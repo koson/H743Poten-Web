@@ -6,7 +6,18 @@ Handles serial communication with STM32H743 device
 import serial
 import logging
 import time
-from ..config.settings import Config
+import sys
+import os
+
+# Add the parent directory to the Python path to handle imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+try:
+    # Try relative imports first (when run as module)
+    from ..config.settings import Config
+except ImportError:
+    # Fall back to absolute imports (when run directly)
+    from config.settings import Config
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +62,7 @@ class SCPIHandler:
     def send_custom_command(self, command):
         """Send a custom SCPI command"""
         try:
-            if not self.is_connected:
+            if not self.is_connected or not self.serial:
                 return {
                     'success': False,
                     'command': command,

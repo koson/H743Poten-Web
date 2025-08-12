@@ -41,4 +41,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8080/ || exit 1
 
 # Default command - run development server with mock hardware
-CMD ["python", "main_dev.py"]
+CMD ["python", "src/run_dev.py"]

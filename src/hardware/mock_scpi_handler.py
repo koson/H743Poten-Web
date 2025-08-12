@@ -6,7 +6,18 @@ import logging
 import time
 import random
 import math
-from ..config.settings import Config
+import sys
+import os
+
+# Add the parent directory to the Python path to handle imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+try:
+    # Try relative imports first (when run as module)
+    from ..config.settings import Config
+except ImportError:
+    # Fall back to absolute imports (when run directly)
+    from config.settings import Config
 
 logger = logging.getLogger(__name__)
 

@@ -4,12 +4,17 @@ Run this for development/testing without actual hardware
 """
 
 import os
+import sys
 import asyncio
 import logging
 from pathlib import Path
 from dotenv import load_dotenv
-from src.app import create_app
-from src.config.settings import Config
+
+# Add src directory to Python path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
+from app import create_app
+from config.settings import Config
 
 # Load development environment variables
 load_dotenv('.env.development')
@@ -31,9 +36,9 @@ logger = logging.getLogger(__name__)
 
 def create_dev_app():
     """Create Flask app with mock SCPI handler"""
-    from src.hardware.mock_scpi_handler import MockSCPIHandler
-    from src.services.measurement_service import MeasurementService
-    from src.services.data_service import DataService
+    from hardware.mock_scpi_handler import MockSCPIHandler
+    from services.measurement_service import MeasurementService
+    from services.data_service import DataService
     
     # Import the create_app function and modify it for development
     app = create_app()

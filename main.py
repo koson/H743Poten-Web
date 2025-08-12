@@ -3,12 +3,17 @@ Main application entry point for H743Poten Web Interface
 """
 
 import os
+import sys
 import asyncio
 import logging
 from pathlib import Path
 from dotenv import load_dotenv
-from src.app import create_app
-from src.config.settings import Config
+
+# Add src directory to Python path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
+from app import create_app
+from config.settings import Config
 
 # Load environment variables
 load_dotenv()
