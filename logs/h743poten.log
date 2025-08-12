@@ -1,0 +1,20 @@
+2025-08-13 02:18:41,588 - __main__ - INFO - Starting H743Poten Web Interface
+2025-08-13 02:18:41,588 - __main__ - INFO - Serial port: /dev/ttyACM0
+2025-08-13 02:18:41,589 - __main__ - INFO - Baud rate: 115200
+2025-08-13 02:18:41,589 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-13 02:18:41,678 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.2.37:8080
+2025-08-13 02:18:41,679 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-13 02:18:49,346 - werkzeug - INFO - 192.168.2.37 - - [13/Aug/2025 02:18:49] "GET / HTTP/1.1" 200 -
+2025-08-13 02:18:49,687 - werkzeug - INFO - 192.168.2.37 - - [13/Aug/2025 02:18:49] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-08-13 02:18:49,715 - werkzeug - INFO - 192.168.2.37 - - [13/Aug/2025 02:18:49] "GET /static/js/app.js HTTP/1.1" 200 -
+2025-08-13 02:18:50,086 - werkzeug - INFO - 192.168.2.37 - - [13/Aug/2025 02:18:50] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-13 02:18:50,635 - werkzeug - INFO - 192.168.2.37 - - [13/Aug/2025 02:18:50] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-08-13 02:19:08,474 - src.hardware.scpi_handler - ERROR - Failed to connect: could not open port '/dev/ttyACM0': FileNotFoundError(2, 'The system cannot find the path specified.', None, 3)
+2025-08-13 02:19:08,475 - werkzeug - INFO - 192.168.2.37 - - [13/Aug/2025 02:19:08] "POST /api/connection/connect HTTP/1.1" 200 -
+2025-08-13 02:19:10,176 - src.hardware.scpi_handler - ERROR - Failed to connect: could not open port '/dev/ttyACM0': FileNotFoundError(2, 'The system cannot find the path specified.', None, 3)
+2025-08-13 02:19:10,177 - werkzeug - INFO - 192.168.2.37 - - [13/Aug/2025 02:19:10] "POST /api/connection/connect HTTP/1.1" 200 -
+2025-08-13 02:19:14,134 - src.hardware.scpi_handler - ERROR - Failed to connect: could not open port '/dev/ttyACM0': FileNotFoundError(2, 'The system cannot find the path specified.', None, 3)
+2025-08-13 02:19:14,135 - werkzeug - INFO - 192.168.2.37 - - [13/Aug/2025 02:19:14] "POST /api/connection/connect HTTP/1.1" 200 -

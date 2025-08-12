@@ -1,0 +1,68 @@
+# Docker ignore file for H743Poten-Web
+# Exclude unnecessary files from Docker build context
+
+# Git files
+.git/
+.gitignore
+
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Documentation (included in image but can be excluded if needed)
+# docs/
+
+# Deployment scripts (not needed in container)
+deployment/
+scripts/deploy*.sh
+scripts/update_pi.*
+*.bat
+
+# Log files (will be created in container)
+logs/*.log
+
+# Development files
+.env
+.env.local
+.env.development
+.env.test
+
+# Test coverage
+.coverage
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Docker files (exclude from build context)
+docker-compose.override.yml

@@ -1,0 +1,141 @@
+/* Status colors */
+.status-connected {
+    color: #28a745;
+}
+
+.status-disconnected {
+    color: #dc3545;
+}
+
+/* Measurement cards */
+.measurement-card {
+    border-left: 4px solid #007bff;
+}
+
+/* Navbar customization */
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* Collapse icons */
+.collapse-icon {
+    transition: transform 0.3s ease;
+}
+
+.collapse-icon.rotated {
+    transform: rotate(180deg);
+}
+
+/* UART Console */
+#uart-output {
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+}
+
+#uart-output .command {
+    color: #0d6efd;
+}
+
+#uart-output .response {
+    color: #198754;
+}
+
+#uart-output .error {
+    color: #dc3545;
+}
+
+#uart-output .timestamp {
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
+/* Plot container */
+#plot-container {
+    transition: all 0.3s ease;
+}
+
+#plot-container.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 1050;
+    background: white;
+    padding: 20px;
+}
+
+/* Form controls */
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Button states */
+.btn:disabled {
+    cursor: not-allowed;
+}
+
+/* Loading spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.2em;
+}
+
+/* Toast notifications */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1060;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #plot-container {
+        height: 50vh !important;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .btn {
+        padding: 0.375rem 0.5rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body.dark-mode {
+        background-color: #212529;
+        color: #f8f9fa;
+    }
+    
+    .dark-mode .card {
+        background-color: #2c3034;
+        border-color: #373b3e;
+    }
+    
+    .dark-mode .card-header {
+        background-color: #343a40;
+        border-bottom-color: #373b3e;
+    }
+    
+    .dark-mode .form-control {
+        background-color: #343a40;
+        border-color: #495057;
+        color: #f8f9fa;
+    }
+    
+    .dark-mode .form-control:focus {
+        background-color: #343a40;
+        border-color: #0d6efd;
+        color: #f8f9fa;
+    }
+}

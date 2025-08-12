@@ -1,0 +1,64 @@
+services:
+  h743poten-web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: h743poten-web
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount logs for persistence
+      - ./logs:/app/logs
+      # Mount device for hardware access (for Raspberry Pi)
+      - /dev:/dev
+    environment:
+      - FLASK_ENV=production
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    privileged: true  # Needed for device access
+    networks:
+      - h743poten-network
+    
+  h743poten-dev:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: h743poten-dev
+    ports:
+      - "5000:8080"
+    volumes:
+      # Mount source code for live development
+      - .:/app
+      - ./logs:/app/logs
+    environment:
+      - FLASK_ENV=development
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - h743poten-network
+    profiles:
+      - dev
+
+  # Optional: Add monitoring with Grafana/Prometheus
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: h743poten-grafana
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #   networks:
+  #     - h743poten-network
+  #   profiles:
+  #     - monitoring
+
+networks:
+  h743poten-network:
+    driver: bridge
+
+# volumes:
+#   grafana_data:
