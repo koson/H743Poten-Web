@@ -169,7 +169,7 @@ except ImportError as e:
                 }
             }
 
-# Create Blueprint
+# Create Blueprint with standard RESTful API prefix
 ai_bp = Blueprint('ai', __name__, url_prefix='/api/ai')
 
 # Initialize AI modules

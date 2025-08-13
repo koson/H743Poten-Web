@@ -58,11 +58,19 @@ class AIDashboard {
     
     async checkMLAvailability() {
         try {
+            console.log('Checking ML availability...');
             const response = await fetch('/api/ai/status');
-            const status = await response.json();
+            console.log('ML status response:', response);
             
-            this.updateAIStatus(status.ml_available ? 'active' : 'inactive');
-            this.updateComponentAvailability(status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const status = await response.json();
+            console.log('ML status data:', status);
+            
+            this.updateAIStatus(status.success ? 'active' : 'inactive');
+            this.updateComponentAvailability(status.status);
             
         } catch (error) {
             console.error('Failed to check ML availability:', error);

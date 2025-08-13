@@ -91,10 +91,20 @@ def create_app():
     @app.route('/favicon.ico')
     def favicon():
         """Serve favicon"""
-        return send_file(
-            str(current_dir / 'static' / 'img' / 'favicon.ico'),
-            mimetype='image/x-icon'
-        )
+        try:
+            favicon_path = static_dir / 'img' / 'favicon.ico'
+            if not favicon_path.exists():
+                # Create img directory if it doesn't exist
+                (static_dir / 'img').mkdir(exist_ok=True)
+                # Return a default transparent favicon if the file doesn't exist
+                return '', 204
+            return send_file(
+                str(favicon_path),
+                mimetype='image/x-icon'
+            )
+        except Exception as e:
+            app.logger.error(f"Error serving favicon: {e}")
+            return '', 204
     
     @app.route('/api/connection/status')
     def connection_status():

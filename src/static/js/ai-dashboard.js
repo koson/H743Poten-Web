@@ -1,7 +1,76 @@
 // AI Dashboard JavaScript
 
+// Check AI system status
+async function checkAIStatus() {
+    try {
+        const API_BASE = window.location.origin;
+        const API_PATH = '/api/ai/status'; // Correct API path
+        const API_URL = `${API_BASE}${API_PATH}`;
+        
+        console.log('Checking AI status...');
+        console.log('API Base URL:', API_BASE);
+        console.log('API Path:', API_PATH);
+        console.log('Full API URL:', API_URL);
+        
+        const response = await fetch(API_URL);
+        console.log('AI Status response:', {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries([...response.headers]),
+            url: response.url
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+        }
+        
+        const text = await response.text();
+        console.log('Raw response text:', text);
+        
+        let data;
+        try {
+            data = JSON.parse(text);
+            console.log('Parsed JSON data:', data);
+        } catch (parseError) {
+            console.error('Failed to parse JSON:', parseError);
+            console.log('Invalid JSON text:', text);
+            throw new Error('Failed to parse AI status response as JSON');
+        }
+        
+        return data.status;
+        
+        return data.status;
+    } catch (error) {
+        console.error('Error checking AI status:', error);
+        showError('Failed to check AI system status');
+        return null;
+    }
+}
+
+// Update status indicator
+function updateStatusIndicator(status) {
+    const statusIndicator = document.querySelector('.status-indicator');
+    const statusDot = document.querySelector('.status-dot');
+    
+    if (!statusIndicator || !statusDot) return;
+    
+    if (status && status.ai_modules_loaded) {
+        statusIndicator.style.background = 'rgba(34, 197, 94, 0.2)';
+        statusIndicator.style.color = '#10b981';
+        statusDot.style.background = '#10b981';
+        statusIndicator.textContent = 'AI System Ready';
+    } else {
+        statusIndicator.style.background = 'rgba(239, 68, 68, 0.2)';
+        statusIndicator.style.color = '#ef4444';
+        statusDot.style.background = '#ef4444';
+        statusIndicator.textContent = 'AI System Offline';
+    }
+}
+
 // Initialize various charts when DOM loads
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM Content loaded, initializing dashboard...');
+    
     initPeakChart();
     initConcentrationChart();
     initQualityGauge();
@@ -10,6 +79,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const toastContainer = document.createElement('div');
     toastContainer.className = 'toast-container';
     document.body.appendChild(toastContainer);
+    
+    // Check AI system status
+    const status = await checkAIStatus();
+    console.log('Initial AI system status:', status);
+    updateStatusIndicator(status);
 });
 
 // Show processing indicator when starting analysis
@@ -33,8 +107,11 @@ async function fetchAnalysisData() {
         console.log('Starting API calls...');
         
         // Make API calls in parallel for efficiency
+        const API_BASE = window.location.origin; // Get the current origin including port
+        console.log('Using API base URL:', API_BASE);
+        
         const [peakData, concentrationData, qualityData, insightsData] = await Promise.all([
-            fetch('/api/ai/analyze-peaks', {
+            fetch(`${API_BASE}/api/ai/analyze-peaks`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -44,7 +121,7 @@ async function fetchAnalysisData() {
                 console.log('Peak analysis response:', response.status);
                 return response;
             }),
-            fetch('/api/ai/predict-concentration', {
+            fetch(`${API_BASE}/api/ai/predict-concentration`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -58,7 +135,7 @@ async function fetchAnalysisData() {
                 console.log('Concentration prediction response:', response.status);
                 return response;
             }),
-            fetch('/api/ai/enhance-signal', {
+            fetch(`${API_BASE}/api/ai/enhance-signal`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -70,7 +147,7 @@ async function fetchAnalysisData() {
                 console.log('Signal enhancement response:', response.status);
                 return response;
             }),
-            fetch('/api/ai/status').then(response => {
+            fetch(`${API_BASE}/api/ai/status`).then(response => {
                 console.log('Status check response:', response.status);
                 return response;
             })

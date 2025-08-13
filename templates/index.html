@@ -136,7 +136,7 @@
                                         </div>
                                         <div class="card-body text-center">
                                             <p>Access the full AI Dashboard interface with advanced analysis capabilities.</p>
-                                            <a href="/ai/dashboard" class="btn btn-success btn-lg" target="_blank">
+                                            <a href="/api/ai/dashboard" class="btn btn-success btn-lg" target="_blank">
                                                 <i class="fas fa-external-link-alt me-2"></i>Open AI Dashboard
                                             </a>
                                         </div>
@@ -250,7 +250,7 @@
         // Load AI system status
         async function loadAIStatus() {
             try {
-                const response = await fetch('/ai/api/status');
+                const response = await fetch('/api/ai/status');
                 const data = await response.json();
                 
                 const statusDiv = document.getElementById('ai-status-info');
