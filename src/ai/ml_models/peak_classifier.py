@@ -75,7 +75,7 @@ class PeakClassifier:
     def _get_default_config(self) -> Dict[str, Any]:
         """Get default neural network configuration optimized for RPi"""
         return {
-            'hidden_layers': (50, 25),  # Smaller networks for RPi
+            'hidden_layer_sizes': (50, 25),  # Smaller networks for RPi
             'activation': 'relu',
             'solver': 'adam',
             'alpha': 0.001,  # L2 regularization

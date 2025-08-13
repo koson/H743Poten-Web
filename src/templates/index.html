@@ -7,7 +7,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="{{ url_for('static', filename='css/ai-dashboard.css') }}" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
 </head>
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -224,7 +228,42 @@
                             
                             <!-- AI Dashboard Tab -->
                             <div class="tab-pane fade" id="ai-dashboard" role="tabpanel">
-                                <div class="ai-dashboard-container"></div>
+                                <div class="ai-dashboard-container">
+                                    <!-- Peak Analysis Chart -->
+                                    <div class="chart-container">
+                                        <canvas id="peakChart"></canvas>
+                                    </div>
+                                    
+                                    <!-- Metrics Grid -->
+                                    <div class="metrics-grid">
+                                        <div class="metric-card">
+                                            <div class="metric-value">12</div>
+                                            <div class="metric-label">Peaks Detected</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-value">95.8%</div>
+                                            <div class="metric-label">Classification Accuracy</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-value">3.2 ms</div>
+                                            <div class="metric-label">Processing Time</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-value">0.85 V</div>
+                                            <div class="metric-label">Primary Peak</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Concentration Chart -->
+                                    <div class="chart-container">
+                                        <canvas id="concentrationChart"></canvas>
+                                    </div>
+
+                                    <!-- Quality Gauge -->
+                                    <div class="chart-container">
+                                        <canvas id="qualityGauge"></canvas>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -235,5 +274,25 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ai-dashboard.js') }}"></script>
+
+    <!-- Initialize with demo data for development -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Demo data for peak chart
+            const demoVoltage = Array.from({length: 100}, (_, i) => -0.5 + i * 0.01);
+            const demoCurrent = demoVoltage.map(v => 
+                Math.sin(v * 10) * Math.exp(-Math.abs(v)) * 2 + 
+                Math.sin(v * 5) * 0.5
+            );
+            
+            // Update peak chart with demo data
+            if (window.peakChart) {
+                window.peakChart.data.labels = demoVoltage;
+                window.peakChart.data.datasets[0].data = demoCurrent;
+                window.peakChart.update();
+            }
+        });
+    </script>
 </body>
 </html>

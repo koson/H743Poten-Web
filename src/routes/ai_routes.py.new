@@ -7,6 +7,7 @@ from flask import Blueprint, render_template, jsonify, request
 import sys
 import os
 from pathlib import Path
+import numpy as np
 
 # Add current directory to path for imports
 current_dir = Path(__file__).parent.parent
@@ -195,9 +196,12 @@ def predict_concentration():
                 'error': 'Invalid data format. Expected voltage and current arrays.'
             }), 400
         
-        # Predict concentration
+        # Calculate mean current value
         print("Calling concentration predictor...")
-        concentration = concentration_predictor.predict_concentration(data)
+        current_array = np.array(data['current'])
+        mean_current = np.mean(current_array)
+        
+        concentration = concentration_predictor.predict_concentration(mean_current)
         print(f"Concentration predictor result: {concentration}")
         
         return jsonify({
@@ -229,15 +233,42 @@ def enhance_signal():
                 'success': False,
                 'error': 'Invalid data format. Expected voltage and current arrays.'
             }), 400
+            
+        # Convert to numpy arrays
+        voltage = np.array(data['voltage']) 
+        current = np.array(data['current'])
         
-        # Enhance signal
-        print("Calling signal processor...")
-        enhanced_signal = signal_processor.enhance_signal({'voltage': data['voltage'], 'current': data['current']})
-        print(f"Signal processor result: {enhanced_signal}")
+        # Apply filtering and baseline correction
+        print("Applying signal filtering...")
+        filtered_signal = signal_processor.apply_filtering(voltage, current)
+        print("Applying baseline correction...")
+        corrected_current = signal_processor.correct_baseline(voltage, filtered_signal.filtered_data)
+        
+        # Get signal quality assessment
+        print("Assessing signal quality...")
+        quality = signal_processor.assess_signal_quality(voltage, corrected_current)
+        
+        enhanced_result = {
+            'voltage': voltage.tolist(),
+            'current': corrected_current.tolist(),
+            'quality': {
+                'snr_db': quality.snr_db,
+                'baseline_drift': quality.baseline_drift,
+                'noise_level': quality.noise_level,
+                'quality_score': quality.quality_score,
+                'recommendations': quality.recommendations
+            },
+            'filter_info': {
+                'method': filtered_signal.filter_method,
+                'quality_improvement': filtered_signal.quality_improvement
+            }
+        }
+        
+        print(f"Signal enhancement complete. Result: {enhanced_result}")
         
         return jsonify({
             'success': True,
-            'enhanced_signal': enhanced_signal
+            'enhanced_signal': enhanced_result
         })
         
     except Exception as e:

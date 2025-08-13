@@ -336,7 +336,7 @@ class ConcentrationPredictor:
                 'model': {'slope': 1.0, 'intercept': 0.0}
             }
     
-    def predict_concentration(self, current_response: float, 
+    def predict_concentration(self, data: Union[float, Dict[str, List[float]]], 
                             conditions: Optional[Dict[str, Any]] = None) -> ConcentrationResult:
         """
         Predict concentration from current response
@@ -352,6 +352,11 @@ class ConcentrationPredictor:
             raise ValueError("Model must be calibrated before prediction")
         
         try:
+            if isinstance(data, Dict):
+                current_response = np.mean(data['current']) # Use mean current value
+            else:
+                current_response = data
+            
             if SKLEARN_AVAILABLE and hasattr(self.calibration_curve, 'predict'):
                 # ML model prediction
                 concentration = self._ml_predict(current_response)
