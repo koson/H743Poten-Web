@@ -135,25 +135,42 @@ def analyze_data():
             }), 400
         
         print("Performing AI analysis")  # Debug log
-        # Return mock data for development
-        mock_result = {
+        
+        # 1. Enhance signal
+        enhanced_signal = signal_processor.enhance_signal({
+            'signal': data['current']
+        })
+        
+        # 2. Find peaks
+        analyzed_data = electrochemical_ai.analyze_cv_data(data)
+        
+        # 3. Classify peaks
+        peak_types = peak_classifier.classify_peaks(analyzed_data['peaks'])
+        
+        # 4. Predict concentration from peaks
+        concentration_result = concentration_predictor.predict_concentration({
+            'peaks': analyzed_data['peaks']
+        })
+        
+        # Combine results
+        result = {
             'voltage': data['voltage'],
-            'current': data['current'],
-            'peaks': [
-                {'voltage': 0.25, 'current': 2.1, 'width': 0.12, 'type': 'oxidation'},
-                {'voltage': -0.15, 'current': -1.8, 'width': 0.15, 'type': 'reduction'}
-            ],
+            'current': enhanced_signal['signal'],
+            'peaks': analyzed_data['peaks'],
             'analysis': {
-                'num_peaks': 2,
-                'reversibility': 0.92,
-                'peak_separation': 0.4
+                'num_peaks': len(analyzed_data['peaks']),
+                'peak_types': peak_types['classification'],
+                'classification_accuracy': peak_types['accuracy'],
+                'concentration': concentration_result.predicted_concentration,
+                'confidence_interval': concentration_result.confidence_interval,
+                'signal_quality': enhanced_signal['quality']
             }
         }
         
         print("Analysis complete")  # Debug log
         return jsonify({
             'success': True,
-            'analysis': mock_result
+            'analysis': result
         })
         
     except Exception as e:
@@ -195,44 +212,70 @@ def classify_peaks():
 def predict_concentration():
     """Predict analyte concentration"""
     try:
+        print("\n=== PREDICT CONCENTRATION ENDPOINT ===")
+        print("1. Getting request data...")
         data = request.get_json()
-        print(f"Received request in predict_concentration:")
         print(f"Request data type: {type(data)}")
-        print(f"Request data: {data}")
+        print(f"Request keys: {list(data.keys()) if isinstance(data, dict) else 'Not a dict'}")
+        print(f"Raw request data: {data}")
+        print(f"Content-Type: {request.headers.get('Content-Type')}")
         
         # Validate required fields
+        print("\n2. Validating request data...")
         if not data or not isinstance(data, dict):
+            print("Error: Invalid data format - not a dict")
             return jsonify({
                 'success': False,
                 'error': 'Invalid request data. Expected JSON object.'
             }), 400
             
-        if 'voltage' not in data or 'current' not in data:
+        print("\n3. Checking required fields...")
+        if 'peaks' not in data:
+            print(f"Error: Missing required field 'peaks'. Available keys: {list(data.keys())}")
             return jsonify({
                 'success': False,
-                'error': 'Missing required fields: voltage and current arrays'
+                'error': 'Missing required field: peaks array'
             }), 400
             
-        if not isinstance(data['voltage'], list) or not isinstance(data['current'], list):
+        print("\n4. Validating peaks data...")
+        if not isinstance(data['peaks'], list):
+            print(f"Error: Invalid type - peaks must be an array")
             return jsonify({
                 'success': False,
-                'error': 'Voltage and current must be arrays'
+                'error': 'Peaks must be an array'
             }), 400
             
-        if len(data['voltage']) != len(data['current']):
-            return jsonify({
-                'success': False,
-                'error': 'Voltage and current arrays must have the same length'
-            }), 400
+        print("\n5. Validating peaks format...")
+        for i, peak in enumerate(data['peaks']):
+            if not isinstance(peak, dict):
+                print(f"Error: Peak {i} is not an object")
+                return jsonify({
+                    'success': False,
+                    'error': f'Peak {i} must be an object with voltage, current, and width properties'
+                }), 400
+                
+            required_fields = ['voltage', 'current', 'width']
+            missing_fields = [field for field in required_fields if field not in peak]
+            if missing_fields:
+                print(f"Error: Peak {i} missing fields: {missing_fields}")
+                return jsonify({
+                    'success': False,
+                    'error': f'Peak {i} missing required fields: {", ".join(missing_fields)}'
+                }), 400
             
         # Predict concentration using the full data
-        print("Calling concentration predictor...")
+        print("\n6. Processing concentration prediction...")
+        print("Input peaks data:")
+        print(f"Number of peaks: {len(data['peaks'])}")
+        print(f"Peaks data: {data['peaks']}")
+        
         result = concentration_predictor.predict_concentration({
-            'voltage': data['voltage'],
-            'current': data['current'],
-            'calibration_data': data.get('calibration_data', [])
+            'peaks': data['peaks']
         })
-        print(f"Concentration predictor result: {result}")
+        
+        print("\n7. Prediction complete")
+        print("Result structure:")
+        print(f"Result: {result}")
         
         return jsonify({
             'success': True,
@@ -252,43 +295,65 @@ def predict_concentration():
 def enhance_signal():
     """Enhance signal quality using AI"""
     try:
+        print("\n=== ENHANCE SIGNAL ENDPOINT ===")
+        print("1. Getting request data...")
         data = request.get_json()
-        print(f"Received request in enhance_signal:")
         print(f"Request data type: {type(data)}")
-        print(f"Request data: {data}")
+        print(f"Request keys: {list(data.keys()) if isinstance(data, dict) else 'Not a dict'}")
+        print(f"Raw request data: {data}")
+        print(f"Content-Type: {request.headers.get('Content-Type')}")
         
         # Validate required fields
+        print("\n2. Validating request data...")
         if not data or not isinstance(data, dict):
+            print("Error: Invalid data format - not a dict")
             return jsonify({
                 'success': False,
                 'error': 'Invalid request data. Expected JSON object.'
             }), 400
             
-        if 'voltage' not in data or 'current' not in data:
+        if 'signal' not in data:
+            print(f"Error: Missing required field 'signal'. Available keys: {list(data.keys())}")
             return jsonify({
                 'success': False,
-                'error': 'Missing required fields: voltage and current arrays'
+                'error': 'Missing required field: signal array'
             }), 400
             
-        if not isinstance(data['voltage'], list) or not isinstance(data['current'], list):
+        print("\n3. Validating array type...")
+        signal_type = type(data['signal'])
+        print(f"Signal type: {signal_type}")
+        
+        if not isinstance(data['signal'], list):
+            print(f"Error: Invalid type - signal: {signal_type}")
             return jsonify({
                 'success': False,
-                'error': 'Voltage and current must be arrays'
+                'error': 'Signal must be an array'
             }), 400
             
-        if len(data['voltage']) != len(data['current']):
+        print("\n4. Validating array length...")
+        signal_len = len(data['signal'])
+        print(f"Signal length: {signal_len}")
+        
+        if signal_len == 0:
+            print("Error: Empty signal array")
             return jsonify({
                 'success': False,
-                'error': 'Voltage and current arrays must have the same length'
+                'error': 'Signal array cannot be empty'
             }), 400
             
         # Enhance signal with the provided data
-        print("Calling signal processor...")
+        print("\n5. Processing signal...")
+        print("Input data sample:")
+        print(f"Signal (first 5): {data['signal'][:5] if len(data['signal']) > 5 else data['signal']}")
+        
         result = signal_processor.enhance_signal({
-            'voltage': data['voltage'],
-            'current': data['current']
+            'signal': data['signal']
         })
-        print(f"Signal processor result: {result}")
+        
+        print("\n6. Processing complete")
+        print("Result structure:")
+        print(f"Keys in result: {list(result.keys())}")
+        print(f"Quality metrics: {result.get('quality', {})}")
         
         return jsonify({
             'success': True,
