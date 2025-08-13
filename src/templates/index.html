@@ -96,6 +96,73 @@
                     </div>
                 </div>
 
+                <!-- CSV Emulation Controls -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <i class="fas fa-file-csv me-2"></i>CSV Data Emulation
+                    </div>
+                    <div class="card-body">
+                        <!-- File Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">CSV File</label>
+                            <input type="file" id="csv-file-input" class="form-control" accept=".csv">
+                            <div class="form-text">Select a CSV file with time, voltage, and current data</div>
+                        </div>
+
+                        <!-- Load Button -->
+                        <div class="d-grid mb-3">
+                            <button onclick="loadCSVFile()" class="btn btn-info">
+                                <i class="fas fa-upload"></i> Load CSV
+                            </button>
+                        </div>
+
+                        <!-- Status Display -->
+                        <div id="csv-status" class="alert alert-secondary small">
+                            <strong>CSV Status:</strong> Not loaded
+                        </div>
+
+                        <!-- Playback Controls -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Speed</label>
+                                <input type="number" id="csv-speed" class="form-control" value="1.0" min="0.1" max="10" step="0.1">
+                            </div>
+                            <div class="col-6 d-flex align-items-end">
+                                <div class="form-check">
+                                    <input type="checkbox" id="csv-loop" class="form-check-input">
+                                    <label class="form-check-label" for="csv-loop">Loop</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Control Buttons -->
+                        <div class="d-grid gap-2 mb-3">
+                            <button id="csv-start-btn" onclick="startCSVEmulation()" class="btn btn-success">
+                                <i class="fas fa-play"></i> Start Emulation
+                            </button>
+                            <button id="csv-stop-btn" onclick="stopCSVEmulation()" class="btn btn-danger" disabled>
+                                <i class="fas fa-stop"></i> Stop Emulation
+                            </button>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="mb-2">
+                            <div class="progress">
+                                <div id="csv-progress-bar" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                            <small id="csv-progress-text" class="text-muted">Ready</small>
+                        </div>
+
+                        <!-- Seek Control -->
+                        <div class="input-group">
+                            <input type="number" id="csv-seek-time" class="form-control" placeholder="Time (s)" step="0.1">
+                            <button onclick="seekCSVEmulation()" class="btn btn-outline-secondary">
+                                <i class="fas fa-search"></i> Seek
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- UART Console -->
                 <div class="card">
                     <div class="card-header">

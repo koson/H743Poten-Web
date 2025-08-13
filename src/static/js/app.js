@@ -5,6 +5,8 @@ let currentMode = 'CV';
 let plot = null;
 let dataPoints = [];
 let updateInterval = null;
+let csvEmulationActive = false;
+let csvProgressInterval = null;
 
 // DOM Elements
 const connectBtn = document.getElementById('connect-btn');
@@ -307,4 +309,202 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => updateConnectionUI(data.connected))
         .catch(error => console.error('Status check error:', error));
+    
+    // Initialize CSV status
+    updateCSVStatus();
 });
+
+// ===== CSV Emulation Functions =====
+
+async function loadCSVFile() {
+    const fileInput = document.getElementById('csv-file-input');
+    if (!fileInput.files.length) {
+        showMessage('Please select a CSV file', 'error');
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    const filePath = file.name; // In a real implementation, you'd upload the file first
+    
+    try {
+        const response = await fetch('/api/emulation/csv/load', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file_path: filePath })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            showMessage(`CSV loaded: ${data.message}`, 'success');
+            updateCSVStatus();
+        } else {
+            showMessage(`Failed to load CSV: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showMessage(`Error loading CSV: ${error.message}`, 'error');
+    }
+}
+
+async function startCSVEmulation() {
+    const speed = parseFloat(document.getElementById('csv-speed').value) || 1.0;
+    const loop = document.getElementById('csv-loop').checked;
+    
+    try {
+        const response = await fetch('/api/emulation/csv/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ speed, loop })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            csvEmulationActive = true;
+            showMessage(data.message, 'success');
+            startCSVProgressMonitoring();
+            updateCSVControls();
+        } else {
+            showMessage(`Failed to start CSV emulation: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showMessage(`Error starting CSV emulation: ${error.message}`, 'error');
+    }
+}
+
+async function stopCSVEmulation() {
+    try {
+        const response = await fetch('/api/emulation/csv/stop', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+            csvEmulationActive = false;
+            showMessage(data.message, 'success');
+            stopCSVProgressMonitoring();
+            updateCSVControls();
+        } else {
+            showMessage(`Failed to stop CSV emulation: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showMessage(`Error stopping CSV emulation: ${error.message}`, 'error');
+    }
+}
+
+async function seekCSVEmulation() {
+    const time = parseFloat(document.getElementById('csv-seek-time').value);
+    if (isNaN(time)) {
+        showMessage('Please enter a valid time', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/emulation/csv/seek', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ time })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            showMessage(data.message, 'success');
+        } else {
+            showMessage(`Seek failed: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showMessage(`Error seeking: ${error.message}`, 'error');
+    }
+}
+
+async function updateCSVStatus() {
+    try {
+        const response = await fetch('/api/emulation/csv/status');
+        const data = await response.json();
+        
+        const statusDiv = document.getElementById('csv-status');
+        if (statusDiv && data.loaded) {
+            const info = data.info;
+            statusDiv.innerHTML = `
+                <strong>CSV Status:</strong> Loaded<br>
+                <strong>File:</strong> ${info.file_path || 'Unknown'}<br>
+                <strong>Points:</strong> ${info.total_points}<br>
+                <strong>Duration:</strong> ${info.time_range.duration.toFixed(3)}s<br>
+                <strong>Voltage Range:</strong> ${info.voltage_range.min.toFixed(3)}V to ${info.voltage_range.max.toFixed(3)}V
+            `;
+            
+            if (data.progress.is_playing) {
+                const progress = data.progress;
+                const progressBar = document.getElementById('csv-progress-bar');
+                if (progressBar) {
+                    progressBar.style.width = `${progress.progress_percent}%`;
+                    progressBar.textContent = `${progress.progress_percent.toFixed(1)}%`;
+                }
+                
+                const progressText = document.getElementById('csv-progress-text');
+                if (progressText) {
+                    progressText.textContent = 
+                        `${progress.current_index}/${progress.total_points} (${progress.elapsed_time.toFixed(1)}s)`;
+                }
+            }
+        } else if (statusDiv) {
+            statusDiv.innerHTML = '<strong>CSV Status:</strong> Not loaded';
+        }
+    } catch (error) {
+        console.error('Error updating CSV status:', error);
+    }
+}
+
+function startCSVProgressMonitoring() {
+    if (csvProgressInterval) clearInterval(csvProgressInterval);
+    csvProgressInterval = setInterval(updateCSVStatus, 500);
+}
+
+function stopCSVProgressMonitoring() {
+    if (csvProgressInterval) {
+        clearInterval(csvProgressInterval);
+        csvProgressInterval = null;
+    }
+}
+
+function updateCSVControls() {
+    const startBtn = document.getElementById('csv-start-btn');
+    const stopBtn = document.getElementById('csv-stop-btn');
+    
+    if (startBtn) startBtn.disabled = csvEmulationActive;
+    if (stopBtn) stopBtn.disabled = !csvEmulationActive;
+}
+
+function showMessage(message, type = 'info') {
+    // Create or update message display
+    let messageDiv = document.getElementById('message-display');
+    if (!messageDiv) {
+        messageDiv = document.createElement('div');
+        messageDiv.id = 'message-display';
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            max-width: 300px;
+        `;
+        document.body.appendChild(messageDiv);
+    }
+    
+    // Set colors based on type
+    const colors = {
+        success: '#28a745',
+        error: '#dc3545',
+        warning: '#ffc107',
+        info: '#17a2b8'
+    };
+    
+    messageDiv.style.backgroundColor = colors[type] || colors.info;
+    messageDiv.textContent = message;
+    messageDiv.style.display = 'block';
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 3000);
+}

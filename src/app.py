@@ -280,6 +280,119 @@ def create_app():
                 'timestamp': time.time()
             }), 500
     
+    @app.route('/api/emulation/csv/load', methods=['POST'])
+    def load_csv_emulation():
+        """Load CSV file for emulation"""
+        try:
+            data = request.get_json()
+            file_path = data.get('file_path')
+            
+            if not file_path:
+                return jsonify({'success': False, 'error': 'File path is required'}), 400
+            
+            # Check if we're using mock handler
+            if hasattr(app.scpi_handler, 'load_csv_data'):
+                success = app.scpi_handler.load_csv_data(file_path)
+                if success:
+                    info = app.scpi_handler.get_csv_info()
+                    return jsonify({
+                        'success': True,
+                        'message': f'Loaded {info["total_points"]} data points',
+                        'info': info
+                    })
+                else:
+                    return jsonify({'success': False, 'error': 'Failed to load CSV file'}), 400
+            else:
+                return jsonify({'success': False, 'error': 'CSV emulation not supported by current handler'}), 400
+                
+        except Exception as e:
+            logger.error(f"Failed to load CSV emulation: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/emulation/csv/start', methods=['POST'])
+    def start_csv_emulation():
+        """Start CSV data emulation"""
+        try:
+            data = request.get_json() or {}
+            speed = data.get('speed', 1.0)
+            loop = data.get('loop', False)
+            
+            # Check if we're using mock handler
+            if hasattr(app.scpi_handler, 'start_csv_emulation'):
+                success = app.scpi_handler.start_csv_emulation(speed, loop)
+                return jsonify({
+                    'success': success,
+                    'message': f'CSV emulation {"started" if success else "failed to start"}'
+                })
+            else:
+                return jsonify({'success': False, 'error': 'CSV emulation not supported by current handler'}), 400
+                
+        except Exception as e:
+            logger.error(f"Failed to start CSV emulation: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/emulation/csv/stop', methods=['POST'])
+    def stop_csv_emulation():
+        """Stop CSV data emulation"""
+        try:
+            # Check if we're using mock handler
+            if hasattr(app.scpi_handler, 'stop_csv_emulation'):
+                app.scpi_handler.stop_csv_emulation()
+                return jsonify({'success': True, 'message': 'CSV emulation stopped'})
+            else:
+                return jsonify({'success': False, 'error': 'CSV emulation not supported by current handler'}), 400
+                
+        except Exception as e:
+            logger.error(f"Failed to stop CSV emulation: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/emulation/csv/status')
+    def get_csv_emulation_status():
+        """Get CSV emulation status and progress"""
+        try:
+            # Check if we're using mock handler
+            if hasattr(app.scpi_handler, 'get_csv_progress'):
+                progress = app.scpi_handler.get_csv_progress()
+                info = app.scpi_handler.get_csv_info()
+                
+                return jsonify({
+                    'loaded': info.get('loaded', False),
+                    'progress': progress,
+                    'info': info
+                })
+            else:
+                return jsonify({
+                    'loaded': False,
+                    'error': 'CSV emulation not supported by current handler'
+                })
+                
+        except Exception as e:
+            logger.error(f"Failed to get CSV emulation status: {e}")
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route('/api/emulation/csv/seek', methods=['POST'])
+    def seek_csv_emulation():
+        """Seek to specific time in CSV data"""
+        try:
+            data = request.get_json()
+            target_time = data.get('time')
+            
+            if target_time is None:
+                return jsonify({'success': False, 'error': 'Time parameter is required'}), 400
+            
+            # Use SCPI command for seeking
+            command = f"csv:seek {target_time}"
+            result = app.scpi_handler.send_custom_command(command)
+            
+            return jsonify({
+                'success': result['success'],
+                'message': f'Seeked to {target_time}s' if result['success'] else result['error']
+            })
+                
+        except Exception as e:
+            logger.error(f"Failed to seek CSV emulation: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
     return app
 
 if __name__ == "__main__":
