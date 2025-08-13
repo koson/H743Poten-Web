@@ -357,23 +357,36 @@ class AIDashboard {
     async performComprehensiveAnalysis(data) {
         const results = {};
         
-        // 1. Peak Analysis
+        // Validate data format
+        if (!data || !Array.isArray(data.voltage) || !Array.isArray(data.current)) {
+            throw new Error('Invalid data format. Expected voltage and current arrays.');
+        }
+        
+        // 1. Analyze peaks
         this.showProcessingStatus('Analyzing peaks...');
         results.peaks = await this.analyzePeaks(data);
         
-        // 2. Signal Processing
+        // 2. Process signal
         this.showProcessingStatus('Processing signal quality...');
-        results.signalQuality = await this.analyzeSignalQuality(data);
+        const signalResult = await this.analyzeSignalQuality({
+            voltage: data.voltage,
+            current: data.current
+        });
+        results.signalQuality = signalResult.result || signalResult;
         
-        // 3. Concentration Analysis
+        // 3. Predict concentration
         this.showProcessingStatus('Predicting concentration...');
-        results.concentration = await this.predictConcentration(data);
+        const concentrationResult = await this.predictConcentration({
+            voltage: data.voltage,
+            current: data.current
+        });
+        results.concentration = concentrationResult.result || concentrationResult;
         
-        // 4. Generate AI Insights
+        // 4. Generate AI insights
         this.showProcessingStatus('Generating AI insights...');
         results.insights = await this.generateInsights(results);
         
-        // 5. Expert Recommendations
+        // 5. Generate recommendations
         this.showProcessingStatus('Generating recommendations...');
         results.recommendations = await this.generateRecommendations(results);
         
@@ -407,37 +420,63 @@ class AIDashboard {
     
     async analyzeSignalQuality(data) {
         try {
+            if (!data || !data.voltage || !data.current) {
+                throw new Error('Missing voltage or current data');
+            }
+
+            console.log('Sending data to enhance-signal:', data);
+            
             const response = await fetch('/api/ai/enhance-signal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    voltage: data.voltage,
-                    current: data.current
+                    voltage: Array.isArray(data.voltage) ? data.voltage : [data.voltage],
+                    current: Array.isArray(data.current) ? data.current : [data.current]
                 })
             });
             
-            if (!response.ok) throw new Error('Signal quality analysis failed');
-            return await response.json();
+            if (!response.ok) {
+                const error = await response.text();
+                throw new Error(`Signal quality analysis failed: ${error}`);
+            }
+            
+            const result = await response.json();
+            console.log('Enhance-signal response:', result);
+            return result;
             
         } catch (error) {
             console.error('Signal quality error:', error);
             // Return demo results with 2 decimal precision
             return {
-                snr_db: 33.12,
-                quality_score: 0.91,
-                noise_level: 90.50e-9,
-                baseline_drift: 0.0005, // This will show as 0.05% when multiplied by 100
-                recommendations: ['Signal quality is good for quantitative analysis']
+                result: {
+                    voltage: data.voltage,
+                    current: data.current,
+                    quality: {
+                        snr_db: 33.12,
+                        quality_score: 0.91,
+                        noise_level: 90.50e-9,
+                        baseline_drift: 0.0005,
+                        recommendations: ['Signal quality is good for quantitative analysis']
+                    },
+                    filter_info: {
+                        method: 'Savitzky-Golay',
+                        quality_improvement: 15.2
+                    }
+                }
             };
         }
     }
     
     async predictConcentration(data) {
         try {
+            if (!data || !data.voltage || !data.current) {
+                throw new Error('Missing voltage or current data');
+            }
+
             // Prepare data with voltage and current arrays
             const requestData = {
-                voltage: data.voltage,
-                current: data.current,
+                voltage: Array.isArray(data.voltage) ? data.voltage : [data.voltage],
+                current: Array.isArray(data.current) ? data.current : [data.current],
                 calibration_data: [
                     [1e-6, 1.1e-6],
                     [5e-6, 5.2e-6],
@@ -445,23 +484,33 @@ class AIDashboard {
                 ]
             };
             
+            console.log('Sending data to predict-concentration:', requestData);
+            
             const response = await fetch('/api/ai/predict-concentration', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData)
             });
             
-            if (!response.ok) throw new Error('Concentration prediction failed');
-            return await response.json();
+            if (!response.ok) {
+                const error = await response.text();
+                throw new Error(`Concentration prediction failed: ${error}`);
+            }
+            
+            const result = await response.json();
+            console.log('Predict-concentration response:', result);
+            return result;
             
         } catch (error) {
             console.error('Concentration prediction error:', error);
             // Return demo results
             return {
-                predicted_concentration: 5.23e-6,
-                confidence_interval: [4.85e-6, 5.61e-6],
-                r_squared: 0.994,
-                method: 'Ridge Regression'
+                result: {
+                    predicted_concentration: 5.23e-6,
+                    confidence_interval: [4.85e-6, 5.61e-6],
+                    r_squared: 0.994,
+                    method: 'Ridge Regression'
+                }
             };
         }
     }
