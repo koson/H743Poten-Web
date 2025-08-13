@@ -10,8 +10,20 @@ import logging
 import numpy as np
 from pathlib import Path
 
-# Configure logger
+# Configure logger with more detailed settings
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# Create console handler with a higher log level
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+
+# Create formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+
+# Add the handler to the logger
+logger.addHandler(console_handler)
 
 # Add current directory to path for imports
 current_dir = Path(__file__).parent.parent
@@ -48,13 +60,78 @@ except ImportError as e:
             }
     
     class PeakClassifier:
+        def __init__(self):
+            self.is_trained = False
+            self.classification_count = 0
+            self.feature_names = ['height', 'width', 'potential', 'area', 
+                                'symmetry', 'sharpness', 'prominence', 'noise_level']
+            
+        def extract_features(self, voltages, currents, peak_indices):
+            # Mock implementation for development
+            from dataclasses import dataclass
+            
+            @dataclass
+            class PeakFeatures:
+                height: float
+                width: float
+                potential: float
+                area: float
+                symmetry: float
+                sharpness: float
+                prominence: float
+                noise_level: float
+                
+            features_list = []
+            for idx in peak_indices:
+                features = PeakFeatures(
+                    height=abs(currents[idx]),
+                    width=5.0,  # Mock fixed width
+                    potential=voltages[idx],
+                    area=abs(currents[idx]) * 5.0,
+                    symmetry=0.8,
+                    sharpness=abs(currents[idx]) / 5.0,
+                    prominence=abs(currents[idx]),
+                    noise_level=1e-9
+                )
+                features_list.append(features)
+                
+            return features_list
+            
         def classify_peaks(self, peaks):
+            from dataclasses import dataclass
+            from datetime import datetime
+            
+            @dataclass
+            class PeakClassification:
+                peak_type: str
+                confidence: float
+                analyte_class: str
+                timestamp: datetime
+                
+            classifications = []
+            for peak in peaks:
+                if peak.potential > 0:
+                    peak_type = "oxidation"
+                else:
+                    peak_type = "reduction"
+                    
+                classification = PeakClassification(
+                    peak_type=peak_type,
+                    confidence=0.95,
+                    analyte_class="unknown",
+                    timestamp=datetime.now()
+                )
+                classifications.append(classification)
+                
+            return classifications
+            
+        def get_model_info(self):
             return {
-                'classification': [
-                    {'type': 'oxidation', 'confidence': 0.95},
-                    {'type': 'reduction', 'confidence': 0.88}
-                ],
-                'accuracy': 0.958
+                'sklearn_available': False,
+                'is_trained': self.is_trained,
+                'classification_count': self.classification_count,
+                'feature_names': self.feature_names,
+                'accuracy_history': []
             }
     
     class ConcentrationPredictor:
@@ -93,7 +170,7 @@ except ImportError as e:
             }
 
 # Create Blueprint
-ai_bp = Blueprint('ai', __name__, url_prefix='/ai')
+ai_bp = Blueprint('ai', __name__, url_prefix='/api/ai')
 
 # Initialize AI modules
 try:
@@ -115,7 +192,7 @@ def ai_dashboard():
     """Main AI Dashboard page"""
     return render_template('ai_dashboard.html')
 
-@ai_bp.route('/api/analyze', methods=['POST'])
+@ai_bp.route('/analyze', methods=['POST'])
 def analyze_data():
     """Analyze electrochemical data using AI"""
     try:
@@ -164,10 +241,13 @@ def analyze_data():
             'peaks': analyzed_data['peaks'],
             'analysis': {
                 'num_peaks': len(analyzed_data['peaks']),
-                'peak_types': peak_types['classification'],
-                'classification_accuracy': peak_types['accuracy'],
-                'concentration': concentration_result.predicted_concentration,
-                'confidence_interval': concentration_result.confidence_interval,
+                'peak_types': [
+                    {'type': pt.peak_type, 'confidence': pt.confidence}
+                    for pt in peak_types
+                ],
+                'classification_accuracy': 0.95,
+                'concentration': concentration_result['concentration'],
+                'confidence_interval': concentration_result['confidence_interval'],
                 'signal_quality': enhanced_signal['quality']
             }
         }
@@ -187,7 +267,7 @@ def analyze_data():
             'error': f'Analysis failed: {str(e)}'
         }), 500
 
-@ai_bp.route('/api/analyze-peaks', methods=['POST'])
+@ai_bp.route('/analyze-peaks', methods=['POST'])
 def analyze_peaks():
     """Detect and classify peaks in electrochemical data"""
     logger.info("=== START ANALYZE PEAKS ===")
@@ -220,55 +300,31 @@ def analyze_peaks():
         
         # Extract peaks from the voltammogram data
         logger.info("Starting peak extraction...")
-        try:
-            extracted_peaks = peak_classifier.extract_features(
-                np.array(data['voltage']), 
-                np.array(data['current']), 
-                peak_indices=[]  # Will be detected automatically
-            )
-            logger.info(f"Extracted {len(extracted_peaks)} peaks")
-            
-            # Classify the detected peaks
-            logger.info("Starting peak classification...")
-            peak_classifications = peak_classifier.classify_peaks(extracted_peaks)
-            logger.info(f"Classified {len(peak_classifications)} peaks")
-            
-            # Format response
-            response = {
-                'success': True,
-                'peaks': [
-                    {
-                        'voltage': peak.potential,
-                        'current': peak.height,
-                        'width': peak.width,
-                        'type': classification.peak_type,
-                        'confidence': classification.confidence
-                    }
-                    for peak, classification in zip(extracted_peaks, peak_classifications)
-                ]
-            }
-            logger.info("Peak analysis completed successfully")
-            return jsonify(response)
-            
-        except Exception as e:
-            error_msg = f"Error in peak analysis: {str(e)}"
-            logger.error(error_msg)
-            logger.error(f"Peak classifier state: {peak_classifier.get_model_info()}")
-            return jsonify({
-                'success': False,
-                'error': error_msg
-            }), 500
-            
-    except Exception as e:
-        error_msg = f"Error processing request: {str(e)}"
-        logger.error(error_msg)
-        return jsonify({
-            'success': False,
-            'error': error_msg
-        }), 500        # Classify the detected peaks
-        classifications = peak_classifier.classify_peaks(peaks)
         
-        return jsonify({
+        # Convert data to numpy arrays
+        voltages = np.array(data['voltage'])
+        currents = np.array(data['current'])
+        
+        # Find peaks using scipy
+        from scipy.signal import find_peaks
+        peak_indices, _ = find_peaks(np.abs(currents), height=np.std(currents))
+        logger.info(f"Found {len(peak_indices)} potential peaks")
+        
+        # Extract features from detected peaks
+        extracted_peaks = peak_classifier.extract_features(
+            voltages=voltages,
+            currents=currents, 
+            peak_indices=peak_indices
+        )
+        logger.info(f"Extracted features for {len(extracted_peaks)} peaks")
+        
+        # Classify the detected peaks
+        logger.info("Starting peak classification...")
+        peak_classifications = peak_classifier.classify_peaks(extracted_peaks)
+        logger.info(f"Classified {len(peak_classifications)} peaks")
+        
+        # Format response
+        response = {
             'success': True,
             'peaks': [
                 {
@@ -276,20 +332,31 @@ def analyze_peaks():
                     'current': peak.height,
                     'width': peak.width,
                     'type': classification.peak_type,
-                    'confidence': classification.confidence
+                    'confidence': classification.confidence,
+                    'area': peak.area,
+                    'symmetry': peak.symmetry,
+                    'sharpness': peak.sharpness,
+                    'prominence': peak.prominence,
+                    'noise_level': peak.noise_level
                 }
-                for peak, classification in zip(peaks, classifications)
-            ]
-        })
+                for peak, classification in zip(extracted_peaks, peak_classifications)
+            ],
+            'model_info': peak_classifier.get_model_info()
+        }
+        
+        logger.info("Peak analysis completed successfully")
+        return jsonify(response)
         
     except Exception as e:
-        logger.error(f"Peak analysis failed: {str(e)}")
+        error_msg = f"Error in peak analysis: {str(e)}"
+        logger.error(error_msg)
+        logger.error(f"Peak classifier state: {peak_classifier.get_model_info()}")
         return jsonify({
             'success': False,
-            'error': f'Peak analysis failed: {str(e)}'
+            'error': error_msg
         }), 500
 
-@ai_bp.route('/api/classify-peaks', methods=['POST'])
+@ai_bp.route('/classify-peaks', methods=['POST'])
 def classify_peaks():
     """Classify peaks in electrochemical data"""
     try:
@@ -315,7 +382,7 @@ def classify_peaks():
             'error': f'Peak classification failed: {str(e)}'
         }), 500
 
-@ai_bp.route('/api/predict-concentration', methods=['POST'])
+@ai_bp.route('/predict-concentration', methods=['POST'])
 def predict_concentration():
     """Predict analyte concentration"""
     try:
@@ -398,7 +465,7 @@ def predict_concentration():
             'error': f'Concentration prediction failed: {str(e)}'
         }), 500
 
-@ai_bp.route('/api/enhance-signal', methods=['POST'])
+@ai_bp.route('/enhance-signal', methods=['POST'])
 def enhance_signal():
     """Enhance signal quality using AI"""
     try:
@@ -476,7 +543,7 @@ def enhance_signal():
             'error': f'Signal enhancement failed: {str(e)}'
         }), 500
 
-@ai_bp.route('/api/status')
+@ai_bp.route('/status')
 def ai_status():
     """Get AI system status"""
     try:

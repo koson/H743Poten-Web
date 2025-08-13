@@ -30,6 +30,8 @@ async function fetchAnalysisData() {
 
         console.log('Sending analyze request with data:', { voltage, current });
 
+        console.log('Starting API calls...');
+        
         // Make API calls in parallel for efficiency
         const [peakData, concentrationData, qualityData, insightsData] = await Promise.all([
             fetch('/api/ai/analyze-peaks', {
@@ -38,6 +40,9 @@ async function fetchAnalysisData() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ voltage, current })
+            }).then(response => {
+                console.log('Peak analysis response:', response.status);
+                return response;
             }),
             fetch('/api/ai/predict-concentration', {
                 method: 'POST',
@@ -49,6 +54,9 @@ async function fetchAnalysisData() {
                         { voltage: 0.85, current: 2.3, width: 0.15 }
                     ]
                 })
+            }).then(response => {
+                console.log('Concentration prediction response:', response.status);
+                return response;
             }),
             fetch('/api/ai/enhance-signal', {
                 method: 'POST',
@@ -58,8 +66,14 @@ async function fetchAnalysisData() {
                 body: JSON.stringify({
                     signal: Array.from({length: 100}, (_, i) => Math.sin(i * 0.1))
                 })
+            }).then(response => {
+                console.log('Signal enhancement response:', response.status);
+                return response;
             }),
-            fetch('/api/ai/status')
+            fetch('/api/ai/status').then(response => {
+                console.log('Status check response:', response.status);
+                return response;
+            })
         ]);
 
         // Process results
@@ -71,8 +85,20 @@ async function fetchAnalysisData() {
         );
     } catch (error) {
         console.error('Error fetching analysis data:', error);
-        showError('Failed to fetch analysis data');
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
+        
+        // Show more detailed error message if available
+        const errorMessage = error.response ? 
+            `Failed to fetch analysis data: ${error.response.status} ${error.response.statusText}` :
+            'Failed to fetch analysis data: Network error';
+            
+        showError(errorMessage);
     } finally {
+        console.log('Analysis complete - hiding processing indicator');
         document.getElementById('processingIndicator').style.display = 'none';
     }
 }
@@ -192,11 +218,20 @@ function initQualityGauge() {
 
 // Update dashboard with new data
 function updateDashboard(peakData, concentrationData, qualityData, insightsData) {
+    console.log('Updating dashboard with data:', {
+        peakData,
+        concentrationData,
+        qualityData,
+        insightsData
+    });
+    
     updatePeakChart(peakData);
     updateConcentrationChart(concentrationData);
     updateQualityGauge(qualityData);
     updateInsights(insightsData);
     updateMetrics(peakData, concentrationData, qualityData);
+    
+    console.log('Dashboard update complete');
 }
 
 // Update Peak Analysis Chart

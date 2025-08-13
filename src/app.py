@@ -36,14 +36,22 @@ logger = logging.getLogger(__name__)
 def create_app():
     """Create and configure Flask application"""
     
-    # Calculate template and static directories relative to this file
-    current_dir = Path(__file__).parent
-    template_dir = current_dir / 'templates'
-    static_dir = current_dir / 'static'
+    # Set up paths
+    current_dir = Path(__file__).parent.resolve()
+    project_root = current_dir.parent
     
-    app = Flask(__name__, 
+    template_dir = project_root / 'templates'
+    static_dir = project_root / 'static'
+    
+    # Create directories if they don't exist
+    template_dir.mkdir(parents=True, exist_ok=True)
+    static_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create Flask app with configured folders
+    app = Flask(__name__,
                 template_folder=str(template_dir),
-                static_folder=str(static_dir))
+                static_folder=str(static_dir),
+                static_url_path='/static')
     
     # Initialize services
     scpi_handler = SCPIHandler()
@@ -57,6 +65,23 @@ def create_app():
     
     # Register AI Blueprint
     app.register_blueprint(ai_bp)
+    
+    @app.route('/debug')
+    def debug():
+        """Debug endpoint to check application state"""
+        app.logger.info("Debug endpoint accessed")
+        return jsonify({
+            'status': 'ok',
+            'template_dir': str(template_dir),
+            'static_dir': str(static_dir),
+            'blueprints': [str(bp) for bp in app.blueprints.keys()],
+            'routes': [str(rule) for rule in app.url_map.iter_rules()],
+            'config': {
+                'DEBUG': app.debug,
+                'ENV': app.env,
+                'TESTING': app.testing
+            }
+        })
     
     @app.route('/')
     def index():

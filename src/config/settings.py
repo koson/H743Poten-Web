@@ -9,7 +9,12 @@ class Config:
     DEBUG = False
 
     # Serial connection settings
-    SERIAL_PORT = '/dev/ttyACM0'  # Default for Linux/RPi, change for Windows
+    # Detect OS and set appropriate port
+    import platform
+    if platform.system() == 'Windows':
+        SERIAL_PORT = 'COM3'  # Default Windows port, adjust if needed
+    else:
+        SERIAL_PORT = '/dev/ttyACM0'  # Default for Linux/RPi
     BAUD_RATE = 115200
 
     # Default measurement parameters
