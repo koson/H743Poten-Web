@@ -300,6 +300,40 @@ modeSelect.addEventListener('change', (e) => {
     // TODO: Show/hide parameter inputs based on mode
 });
 
+// AI Dashboard
+async function loadAIDashboard() {
+    const container = document.querySelector('.ai-dashboard-container');
+    if (!container) return;
+
+    try {
+        const response = await fetch('/ai/dashboard');
+        const html = await response.text();
+        
+        // Extract content between <body> tags
+        const bodyContent = html.match(/<body[^>]*>([\s\S]*)<\/body>/i)[1];
+        
+        // Insert the content
+        container.innerHTML = bodyContent;
+        
+        // Initialize AI Dashboard components
+        const scripts = container.getElementsByTagName('script');
+        for (let script of scripts) {
+            if (script.src) {
+                // Load external scripts
+                const newScript = document.createElement('script');
+                newScript.src = script.src;
+                document.body.appendChild(newScript);
+            } else {
+                // Execute inline scripts
+                eval(script.innerText);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading AI Dashboard:', error);
+        container.innerHTML = '<div class="alert alert-danger">Failed to load AI Dashboard</div>';
+    }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     initializePlot();
@@ -309,6 +343,9 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => updateConnectionUI(data.connected))
         .catch(error => console.error('Status check error:', error));
+    
+    // Handle AI Dashboard tab click
+    document.getElementById('ai-dashboard-tab').addEventListener('click', loadAIDashboard);
     
     // Initialize CSV status
     updateCSVStatus();
