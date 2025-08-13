@@ -22,12 +22,14 @@ try:
     from .hardware.scpi_handler import SCPIHandler
     from .services.measurement_service import MeasurementService
     from .services.data_service import DataService
+    from .routes.ai_routes import ai_bp
 except ImportError:
     # Fall back to absolute imports (when run directly)
     from config.settings import Config
     from hardware.scpi_handler import SCPIHandler
     from services.measurement_service import MeasurementService
     from services.data_service import DataService
+    from routes.ai_routes import ai_bp
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +54,9 @@ def create_app():
     app.scpi_handler = scpi_handler
     app.measurement_service = measurement_service
     app.data_service = data_service
+    
+    # Register AI Blueprint
+    app.register_blueprint(ai_bp)
     
     @app.route('/')
     def index():

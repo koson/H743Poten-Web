@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H743Poten Web Interface</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .nav-pills .nav-link.active {
+            background-color: #007bff;
+        }
+        .status-connected { color: #28a745; }
+        .status-disconnected { color: #dc3545; }
+        .main-content {
+            min-height: 80vh;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-microchip me-2"></i>H743Poten Web Interface
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text" id="connection-status">
+                    <i class="fas fa-circle status-disconnected"></i> Disconnected
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <div class="col-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Navigation</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            <a href="#dashboard" class="list-group-item list-group-item-action active" onclick="showTab('dashboard')">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                            <a href="#ai-dashboard" class="list-group-item list-group-item-action" onclick="showTab('ai-dashboard')">
+                                <i class="fas fa-brain me-2"></i>AI Dashboard
+                            </a>
+                            <a href="#measurements" class="list-group-item list-group-item-action" onclick="showTab('measurements')">
+                                <i class="fas fa-chart-line me-2"></i>Measurements
+                            </a>
+                            <a href="#settings" class="list-group-item list-group-item-action" onclick="showTab('settings')">
+                                <i class="fas fa-cog me-2"></i>Settings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10">
+                <!-- Dashboard Tab -->
+                <div id="dashboard-content" class="tab-content active">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tachometer-alt me-2"></i>System Dashboard
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="mb-0">Device Connection</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="text-center mb-3">
+                                                <span id="device-status" class="badge bg-secondary">Not Connected</span>
+                                            </div>
+                                            <div class="d-grid gap-2">
+                                                <button id="connect-btn" class="btn btn-success">
+                                                    <i class="fas fa-plug"></i> Connect
+                                                </button>
+                                                <button id="disconnect-btn" class="btn btn-danger" disabled>
+                                                    <i class="fas fa-unlink"></i> Disconnect
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-info">
+                                        <div class="card-header bg-info text-white">
+                                            <h6 class="mb-0">System Status</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><strong>Port:</strong> <span id="port-info">/dev/ttyUSB0</span></li>
+                                                <li><strong>Baud Rate:</strong> <span id="baud-info">115200</span></li>
+                                                <li><strong>AI Status:</strong> <span id="ai-status" class="badge bg-success">Available</span></li>
+                                                <li><strong>Last Update:</strong> <span id="last-update">--</span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Dashboard Tab -->
+                <div id="ai-dashboard-content" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-brain me-2"></i>AI Dashboard Integration
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-rocket me-2"></i>
+                                    <strong>AI Dashboard Migrated Successfully!</strong><br>
+                                    The AI Dashboard has been migrated from PyPiPo Working-AI-Dashboard-V1 branch.
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0">Launch AI Dashboard</h6>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <p>Access the full AI Dashboard interface with advanced analysis capabilities.</p>
+                                            <a href="/ai/dashboard" class="btn btn-success btn-lg" target="_blank">
+                                                <i class="fas fa-external-link-alt me-2"></i>Open AI Dashboard
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-info">
+                                        <div class="card-header bg-info text-white">
+                                            <h6 class="mb-0">AI Features</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-check text-success me-2"></i>Peak Classification</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Concentration Prediction</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Signal Enhancement</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Electrochemical Intelligence</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Real-time Analysis</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">AI System Status</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="ai-status-info">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Measurements Tab -->
+                <div id="measurements-content" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Measurement Interface
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Measurement interface will be implemented here.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="settings-content" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-cog me-2"></i>System Settings
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Settings interface will be implemented here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Tab navigation
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Remove active class from all nav items
+            const navItems = document.querySelectorAll('.list-group-item');
+            navItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            const selectedTab = document.getElementById(tabName + '-content');
+            if (selectedTab) {
+                selectedTab.style.display = 'block';
+            }
+            
+            // Add active class to selected nav item
+            const selectedNav = document.querySelector(`[onclick="showTab('${tabName}')"]`);
+            if (selectedNav) {
+                selectedNav.classList.add('active');
+            }
+            
+            // Load AI status when AI dashboard tab is selected
+            if (tabName === 'ai-dashboard') {
+                loadAIStatus();
+            }
+        }
+        
+        // Load AI system status
+        async function loadAIStatus() {
+            try {
+                const response = await fetch('/ai/api/status');
+                const data = await response.json();
+                
+                const statusDiv = document.getElementById('ai-status-info');
+                
+                if (data.success) {
+                    const status = data.status;
+                    statusDiv.innerHTML = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><strong>Version:</strong> ${status.version}</li>
+                                    <li><strong>Last Updated:</strong> ${status.last_updated}</li>
+                                    <li><strong>Modules Loaded:</strong> 
+                                        <span class="badge ${status.ai_modules_loaded ? 'bg-success' : 'bg-danger'}">
+                                            ${status.ai_modules_loaded ? 'Yes' : 'No'}
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><strong>Electrochemical AI:</strong> 
+                                        <span class="badge bg-success">${status.electrochemical_ai}</span>
+                                    </li>
+                                    <li><strong>Peak Classifier:</strong> 
+                                        <span class="badge bg-success">${status.peak_classifier}</span>
+                                    </li>
+                                    <li><strong>Concentration Predictor:</strong> 
+                                        <span class="badge bg-success">${status.concentration_predictor}</span>
+                                    </li>
+                                    <li><strong>Signal Processor:</strong> 
+                                        <span class="badge bg-success">${status.signal_processor}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Failed to load AI status: ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                const statusDiv = document.getElementById('ai-status-info');
+                statusDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times me-2"></i>
+                        Error loading AI status: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Connection functions
+        async function connectDevice() {
+            try {
+                const response = await fetch('/api/connection/connect', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateConnectionStatus(true);
+                } else {
+                    alert('Failed to connect: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Connection error: ' + error.message);
+            }
+        }
+        
+        async function disconnectDevice() {
+            try {
+                const response = await fetch('/api/connection/disconnect', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateConnectionStatus(false);
+                } else {
+                    alert('Failed to disconnect: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Disconnection error: ' + error.message);
+            }
+        }
+        
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connection-status');
+            const deviceStatus = document.getElementById('device-status');
+            const connectBtn = document.getElementById('connect-btn');
+            const disconnectBtn = document.getElementById('disconnect-btn');
+            
+            if (connected) {
+                statusElement.innerHTML = '<i class="fas fa-circle status-connected"></i> Connected';
+                deviceStatus.textContent = 'Connected';
+                deviceStatus.className = 'badge bg-success';
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+            } else {
+                statusElement.innerHTML = '<i class="fas fa-circle status-disconnected"></i> Disconnected';
+                deviceStatus.textContent = 'Not Connected';
+                deviceStatus.className = 'badge bg-secondary';
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+            }
+            
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners
+            document.getElementById('connect-btn').addEventListener('click', connectDevice);
+            document.getElementById('disconnect-btn').addEventListener('click', disconnectDevice);
+            
+            // Check initial connection status
+            fetch('/api/connection/status')
+                .then(response => response.json())
+                .then(data => {
+                    updateConnectionStatus(data.connected);
+                })
+                .catch(error => {
+                    console.error('Failed to check connection status:', error);
+                });
+        });
+    </script>
+</body>
+</html>
