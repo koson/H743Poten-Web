@@ -6,7 +6,12 @@ Migrated from PyPiPo Working-AI-Dashboard-V1
 from flask import Blueprint, render_template, jsonify, request
 import sys
 import os
+import logging
+import numpy as np
 from pathlib import Path
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 # Add current directory to path for imports
 current_dir = Path(__file__).parent.parent
@@ -180,6 +185,108 @@ def analyze_data():
         return jsonify({
             'success': False,
             'error': f'Analysis failed: {str(e)}'
+        }), 500
+
+@ai_bp.route('/api/analyze-peaks', methods=['POST'])
+def analyze_peaks():
+    """Detect and classify peaks in electrochemical data"""
+    logger.info("=== START ANALYZE PEAKS ===")
+    logger.info(f"Request Headers: {request.headers}")
+    
+    try:
+        data = request.get_json()
+        logger.info(f"Received data type: {type(data)}")
+        logger.info(f"Data keys: {list(data.keys()) if isinstance(data, dict) else 'Not a dict'}")
+        logger.info(f"Raw request data: {data}")
+        
+        if not data:
+            logger.error("No data provided in request")
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+        
+        if 'voltage' not in data or 'current' not in data:
+            logger.error(f"Missing required fields. Got: {list(data.keys())}")
+            return jsonify({
+                'success': False,
+                'error': 'Invalid data format. Expected voltage and current arrays.'
+            }), 400
+        
+        logger.info(f"Voltage data length: {len(data['voltage'])}")
+        logger.info(f"Current data length: {len(data['current'])}")
+        logger.info(f"Voltage sample: {data['voltage'][:5]}")
+        logger.info(f"Current sample: {data['current'][:5]}")
+        
+        # Extract peaks from the voltammogram data
+        logger.info("Starting peak extraction...")
+        try:
+            extracted_peaks = peak_classifier.extract_features(
+                np.array(data['voltage']), 
+                np.array(data['current']), 
+                peak_indices=[]  # Will be detected automatically
+            )
+            logger.info(f"Extracted {len(extracted_peaks)} peaks")
+            
+            # Classify the detected peaks
+            logger.info("Starting peak classification...")
+            peak_classifications = peak_classifier.classify_peaks(extracted_peaks)
+            logger.info(f"Classified {len(peak_classifications)} peaks")
+            
+            # Format response
+            response = {
+                'success': True,
+                'peaks': [
+                    {
+                        'voltage': peak.potential,
+                        'current': peak.height,
+                        'width': peak.width,
+                        'type': classification.peak_type,
+                        'confidence': classification.confidence
+                    }
+                    for peak, classification in zip(extracted_peaks, peak_classifications)
+                ]
+            }
+            logger.info("Peak analysis completed successfully")
+            return jsonify(response)
+            
+        except Exception as e:
+            error_msg = f"Error in peak analysis: {str(e)}"
+            logger.error(error_msg)
+            logger.error(f"Peak classifier state: {peak_classifier.get_model_info()}")
+            return jsonify({
+                'success': False,
+                'error': error_msg
+            }), 500
+            
+    except Exception as e:
+        error_msg = f"Error processing request: {str(e)}"
+        logger.error(error_msg)
+        return jsonify({
+            'success': False,
+            'error': error_msg
+        }), 500        # Classify the detected peaks
+        classifications = peak_classifier.classify_peaks(peaks)
+        
+        return jsonify({
+            'success': True,
+            'peaks': [
+                {
+                    'voltage': peak.potential,
+                    'current': peak.height,
+                    'width': peak.width,
+                    'type': classification.peak_type,
+                    'confidence': classification.confidence
+                }
+                for peak, classification in zip(peaks, classifications)
+            ]
+        })
+        
+    except Exception as e:
+        logger.error(f"Peak analysis failed: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Peak analysis failed: {str(e)}'
         }), 500
 
 @ai_bp.route('/api/classify-peaks', methods=['POST'])

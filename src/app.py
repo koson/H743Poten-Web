@@ -63,6 +63,14 @@ def create_app():
         """Main dashboard"""
         return render_template('index.html')
     
+    @app.route('/favicon.ico')
+    def favicon():
+        """Serve favicon"""
+        return send_file(
+            str(current_dir / 'static' / 'img' / 'favicon.ico'),
+            mimetype='image/x-icon'
+        )
+    
     @app.route('/api/connection/status')
     def connection_status():
         """Get connection status"""

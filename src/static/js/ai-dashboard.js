@@ -32,14 +32,14 @@ async function fetchAnalysisData() {
 
         // Make API calls in parallel for efficiency
         const [peakData, concentrationData, qualityData, insightsData] = await Promise.all([
-            fetch('/ai/api/analyze', {
+            fetch('/api/ai/analyze-peaks', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ voltage, current })
             }),
-            fetch('/ai/api/predict-concentration', {
+            fetch('/api/ai/predict-concentration', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -50,7 +50,7 @@ async function fetchAnalysisData() {
                     ]
                 })
             }),
-            fetch('/ai/api/enhance-signal', {
+            fetch('/api/ai/enhance-signal', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -59,7 +59,7 @@ async function fetchAnalysisData() {
                     signal: Array.from({length: 100}, (_, i) => Math.sin(i * 0.1))
                 })
             }),
-            fetch('/ai/api/status')
+            fetch('/api/ai/status')
         ]);
 
         // Process results
