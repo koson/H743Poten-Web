@@ -407,10 +407,13 @@ class AIDashboard {
     
     async analyzeSignalQuality(data) {
         try {
-            const response = await fetch('/api/ai/signal-quality', {
+            const response = await fetch('/api/ai/enhance-signal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: JSON.stringify({
+                    voltage: data.voltage,
+                    current: data.current
+                })
             });
             
             if (!response.ok) throw new Error('Signal quality analysis failed');
@@ -431,20 +434,21 @@ class AIDashboard {
     
     async predictConcentration(data) {
         try {
-            // Use demo calibration data
-            const calibrationData = [
-                [1e-6, 1.1e-6],
-                [5e-6, 5.2e-6],
-                [10e-6, 9.8e-6]
-            ];
+            // Prepare data with voltage and current arrays
+            const requestData = {
+                voltage: data.voltage,
+                current: data.current,
+                calibration_data: [
+                    [1e-6, 1.1e-6],
+                    [5e-6, 5.2e-6],
+                    [10e-6, 9.8e-6]
+                ]
+            };
             
             const response = await fetch('/api/ai/predict-concentration', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...data,
-                    calibration_data: calibrationData
-                })
+                body: JSON.stringify(requestData)
             });
             
             if (!response.ok) throw new Error('Concentration prediction failed');
@@ -521,19 +525,19 @@ class AIDashboard {
     
     updateAnalysisResults(results) {
         // Update peak analysis
-        this.updatePeakAnalysis(results.peaks);
+        this.updatePeakAnalysis(results.analysis?.peaks);
         
         // Update concentration analysis
-        this.updateConcentrationAnalysis(results.concentration);
+        this.updateConcentrationAnalysis(results.result);
         
         // Update signal quality
-        this.updateSignalQualityDisplay(results.signalQuality);
+        this.updateSignalQualityDisplay(results.result?.quality);
         
         // Update AI insights
         this.updateInsights(results.insights);
         
         // Update recommendations
-        this.updateRecommendations(results.recommendations);
+        this.updateRecommendations(results.result?.quality?.recommendations || []);
         
         // Update component metrics
         this.updateComponentMetrics(results);

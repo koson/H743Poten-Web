@@ -65,14 +65,26 @@ except ImportError as e:
             }
     
     class SignalProcessor:
-        def enhance_signal(self, signal):
-            signal = np.array(signal)
+        def enhance_signal(self, data):
+            voltage = np.array(data['voltage'])
+            current = np.array(data['current'])
             # Mock signal processing
+            enhanced_current = current + np.random.normal(0, 0.1, len(current))
+            
             return {
-                'enhanced_signal': signal.tolist(),
-                'noise_reduction': 15.2,
-                'baseline_stability': 0.992,
-                'signal_quality': 92
+                'voltage': voltage.tolist(),
+                'current': enhanced_current.tolist(),
+                'quality': {
+                    'snr_db': 35.2,
+                    'baseline_drift': 0.002,
+                    'noise_level': 1e-9,
+                    'quality_score': 0.92,
+                    'recommendations': ['Signal quality is good for quantitative analysis']
+                },
+                'filter_info': {
+                    'method': 'Savitzky-Golay',
+                    'quality_improvement': 15.2
+                }
             }
 
 # Create Blueprint
@@ -187,22 +199,44 @@ def predict_concentration():
         print(f"Received request in predict_concentration:")
         print(f"Request data type: {type(data)}")
         print(f"Request data: {data}")
-        print(f"Request headers: {request.headers}")
         
-        if not data or 'voltage' not in data or 'current' not in data:
+        # Validate required fields
+        if not data or not isinstance(data, dict):
             return jsonify({
                 'success': False,
-                'error': 'Invalid data format. Expected voltage and current arrays.'
+                'error': 'Invalid request data. Expected JSON object.'
             }), 400
-        
-        # Predict concentration
+            
+        if 'voltage' not in data or 'current' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'Missing required fields: voltage and current arrays'
+            }), 400
+            
+        if not isinstance(data['voltage'], list) or not isinstance(data['current'], list):
+            return jsonify({
+                'success': False,
+                'error': 'Voltage and current must be arrays'
+            }), 400
+            
+        if len(data['voltage']) != len(data['current']):
+            return jsonify({
+                'success': False,
+                'error': 'Voltage and current arrays must have the same length'
+            }), 400
+            
+        # Predict concentration using the full data
         print("Calling concentration predictor...")
-        concentration = concentration_predictor.predict_concentration(data)
-        print(f"Concentration predictor result: {concentration}")
+        result = concentration_predictor.predict_concentration({
+            'voltage': data['voltage'],
+            'current': data['current'],
+            'calibration_data': data.get('calibration_data', [])
+        })
+        print(f"Concentration predictor result: {result}")
         
         return jsonify({
             'success': True,
-            'concentration': concentration
+            'result': result
         })
         
     except Exception as e:
@@ -222,22 +256,43 @@ def enhance_signal():
         print(f"Received request in enhance_signal:")
         print(f"Request data type: {type(data)}")
         print(f"Request data: {data}")
-        print(f"Request headers: {request.headers}")
         
-        if not data or 'voltage' not in data or 'current' not in data:
+        # Validate required fields
+        if not data or not isinstance(data, dict):
             return jsonify({
                 'success': False,
-                'error': 'Invalid data format. Expected voltage and current arrays.'
+                'error': 'Invalid request data. Expected JSON object.'
             }), 400
-        
-        # Enhance signal
+            
+        if 'voltage' not in data or 'current' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'Missing required fields: voltage and current arrays'
+            }), 400
+            
+        if not isinstance(data['voltage'], list) or not isinstance(data['current'], list):
+            return jsonify({
+                'success': False,
+                'error': 'Voltage and current must be arrays'
+            }), 400
+            
+        if len(data['voltage']) != len(data['current']):
+            return jsonify({
+                'success': False,
+                'error': 'Voltage and current arrays must have the same length'
+            }), 400
+            
+        # Enhance signal with the provided data
         print("Calling signal processor...")
-        enhanced_signal = signal_processor.enhance_signal({'voltage': data['voltage'], 'current': data['current']})
-        print(f"Signal processor result: {enhanced_signal}")
+        result = signal_processor.enhance_signal({
+            'voltage': data['voltage'],
+            'current': data['current']
+        })
+        print(f"Signal processor result: {result}")
         
         return jsonify({
             'success': True,
-            'enhanced_signal': enhanced_signal
+            'result': result
         })
         
     except Exception as e:
