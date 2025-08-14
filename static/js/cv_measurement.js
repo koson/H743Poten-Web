@@ -51,12 +51,14 @@ class CVMeasurement {
         this.stopBtn = document.getElementById('cv-stop-btn');
         this.pauseBtn = document.getElementById('cv-pause-btn');
         this.exportBtn = document.getElementById('cv-export-btn');
+        this.fixRangeBtn = document.getElementById('cv-fix-range-btn');
         
         console.log('CV buttons found:', {
             start: !!this.startBtn,
             stop: !!this.stopBtn,
             pause: !!this.pauseBtn,
-            export: !!this.exportBtn
+            export: !!this.exportBtn,
+            fixRange: !!this.fixRangeBtn
         });
         
         // Get status elements
@@ -68,6 +70,7 @@ class CVMeasurement {
         this.stopBtn?.addEventListener('click', () => this.stopMeasurement());
         this.pauseBtn?.addEventListener('click', () => this.togglePause());
         this.exportBtn?.addEventListener('click', () => this.exportData());
+        this.fixRangeBtn?.addEventListener('click', () => this.fixPlotRange());
         
         // Parameter validation on input
         [this.beginInput, this.upperInput, this.lowerInput, this.rateInput, this.cyclesInput]
@@ -165,6 +168,16 @@ class CVMeasurement {
         Plotly.newPlot(plotDiv, [], layout, config);
         
         this.plotDiv = plotDiv;
+    }
+    
+    getCurrentParameters() {
+        return {
+            begin: this.beginInput ? this.beginInput.value : 0.0,
+            upper: this.upperInput ? this.upperInput.value : 0.7,
+            lower: this.lowerInput ? this.lowerInput.value : -0.4,
+            rate: this.rateInput ? this.rateInput.value : 0.1,
+            cycles: this.cyclesInput ? this.cyclesInput.value : 1
+        };
     }
     
     async validateParameters() {
@@ -481,6 +494,27 @@ class CVMeasurement {
             const dataPoints = result.data_points || [];
             console.log('[DEBUG] Data points extracted:', dataPoints.length, 'points');
             
+            // Debug: Check if we're missing data by comparing with status
+            if (result.status && result.status.data_points_count) {
+                const backendCount = result.status.data_points_count;
+                const receivedCount = dataPoints.length;
+                if (backendCount > receivedCount) {
+                    console.warn(`[DEBUG] Data mismatch! Backend has ${backendCount} points but only received ${receivedCount} points`);
+                }
+            }
+            
+            // Debug: Check voltage range in received data
+            if (dataPoints.length > 0) {
+                const voltages = dataPoints.map(p => p.potential);
+                const minV = Math.min(...voltages);
+                const maxV = Math.max(...voltages);
+                console.log(`[DEBUG] Received data voltage range: ${minV.toFixed(4)}V to ${maxV.toFixed(4)}V`);
+                
+                // Check for negative voltages
+                const negativeCount = voltages.filter(v => v < 0).length;
+                console.log(`[DEBUG] Negative voltage points: ${negativeCount}/${voltages.length}`);
+            }
+            
             if (dataPoints.length > 0) {
                 // Get only new points since last update
                 const currentDataLength = this.plotData.x.length;
@@ -511,9 +545,33 @@ class CVMeasurement {
                             direction: point.direction
                         });
                         
-                        // Update plot for each new point
-                        this.updatePlotIncremental(point);
+                        // Log data range so far
+                        if (this.plotData.x.length > 0) {
+                            const minV = Math.min(...this.plotData.x);
+                            const maxV = Math.max(...this.plotData.x);
+                            console.log(`[DEBUG] Current voltage range in plot data: ${minV.toFixed(4)}V to ${maxV.toFixed(4)}V`);
+                        }
                     });
+                    
+                    // Force complete plot update after adding all new points
+                    console.log(`[DEBUG] Forcing complete plot update with ${this.plotData.x.length} total points`);
+                    this.updatePlotComplete();
+                } else if (dataPoints.length < currentDataLength) {
+                    // Backend has fewer points than frontend (unusual case)
+                    console.log(`[DEBUG] Backend has fewer points (${dataPoints.length}) than frontend (${currentDataLength}) - resyncing`);
+                    
+                    // Clear and reload all data from backend
+                    this.plotData = { x: [], y: [], cycle: [], direction: [] };
+                    
+                    dataPoints.forEach((point, index) => {
+                        this.plotData.x.push(point.potential);
+                        this.plotData.y.push(point.current);
+                        this.plotData.cycle.push(point.cycle);
+                        this.plotData.direction.push(point.direction);
+                    });
+                    
+                    console.log(`[DEBUG] Resynced with ${this.plotData.x.length} points from backend`);
+                    this.updatePlotComplete();
                 } else {
                     console.log('[DEBUG] No new data points to add');
                 }
@@ -543,10 +601,72 @@ class CVMeasurement {
         if (!this.plotDiv || this.plotData.x.length === 0) return;
         
         console.log(`Updating complete plot with ${this.plotData.x.length} data points`);
+
+        // Calculate actual data range for proper axis scaling
+        let minPotential = Math.min(...this.plotData.x);
+        let maxPotential = Math.max(...this.plotData.x);
+        let minCurrent = Math.min(...this.plotData.y);
+        let maxCurrent = Math.max(...this.plotData.y);
+        
+        // Validate ranges (fallback to default if invalid)
+        if (!isFinite(minPotential) || !isFinite(maxPotential)) {
+            console.warn('[DEBUG] Invalid potential range, using defaults');
+            minPotential = -0.5;
+            maxPotential = 0.8;
+        }
+        if (!isFinite(minCurrent) || !isFinite(maxCurrent)) {
+            console.warn('[DEBUG] Invalid current range, using defaults');
+            minCurrent = -1e-6;
+            maxCurrent = 1e-6;
+        }
+        
+        // Force expand range to include CV parameters if data is limited
+        const cvParams = this.getCurrentParameters();
+        if (cvParams) {
+            const lowerV = parseFloat(cvParams.lower) || -0.4;
+            const upperV = parseFloat(cvParams.upper) || 0.7;
+            
+            // Ensure range includes parameter range even if data doesn't
+            minPotential = Math.min(minPotential, lowerV);
+            maxPotential = Math.max(maxPotential, upperV);
+            
+            console.log(`[DEBUG] CV parameters - Lower: ${lowerV}V, Upper: ${upperV}V`);
+            console.log(`[DEBUG] Expanded range to include parameters: ${minPotential.toFixed(4)}V to ${maxPotential.toFixed(4)}V`);
+        }
+        
+        // Force minimum range if data is too narrow
+        const dataRange = maxPotential - minPotential;
+        if (dataRange < 0.5) {
+            const center = (minPotential + maxPotential) / 2;
+            minPotential = center - 0.6;
+            maxPotential = center + 0.6;
+            console.log(`[DEBUG] Data range too narrow (${dataRange.toFixed(4)}V), forcing wider range: ${minPotential.toFixed(4)}V to ${maxPotential.toFixed(4)}V`);
+        }
+        
+        // Add 10% padding to ranges for better visualization
+        const potentialRange = maxPotential - minPotential;
+        const currentRange = Math.abs(maxCurrent - minCurrent);
+        const potentialPadding = potentialRange * 0.1;
+        const currentPadding = currentRange * 0.1;
+        
+        console.log(`[DEBUG] Raw data range - Potential: ${minPotential.toFixed(4)}V to ${maxPotential.toFixed(4)}V`);
+        console.log(`[DEBUG] Raw data range - Current: ${minCurrent.toExponential(3)}A to ${maxCurrent.toExponential(3)}A`);
+        console.log(`[DEBUG] Final plot range - Potential: ${(minPotential - potentialPadding).toFixed(4)}V to ${(maxPotential + potentialPadding).toFixed(4)}V`);
+        console.log(`[DEBUG] Plot data sample:`, {
+            firstPotential: this.plotData.x[0],
+            lastPotential: this.plotData.x[this.plotData.x.length - 1],
+            totalPoints: this.plotData.x.length,
+            sampleVoltages: this.plotData.x.slice(0, 10)
+        });
         
         // Group data by cycle for proper CV curves
         const cycles = [...new Set(this.plotData.cycle)];
         const traces = [];
+        
+        // Extra debugging for trace data
+        console.log(`[DEBUG] Creating traces for ${cycles.length} cycles`);
+        console.log(`[DEBUG] All voltage data points:`, this.plotData.x);
+        console.log(`[DEBUG] Voltage range check - Min: ${Math.min(...this.plotData.x).toFixed(4)}, Max: ${Math.max(...this.plotData.x).toFixed(4)}`);
         
         cycles.forEach((cycle, cycleIndex) => {
             // Get all points for this cycle
@@ -560,49 +680,78 @@ class CVMeasurement {
             const forwardIndices = cycleIndices.filter(i => this.plotData.direction[i] === 'forward');
             const reverseIndices = cycleIndices.filter(i => this.plotData.direction[i] === 'reverse');
             
-            // Forward scan trace
+            // Create completely isolated traces with explicit line settings
+            const forwardX = forwardIndices.map(i => this.plotData.x[i]);
+            const forwardY = forwardIndices.map(i => this.plotData.y[i]);
+            const reverseX = reverseIndices.map(i => this.plotData.x[i]);
+            const reverseY = reverseIndices.map(i => this.plotData.y[i]);
+            
+            // Forward scan trace - completely isolated
             if (forwardIndices.length > 0) {
+                // Sort forward data (ascending voltage)
+                const forwardPairs = forwardX.map((x, i) => ({ x, y: forwardY[i] }));
+                forwardPairs.sort((a, b) => a.x - b.x);
+                
+                console.log(`[DEBUG] Cycle ${cycle} Forward: ${forwardPairs.length} points`);
+                
                 traces.push({
-                    x: forwardIndices.map(i => this.plotData.x[i]),
-                    y: forwardIndices.map(i => this.plotData.y[i]),
+                    x: forwardPairs.map(p => p.x),
+                    y: forwardPairs.map(p => p.y),
                     type: 'scatter',
-                    mode: 'lines+markers',
-                    name: `Cycle ${cycle} Forward`,
+                    mode: 'markers+lines',
+                    name: `Cycle ${cycle}`,
                     line: {
                         width: 2,
                         color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
-                        dash: 'solid'
+                        shape: 'linear'
                     },
                     marker: {
-                        size: 3,
-                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`
+                        size: 0.1,  // Extremely small markers
+                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
+                        opacity: 0  // Invisible markers
                     },
-                    showlegend: true
+                    connectgaps: false,
+                    showlegend: true,
+                    legendgroup: `cycle${cycle}`,
+                    visible: true,
+                    hovertemplate: `Cycle ${cycle}<br>V: %{x:.4f}<br>I: %{y:.2e}<extra></extra>`
                 });
             }
             
-            // Reverse scan trace
+            // Add delay before reverse trace to ensure complete separation
             if (reverseIndices.length > 0) {
+                // Sort reverse data (descending voltage)
+                const reversePairs = reverseX.map((x, i) => ({ x, y: reverseY[i] }));
+                reversePairs.sort((a, b) => b.x - a.x);
+                
+                console.log(`[DEBUG] Cycle ${cycle} Reverse: ${reversePairs.length} points`);
+                
+                // Create reverse trace with completely different configuration
                 traces.push({
-                    x: reverseIndices.map(i => this.plotData.x[i]),
-                    y: reverseIndices.map(i => this.plotData.y[i]),
+                    x: reversePairs.map(p => p.x),
+                    y: reversePairs.map(p => p.y),
                     type: 'scatter',
-                    mode: 'lines+markers',
-                    name: `Cycle ${cycle} Reverse`,
+                    mode: 'markers+lines',
+                    name: `Cycle ${cycle} Rev`,
                     line: {
                         width: 2,
-                        color: `hsl(${cycleIndex * 60}, 70%, 40%)`,
-                        dash: 'dash'
+                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
+                        shape: 'linear'
                     },
                     marker: {
-                        size: 3,
-                        color: `hsl(${cycleIndex * 60}, 70%, 40%)`
+                        size: 0.1,  // Extremely small markers
+                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
+                        opacity: 0  // Invisible markers
                     },
-                    showlegend: true
+                    connectgaps: false,
+                    showlegend: false,
+                    legendgroup: `cycle${cycle}`,
+                    visible: true,
+                    hovertemplate: `Cycle ${cycle}<br>V: %{x:.4f}<br>I: %{y:.2e}<extra></extra>`
                 });
             }
         });
-        
+
         // Update layout for proper CV display
         const layout = {
             title: {
@@ -615,7 +764,8 @@ class CVMeasurement {
                 gridcolor: '#f0f0f0',
                 zeroline: true,
                 zerolinecolor: '#666',
-                autorange: true
+                range: [minPotential - potentialPadding, maxPotential + potentialPadding],
+                autorange: false
             },
             yaxis: {
                 title: 'Current (A)', 
@@ -624,7 +774,8 @@ class CVMeasurement {
                 zeroline: true,
                 zerolinecolor: '#666',
                 tickformat: '.2e',
-                autorange: true
+                range: [minCurrent - currentPadding, maxCurrent + currentPadding],
+                autorange: false
             },
             showlegend: true,
             legend: {
@@ -643,12 +794,47 @@ class CVMeasurement {
             responsive: true,
             displayModeBar: true,
             displaylogo: false,
-            modeBarButtonsToRemove: ['lasso2d', 'select2d', 'pan2d', 'autoScale2d']
+            modeBarButtonsToRemove: ['lasso2d', 'select2d', 'pan2d', 'autoScale2d'],
+            // Force no line connections across traces
+            plotGlPixelRatio: 2,
+            toImageButtonOptions: {
+                format: 'png',
+                filename: 'cv_measurement',
+                height: 500,
+                width: 700,
+                scale: 1
+            }
         };
         
         try {
+            console.log(`[DEBUG] Updating Plotly with ${traces.length} traces`);
+            console.log(`[DEBUG] X-axis range: [${minPotential - potentialPadding}, ${maxPotential + potentialPadding}]`);
+            console.log(`[DEBUG] Y-axis range: [${minCurrent - currentPadding}, ${maxCurrent + currentPadding}]`);
+            console.log(`[DEBUG] Sample trace data:`, traces.length > 0 ? {
+                traceCount: traces.length,
+                firstTrace: {
+                    name: traces[0].name,
+                    xSample: traces[0].x.slice(0, 5),
+                    ySample: traces[0].y.slice(0, 5),
+                    totalPoints: traces[0].x.length
+                }
+            } : 'No traces');
+            
+            console.log(`[DEBUG] About to call Plotly.react with layout:`, {
+                xRange: layout.xaxis.range,
+                yRange: layout.yaxis.range,
+                tracesCount: traces.length
+            });
+            
             Plotly.react(this.plotDiv, traces, layout, config);
             console.log(`Plot updated with ${traces.length} traces for ${cycles.length} cycles`);
+            
+            // Verify the plot was updated correctly
+            setTimeout(() => {
+                const currentLayout = this.plotDiv.layout;
+                console.log(`[DEBUG] Plot verification - Current x-axis range:`, currentLayout.xaxis?.range);
+                console.log(`[DEBUG] Plot verification - Current y-axis range:`, currentLayout.yaxis?.range);
+            }, 100);
         } catch (error) {
             console.error('Failed to update plot:', error);
             // Fallback: clear and recreate
@@ -852,6 +1038,37 @@ class CVMeasurement {
             });
     }
     
+    fixPlotRange() {
+        console.log('[DEBUG] Manually fixing plot range...');
+        
+        if (!this.plotDiv) {
+            console.warn('Plot not initialized');
+            this.showMessage('Plot not initialized', 'error');
+            return;
+        }
+        
+        // Get current parameters
+        const params = this.getCurrentParameters();
+        const lowerV = parseFloat(params.lower) || -0.4;
+        const upperV = parseFloat(params.upper) || 0.7;
+        
+        // Force reset plot range to parameter range
+        const layout_update = {
+            'xaxis.range': [lowerV - 0.1, upperV + 0.1],
+            'xaxis.autorange': false
+        };
+        
+        console.log(`[DEBUG] Forcing plot range to: ${lowerV - 0.1}V to ${upperV + 0.1}V`);
+        
+        Plotly.relayout(this.plotDiv, layout_update).then(() => {
+            console.log('[DEBUG] Plot range fixed successfully');
+            this.showMessage(`Plot range fixed: ${lowerV}V to ${upperV}V`, 'success');
+        }).catch(error => {
+            console.error('[DEBUG] Failed to fix plot range:', error);
+            this.showMessage('Failed to fix plot range', 'error');
+        });
+    }
+    
     showMessage(message, type = 'info') {
         // Show toast notification
         if (typeof showToast === 'function') {
@@ -961,4 +1178,60 @@ CVMeasurement.prototype.setSimulationMode = async function(enabled) {
             this.simulationToggle.checked = !enabled;
         }
     }
+};
+
+// Function to manually fix plot range when automatic detection fails
+window.fixPlotRange = function() {
+    if (window.cvMeasurement && window.cvMeasurement.fixPlotRange) {
+        window.cvMeasurement.fixPlotRange();
+    }
+};
+
+// Add fixPlotRange method to CVMeasurement prototype
+CVMeasurement.prototype.fixPlotRange = function() {
+    if (!this.plotDiv || this.plotData.x.length === 0) {
+        console.warn('[DEBUG] Cannot fix plot range - no plot data available');
+        return;
+    }
+    
+    console.log('[DEBUG] Manual plot range fix initiated');
+    
+    // Get CV parameters for expected range
+    const cvParams = this.getCurrentParameters();
+    let lowerV = -0.4, upperV = 0.7;  // Default range
+    
+    if (cvParams) {
+        lowerV = parseFloat(cvParams.lower) || -0.4;
+        upperV = parseFloat(cvParams.upper) || 0.7;
+    }
+    
+    // Calculate actual data range
+    const minV = Math.min(...this.plotData.x);
+    const maxV = Math.max(...this.plotData.x);
+    const minI = Math.min(...this.plotData.y);
+    const maxI = Math.max(...this.plotData.y);
+    
+    // Use the wider of parameter range vs data range
+    const finalMinV = Math.min(lowerV, minV);
+    const finalMaxV = Math.max(upperV, maxV);
+    
+    console.log(`[DEBUG] Range fix - Data: ${minV.toFixed(4)} to ${maxV.toFixed(4)}V`);
+    console.log(`[DEBUG] Range fix - Params: ${lowerV.toFixed(4)} to ${upperV.toFixed(4)}V`);
+    console.log(`[DEBUG] Range fix - Final: ${finalMinV.toFixed(4)} to ${finalMaxV.toFixed(4)}V`);
+    
+    // Update plot layout with explicit range
+    const update = {
+        'xaxis.range': [finalMinV - 0.05, finalMaxV + 0.05],
+        'yaxis.range': [minI - Math.abs(minI) * 0.1, maxI + Math.abs(maxI) * 0.1],
+        'xaxis.autorange': false,
+        'yaxis.autorange': false
+    };
+    
+    Plotly.relayout(this.plotDiv, update).then(() => {
+        console.log('[DEBUG] Manual range fix completed successfully');
+        this.showMessage('Plot range fixed manually', 'success');
+    }).catch(error => {
+        console.error('[DEBUG] Manual range fix failed:', error);
+        this.showMessage('Failed to fix plot range', 'error');
+    });
 };

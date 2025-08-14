@@ -172,9 +172,30 @@ def stream_cv_data():
         if not cv_service:
             return jsonify({'error': 'CV service not available'}), 500
         
-        # Get latest data points (last 50 for real-time update)
-        data_points = cv_service.get_data_points(limit=50)
+        # Get ALL data points for proper CV plotting (remove limit)
+        # Frontend will handle incremental updates efficiently
+        print(f"[CV DEBUG] About to call get_data_points() without limit")
+        data_points = cv_service.get_data_points()  # No limit = all data
         status = cv_service.get_status()
+        
+        # Debug logging for data sync issues
+        total_points = len(data_points)
+        backend_count = status.get('data_points_count', 0)
+        
+        print(f"[CV DEBUG] Streaming API - returning {total_points} points, backend has {backend_count}")
+        logger.info(f"[DEBUG] Streaming API called - returning {total_points} points, backend has {backend_count}")
+        
+        if total_points != backend_count:
+            print(f"[CV DEBUG] MISMATCH: returning {total_points} vs backend {backend_count}")
+            logger.warning(f"Data count mismatch: returning {total_points} points but status says {backend_count}")
+        
+        # Check voltage range for debugging
+        if data_points:
+            voltages = [p.get('potential', 0) for p in data_points]
+            min_v, max_v = min(voltages), max(voltages)
+            negative_count = sum(1 for v in voltages if v < 0)
+            print(f"[CV DEBUG] V range: {min_v:.4f} to {max_v:.4f}, negative: {negative_count}/{total_points}")
+            logger.info(f"[DEBUG] V range: {min_v:.4f} to {max_v:.4f}, negative: {negative_count}/{total_points}")
         
         return jsonify({
             'data_points': data_points,

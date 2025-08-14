@@ -288,9 +288,16 @@ class CVMeasurementService:
     
     def get_data_points(self, limit: Optional[int] = None) -> List[Dict]:
         """Get measurement data points"""
+        print(f"[CV SERVICE] get_data_points called with limit={limit}")
         with self.data_lock:
+            total_points = len(self.data_points)
+            print(f"[CV SERVICE] Total data points available: {total_points}")
+            
             points = self.data_points[-limit:] if limit else self.data_points
-            return [
+            result_count = len(points)
+            print(f"[CV SERVICE] Returning {result_count} points (limit={limit})")
+            
+            result = [
                 {
                     'timestamp': point.timestamp,
                     'potential': point.potential,
@@ -300,6 +307,12 @@ class CVMeasurementService:
                 }
                 for point in points
             ]
+            
+            if result:
+                voltages = [p['potential'] for p in result]
+                print(f"[CV SERVICE] Voltage range: {min(voltages):.4f} to {max(voltages):.4f}")
+            
+            return result
     
     def enable_streaming(self, callback=None):
         """Enable real-time data streaming"""
@@ -391,7 +404,7 @@ class CVMeasurementService:
                 # No new data available, just continue
                 return True
                 
-            logger.debug(f"STM32 incoming data: '{incoming_data}'")
+            logger.debug(f"STM32 incoming data: '{incoming_data.strip()}'")
             
             # Handle multiple lines of data if received
             lines = incoming_data.strip().split('\n')
@@ -401,6 +414,8 @@ class CVMeasurementService:
                 line = line.strip()
                 if not line:
                     continue
+                    
+                logger.debug(f"Processing line: '{line}'")
                     
                 # Handle SCPI error responses
                 if line.startswith('**ERROR'):
