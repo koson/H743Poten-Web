@@ -22,14 +22,18 @@ try:
     from .hardware import SCPIHandler
     from .services.measurement_service import MeasurementService
     from .services.data_service import DataService
+    from .services.cv_measurement_service import CVMeasurementService
     from .routes import ai_bp, port_bp
+    from .routes.cv_routes import cv_bp
 except ImportError:
     # Fall back to absolute imports (when run directly)
     from config.settings import Config
     from hardware import SCPIHandler
     from services.measurement_service import MeasurementService
     from services.data_service import DataService
+    from services.cv_measurement_service import CVMeasurementService
     from routes import ai_bp, port_bp
+    from routes.cv_routes import cv_bp
 
 logger = logging.getLogger(__name__)
 
@@ -57,15 +61,18 @@ def create_app():
     scpi_handler = SCPIHandler()
     measurement_service = MeasurementService(scpi_handler)
     data_service = DataService()
+    cv_service = CVMeasurementService(scpi_handler)
     
     # Store services in application context
     app.config['scpi_handler'] = scpi_handler
     app.config['measurement_service'] = measurement_service
     app.config['data_service'] = data_service
+    app.config['cv_service'] = cv_service
     
     # Register blueprints
     app.register_blueprint(ai_bp)
     app.register_blueprint(port_bp)
+    app.register_blueprint(cv_bp)
     
     @app.route('/debug')
     def debug():
@@ -79,7 +86,6 @@ def create_app():
             'routes': [str(rule) for rule in app.url_map.iter_rules()],
             'config': {
                 'DEBUG': app.debug,
-                'ENV': app.env,
                 'TESTING': app.testing
             }
         })
