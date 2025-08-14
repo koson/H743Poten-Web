@@ -220,47 +220,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showParameterGroup(currentMode);
     });
     
-    // Connect button
-    connectBtn.addEventListener('click', async () => {
-        if (!isConnected) {
-            try {
-                const response = await fetch('/api/connection/connect', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        port: portSelect.value,
-                        baud_rate: parseInt(baudSelect.value)
-                    })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    // Let the state listener handle the UI updates
-                    connectionState.setState({
-                        isConnected: true,
-                        currentPort: portSelect.value,
-                        currentBaudRate: parseInt(baudSelect.value)
-                    });
-                }
-            } catch (error) {
-                console.error('Connection error:', error);
-                alert('Failed to connect to device');
-            }
-        } else {
-            // Disconnect logic
-            try {
-                await fetch('/api/device/disconnect', { method: 'POST' });
-                // Let the state listener handle the UI updates
-                connectionState.setState({
-                    isConnected: false,
-                    currentPort: null,
-                    currentBaudRate: null
-                });
-            } catch (error) {
-                console.error('Disconnection error:', error);
-            }
-        }
-    });
+    // Note: Connection handling is managed by PortManager
+    // measurement.js only listens to connection state changes via connectionState.addListener above
     
     // Start measurement
     startBtn.addEventListener('click', async () => {
@@ -374,5 +335,4 @@ function startDataCollection() {
     }, 100); // Poll every 100ms
 }
 
-// Initialize port manager
-const portManager = new PortManager();
+// Note: PortManager is initialized in port_manager.js

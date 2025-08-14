@@ -31,17 +31,43 @@ class SCPIHandler:
     def connect(self):
         """Connect to the device"""
         try:
+            # Check if already connected
             if self.is_connected:
                 return True
 
-            self.serial = serial.Serial(
-                port=self.port,
-                baudrate=self.baud_rate,
-                timeout=1
-            )
-            self.is_connected = True
-            logger.info(f"Connected to {self.port} at {self.baud_rate} baud")
-            return True
+            # Check if port exists
+            import serial.tools.list_ports
+            available_ports = [p.device for p in serial.tools.list_ports.comports()]
+            if self.port not in available_ports:
+                raise Exception(f"Port {self.port} not found")
+
+            # Check if port is in use
+            try:
+                temp_serial = serial.Serial(self.port)
+                temp_serial.close()
+            except:
+                raise Exception(f"Port {self.port} is in use")
+
+            # Try to connect with timeout and retries
+            max_retries = 3
+            retry_delay = 1  # seconds
+            
+            for attempt in range(max_retries):
+                try:
+                    self.serial = serial.Serial(
+                        port=self.port,
+                        baudrate=self.baud_rate,
+                        timeout=1
+                    )
+                    self.is_connected = True
+                    logger.info(f"Connected to {self.port} at {self.baud_rate} baud")
+                    return True
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        logger.warning(f"Connection attempt {attempt + 1} failed: {e}")
+                        time.sleep(retry_delay)
+                    else:
+                        raise
 
         except Exception as e:
             logger.error(f"Failed to connect: {e}")
@@ -52,11 +78,23 @@ class SCPIHandler:
         """Disconnect from the device"""
         try:
             if self.serial and self.serial.is_open:
+                # Flush buffers before closing
+                self.serial.reset_input_buffer()
+                self.serial.reset_output_buffer()
                 self.serial.close()
+
             self.is_connected = False
+            self.serial = None
+
+            # Wait for port to be fully released
+            time.sleep(1)
             logger.info("Disconnected from device")
+
         except Exception as e:
             logger.error(f"Error during disconnect: {e}")
+            # Even if there's an error, mark as disconnected
+            self.is_connected = False 
+            self.serial = None
             raise
 
     def send_custom_command(self, command):

@@ -4,6 +4,12 @@
 
 class PortManager {
     constructor() {
+        // Singleton pattern - prevent multiple instances
+        if (PortManager.instance) {
+            console.log('PortManager singleton already exists, returning existing instance');
+            return PortManager.instance;
+        }
+        
         console.log('Initializing PortManager...');
         this.portSelect = document.getElementById('port-select');
         this.connectButton = document.getElementById('connect-btn');
@@ -20,6 +26,9 @@ class PortManager {
         
         console.log('Found port select element:', this.portSelect);
         this.init();
+        
+        // Store the singleton instance
+        PortManager.instance = this;
     }
     
     onConnectionStateChange(state) {
@@ -32,8 +41,16 @@ class PortManager {
             if (state.currentBaudRate && this.baudSelect) {
                 this.baudSelect.value = state.currentBaudRate;
             }
+            // Update connect button to show disconnect
+            if (this.connectButton && !this.isConnecting) {
+                this.connectButton.innerHTML = '<i class="fas fa-unlink"></i> Disconnect';
+            }
             this.updateStatus('Connected', 'success');
         } else {
+            // Update connect button to show connect
+            if (this.connectButton && !this.isConnecting) {
+                this.connectButton.innerHTML = '<i class="fas fa-link"></i> Connect';
+            }
             this.updateStatus('Not Connected', 'error');
         }
     }
@@ -114,21 +131,37 @@ class PortManager {
     }
     
     setupEventListeners() {
+        // Remove any existing event listeners first to prevent duplicates
+        if (this.connectButton) {
+            // Clone the button to remove all event listeners
+            const newButton = this.connectButton.cloneNode(true);
+            this.connectButton.parentNode.replaceChild(newButton, this.connectButton);
+            this.connectButton = newButton;
+            
+            this.connectButton.addEventListener('click', async () => {
+                // Check if we're currently connected
+                if (connectionState.isConnected) {
+                    await this.disconnect();
+                } else {
+                    const selectedPort = this.portSelect.value;
+                    if (selectedPort) {
+                        await this.connect(selectedPort);
+                    }
+                }
+            });
+        }
+        
         this.portSelect.addEventListener('change', async () => {
             const selectedPort = this.portSelect.value;
             if (selectedPort) {
                 await this.testPort(selectedPort);
             }
         });
-        
-        if (this.connectButton) {
-            this.connectButton.addEventListener('click', async () => {
-                const selectedPort = this.portSelect.value;
-                if (selectedPort) {
-                    await this.connect(selectedPort);
-                }
-            });
-        }
+    }
+    
+    // Static method to clear singleton instance
+    static clearInstance() {
+        PortManager.instance = null;
     }
     
     async testPort(port) {
@@ -162,47 +195,94 @@ class PortManager {
         try {
             const baudRate = this.baudSelect ? parseInt(this.baudSelect.value) : 115200;
             
-            // Try connecting up to 3 times
-            for (let attempt = 1; attempt <= 3; attempt++) {
-                console.log(`Connection attempt ${attempt}/3`);
-                
-                try {
-                    const response = await fetch('/api/connection/connect', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ 
-                            port,
-                            baud_rate: baudRate
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    if (data.success) {
-                        // Update global connection state
-                        connectionState.updateState(true, port, baudRate);
-                        this.updateStatus('Connected', 'success');
-                        this.isConnecting = false;
-                        return; // Successfully connected
-                    }
-                } catch (error) {
-                    console.error(`Attempt ${attempt} failed:`, error);
-                    if (attempt < 3) {
-                        await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms before retry
-                    }
-                }
+            // Update UI to show connecting state
+            if (this.connectButton) {
+                this.connectButton.disabled = true;
+                this.connectButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
             }
+            if (this.portSelect) this.portSelect.disabled = true;
+            if (this.baudSelect) this.baudSelect.disabled = true;
             
-            // If we get here, all attempts failed
-            connectionState.updateState(false, null, null);
-            this.updateStatus('Connection failed after 3 attempts', 'error');
+            console.log(`Attempting to connect to ${port} at ${baudRate} baud`);
+            
+            const response = await fetch('/api/connection/connect', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    port,
+                    baud_rate: baudRate
+                })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                // Update global connection state
+                connectionState.updateState(true, port, baudRate);
+                this.updateStatus('Connected', 'success');
+            } else {
+                throw new Error(data.error || 'Connection failed');
+            }
         } catch (error) {
-            console.error('Error in connect process:', error);
+            console.error('Connection error:', error);
             connectionState.updateState(false, null, null);
-            this.updateStatus('Connection error', 'error');
+            this.updateStatus(`Connection failed: ${error.message}`, 'error');
         } finally {
             this.isConnecting = false;
+            // Re-enable UI elements
+            if (this.connectButton) {
+                this.connectButton.disabled = false;
+                this.connectButton.innerHTML = connectionState.isConnected ? 
+                    '<i class="fas fa-unlink"></i> Disconnect' : 
+                    '<i class="fas fa-link"></i> Connect';
+            }
+            if (this.portSelect) this.portSelect.disabled = false;
+            if (this.baudSelect) this.baudSelect.disabled = false;
+        }
+    }
+    
+    async disconnect() {
+        if (this.isConnecting) {
+            console.log('Connection operation in progress, cannot disconnect');
+            return;
+        }
+        
+        this.isConnecting = true;
+        
+        try {
+            // Update UI to show disconnecting state
+            if (this.connectButton) {
+                this.connectButton.disabled = true;
+                this.connectButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Disconnecting...';
+            }
+            
+            console.log('Attempting to disconnect');
+            
+            const response = await fetch('/api/connection/disconnect', {
+                method: 'POST'
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                // Update global connection state
+                connectionState.updateState(false, null, null);
+                this.updateStatus('Disconnected', 'info');
+            } else {
+                throw new Error(data.error || 'Disconnection failed');
+            }
+        } catch (error) {
+            console.error('Disconnection error:', error);
+            this.updateStatus(`Disconnection failed: ${error.message}`, 'error');
+        } finally {
+            this.isConnecting = false;
+            // Re-enable UI elements
+            if (this.connectButton) {
+                this.connectButton.disabled = false;
+                this.connectButton.innerHTML = connectionState.isConnected ? 
+                    '<i class="fas fa-unlink"></i> Disconnect' : 
+                    '<i class="fas fa-link"></i> Connect';
+            }
         }
     }
     
@@ -214,7 +294,9 @@ class PortManager {
     }
 }
 
-// Initialize port manager when page loads
+// Initialize port manager when page loads (singleton pattern)
 document.addEventListener('DOMContentLoaded', () => {
+    // Clear any existing instance first
+    PortManager.clearInstance();
     new PortManager();
 });
