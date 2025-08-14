@@ -670,20 +670,32 @@ class CVMeasurement {
             const status = await response.json();
             console.log('[DEBUG] Status response:', status);
             
-            // Update status text
+            // Update status text with connection info
             if (this.statusText) {
                 let statusStr = `Status: ${status.is_measuring ? 'Running' : 'Stopped'}`;
                 if (status.is_paused) statusStr += ' (Paused)';
+                if (status.device_connected !== undefined) {
+                    statusStr += ` | Device: ${status.device_connected ? 'Connected' : 'Disconnected'}`;
+                }
                 this.statusText.textContent = statusStr;
                 console.log('[DEBUG] Updated status text:', statusStr);
             }
             
-            // Update progress text
+            // Update progress text with timeout info
             if (this.progressText) {
-                const progress = `Cycle: ${status.current_cycle} | Direction: ${status.scan_direction} | ` +
+                let progress = `Cycle: ${status.current_cycle} | Direction: ${status.scan_direction} | ` +
                               `Potential: ${status.current_potential?.toFixed(3)}V | ` +
                               `Points: ${status.data_points_count} | ` +
                               `Time: ${status.elapsed_time?.toFixed(1)}s`;
+                
+                // Add timeout warning if no data received recently
+                if (status.is_measuring && status.time_since_last_data !== null && status.time_since_last_data > 5) {
+                    progress += ` | WARNING: No data for ${status.time_since_last_data?.toFixed(1)}s`;
+                    if (status.time_since_last_data > 8) {
+                        progress += ' (May stop soon)';
+                    }
+                }
+                
                 this.progressText.textContent = progress;
                 console.log('[DEBUG] Updated progress text:', progress);
             }

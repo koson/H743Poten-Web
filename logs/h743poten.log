@@ -36,3 +36,21 @@
  * Running on http://127.0.0.1:8080
  * Running on http://192.168.2.37:8080
 2025-08-15 03:16:08,810 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-15 03:30:17,129 - __main__ - INFO - Starting H743Poten Web Interface
+2025-08-15 03:30:17,130 - __main__ - INFO - Serial port: COM3
+2025-08-15 03:30:17,130 - __main__ - INFO - Baud rate: 115200
+2025-08-15 03:30:17,130 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-15 03:30:17,164 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.2.37:8080
+2025-08-15 03:30:17,165 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-15 03:35:47,018 - __main__ - INFO - Starting H743Poten Web Interface
+2025-08-15 03:35:47,019 - __main__ - INFO - Serial port: COM3
+2025-08-15 03:35:47,019 - __main__ - INFO - Baud rate: 115200
+2025-08-15 03:35:47,019 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-15 03:35:47,049 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.2.37:8080
+2025-08-15 03:35:47,050 - werkzeug - INFO - [33mPress CTRL+C to quit[0m

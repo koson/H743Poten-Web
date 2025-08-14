@@ -85,6 +85,15 @@ class CVMeasurementService:
         # Simulation mode for development/testing
         self.simulation_mode = False
         
+        # Timeout handling
+        self.last_data_time = None
+        self.data_timeout = 10.0  # seconds without data before considering measurement complete
+        
+        # Data validation filters (similar to Desktop version)
+        self.last_validated_potential = None
+        self.last_validated_current = None
+        self.last_potential = None  # For direction inference
+        
     def set_simulation_mode(self, enabled: bool) -> None:
         """Enable or disable simulation mode"""
         self.simulation_mode = enabled
@@ -170,6 +179,7 @@ class CVMeasurementService:
                 self.is_measuring = True
                 self.is_paused = False
                 self.start_time = time.time()
+                self.last_data_time = time.time()  # Initialize last data time
                 self.measurement_thread = threading.Thread(
                     target=self._measurement_worker,
                     daemon=True
@@ -189,8 +199,16 @@ class CVMeasurementService:
             if not self.is_measuring:
                 return False, "No measurement in progress"
             
-            # Send abort command to device using POTEn format
-            result = self.scpi_handler.send_custom_command("POTEn:CV:STOP")
+            # Send abort command to device (like Desktop version)
+            try:
+                if self.scpi_handler and self.scpi_handler.is_connected:
+                    # Send multiple ABORT commands for reliability
+                    for i in range(3):
+                        result = self.scpi_handler.send_custom_command("POTEn:ABORt")
+                        logger.info(f"Sent ABORT command #{i+1}: {result}")
+                        time.sleep(0.1)
+            except Exception as e:
+                logger.warning(f"Failed to send ABORT command: {e}")
             
             # Stop measurement thread
             self.is_measuring = False
@@ -243,6 +261,11 @@ class CVMeasurementService:
     def get_status(self) -> Dict:
         """Get current measurement status"""
         with self.data_lock:
+            # Check for data timeout if measurement is running
+            time_since_last_data = None
+            if self.is_measuring and self.last_data_time:
+                time_since_last_data = time.time() - self.last_data_time
+                
             return {
                 'is_measuring': self.is_measuring,
                 'is_paused': self.is_paused,
@@ -251,6 +274,9 @@ class CVMeasurementService:
                 'current_potential': self.current_potential,
                 'data_points_count': len(self.data_points),
                 'elapsed_time': time.time() - self.start_time if self.start_time else 0,
+                'time_since_last_data': time_since_last_data,
+                'data_timeout': self.data_timeout,
+                'device_connected': getattr(self.scpi_handler, 'is_connected', False),
                 'parameters': {
                     'begin': self.current_params.begin,
                     'upper': self.current_params.upper,
@@ -331,6 +357,23 @@ class CVMeasurementService:
     def _read_measurement_data(self) -> bool:
         """Read measurement data from device"""
         try:
+            # Check for data timeout
+            current_time = time.time()
+            if self.last_data_time and (current_time - self.last_data_time) > self.data_timeout:
+                logger.warning(f"No data received for {self.data_timeout} seconds, stopping measurement")
+                
+                # Try to send stop command to STM32
+                try:
+                    if self.scpi_handler and self.scpi_handler.is_connected:
+                        # Use ABORT command like Desktop version
+                        stop_result = self.scpi_handler.send_custom_command("POTEn:ABORt")
+                        logger.info(f"Sent ABORT command to STM32: {stop_result}")
+                except Exception as e:
+                    logger.warning(f"Failed to send ABORT command to STM32: {e}")
+                
+                self.is_measuring = False
+                return False
+            
             # Check if we should use simulation mode
             if self.simulation_mode or not self.scpi_handler.is_connected:
                 logger.debug("Using simulation mode for data reading")
@@ -364,28 +407,72 @@ class CVMeasurementService:
                     logger.warning(f"STM32 SCPI error: {line}")
                     continue
                 
-                # Parse CV data: "CV, timestamp, potential, current, cycle, direction, ..."
+                # Parse CV data: Expected format from STM32
+                # Old format: "CV, timestamp, potential, current, cycle, direction, ..."
+                # New format (Desktop compatible): "CV, time_ms, voltage, current, current_gain, cycle, adc0_raw, dac1_raw, point_no, dac0_raw"
                 if line.startswith('CV,') or line.startswith('CV '):
                     try:
                         parts = line.split(',')
                         logger.debug(f"Parsed CV data parts: {parts}")
                         
-                        # Expected format: "CV, timestamp, potential, current, cycle, direction, ..."
-                        if len(parts) < 6 or parts[0].strip() != 'CV':
+                        # Desktop format with 10+ fields: "CV, time_ms, voltage, current, current_gain, cycle, adc0_raw, dac1_raw, point_no, dac0_raw"
+                        if len(parts) >= 10 and parts[0].strip() == 'CV':
+                            # Extract data from STM32 Desktop format
+                            time_ms = float(parts[1].strip())           # STM32 timestamp (ms)
+                            potential = float(parts[2].strip())         # Potential (V)
+                            current = float(parts[3].strip())           # Current (A)  
+                            current_gain = float(parts[4].strip())      # Current gain
+                            cycle = int(parts[5].strip())               # Cycle number
+                            adc0_raw = int(parts[6].strip())            # ADC0 raw
+                            dac1_raw = int(parts[7].strip())            # DAC1 raw
+                            point_no = int(parts[8].strip())            # Point number
+                            dac0_raw = int(parts[9].strip())            # DAC0 raw
+                            
+                            # Infer scan direction from voltage progression
+                            if hasattr(self, 'last_potential') and self.last_potential is not None:
+                                voltage_change = potential - self.last_potential
+                                if abs(voltage_change) > 0.001:  # Threshold for direction change
+                                    direction = 'forward' if voltage_change > 0 else 'reverse'
+                                else:
+                                    direction = self.scan_direction  # Keep current direction
+                            else:
+                                direction = 'forward'  # Default for first point
+                            
+                            self.last_potential = potential
+                            
+                        # Fallback to simple format: "CV, timestamp, potential, current, cycle, direction, ..."
+                        elif len(parts) >= 6 and parts[0].strip() == 'CV':
+                            time_ms = float(parts[1].strip())           # STM32 timestamp
+                            potential = float(parts[2].strip())         # Potential (V)
+                            current = float(parts[3].strip())           # Current (A)  
+                            cycle = int(parts[4].strip())               # Cycle number
+                            direction_code = int(parts[5].strip())      # Direction (1=forward, 0=reverse)
+                            direction = 'forward' if direction_code == 1 else 'reverse'
+                        else:
                             logger.warning(f"Invalid CV data format: {line}")
                             continue
-                            
-                        # Extract data from STM32 format
-                        timestamp_ms = int(parts[1].strip())  # STM32 timestamp
-                        potential = float(parts[2].strip())   # Potential (V)
-                        current = float(parts[3].strip())     # Current (A)  
-                        cycle = int(parts[4].strip())         # Cycle number
-                        direction_code = int(parts[5].strip()) # Direction (1=forward, 0=reverse)
                         
-                        # Convert direction code to string
-                        direction = 'forward' if direction_code == 1 else 'reverse'
+                        logger.info(f"STM32 Data: V={potential:.3f}V, I={current:.6f}A, Cycle={cycle}, Dir={direction}, Time={time_ms}ms")
                         
-                        logger.info(f"STM32 Data: V={potential:.3f}V, I={current:.6f}A, Cycle={cycle}, Dir={direction}, Timestamp={timestamp_ms}ms")
+                        # Data validation and filtering (similar to Desktop version)
+                        if hasattr(self, 'last_validated_potential') and self.last_validated_potential is not None:
+                            voltage_jump = abs(potential - self.last_validated_potential)
+                            if voltage_jump > 0.5:  # Filter large voltage jumps
+                                logger.warning(f"Filtered large voltage jump: {voltage_jump:.3f}V")
+                                continue
+                        
+                        if hasattr(self, 'last_validated_current') and self.last_validated_current is not None:
+                            current_jump = abs(current - self.last_validated_current)
+                            if current_jump > 0.001:  # Filter large current spikes (1mA)
+                                logger.warning(f"Filtered large current spike: {current_jump:.6f}A")
+                                continue
+                        
+                        # Update validated values for next comparison
+                        self.last_validated_potential = potential
+                        self.last_validated_current = current
+                        
+                        # Update last data time when we receive valid data
+                        self.last_data_time = time.time()
                         
                         # Update current state
                         self.current_potential = potential
@@ -410,9 +497,10 @@ class CVMeasurementService:
                         logger.warning(f"Failed to parse CV data '{line}': {e}")
                         continue
                 
-                # Check for measurement completion signal
-                elif line.strip() == 'CV_COMPLETE' or 'COMPLETE' in line:
-                    logger.info("CV measurement completed by STM32")
+                # Check for measurement completion signals from STM32
+                elif any(completion_signal in line for completion_signal in 
+                        ['CV Operation Finished', 'CV Operation Complete', 'CV_COMPLETE', 'COMPLETE']):
+                    logger.info(f"CV measurement completed by STM32: {line.strip()}")
                     self.is_measuring = False
                     return False
             
