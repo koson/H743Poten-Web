@@ -461,22 +461,37 @@ class CVMeasurement {
     
     async updateData() {
         try {
+            console.log('[DEBUG] Fetching data from /api/cv/data/stream...');
             const response = await fetch('/api/cv/data/stream');
-            if (!response.ok) return;
+            
+            console.log('[DEBUG] Response status:', response.status, response.statusText);
+            
+            if (!response.ok) {
+                console.warn('[DEBUG] Response not OK, skipping data update');
+                return;
+            }
             
             const result = await response.json();
+            console.log('[DEBUG] Full response from server:', result);
+            
             const dataPoints = result.data_points || [];
+            console.log('[DEBUG] Data points extracted:', dataPoints.length, 'points');
             
             if (dataPoints.length > 0) {
                 // Get only new points since last update
                 const currentDataLength = this.plotData.x.length;
                 
-                console.log(`Total points from server: ${dataPoints.length}, Current local points: ${currentDataLength}`);
+                console.log(`[DEBUG] Total points from server: ${dataPoints.length}, Current local points: ${currentDataLength}`);
+                
+                // Log last few points for inspection
+                if (dataPoints.length > 0) {
+                    console.log('[DEBUG] Latest server data points:', dataPoints.slice(-3));
+                }
                 
                 // If server has more points than we have locally, add the new ones
                 if (dataPoints.length > currentDataLength) {
                     const newPoints = dataPoints.slice(currentDataLength);
-                    console.log(`Adding ${newPoints.length} new data points`);
+                    console.log(`[DEBUG] Adding ${newPoints.length} new data points:`, newPoints);
                     
                     // Add new data points to plot
                     newPoints.forEach((point, index) => {
@@ -485,14 +500,25 @@ class CVMeasurement {
                         this.plotData.cycle.push(point.cycle);
                         this.plotData.direction.push(point.direction);
                         
+                        console.log(`[DEBUG] Added point ${index + 1}/${newPoints.length}:`, {
+                            potential: point.potential,
+                            current: point.current,
+                            cycle: point.cycle,
+                            direction: point.direction
+                        });
+                        
                         // Update plot for each new point
                         this.updatePlotIncremental(point);
                     });
+                } else {
+                    console.log('[DEBUG] No new data points to add');
                 }
+            } else {
+                console.log('[DEBUG] No data points in response');
             }
             
         } catch (error) {
-            console.error('Failed to update data:', error);
+            console.error('[DEBUG] Failed to update data:', error);
         }
     }
     
@@ -545,16 +571,23 @@ class CVMeasurement {
     
     async updateStatus() {
         try {
+            console.log('[DEBUG] Fetching status from /api/cv/status...');
             const response = await fetch('/api/cv/status');
-            if (!response.ok) return;
+            
+            if (!response.ok) {
+                console.warn('[DEBUG] Status response not OK:', response.status);
+                return;
+            }
             
             const status = await response.json();
+            console.log('[DEBUG] Status response:', status);
             
             // Update status text
             if (this.statusText) {
                 let statusStr = `Status: ${status.is_measuring ? 'Running' : 'Stopped'}`;
                 if (status.is_paused) statusStr += ' (Paused)';
                 this.statusText.textContent = statusStr;
+                console.log('[DEBUG] Updated status text:', statusStr);
             }
             
             // Update progress text
@@ -564,22 +597,25 @@ class CVMeasurement {
                               `Points: ${status.data_points_count} | ` +
                               `Time: ${status.elapsed_time?.toFixed(1)}s`;
                 this.progressText.textContent = progress;
+                console.log('[DEBUG] Updated progress text:', progress);
             }
             
             // Update UI state if status changed
             if (this.isRunning !== status.is_measuring || this.isPaused !== status.is_paused) {
+                console.log('[DEBUG] Status changed - updating UI state');
                 this.isRunning = status.is_measuring;
                 this.isPaused = status.is_paused;
                 this.updateUIState();
                 
                 // Stop data updates if measurement ended
                 if (!this.isRunning) {
+                    console.log('[DEBUG] Measurement ended - stopping data updates');
                     this.stopDataUpdates();
                 }
             }
             
         } catch (error) {
-            console.error('Failed to update status:', error);
+            console.error('[DEBUG] Failed to update status:', error);
         }
     }
     

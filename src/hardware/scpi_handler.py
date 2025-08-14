@@ -27,6 +27,7 @@ class SCPIHandler:
         self.baud_rate = baud_rate or Config.BAUD_RATE
         self.serial = None
         self.is_connected = False
+        self.data_buffer = []  # Buffer for incoming CV data
 
     def connect(self):
         """Connect to the device"""
@@ -147,3 +148,44 @@ class SCPIHandler:
         if result['success']:
             return result['response']
         raise Exception(result['error'])
+    
+    def get_buffered_data(self):
+        """Get any buffered data that came from STM32 automatically"""
+        try:
+            if not self.is_connected or not self.serial or not self.serial.is_open:
+                return None
+                
+            # Check if there's any data waiting in the serial buffer
+            if self.serial.in_waiting > 0:
+                # Read all available data
+                raw_data = self.serial.read_all()
+                if raw_data:
+                    incoming_data = raw_data.decode('utf-8', errors='ignore')
+                    if incoming_data.strip():
+                        logger.debug(f"Received buffered data: '{incoming_data.strip()}'")
+                        return incoming_data
+                    
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error reading buffered data: {e}")
+            return None
+    
+    def clear_buffer(self):
+        """Clear the serial input buffer"""
+        try:
+            if self.serial and self.serial.is_open:
+                self.serial.reset_input_buffer()
+                self.data_buffer.clear()
+        except Exception as e:
+            logger.error(f"Error clearing buffer: {e}")
+    
+    def has_data_available(self):
+        """Check if there's data available in the buffer"""
+        try:
+            if self.serial and self.serial.is_open:
+                return self.serial.in_waiting > 0
+            return False
+        except Exception as e:
+            logger.error(f"Error checking data availability: {e}")
+            return False

@@ -321,7 +321,7 @@ class CVMeasurementService:
                         except Exception as e:
                             logger.error(f"Streaming callback error: {e}")
                 
-                time.sleep(0.05)  # 20 Hz sampling rate
+                time.sleep(0.1)  # 10 Hz sampling rate to avoid queue overflow
                 
         except Exception as e:
             logger.error(f"CV measurement worker error: {e}")
@@ -333,65 +333,90 @@ class CVMeasurementService:
         try:
             # Check if we should use simulation mode
             if self.simulation_mode or not self.scpi_handler.is_connected:
+                logger.debug("Using simulation mode for data reading")
                 return self._simulate_measurement_data()
             
-            # Read actual data from STM32 via SCPI handler
-            # Use POTEn command format to query current measurement data
-            # Command: POTEn:CV:DATA? 
-            # Expected response: "potential,current,cycle,direction[,COMPLETE]" or "NO_DATA"
-            result = self.scpi_handler.send_custom_command("POTEn:CV:DATA?")
+            # For STM32 CV measurements, we don't poll for data
+            # STM32 sends data automatically after POTEn:CV:Start:ALL command
+            # We just need to listen for incoming data from the SCPI handler
             
-            if not result['success']:
-                logger.warning(f"Failed to read measurement data: {result.get('message', 'Unknown error')}")
-                # Fall back to simulation if device communication fails
-                logger.info("Falling back to simulation mode due to communication error")
-                return self._simulate_measurement_data()
-                
-            response = result.get('response', '').strip()
-            if not response or response == 'NO_DATA':
-                # No new data available yet, continue measurement
+            # Check if there's any incoming data from STM32
+            # The SCPI handler should buffer incoming data
+            incoming_data = getattr(self.scpi_handler, 'get_buffered_data', lambda: None)()
+            
+            if not incoming_data:
+                # No new data available, just continue
                 return True
                 
-            # Parse response: "potential,current,cycle,direction,status"
-            try:
-                parts = response.split(',')
-                if len(parts) < 4:
-                    logger.warning(f"Invalid data format from device: {response}")
-                    return True
+            logger.debug(f"STM32 incoming data: '{incoming_data}'")
+            
+            # Handle multiple lines of data if received
+            lines = incoming_data.strip().split('\n')
+            data_processed = False
+            
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
                     
-                potential = float(parts[0])
-                current = float(parts[1])
-                cycle = int(parts[2])
-                direction = parts[3].strip()
+                # Handle SCPI error responses
+                if line.startswith('**ERROR'):
+                    logger.warning(f"STM32 SCPI error: {line}")
+                    continue
                 
-                # Check if measurement is complete
-                if len(parts) >= 5 and parts[4].strip() == 'COMPLETE':
-                    logger.info("CV measurement completed by device")
+                # Parse CV data: "CV, timestamp, potential, current, cycle, direction, ..."
+                if line.startswith('CV,') or line.startswith('CV '):
+                    try:
+                        parts = line.split(',')
+                        logger.debug(f"Parsed CV data parts: {parts}")
+                        
+                        # Expected format: "CV, timestamp, potential, current, cycle, direction, ..."
+                        if len(parts) < 6 or parts[0].strip() != 'CV':
+                            logger.warning(f"Invalid CV data format: {line}")
+                            continue
+                            
+                        # Extract data from STM32 format
+                        timestamp_ms = int(parts[1].strip())  # STM32 timestamp
+                        potential = float(parts[2].strip())   # Potential (V)
+                        current = float(parts[3].strip())     # Current (A)  
+                        cycle = int(parts[4].strip())         # Cycle number
+                        direction_code = int(parts[5].strip()) # Direction (1=forward, 0=reverse)
+                        
+                        # Convert direction code to string
+                        direction = 'forward' if direction_code == 1 else 'reverse'
+                        
+                        logger.info(f"STM32 Data: V={potential:.3f}V, I={current:.6f}A, Cycle={cycle}, Dir={direction}, Timestamp={timestamp_ms}ms")
+                        
+                        # Update current state
+                        self.current_potential = potential
+                        self.current_cycle = cycle
+                        self.scan_direction = direction
+                        
+                        # Add data point
+                        with self.data_lock:
+                            data_point = CVDataPoint(
+                                timestamp=time.time(),  # Use system time for consistency
+                                potential=potential,
+                                current=current,
+                                cycle=cycle,
+                                direction=direction
+                            )
+                            self.data_points.append(data_point)
+                            logger.debug(f"Added data point #{len(self.data_points)}: {data_point}")
+                            
+                        data_processed = True
+                        
+                    except (ValueError, IndexError) as e:
+                        logger.warning(f"Failed to parse CV data '{line}': {e}")
+                        continue
+                
+                # Check for measurement completion signal
+                elif line.strip() == 'CV_COMPLETE' or 'COMPLETE' in line:
+                    logger.info("CV measurement completed by STM32")
                     self.is_measuring = False
                     return False
-                
-                # Update current state
-                self.current_potential = potential
-                self.current_cycle = cycle
-                self.scan_direction = direction
-                
-                # Add data point
-                with self.data_lock:
-                    data_point = CVDataPoint(
-                        timestamp=time.time(),
-                        potential=potential,
-                        current=current,
-                        cycle=cycle,
-                        direction=direction
-                    )
-                    self.data_points.append(data_point)
-                    
-                logger.debug(f"Data point: V={potential:.3f}, I={current:.6f}, Cycle={cycle}, Dir={direction}")
-                return True
-                
-            except (ValueError, IndexError) as e:
-                logger.warning(f"Failed to parse measurement data '{response}': {e}")
-                return True
+            
+            return True
             
         except Exception as e:
             logger.error(f"Failed to read measurement data: {e}")

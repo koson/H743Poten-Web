@@ -18,9 +18,9 @@ sys.path.insert(0, current_dir)
 sys.path.insert(0, src_dir)
 sys.path.insert(0, parent_dir)
 
-# Set up logging
+# Set up logging with DEBUG level for troubleshooting
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 

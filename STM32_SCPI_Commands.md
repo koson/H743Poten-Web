@@ -21,28 +21,31 @@ POTEn:CV:Start:ALL 0.0,1.0,-1.0,0.1,1
 
 ---
 
-### 2. Query CV Data 
-**Command:** `POTEn:CV:DATA?`
+### 2. CV Data Streaming (Automatic)
+**After Start Command:** STM32 automatically sends CV data without polling
 
-**Response Format:**
-- Normal data: `<potential>,<current>,<cycle>,<direction>`
-- No data available: `NO_DATA`
-- Measurement complete: `<potential>,<current>,<cycle>,<direction>,COMPLETE`
+**Data Format:**
+- Continuous stream: `CV, <timestamp>, <potential>, <current>, <cycle>, <direction>, <extra_fields>`
+- Completion signal: `CV_COMPLETE` or line containing `COMPLETE`
+- Error responses: `**ERROR: -113, "Undefined header"` or `**ERROR: -350, "Queue overflow"`
 
 **Examples:**
 ```
-0.123,-0.000456,1,forward
--0.567,0.000234,2,reverse
-NO_DATA
-0.000,-0.000123,3,forward,COMPLETE
+CV, 244, 0.0001, -1.0842e-09, 3, 1, 2050, 2051, 4, 2050
+CV, 345, 0.1234, -2.3456e-09, 3, 1, 2051, 2052, 5, 2051
+CV_COMPLETE
 ```
 
 **Data Fields:**
+- `CV`: Command identifier
+- `timestamp`: STM32 timestamp in milliseconds
 - `potential`: Current applied potential (V)
 - `current`: Measured current (A)
 - `cycle`: Current cycle number (1-based)
-- `direction`: Scan direction ("forward" or "reverse")
-- `COMPLETE`: Optional status indicating measurement completion
+- `direction`: Direction code (1=forward, 0=reverse)
+- `extra_fields`: Additional STM32-specific data (ignored by web app)
+
+**No Polling Required:** Web application listens passively for incoming data
 
 ---
 
@@ -60,11 +63,12 @@ Each CV cycle follows this pattern:
 1. **Forward scan:** Begin → Upper → Lower
 2. **Reverse scan:** Lower → Begin
 
-### Data Streaming
-- Web application queries `POTEn:CV:DATA?` every 50ms (20 Hz)
-- STM32 should buffer data points and return the latest available data
-- Return `NO_DATA` when no new data is available
-- Return `COMPLETE` status when all cycles are finished
+### Data Streaming Protocol
+- **Start:** Send `POTEn:CV:Start:ALL` command once
+- **Stream:** STM32 automatically sends data as it's collected
+- **Listen:** Web application reads buffered serial data continuously
+- **Complete:** STM32 sends completion signal when finished
+- **No Polling:** Do NOT send `POTEn:CV:DATA?` queries
 
 ### Error Handling
 - Invalid commands should return descriptive error messages
