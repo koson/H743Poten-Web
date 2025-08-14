@@ -10,6 +10,29 @@ logger = logging.getLogger(__name__)
 
 cv_bp = Blueprint('cv', __name__, url_prefix='/api/cv')
 
+@cv_bp.route('/simulation', methods=['POST'])
+def set_simulation_mode():
+    """Enable or disable simulation mode"""
+    try:
+        data = request.get_json()
+        enabled = data.get('enabled', False)
+        
+        # Get CV service from app config
+        cv_service = current_app.config.get('cv_service')
+        if not cv_service:
+            return jsonify({'success': False, 'error': 'CV service not available'}), 500
+        
+        cv_service.set_simulation_mode(enabled)
+        return jsonify({
+            'success': True,
+            'message': f"Simulation mode {'enabled' if enabled else 'disabled'}",
+            'simulation_mode': enabled
+        })
+        
+    except Exception as e:
+        logger.error(f"Failed to set simulation mode: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @cv_bp.route('/setup', methods=['POST'])
 def setup_cv_measurement():
     """Setup CV measurement parameters"""

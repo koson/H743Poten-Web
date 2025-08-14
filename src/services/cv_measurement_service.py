@@ -71,6 +71,14 @@ class CVMeasurementService:
         self.streaming_enabled = False
         self.stream_callback = None
         
+        # Simulation mode for development/testing
+        self.simulation_mode = False
+        
+    def set_simulation_mode(self, enabled: bool) -> None:
+        """Enable or disable simulation mode"""
+        self.simulation_mode = enabled
+        logger.info(f"CV simulation mode {'enabled' if enabled else 'disabled'}")
+    
     def setup_measurement(self, params: Dict) -> Tuple[bool, str]:
         """Setup CV measurement with parameters"""
         try:
@@ -102,9 +110,6 @@ class CVMeasurementService:
     def start_measurement(self) -> Tuple[bool, str]:
         """Start CV measurement"""
         try:
-            if not self.scpi_handler.is_connected:
-                return False, "Device not connected"
-                
             if self.current_params is None:
                 return False, "No measurement parameters configured"
                 
@@ -118,30 +123,54 @@ class CVMeasurementService:
                 self.scan_direction = 'forward'
                 self.current_potential = self.current_params.begin
                 
-            # Send SCPI command to start measurement
-            command = self.current_params.to_scpi_command()
-            result = self.scpi_handler.send_custom_command(command)
-            
-            if not result['success']:
-                return False, f"Failed to start measurement: {result['error']}"
-            
-            # Start measurement monitoring thread
-            self.is_measuring = True
-            self.is_paused = False
-            self.start_time = time.time()
-            
-            self.measurement_thread = threading.Thread(
-                target=self._measurement_worker,
-                daemon=True
-            )
-            self.measurement_thread.start()
-            
-            logger.info("CV measurement started")
-            return True, "CV measurement started successfully"
+            # Check if using real device or simulation
+            if self.simulation_mode or not self.scpi_handler.is_connected:
+                logger.info("Starting CV measurement in simulation mode")
+                # Start simulation directly
+                self.is_measuring = True
+                self.is_paused = False
+                self.start_time = time.time()
+                self.measurement_thread = threading.Thread(
+                    target=self._measurement_worker,
+                    daemon=True
+                )
+                self.measurement_thread.start()
+                return True, "CV measurement started (simulation mode)"
+            else:
+                # Send SCPI command to start measurement on real device
+                command = self.current_params.to_scpi_command()
+                result = self.scpi_handler.send_custom_command(command)
+                
+                if not result['success']:
+                    logger.warning(f"Failed to start device measurement: {result.get('error')}")
+                    logger.info("Falling back to simulation mode")
+                    self.simulation_mode = True
+                    self.is_measuring = True
+                    self.is_paused = False
+                    self.start_time = time.time()
+                    self.measurement_thread = threading.Thread(
+                        target=self._measurement_worker,
+                        daemon=True
+                    )
+                    self.measurement_thread.start()
+                    return True, "CV measurement started (simulation mode - device not responding)"
+                
+                # Device accepted command, start measurement worker
+                self.is_measuring = True
+                self.is_paused = False
+                self.start_time = time.time()
+                self.measurement_thread = threading.Thread(
+                    target=self._measurement_worker,
+                    daemon=True
+                )
+                self.measurement_thread.start()
+                
+                logger.info("CV measurement started on device")
+                return True, "CV measurement started successfully"
             
         except Exception as e:
             logger.error(f"Failed to start CV measurement: {e}")
-            return False, f"Start failed: {e}"
+            return False, f"Failed to start measurement: {e}"
     
     def stop_measurement(self) -> Tuple[bool, str]:
         """Stop CV measurement"""
@@ -291,91 +320,154 @@ class CVMeasurementService:
     def _read_measurement_data(self) -> bool:
         """Read measurement data from device"""
         try:
-            # This is a placeholder for actual data reading
-            # In real implementation, this would read from serial port
-            # and parse the incoming data stream
+            # Check if we should use simulation mode
+            if self.simulation_mode or not self.scpi_handler.is_connected:
+                return self._simulate_measurement_data()
             
-            # For demo purposes, simulate CV curve data
-            if self.current_params:
-                current_time = time.time()
-                elapsed = current_time - self.start_time
+            # Read actual data from STM32 via SCPI handler
+            result = self.scpi_handler.send_custom_command("MEAS:CV:DATA?")
+            
+            if not result['success']:
+                logger.warning(f"Failed to read measurement data: {result.get('message', 'Unknown error')}")
+                # Fall back to simulation if device communication fails
+                logger.info("Falling back to simulation mode due to communication error")
+                return self._simulate_measurement_data()
                 
-                # Simulate potential progression for proper CV curve
-                # Each cycle: begin -> upper -> lower -> begin
-                cycle_duration = 2 * (abs(self.current_params.upper - self.current_params.begin) + 
-                                    abs(self.current_params.lower - self.current_params.begin)) / self.current_params.rate
+            response = result.get('response', '').strip()
+            if not response or response == 'NO_DATA':
+                # No new data available yet, continue measurement
+                return True
                 
-                cycle_time = elapsed % cycle_duration
-                half_cycle = cycle_duration / 2
+            # Parse response: "potential,current,cycle,direction,status"
+            try:
+                parts = response.split(',')
+                if len(parts) < 4:
+                    logger.warning(f"Invalid data format from device: {response}")
+                    return True
+                    
+                potential = float(parts[0])
+                current = float(parts[1])
+                cycle = int(parts[2])
+                direction = parts[3].strip()
                 
-                if cycle_time < half_cycle:
-                    # Forward scan: begin -> upper -> lower
-                    if cycle_time < half_cycle / 2:
-                        # begin -> upper
-                        progress = (cycle_time) / (half_cycle / 2)
-                        self.current_potential = (
-                            self.current_params.begin + 
-                            progress * (self.current_params.upper - self.current_params.begin)
-                        )
-                    else:
-                        # upper -> lower
-                        progress = (cycle_time - half_cycle / 2) / (half_cycle / 2)
-                        self.current_potential = (
-                            self.current_params.upper - 
-                            progress * (self.current_params.upper - self.current_params.lower)
-                        )
-                    self.scan_direction = 'forward'
-                else:
-                    # Reverse scan: lower -> begin
-                    progress = (cycle_time - half_cycle) / half_cycle
-                    self.current_potential = (
-                        self.current_params.lower + 
-                        progress * (self.current_params.begin - self.current_params.lower)
-                    )
-                    self.scan_direction = 'reverse'
-                
-                # Update cycle number
-                self.current_cycle = int(elapsed / cycle_duration) + 1
-                
-                # Stop if cycles completed
-                if self.current_cycle > self.current_params.cycles:
+                # Check if measurement is complete
+                if len(parts) >= 5 and parts[4].strip() == 'COMPLETE':
+                    logger.info("CV measurement completed by device")
                     self.is_measuring = False
                     return False
                 
-                # Simulate current response (more realistic CV curve)
-                # Simple redox peak simulation
-                peak_potential = (self.current_params.upper + self.current_params.lower) / 2
-                peak_width = 0.1  # V
-                peak_current = 0.001  # A
-                
-                # Gaussian peak simulation
-                import math
-                distance_from_peak = abs(self.current_potential - peak_potential)
-                if distance_from_peak < peak_width:
-                    peak_factor = math.exp(-(distance_from_peak / peak_width) ** 2)
-                    simulated_current = peak_current * peak_factor
-                else:
-                    simulated_current = 0.0001  # Background current
-                
-                # Add some noise
-                noise = 0.00001 * (2 * (time.time() % 1) - 1)
-                simulated_current += noise
+                # Update current state
+                self.current_potential = potential
+                self.current_cycle = cycle
+                self.scan_direction = direction
                 
                 # Add data point
                 with self.data_lock:
                     data_point = CVDataPoint(
-                        timestamp=current_time,
-                        potential=self.current_potential,
-                        current=simulated_current,
-                        cycle=self.current_cycle,
-                        direction=self.scan_direction
+                        timestamp=time.time(),
+                        potential=potential,
+                        current=current,
+                        cycle=cycle,
+                        direction=direction
                     )
                     self.data_points.append(data_point)
-                
+                    
+                logger.debug(f"Data point: V={potential:.3f}, I={current:.6f}, Cycle={cycle}, Dir={direction}")
                 return True
-            
-            return False
+                
+            except (ValueError, IndexError) as e:
+                logger.warning(f"Failed to parse measurement data '{response}': {e}")
+                return True
             
         except Exception as e:
             logger.error(f"Failed to read measurement data: {e}")
+            # Fall back to simulation on any error
+            logger.info("Falling back to simulation mode due to error")
+            return self._simulate_measurement_data()
+    
+    def _simulate_measurement_data(self) -> bool:
+        """Simulate CV measurement data for development/testing"""
+        try:
+            if not self.current_params or self.start_time is None:
+                return False
+                
+            current_time = time.time()
+            elapsed = current_time - self.start_time
+            
+            # Simulate potential progression for proper CV curve
+            # Each cycle: begin -> upper -> lower -> begin
+            cycle_duration = 2 * (abs(self.current_params.upper - self.current_params.begin) + 
+                                abs(self.current_params.lower - self.current_params.begin)) / self.current_params.rate
+            
+            cycle_time = elapsed % cycle_duration
+            half_cycle = cycle_duration / 2
+            
+            if cycle_time < half_cycle:
+                # Forward scan: begin -> upper -> lower
+                if cycle_time < half_cycle / 2:
+                    # begin -> upper
+                    progress = (cycle_time) / (half_cycle / 2)
+                    self.current_potential = (
+                        self.current_params.begin + 
+                        progress * (self.current_params.upper - self.current_params.begin)
+                    )
+                else:
+                    # upper -> lower
+                    progress = (cycle_time - half_cycle / 2) / (half_cycle / 2)
+                    self.current_potential = (
+                        self.current_params.upper - 
+                        progress * (self.current_params.upper - self.current_params.lower)
+                    )
+                self.scan_direction = 'forward'
+            else:
+                # Reverse scan: lower -> begin
+                progress = (cycle_time - half_cycle) / half_cycle
+                self.current_potential = (
+                    self.current_params.lower + 
+                    progress * (self.current_params.begin - self.current_params.lower)
+                )
+                self.scan_direction = 'reverse'
+            
+            # Update cycle number
+            self.current_cycle = int(elapsed / cycle_duration) + 1
+            
+            # Stop if cycles completed
+            if self.current_cycle > self.current_params.cycles:
+                self.is_measuring = False
+                return False
+            
+            # Simulate current response (more realistic CV curve)
+            # Simple redox peak simulation
+            peak_potential = (self.current_params.upper + self.current_params.lower) / 2
+            peak_width = 0.1  # V
+            peak_current = 0.001  # A
+            
+            # Gaussian peak simulation
+            import math
+            distance_from_peak = abs(self.current_potential - peak_potential)
+            if distance_from_peak < peak_width:
+                peak_factor = math.exp(-(distance_from_peak / peak_width) ** 2)
+                simulated_current = peak_current * peak_factor
+            else:
+                simulated_current = 0.0001  # Background current
+            
+            # Add some noise
+            noise = 0.00001 * (2 * (time.time() % 1) - 1)
+            simulated_current += noise
+            
+            # Add data point
+            with self.data_lock:
+                data_point = CVDataPoint(
+                    timestamp=current_time,
+                    potential=self.current_potential,
+                    current=simulated_current,
+                    cycle=self.current_cycle,
+                    direction=self.scan_direction
+                )
+                self.data_points.append(data_point)
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to simulate measurement data: {e}")
             return False

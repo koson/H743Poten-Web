@@ -31,13 +31,15 @@ class CVMeasurement {
         this.lowerInput = document.getElementById('cv-lower');
         this.rateInput = document.getElementById('cv-rate');
         this.cyclesInput = document.getElementById('cv-cycles');
+        this.simulationToggle = document.getElementById('cv-simulation-mode');
         
         console.log('CV inputs found:', {
             begin: !!this.beginInput,
             upper: !!this.upperInput,
             lower: !!this.lowerInput,
             rate: !!this.rateInput,
-            cycles: !!this.cyclesInput
+            cycles: !!this.cyclesInput,
+            simulation: !!this.simulationToggle
         });
         
         // Get CV control buttons
@@ -73,6 +75,13 @@ class CVMeasurement {
                     });
                 }
             });
+        
+        // Add simulation mode toggle event
+        if (this.simulationToggle) {
+            this.simulationToggle.addEventListener('change', () => {
+                this.setSimulationMode(this.simulationToggle.checked);
+            });
+        }
         
         // Add debug button for manual enable (temporary)
         const debugBtn = document.createElement('button');
@@ -760,3 +769,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// Add global method to CVMeasurement prototype for simulation mode
+CVMeasurement.prototype.setSimulationMode = async function(enabled) {
+    console.log(`Setting simulation mode: ${enabled}`);
+    
+    try {
+        const response = await fetch('/api/cv/simulation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ enabled: enabled })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('Simulation mode changed:', result.message);
+            this.showMessage(result.message, 'info');
+            
+            // Update UI to reflect simulation mode
+            const label = this.simulationToggle?.nextElementSibling;
+            if (label) {
+                const icon = label.querySelector('i');
+                if (icon) {
+                    icon.className = enabled ? 'fas fa-flask text-warning' : 'fas fa-flask';
+                }
+            }
+        } else {
+            console.error('Failed to set simulation mode:', result.error);
+            this.showMessage(`Error: ${result.error}`, 'error');
+            
+            // Revert toggle state
+            if (this.simulationToggle) {
+                this.simulationToggle.checked = !enabled;
+            }
+        }
+    } catch (error) {
+        console.error('Network error setting simulation mode:', error);
+        this.showMessage('Network error: Could not change simulation mode', 'error');
+        
+        // Revert toggle state
+        if (this.simulationToggle) {
+            this.simulationToggle.checked = !enabled;
+        }
+    }
+};
