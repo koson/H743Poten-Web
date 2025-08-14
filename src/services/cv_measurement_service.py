@@ -96,8 +96,8 @@ class CVMeasurementService:
             # Create CV parameters object
             cv_params = CVParameters(
                 begin=float(params.get('begin', 0.0)),
-                upper=float(params.get('upper', 1.0)), 
-                lower=float(params.get('lower', -1.0)),
+                upper=float(params.get('upper', 0.7)), 
+                lower=float(params.get('lower', -0.4)),
                 rate=float(params.get('rate', 0.1)),
                 cycles=int(params.get('cycles', 1))
             )
