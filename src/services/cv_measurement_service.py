@@ -300,38 +300,66 @@ class CVMeasurementService:
                 current_time = time.time()
                 elapsed = current_time - self.start_time
                 
-                # Simulate potential progression
-                period = 2 * abs(self.current_params.upper - self.current_params.lower) / self.current_params.rate
-                cycle_time = elapsed % period
+                # Simulate potential progression for proper CV curve
+                # Each cycle: begin -> upper -> lower -> begin
+                cycle_duration = 2 * (abs(self.current_params.upper - self.current_params.begin) + 
+                                    abs(self.current_params.lower - self.current_params.begin)) / self.current_params.rate
                 
-                if cycle_time < period / 2:
-                    # Forward scan
-                    progress = (2 * cycle_time) / period
-                    self.current_potential = (
-                        self.current_params.begin + 
-                        progress * (self.current_params.upper - self.current_params.begin)
-                    )
+                cycle_time = elapsed % cycle_duration
+                half_cycle = cycle_duration / 2
+                
+                if cycle_time < half_cycle:
+                    # Forward scan: begin -> upper -> lower
+                    if cycle_time < half_cycle / 2:
+                        # begin -> upper
+                        progress = (cycle_time) / (half_cycle / 2)
+                        self.current_potential = (
+                            self.current_params.begin + 
+                            progress * (self.current_params.upper - self.current_params.begin)
+                        )
+                    else:
+                        # upper -> lower
+                        progress = (cycle_time - half_cycle / 2) / (half_cycle / 2)
+                        self.current_potential = (
+                            self.current_params.upper - 
+                            progress * (self.current_params.upper - self.current_params.lower)
+                        )
                     self.scan_direction = 'forward'
                 else:
-                    # Reverse scan
-                    progress = (2 * (cycle_time - period / 2)) / period
+                    # Reverse scan: lower -> begin
+                    progress = (cycle_time - half_cycle) / half_cycle
                     self.current_potential = (
-                        self.current_params.upper - 
-                        progress * (self.current_params.upper - self.current_params.lower)
+                        self.current_params.lower + 
+                        progress * (self.current_params.begin - self.current_params.lower)
                     )
                     self.scan_direction = 'reverse'
                 
                 # Update cycle number
-                self.current_cycle = int(elapsed / period) + 1
+                self.current_cycle = int(elapsed / cycle_duration) + 1
                 
                 # Stop if cycles completed
                 if self.current_cycle > self.current_params.cycles:
                     self.is_measuring = False
                     return False
                 
-                # Simulate current response (dummy data)
-                # In real implementation, this would come from the device
-                simulated_current = 0.001 * self.current_potential * (1 + 0.1 * (2 * time.time() % 1 - 1))
+                # Simulate current response (more realistic CV curve)
+                # Simple redox peak simulation
+                peak_potential = (self.current_params.upper + self.current_params.lower) / 2
+                peak_width = 0.1  # V
+                peak_current = 0.001  # A
+                
+                # Gaussian peak simulation
+                import math
+                distance_from_peak = abs(self.current_potential - peak_potential)
+                if distance_from_peak < peak_width:
+                    peak_factor = math.exp(-(distance_from_peak / peak_width) ** 2)
+                    simulated_current = peak_current * peak_factor
+                else:
+                    simulated_current = 0.0001  # Background current
+                
+                # Add some noise
+                noise = 0.00001 * (2 * (time.time() % 1) - 1)
+                simulated_current += noise
                 
                 # Add data point
                 with self.data_lock:

@@ -210,7 +210,17 @@ def validate_cv_parameters():
         params = data.get('params', {})
         
         # Import CV parameters for validation
-        from ..services.cv_measurement_service import CVParameters
+        import sys
+        import os
+        
+        # Add the parent directory to the Python path
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+        
+        try:
+            from services.cv_measurement_service import CVParameters
+        except ImportError:
+            # Fallback import
+            from ..services.cv_measurement_service import CVParameters
         
         try:
             cv_params = CVParameters(
@@ -238,4 +248,8 @@ def validate_cv_parameters():
         
     except Exception as e:
         logger.error(f"Failed to validate CV parameters: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({
+            'valid': False, 
+            'message': f'Validation error: {e}',
+            'scpi_command': None
+        })
