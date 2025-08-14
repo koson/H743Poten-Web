@@ -240,5 +240,6 @@
 <!-- Include Plotly.js -->
 <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
 <!-- Include custom JS -->
+<script src="{{ url_for('static', filename='js/port_manager.js') }}"></script>
 <script src="{{ url_for('static', filename='js/measurement.js') }}"></script>
-{% endblock %}
+{% endblock scripts %}

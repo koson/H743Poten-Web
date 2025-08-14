@@ -19,17 +19,17 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 try:
     # Try relative imports first (when run as module)
     from .config.settings import Config
-    from .hardware.scpi_handler import SCPIHandler
+    from .hardware import SCPIHandler
     from .services.measurement_service import MeasurementService
     from .services.data_service import DataService
-    from .routes.ai_routes import ai_bp
+    from .routes import ai_bp, port_bp
 except ImportError:
     # Fall back to absolute imports (when run directly)
     from config.settings import Config
-    from hardware.scpi_handler import SCPIHandler
+    from hardware import SCPIHandler
     from services.measurement_service import MeasurementService
     from services.data_service import DataService
-    from routes.ai_routes import ai_bp
+    from routes import ai_bp, port_bp
 
 logger = logging.getLogger(__name__)
 
@@ -58,13 +58,14 @@ def create_app():
     measurement_service = MeasurementService(scpi_handler)
     data_service = DataService()
     
-    # Store services in app context
-    app.scpi_handler = scpi_handler
-    app.measurement_service = measurement_service
-    app.data_service = data_service
+    # Store services in application context
+    app.config['scpi_handler'] = scpi_handler
+    app.config['measurement_service'] = measurement_service
+    app.config['data_service'] = data_service
     
-    # Register AI Blueprint
+    # Register blueprints
     app.register_blueprint(ai_bp)
+    app.register_blueprint(port_bp)
     
     @app.route('/debug')
     def debug():
@@ -115,16 +116,25 @@ def create_app():
     def connection_status():
         """Get connection status"""
         return jsonify({
-            'connected': app.scpi_handler.is_connected,
-            'port': app.scpi_handler.port,
-            'baud_rate': app.scpi_handler.baud_rate
+            'connected': app.config['scpi_handler'].is_connected,
+            'port': app.config['scpi_handler'].port,
+            'baud_rate': app.config['scpi_handler'].baud_rate
         })
     
     @app.route('/api/connection/connect', methods=['POST'])
     def connect_device():
         """Connect to device"""
         try:
-            success = app.scpi_handler.connect()
+            data = request.get_json()
+            port = data.get('port')
+            baud_rate = data.get('baud_rate', 115200)  # Default to 115200 if not provided
+            
+            if not port:
+                return jsonify({'success': False, 'error': 'Port is required'}), 400
+
+            app.config['scpi_handler'].port = port
+            app.config['scpi_handler'].baud_rate = baud_rate
+            success = app.config['scpi_handler'].connect()
             return jsonify({'success': success})
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500
@@ -133,7 +143,7 @@ def create_app():
     def disconnect_device():
         """Disconnect from device"""
         try:
-            app.scpi_handler.disconnect()
+            app.config['scpi_handler'].disconnect()
             return jsonify({'success': True})
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500
@@ -154,7 +164,7 @@ def create_app():
             mode = data.get('mode')
             params = data.get('params', {})
             
-            success = app.measurement_service.setup_measurement(mode, params)
+            success = app.config['measurement_service'].setup_measurement(mode, params)
             return jsonify({'success': success})
             
         except Exception as e:
@@ -165,7 +175,7 @@ def create_app():
     def start_measurement():
         """Start measurement"""
         try:
-            success = app.measurement_service.start_measurement()
+            success = app.config['measurement_service'].start_measurement()
             return jsonify({'success': success})
         except Exception as e:
             logger.error(f"Failed to start measurement: {e}")
@@ -175,7 +185,7 @@ def create_app():
     def stop_measurement():
         """Stop measurement"""
         try:
-            success = app.measurement_service.stop_measurement()
+            success = app.config['measurement_service'].stop_measurement()
             return jsonify({'success': success})
         except Exception as e:
             logger.error(f"Failed to stop measurement: {e}")
@@ -185,7 +195,7 @@ def create_app():
     def measurement_status():
         """Get measurement status"""
         try:
-            status = app.measurement_service.get_status()
+            status = app.config['measurement_service'].get_status()
             return jsonify(status)
         except Exception as e:
             logger.error(f"Failed to get measurement status: {e}")
@@ -196,10 +206,10 @@ def create_app():
         """Get current measurement data"""
         try:
             # Get data from measurement service and update data service
-            measurement_data = app.measurement_service.get_measurement_data()
-            app.data_service.update_measurement_data(measurement_data)
+            measurement_data = app.config['measurement_service'].get_measurement_data()
+            app.config['data_service'].update_measurement_data(measurement_data)
             
-            data = app.data_service.get_current_data()
+            data = app.config['data_service'].get_current_data()
             return jsonify(data)
         except Exception as e:
             logger.error(f"Failed to get current data: {e}")
@@ -210,7 +220,7 @@ def create_app():
         """Export measurement data as CSV"""
         try:
             # Get current data
-            data = app.data_service.get_current_data()
+            data = app.config['data_service'].get_current_data()
             
             if not data['points']:
                 return jsonify({'error': 'No data to export'}), 400
@@ -251,10 +261,10 @@ def create_app():
     def get_device_info():
         """Get device information"""
         try:
-            if not app.scpi_handler.is_connected:
+            if not app.config['scpi_handler'].is_connected:
                 return jsonify({'error': 'Device not connected'}), 400
             
-            device_id = app.scpi_handler.query("*IDN?")
+            device_id = app.config['scpi_handler'].query("*IDN?")
             return jsonify({
                 'device_id': device_id,
                 'connected': True
@@ -267,6 +277,7 @@ def create_app():
     @app.route('/api/uart/send', methods=['POST'])
     def send_uart_command():
         """Send custom SCPI command for UART testing with STM32H743 optimizations"""
+        command = ''
         try:
             data = request.get_json()
             command = data.get('command', '').strip()
@@ -274,7 +285,7 @@ def create_app():
             if not command:
                 return jsonify({'error': 'Command is required'}), 400
             
-            if not app.scpi_handler.is_connected:
+            if not app.config['scpi_handler'].is_connected:
                 return jsonify({'error': 'Device not connected'}), 400
             
             # Add rate limiting to prevent rapid commands with exceptions for long commands
@@ -288,13 +299,16 @@ def create_app():
             # Check if this is a long-running command
             is_long_command = any(cmd in command.lower() for cmd in long_running_commands)
             
-            # Rate limiting logic
+            # Rate limiting logic using app.config
             rate_limit_time = 2.0 if is_long_command else 0.5  # 2s for long commands, 0.5s for others
             
             # Skip rate limiting for consecutive identical long commands (auto-retry)
-            if hasattr(app, '_last_uart_command_time') and hasattr(app, '_last_uart_command'):
-                time_since_last = time.time() - app._last_uart_command_time
-                same_command = (app._last_uart_command == command)
+            last_command_time = app.config.get('_last_uart_command_time')
+            last_command = app.config.get('_last_uart_command')
+            
+            if last_command_time and last_command:
+                time_since_last = time.time() - last_command_time
+                same_command = (last_command == command)
                 
                 # Only apply rate limiting if it's not the same long command being retried
                 if time_since_last < rate_limit_time and not (is_long_command and same_command):
@@ -306,14 +320,14 @@ def create_app():
                         'timestamp': time.time()
                     }), 429
             
-            app._last_uart_command_time = time.time()
-            app._last_uart_command = command
+            app.config['_last_uart_command_time'] = time.time()
+            app.config['_last_uart_command'] = command
             
             # Log the command attempt
             logger.info(f"Web UART command: {command}")
             
             # Send command using the SCPI handler
-            result = app.scpi_handler.send_custom_command(command)
+            result = app.config['scpi_handler'].send_custom_command(command)
             
             # Log the result
             if result['success']:
@@ -327,7 +341,7 @@ def create_app():
             logger.error(f"Failed to send UART command: {e}")
             return jsonify({
                 'success': False,
-                'command': command if 'command' in locals() else '',
+                'command': command,
                 'response': None,
                 'error': str(e),
                 'timestamp': time.time()
@@ -344,10 +358,10 @@ def create_app():
                 return jsonify({'success': False, 'error': 'File path is required'}), 400
             
             # Check if we're using mock handler
-            if hasattr(app.scpi_handler, 'load_csv_data'):
-                success = app.scpi_handler.load_csv_data(file_path)
+            if hasattr(app.config['scpi_handler'], 'load_csv_data'):
+                success = app.config['scpi_handler'].load_csv_data(file_path)
                 if success:
-                    info = app.scpi_handler.get_csv_info()
+                    info = app.config['scpi_handler'].get_csv_info()
                     return jsonify({
                         'success': True,
                         'message': f'Loaded {info["total_points"]} data points',
@@ -371,8 +385,8 @@ def create_app():
             loop = data.get('loop', False)
             
             # Check if we're using mock handler
-            if hasattr(app.scpi_handler, 'start_csv_emulation'):
-                success = app.scpi_handler.start_csv_emulation(speed, loop)
+            if hasattr(app.config['scpi_handler'], 'start_csv_emulation'):
+                success = app.config['scpi_handler'].start_csv_emulation(speed, loop)
                 return jsonify({
                     'success': success,
                     'message': f'CSV emulation {"started" if success else "failed to start"}'
@@ -389,8 +403,8 @@ def create_app():
         """Stop CSV data emulation"""
         try:
             # Check if we're using mock handler
-            if hasattr(app.scpi_handler, 'stop_csv_emulation'):
-                app.scpi_handler.stop_csv_emulation()
+            if hasattr(app.config['scpi_handler'], 'stop_csv_emulation'):
+                app.config['scpi_handler'].stop_csv_emulation()
                 return jsonify({'success': True, 'message': 'CSV emulation stopped'})
             else:
                 return jsonify({'success': False, 'error': 'CSV emulation not supported by current handler'}), 400
@@ -404,9 +418,9 @@ def create_app():
         """Get CSV emulation status and progress"""
         try:
             # Check if we're using mock handler
-            if hasattr(app.scpi_handler, 'get_csv_progress'):
-                progress = app.scpi_handler.get_csv_progress()
-                info = app.scpi_handler.get_csv_info()
+            if hasattr(app.config['scpi_handler'], 'get_csv_progress'):
+                progress = app.config['scpi_handler'].get_csv_progress()
+                info = app.config['scpi_handler'].get_csv_info()
                 
                 return jsonify({
                     'loaded': info.get('loaded', False),
@@ -435,7 +449,7 @@ def create_app():
             
             # Use SCPI command for seeking
             command = f"csv:seek {target_time}"
-            result = app.scpi_handler.send_custom_command(command)
+            result = app.config['scpi_handler'].send_custom_command(command)
             
             return jsonify({
                 'success': result['success'],

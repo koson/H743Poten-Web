@@ -16,6 +16,32 @@ const stopBtn = document.getElementById('stop-btn');
 const plotContainer = document.getElementById('plot-container');
 const currentRange = document.getElementById('current-range');
 
+// Update connection status based on global state
+connectionState.addListener((state) => {
+    if (state.isConnected) {
+        isConnected = true;
+        connectBtn.innerHTML = '<i class="fas fa-unlink"></i> Disconnect';
+        connectionStatus.className = 'badge bg-success';
+        connectionStatus.innerHTML = '<i class="fas fa-plug"></i> Connected';
+        startBtn.disabled = false;
+        
+        // Update port and baud rate selects
+        if (state.currentPort && portSelect.value !== state.currentPort) {
+            portSelect.value = state.currentPort;
+        }
+        if (state.currentBaudRate && baudSelect.value !== state.currentBaudRate.toString()) {
+            baudSelect.value = state.currentBaudRate.toString();
+        }
+    } else {
+        isConnected = false;
+        connectBtn.innerHTML = '<i class="fas fa-link"></i> Connect';
+        connectionStatus.className = 'badge bg-secondary';
+        connectionStatus.innerHTML = '<i class="fas fa-plug"></i> Disconnected';
+        startBtn.disabled = true;
+        stopBtn.disabled = true;
+    }
+});
+
 // Initialize Plotly graph
 function initializePlot() {
     const layout = {
@@ -198,22 +224,23 @@ document.addEventListener('DOMContentLoaded', () => {
     connectBtn.addEventListener('click', async () => {
         if (!isConnected) {
             try {
-                const response = await fetch('/api/device/connect', {
+                const response = await fetch('/api/connection/connect', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         port: portSelect.value,
-                        baudRate: parseInt(baudSelect.value)
+                        baud_rate: parseInt(baudSelect.value)
                     })
                 });
                 
                 const data = await response.json();
                 if (data.success) {
-                    isConnected = true;
-                    connectBtn.innerHTML = '<i class="fas fa-unlink"></i> Disconnect';
-                    connectionStatus.className = 'badge bg-success';
-                    connectionStatus.innerHTML = '<i class="fas fa-plug"></i> Connected';
-                    startBtn.disabled = false;
+                    // Let the state listener handle the UI updates
+                    connectionState.setState({
+                        isConnected: true,
+                        currentPort: portSelect.value,
+                        currentBaudRate: parseInt(baudSelect.value)
+                    });
                 }
             } catch (error) {
                 console.error('Connection error:', error);
@@ -223,12 +250,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Disconnect logic
             try {
                 await fetch('/api/device/disconnect', { method: 'POST' });
-                isConnected = false;
-                connectBtn.innerHTML = '<i class="fas fa-link"></i> Connect';
-                connectionStatus.className = 'badge bg-secondary';
-                connectionStatus.innerHTML = '<i class="fas fa-plug"></i> Disconnected';
-                startBtn.disabled = true;
-                stopBtn.disabled = true;
+                // Let the state listener handle the UI updates
+                connectionState.setState({
+                    isConnected: false,
+                    currentPort: null,
+                    currentBaudRate: null
+                });
             } catch (error) {
                 console.error('Disconnection error:', error);
             }
@@ -347,23 +374,5 @@ function startDataCollection() {
     }, 100); // Poll every 100ms
 }
 
-// Load available ports
-async function loadPorts() {
-    try {
-        const response = await fetch('/api/device/ports');
-        const data = await response.json();
-        
-        portSelect.innerHTML = '<option value="">Select port...</option>';
-        data.ports.forEach(port => {
-            const option = document.createElement('option');
-            option.value = port;
-            option.textContent = port;
-            portSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Failed to load ports:', error);
-    }
-}
-
-// Initial port load
-loadPorts();
+// Initialize port manager
+const portManager = new PortManager();
