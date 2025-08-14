@@ -48,7 +48,7 @@
                             <a href="#ai-dashboard" class="list-group-item list-group-item-action" onclick="showTab('ai-dashboard')">
                                 <i class="fas fa-brain me-2"></i>AI Dashboard
                             </a>
-                            <a href="#measurements" class="list-group-item list-group-item-action" onclick="showTab('measurements')">
+                            <a href="/measurements" class="list-group-item list-group-item-action">
                                 <i class="fas fa-chart-line me-2"></i>Measurements
                             </a>
                             <a href="#settings" class="list-group-item list-group-item-action" onclick="showTab('settings')">
@@ -217,6 +217,12 @@
     <script>
         // Tab navigation
         function showTab(tabName) {
+            // If measurements tab, navigate to measurements page
+            if (tabName === 'measurements') {
+                window.location.href = '/measurements';
+                return;
+            }
+            
             // Hide all tab contents
             const tabContents = document.querySelectorAll('.tab-content');
             tabContents.forEach(content => {

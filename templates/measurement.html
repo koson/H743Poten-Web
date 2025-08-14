@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <div class="row">
+        <!-- Left Sidebar - Connection & Control -->
+        <div class="col-md-3">
+            <!-- Connection Card -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fas fa-plug me-2"></i>Connection
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Port</label>
+                        <select class="form-select" id="port-select">
+                            <option value="">Select port...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Baud Rate</label>
+                        <select class="form-select" id="baud-select">
+                            <option value="9600">9600</option>
+                            <option value="19200">19200</option>
+                            <option value="38400">38400</option>
+                            <option value="57600">57600</option>
+                            <option value="115200" selected>115200</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button id="connect-btn" class="btn btn-primary">
+                            <i class="fas fa-link"></i> Connect
+                        </button>
+                    </div>
+                    <div class="text-center mt-2">
+                        <span id="connection-status" class="badge bg-secondary">
+                            <i class="fas fa-plug"></i> Disconnected
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Measurement Control Card -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fas fa-cogs me-2"></i>Measurement Control
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Measurement Mode</label>
+                        <select class="form-select" id="mode-select">
+                            <option value="CV">Cyclic Voltammetry (CV)</option>
+                            <option value="DPV">Differential Pulse Voltammetry (DPV)</option>
+                            <option value="SWV">Square Wave Voltammetry (SWV)</option>
+                            <option value="CA">Chronoamperometry (CA)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- CV Parameters -->
+                    <div id="cv-params" class="parameter-group">
+                        <div class="mb-2">
+                            <label class="form-label">Initial E (V)</label>
+                            <input type="number" class="form-control" id="cv-initial" value="-0.5" step="0.1">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Final E (V)</label>
+                            <input type="number" class="form-control" id="cv-final" value="0.5" step="0.1">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Scan Rate (V/s)</label>
+                            <input type="number" class="form-control" id="cv-scan-rate" value="0.1" step="0.01">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Step E (V)</label>
+                            <input type="number" class="form-control" id="cv-step" value="0.01" step="0.001">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Cycles</label>
+                            <input type="number" class="form-control" id="cv-cycles" value="1" min="1">
+                        </div>
+                    </div>
+
+                    <!-- DPV Parameters -->
+                    <div id="dpv-params" class="parameter-group" style="display: none;">
+                        <div class="mb-2">
+                            <label class="form-label">Initial E (V)</label>
+                            <input type="number" class="form-control" id="dpv-initial" value="-0.5" step="0.1">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Final E (V)</label>
+                            <input type="number" class="form-control" id="dpv-final" value="0.5" step="0.1">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Amplitude (V)</label>
+                            <input type="number" class="form-control" id="dpv-amplitude" value="0.05" step="0.01">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Step E (V)</label>
+                            <input type="number" class="form-control" id="dpv-step" value="0.01" step="0.001">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Pulse Width (s)</label>
+                            <input type="number" class="form-control" id="dpv-pulse-width" value="0.05" step="0.01">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Scan Rate (V/s)</label>
+                            <input type="number" class="form-control" id="dpv-scan-rate" value="0.02" step="0.01">
+                        </div>
+                    </div>
+
+                    <!-- SWV Parameters -->
+                    <div id="swv-params" class="parameter-group" style="display: none;">
+                        <div class="mb-2">
+                            <label class="form-label">Initial E (V)</label>
+                            <input type="number" class="form-control" id="swv-initial" value="-0.5" step="0.1">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Final E (V)</label>
+                            <input type="number" class="form-control" id="swv-final" value="0.5" step="0.1">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Amplitude (V)</label>
+                            <input type="number" class="form-control" id="swv-amplitude" value="0.05" step="0.01">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Step E (V)</label>
+                            <input type="number" class="form-control" id="swv-step" value="0.01" step="0.001">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Frequency (Hz)</label>
+                            <input type="number" class="form-control" id="swv-frequency" value="10" min="1">
+                        </div>
+                    </div>
+
+                    <!-- CA Parameters -->
+                    <div id="ca-params" class="parameter-group" style="display: none;">
+                        <div class="mb-2">
+                            <label class="form-label">Initial E (V)</label>
+                            <input type="number" class="form-control" id="ca-initial" value="0" step="0.1">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Step E (V)</label>
+                            <input type="number" class="form-control" id="ca-step" value="0.5" step="0.1">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Step Time (s)</label>
+                            <input type="number" class="form-control" id="ca-time" value="10" min="1">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Sample Interval (s)</label>
+                            <input type="number" class="form-control" id="ca-interval" value="0.1" step="0.1" min="0.1">
+                        </div>
+                    </div>
+
+                    <!-- Common Controls -->
+                    <div class="mb-3">
+                        <label class="form-label">Current Range</label>
+                        <select class="form-select" id="current-range">
+                            <option value="2.5mA">±2.5 mA</option>
+                            <option value="250uA">±250 µA</option>
+                            <option value="25uA" selected>±25 µA</option>
+                            <option value="2.5uA">±2.5 µA</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button id="start-btn" class="btn btn-success" disabled>
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button id="stop-btn" class="btn btn-danger" disabled>
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content - Graph & Data -->
+        <div class="col-md-9">
+            <!-- Graph Card -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-chart-line me-2"></i>Measurement Plot</span>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary" id="zoom-in-btn">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" id="zoom-out-btn">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" id="reset-zoom-btn">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="plot-container" style="height: 500px;"></div>
+                </div>
+            </div>
+
+            <!-- Data Table Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-table me-2"></i>Measurement Data</span>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-primary" id="export-csv-btn">
+                                <i class="fas fa-file-csv me-1"></i>Export CSV
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" id="copy-data-btn">
+                                <i class="fas fa-copy me-1"></i>Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover" id="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Time (s)</th>
+                                    <th>Potential (V)</th>
+                                    <th>Current (A)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Include Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+<!-- Include custom JS -->
+<script src="{{ url_for('static', filename='js/measurement.js') }}"></script>
+{% endblock %}

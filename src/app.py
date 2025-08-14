@@ -87,6 +87,11 @@ def create_app():
     def index():
         """Main dashboard"""
         return render_template('index.html')
+        
+    @app.route('/measurements')
+    def measurements():
+        """Measurement interface"""
+        return render_template('measurement.html')
     
     @app.route('/favicon.ico')
     def favicon():
