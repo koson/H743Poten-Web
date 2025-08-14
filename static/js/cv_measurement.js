@@ -18,6 +18,10 @@ class CVMeasurement {
         this.statusUpdateInterval = null;
         this.plotInitialized = false; // Track plot initialization
         
+        // Plot update throttling
+        this.lastPlotUpdate = 0;
+        this.plotUpdateThrottle = 500; // Update plot max every 500ms
+        
         this.initializeUI();
         this.initializePlot();
     }
@@ -436,15 +440,15 @@ class CVMeasurement {
     }
     
     startDataUpdates() {
-        // Update data every 100ms for real-time plotting
+        // Update data every 200ms for real-time plotting (reduced frequency)
         this.dataUpdateInterval = setInterval(async () => {
             await this.updateData();
-        }, 100);
+        }, 200);
         
-        // Update status every 500ms
+        // Update status every 1000ms (reduced frequency)
         this.statusUpdateInterval = setInterval(async () => {
             await this.updateStatus();
-        }, 500);
+        }, 1000);
     }
     
     stopDataUpdates() {
@@ -525,47 +529,131 @@ class CVMeasurement {
     updatePlotIncremental(newPoint) {
         if (!this.plotDiv) return;
         
-        const traceIndex = newPoint.cycle - 1; // Cycles start from 1, traces from 0
-        const currentTraces = this.plotDiv.data || [];
+        console.log(`Adding point: V=${newPoint.potential}V, I=${newPoint.current}A, Cycle=${newPoint.cycle}, Dir=${newPoint.direction}`);
         
-        console.log(`Adding point to cycle ${newPoint.cycle}, trace index ${traceIndex}`);
+        // Throttle plot updates to prevent UI freeze
+        const now = Date.now();
+        if (now - this.lastPlotUpdate > this.plotUpdateThrottle) {
+            this.updatePlotComplete();
+            this.lastPlotUpdate = now;
+        }
+    }
+    
+    updatePlotComplete() {
+        if (!this.plotDiv || this.plotData.x.length === 0) return;
         
-        // Check if we need to add a new trace for a new cycle
-        if (traceIndex >= currentTraces.length) {
-            console.log(`Creating new trace for cycle ${newPoint.cycle}`);
+        console.log(`Updating complete plot with ${this.plotData.x.length} data points`);
+        
+        // Group data by cycle for proper CV curves
+        const cycles = [...new Set(this.plotData.cycle)];
+        const traces = [];
+        
+        cycles.forEach((cycle, cycleIndex) => {
+            // Get all points for this cycle
+            const cycleIndices = this.plotData.cycle
+                .map((c, i) => c === cycle ? i : -1)
+                .filter(i => i !== -1);
             
-            const newTrace = {
-                x: [newPoint.potential],
-                y: [newPoint.current],
-                type: 'scatter',
-                mode: 'lines+markers',
-                name: `Cycle ${newPoint.cycle}`,
-                line: {
-                    width: 2,
-                    color: newPoint.cycle === 1 ? '#007bff' : `hsl(${(newPoint.cycle - 1) * 60}, 70%, 50%)`
-                },
-                marker: {
-                    size: 3
-                }
-            };
+            if (cycleIndices.length === 0) return;
             
-            try {
-                Plotly.addTraces(this.plotDiv, [newTrace]);
-            } catch (error) {
-                console.error('Failed to add new trace:', error);
-                this.createInitialPlot();
+            // Separate forward and reverse scans for proper CV appearance
+            const forwardIndices = cycleIndices.filter(i => this.plotData.direction[i] === 'forward');
+            const reverseIndices = cycleIndices.filter(i => this.plotData.direction[i] === 'reverse');
+            
+            // Forward scan trace
+            if (forwardIndices.length > 0) {
+                traces.push({
+                    x: forwardIndices.map(i => this.plotData.x[i]),
+                    y: forwardIndices.map(i => this.plotData.y[i]),
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: `Cycle ${cycle} Forward`,
+                    line: {
+                        width: 2,
+                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
+                        dash: 'solid'
+                    },
+                    marker: {
+                        size: 3,
+                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`
+                    },
+                    showlegend: true
+                });
             }
-        } else {
-            // Extend existing trace
-            try {
-                Plotly.extendTraces(this.plotDiv, {
-                    x: [[newPoint.potential]],
-                    y: [[newPoint.current]]
-                }, [traceIndex]);
-            } catch (error) {
-                console.error('Failed to extend trace:', error);
-                this.createInitialPlot();
+            
+            // Reverse scan trace
+            if (reverseIndices.length > 0) {
+                traces.push({
+                    x: reverseIndices.map(i => this.plotData.x[i]),
+                    y: reverseIndices.map(i => this.plotData.y[i]),
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: `Cycle ${cycle} Reverse`,
+                    line: {
+                        width: 2,
+                        color: `hsl(${cycleIndex * 60}, 70%, 40%)`,
+                        dash: 'dash'
+                    },
+                    marker: {
+                        size: 3,
+                        color: `hsl(${cycleIndex * 60}, 70%, 40%)`
+                    },
+                    showlegend: true
+                });
             }
+        });
+        
+        // Update layout for proper CV display
+        const layout = {
+            title: {
+                text: 'Cyclic Voltammetry',
+                font: { size: 16 }
+            },
+            xaxis: {
+                title: 'Potential (V)',
+                showgrid: true,
+                gridcolor: '#f0f0f0',
+                zeroline: true,
+                zerolinecolor: '#666',
+                autorange: true
+            },
+            yaxis: {
+                title: 'Current (A)', 
+                showgrid: true,
+                gridcolor: '#f0f0f0',
+                zeroline: true,
+                zerolinecolor: '#666',
+                tickformat: '.2e',
+                autorange: true
+            },
+            showlegend: true,
+            legend: {
+                x: 1.02,
+                y: 1,
+                xanchor: 'left',
+                bgcolor: 'rgba(255,255,255,0.8)',
+                bordercolor: '#ccc',
+                borderwidth: 1
+            },
+            autosize: true,
+            margin: { l: 80, r: 120, t: 60, b: 60 }
+        };
+        
+        const config = {
+            responsive: true,
+            displayModeBar: true,
+            displaylogo: false,
+            modeBarButtonsToRemove: ['lasso2d', 'select2d', 'pan2d', 'autoScale2d']
+        };
+        
+        try {
+            Plotly.react(this.plotDiv, traces, layout, config);
+            console.log(`Plot updated with ${traces.length} traces for ${cycles.length} cycles`);
+        } catch (error) {
+            console.error('Failed to update plot:', error);
+            // Fallback: clear and recreate
+            this.clearPlotData();
+            this.initializePlot();
         }
     }
     
@@ -620,11 +708,8 @@ class CVMeasurement {
     }
     
     updatePlot() {
-        // This method is now mainly used for initial plot creation
-        if (!this.plotDiv || this.plotData.x.length === 0) return;
-        
-        console.log('Creating full plot with all data');
-        this.createInitialPlot();
+        // Use the complete plot update method for consistent display
+        this.updatePlotComplete();
     }
     
     createInitialPlot() {
@@ -632,42 +717,55 @@ class CVMeasurement {
         
         console.log(`Creating initial plot with ${this.plotData.x.length} data points`);
         
-        // Start with empty plot or create traces for existing data
-        const traces = [];
-        
+        // Use the complete plot update for consistency
         if (this.plotData.x.length > 0) {
-            // Group data by cycle for different traces
-            const cycles = [...new Set(this.plotData.cycle)];
-            console.log('Cycles found:', cycles);
+            this.updatePlotComplete();
+        } else {
+            // Create empty plot with proper layout
+            const layout = {
+                title: {
+                    text: 'Cyclic Voltammetry',
+                    font: { size: 16 }
+                },
+                xaxis: {
+                    title: 'Potential (V)',
+                    showgrid: true,
+                    gridcolor: '#f0f0f0',
+                    zeroline: true,
+                    zerolinecolor: '#666'
+                },
+                yaxis: {
+                    title: 'Current (A)', 
+                    showgrid: true,
+                    gridcolor: '#f0f0f0',
+                    zeroline: true,
+                    zerolinecolor: '#666',
+                    tickformat: '.2e'
+                },
+                showlegend: true,
+                legend: {
+                    x: 1.02,
+                    y: 1,
+                    xanchor: 'left'
+                },
+                autosize: true,
+                margin: { l: 80, r: 120, t: 60, b: 60 }
+            };
             
-            cycles.forEach(cycle => {
-                const cycleIndices = this.plotData.cycle.map((c, i) => c === cycle ? i : -1).filter(i => i !== -1);
-                
-                console.log(`Cycle ${cycle}: ${cycleIndices.length} points`);
-                
-                traces.push({
-                    x: cycleIndices.map(i => this.plotData.x[i]),
-                    y: cycleIndices.map(i => this.plotData.y[i]),
-                    type: 'scatter',
-                    mode: 'lines+markers',
-                    name: `Cycle ${cycle}`,
-                    line: {
-                        width: 2,
-                        color: cycle === 1 ? '#007bff' : `hsl(${(cycle - 1) * 60}, 70%, 50%)`
-                    },
-                    marker: {
-                        size: 3
-                    }
-                });
-            });
-        }
-        
-        try {
-            Plotly.react(this.plotDiv, traces);
-            this.plotInitialized = true;
-            console.log('Plot created successfully');
-        } catch (error) {
-            console.error('Failed to create plot:', error);
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                displaylogo: false,
+                modeBarButtonsToRemove: ['lasso2d', 'select2d', 'pan2d', 'autoScale2d']
+            };
+            
+            try {
+                Plotly.react(this.plotDiv, [], layout, config);
+                this.plotInitialized = true;
+                console.log('Empty plot created successfully');
+            } catch (error) {
+                console.error('Failed to create empty plot:', error);
+            }
         }
     }
     
