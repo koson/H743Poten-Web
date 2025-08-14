@@ -246,8 +246,8 @@ class CVMeasurement {
         
         const params = {
             begin: parseFloat(this.beginInput.value) || 0.0,
-            upper: parseFloat(this.upperInput.value) || 1.0,
-            lower: parseFloat(this.lowerInput.value) || -1.0,
+            upper: parseFloat(this.upperInput.value) || 0.7,
+            lower: parseFloat(this.lowerInput.value) || -0.4,
             rate: parseFloat(this.rateInput.value) || 0.1,
             cycles: parseInt(this.cyclesInput.value) || 1
         };

@@ -218,8 +218,8 @@ def get_cv_defaults():
     """Get default CV parameters"""
     return jsonify({
         'begin': 0.0,
-        'upper': 1.0,
-        'lower': -1.0,
+        'upper': 0.7,
+        'lower': -0.4,
         'rate': 0.1,
         'cycles': 1,
         'description': 'Default CV parameters for H743Poten'
