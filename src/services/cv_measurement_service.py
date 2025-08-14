@@ -39,7 +39,18 @@ class CVParameters:
         return True, "Parameters valid"
     
     def to_scpi_command(self) -> str:
-        """Convert parameters to SCPI command"""
+        """Convert parameters to SCPI command for STM32
+        
+        Format: POTEn:CV:Start:ALL <begin>,<upper>,<lower>,<rate>,<cycles>
+        Example: POTEn:CV:Start:ALL 0.0,1.0,-1.0,0.1,1
+        
+        Parameters:
+        - Begin: Starting potential (V)
+        - Upper: Upper potential limit (V) 
+        - Lower: Lower potential limit (V)
+        - Rate: Scan rate (V/s)
+        - Cycles: Number of cycles
+        """
         return f"POTEn:CV:Start:ALL {self.begin},{self.upper},{self.lower},{self.rate},{self.cycles}"
 
 @dataclass  
@@ -178,8 +189,8 @@ class CVMeasurementService:
             if not self.is_measuring:
                 return False, "No measurement in progress"
             
-            # Send abort command to device
-            result = self.scpi_handler.send_custom_command("POTEn:ABORt")
+            # Send abort command to device using POTEn format
+            result = self.scpi_handler.send_custom_command("POTEn:CV:STOP")
             
             # Stop measurement thread
             self.is_measuring = False
@@ -325,7 +336,10 @@ class CVMeasurementService:
                 return self._simulate_measurement_data()
             
             # Read actual data from STM32 via SCPI handler
-            result = self.scpi_handler.send_custom_command("MEAS:CV:DATA?")
+            # Use POTEn command format to query current measurement data
+            # Command: POTEn:CV:DATA? 
+            # Expected response: "potential,current,cycle,direction[,COMPLETE]" or "NO_DATA"
+            result = self.scpi_handler.send_custom_command("POTEn:CV:DATA?")
             
             if not result['success']:
                 logger.warning(f"Failed to read measurement data: {result.get('message', 'Unknown error')}")
