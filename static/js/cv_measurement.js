@@ -522,6 +522,23 @@ class CVMeasurement {
             const dataPoints = result.data_points || [];
             console.log('[DEBUG] Data points extracted:', dataPoints.length, 'points');
             
+            // Check measurement status for auto-save
+            const status = result.status || {};
+            const isMeasuring = status.is_measuring || false;
+            const dataPointsCount = status.data_points_count || 0;
+            
+            // Auto-save when measurement stops and we have data
+            if (this.isRunning && !isMeasuring && dataPointsCount > 0) {
+                console.log('[AUTO-SAVE] Measurement completed, auto-saving data...');
+                this.isRunning = false;
+                this.updateUIState();
+                this.stopDataUpdates();
+                this.showMessage('CV measurement completed - Auto-saving data...', 'success');
+                
+                // Auto-save the measurement
+                await this.saveMeasurement(true); // true = auto-save mode
+            }
+            
             if (dataPoints.length > 0) {
                 // Get only new points since last update
                 const currentDataLength = this.plotData.x.length;
@@ -667,11 +684,23 @@ class CVMeasurement {
             
             // Forward scan trace - completely isolated
             if (forwardIndices.length > 0) {
-                // Sort forward data (ascending voltage)
-                const forwardPairs = forwardX.map((x, i) => ({ x, y: forwardY[i] }));
-                forwardPairs.sort((a, b) => a.x - b.x);
+                // For real-time plotting, maintain chronological order
+                // For completed measurements, sort for proper CV display
+                let forwardPairs;
+                if (this.isRunning) {
+                    // Real-time mode: maintain chronological order
+                    forwardPairs = forwardIndices.map(i => ({ 
+                        x: this.plotData.x[i], 
+                        y: this.plotData.y[i], 
+                        index: i 
+                    }));
+                } else {
+                    // Completed measurement: sort for proper display
+                    forwardPairs = forwardX.map((x, i) => ({ x, y: forwardY[i] }));
+                    forwardPairs.sort((a, b) => a.x - b.x);
+                }
                 
-                console.log(`[DEBUG] Cycle ${cycle} Forward: ${forwardPairs.length} points`);
+                console.log(`[DEBUG] Cycle ${cycle} Forward: ${forwardPairs.length} points${this.isRunning ? ' (real-time)' : ' (sorted)'}`);
                 
                 traces.push({
                     x: forwardPairs.map(p => p.x),
@@ -699,11 +728,23 @@ class CVMeasurement {
             
             // Add delay before reverse trace to ensure complete separation
             if (reverseIndices.length > 0) {
-                // Sort reverse data (descending voltage)
-                const reversePairs = reverseX.map((x, i) => ({ x, y: reverseY[i] }));
-                reversePairs.sort((a, b) => b.x - a.x);
+                // For real-time plotting, maintain chronological order
+                // For completed measurements, sort for proper CV display
+                let reversePairs;
+                if (this.isRunning) {
+                    // Real-time mode: maintain chronological order 
+                    reversePairs = reverseIndices.map(i => ({ 
+                        x: this.plotData.x[i], 
+                        y: this.plotData.y[i], 
+                        index: i 
+                    }));
+                } else {
+                    // Completed measurement: sort for proper display
+                    reversePairs = reverseX.map((x, i) => ({ x, y: reverseY[i] }));
+                    reversePairs.sort((a, b) => b.x - a.x);
+                }
                 
-                console.log(`[DEBUG] Cycle ${cycle} Reverse: ${reversePairs.length} points`);
+                console.log(`[DEBUG] Cycle ${cycle} Reverse: ${reversePairs.length} points${this.isRunning ? ' (real-time)' : ' (sorted)'}`);
                 
                 // Create reverse trace with completely different configuration
                 traces.push({
@@ -1276,17 +1317,23 @@ CVMeasurement.prototype.fixPlotRange = function() {
 };
 
 // Save current measurement data
-CVMeasurement.prototype.saveMeasurement = async function() {
+CVMeasurement.prototype.saveMeasurement = async function(isAutoSave = false) {
     try {
         if (this.plotData.x.length === 0) {
             this.showMessage('No measurement data to save', 'warning');
             return;
         }
         
-        // Generate session ID
-        const sessionId = `CV_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+        // Generate session ID with auto-save prefix if needed
+        const prefix = isAutoSave ? 'AUTO_CV_' : 'CV_';
+        const sessionId = `${prefix}${new Date().toISOString().replace(/[:.]/g, '-')}`;
         
-        console.log(`[SAVE] Saving measurement with ${this.plotData.x.length} data points`);
+        console.log(`[SAVE] ${isAutoSave ? 'Auto-' : ''}Saving measurement with ${this.plotData.x.length} data points`);
+        
+        // Show appropriate message
+        if (isAutoSave) {
+            this.showMessage('Auto-saving measurement data...', 'info');
+        }
         
         // Prepare data points in the format expected by backend
         const dataPoints = [];
@@ -1337,18 +1384,26 @@ CVMeasurement.prototype.saveMeasurement = async function() {
         const data = await response.json();
         
         if (data.success) {
-            this.showMessage(`Measurement saved as ${data.session_id}`, 'success');
+            const saveMessage = isAutoSave ? 
+                `Measurement auto-saved as ${data.session_id}` : 
+                `Measurement saved as ${data.session_id}`;
+            this.showMessage(saveMessage, 'success');
             
-            // Disable save button after successful save
-            const saveBtn = document.getElementById('save-measurement-btn');
-            if (saveBtn) {
-                saveBtn.disabled = true;
-                saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
+            // Disable save button after successful save (but not for auto-save)
+            if (!isAutoSave) {
+                const saveBtn = document.getElementById('save-measurement-btn');
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
+                }
             }
             
-            console.log(`[SAVE] Successfully saved: ${data.session_id}`);
+            console.log(`[SAVE] Successfully ${isAutoSave ? 'auto-' : ''}saved: ${data.session_id}`);
         } else {
-            this.showMessage(`Failed to save measurement: ${data.error}`, 'error');
+            const errorMessage = isAutoSave ? 
+                `Failed to auto-save measurement: ${data.error}` : 
+                `Failed to save measurement: ${data.error}`;
+            this.showMessage(errorMessage, 'error');
             console.error(`[SAVE] Save failed: ${data.error}`);
         }
         
