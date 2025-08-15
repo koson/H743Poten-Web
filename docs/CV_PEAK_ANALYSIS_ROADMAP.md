@@ -26,8 +26,13 @@ gantt
     Model Training         :training, after features, 5d
     ML Detector           :ml, after training, 3d
     
-    section Phase 5: Integration
-    Performance Comparison :perf, after ml, 3d
+    section Phase 5: ML Prediction
+    Quantitative Models   :quant, after ml, 4d
+    Concentration Prediction :conc, after quant, 4d
+    Substance Classification :subst, after conc, 4d
+    
+    section Phase 6: Integration
+    Performance Comparison :perf, after subst, 3d
     Web Interface         :web, after perf, 4d
     Testing & Deployment  :deploy, after web, 3d
 ```

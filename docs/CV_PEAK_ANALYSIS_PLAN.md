@@ -250,13 +250,19 @@ pandas>=1.3.0
 # Machine learning
 scikit-learn>=1.0.0
 tensorflow>=2.6.0  # or pytorch
+xgboost>=1.5.0     # for ensemble methods
 
 # Visualization
 matplotlib>=3.4.0
 plotly>=5.0.0
+seaborn>=0.11.0    # for statistical plots
 
 # Signal processing
 pywavelets>=1.1.0
+
+# Prediction & Analysis
+scipy>=1.7.0
+statsmodels>=0.13.0  # for statistical analysis
 ```
 
 ### Hardware Requirements
@@ -274,10 +280,22 @@ graph LR
     B -->|ml| E[ML Detection]
     B -->|all| F[Compare All Methods]
     
-    C --> G[JSON Response]
+    C --> G[Peak Results]
     D --> G
     E --> G
     F --> G
+    
+    G --> H[POST /api/cv/predict]
+    H --> I{Prediction Type}
+    I -->|quantity| J[Quantitative Analysis]
+    I -->|concentration| K[Concentration Prediction]
+    I -->|substance| L[Substance Classification]
+    I -->|all| M[Complete Analysis]
+    
+    J --> N[JSON Response]
+    K --> N
+    L --> N
+    M --> N
 ```
 
 ## Configuration Options
