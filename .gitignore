@@ -19,3 +19,4 @@ develop-eggs/
 .installed.cfg
 lib/
 lib64/
+data_logs/sessions/

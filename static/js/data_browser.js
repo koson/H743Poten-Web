@@ -362,17 +362,24 @@ function updateSessionDetailModal(sessionData) {
     // Load PNG image
     if (sessionData.png_exists) {
         const plotImg = document.getElementById('session-plot-img');
-        plotImg.src = `/api/data-logging/sessions/${metadata.session_id}/view/png?t=${Date.now()}`;
+        const imgUrl = `/api/data-logging/sessions/${metadata.session_id}/view/png?t=${Date.now()}`;
+        console.log('Loading PNG image from:', imgUrl);
+        
+        plotImg.src = imgUrl;
         plotImg.onload = () => {
+            console.log('PNG image loaded successfully');
             document.getElementById('plot-loading').style.display = 'none';
             plotImg.style.display = 'block';
         };
-        plotImg.onerror = () => {
+        plotImg.onerror = (error) => {
+            console.error('Failed to load PNG image:', error);
+            console.error('Image URL:', imgUrl);
             document.getElementById('plot-loading').style.display = 'none';
             plotImg.style.display = 'none';
             showToast('Failed to load plot image', 'error');
         };
     } else {
+        console.log('No PNG file exists for this session');
         document.getElementById('plot-loading').style.display = 'none';
         document.getElementById('session-plot-img').style.display = 'none';
     }

@@ -245,6 +245,8 @@
 {% block scripts %}
 <!-- Include Plotly.js -->
 <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+<!-- Include Port Manager -->
+<script src="{{ url_for('static', filename='js/port_manager.js') }}"></script>
 <!-- Include CV measurement JS -->
 <script src="{{ url_for('static', filename='js/cv_measurement.js') }}"></script>
 {% endblock %}

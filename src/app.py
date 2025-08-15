@@ -66,7 +66,10 @@ def create_app():
     measurement_service = MeasurementService(scpi_handler)
     data_service = DataService()
     cv_service = CVMeasurementService(scpi_handler)
-    data_logging_service = DataLoggingService()
+    
+    # Initialize data logging service with correct path
+    data_logs_path = project_root / "data_logs"
+    data_logging_service = DataLoggingService(str(data_logs_path))
     
     # Store services in application context
     app.config['scpi_handler'] = scpi_handler

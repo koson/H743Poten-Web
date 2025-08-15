@@ -1,0 +1,616 @@
+2025-08-16 03:38:30,679 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 03:38:30,709 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 03:38:30,710 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 03:38:30,711 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 03:38:30,773 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.2.37:8080
+2025-08-16 03:38:30,773 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 03:38:30,778 - werkzeug - INFO -  * Restarting with stat
+2025-08-16 03:38:34,288 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 03:38:34,335 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 03:38:34,335 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 03:38:34,335 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 03:38:34,350 - werkzeug - WARNING -  * Debugger is active!
+2025-08-16 03:38:34,367 - werkzeug - INFO -  * Debugger PIN: 361-562-624
+2025-08-16 04:42:10,542 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 04:42:10,578 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 04:42:10,578 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 04:42:10,579 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 04:42:10,793 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.28.9.251:8080
+2025-08-16 04:42:10,794 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 04:42:10,832 - werkzeug - INFO -  * Restarting with stat
+2025-08-16 04:42:35,401 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 04:42:35,427 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 04:42:35,427 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 04:42:35,428 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 04:42:35,596 - werkzeug - WARNING -  * Debugger is active!
+2025-08-16 04:42:35,615 - werkzeug - INFO -  * Debugger PIN: 826-465-490
+2025-08-16 04:45:07,333 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 04:45:07,361 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 04:45:07,362 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 04:45:07,362 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 04:45:44,965 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 04:45:44,991 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 04:45:44,991 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 04:45:44,992 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 04:45:45,163 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.28.9.251:8080
+2025-08-16 04:45:45,164 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 04:45:45,188 - werkzeug - INFO -  * Restarting with stat
+2025-08-16 04:45:49,050 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 04:45:49,084 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 04:45:49,085 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 04:45:49,086 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 04:45:49,175 - werkzeug - WARNING -  * Debugger is active!
+2025-08-16 04:45:49,194 - werkzeug - INFO -  * Debugger PIN: 104-419-903
+2025-08-16 04:48:08,745 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 04:48:08,783 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 04:48:08,784 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 04:48:08,785 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 04:48:08,964 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.28.9.251:8080
+2025-08-16 04:48:08,965 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 04:48:08,989 - werkzeug - INFO -  * Restarting with stat
+2025-08-16 04:48:12,696 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 04:48:12,721 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 04:48:12,721 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 04:48:12,722 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 04:48:12,808 - werkzeug - WARNING -  * Debugger is active!
+2025-08-16 04:48:12,812 - werkzeug - INFO -  * Debugger PIN: 104-419-903
+2025-08-16 04:48:28,084 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:48:28] "GET / HTTP/1.1" 200 -
+2025-08-16 04:48:28,151 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:48:28] "GET /static/js/port_manager.js HTTP/1.1" 200 -
+2025-08-16 04:48:28,151 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:48:28] "GET /static/js/connection_state.js HTTP/1.1" 200 -
+2025-08-16 04:48:28,317 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:48:28] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 04:48:28,327 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:48:28] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 04:48:28,334 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:48:28] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 04:48:28,367 - routes.port_routes - INFO - Port list requested
+2025-08-16 04:48:28,368 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 04:48:28,373 - hardware.port_scanner - INFO - Found 0 ports in total
+2025-08-16 04:48:28,374 - hardware.port_scanner - DEBUG - Port scan complete. Found 0 available ports
+2025-08-16 04:48:28,374 - routes.port_routes - INFO - Found 0 STM32 ports
+2025-08-16 04:48:28,375 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 04:48:28,381 - hardware.port_scanner - INFO - Found 0 ports in total
+2025-08-16 04:48:28,382 - hardware.port_scanner - DEBUG - Port scan complete. Found 0 available ports
+2025-08-16 04:48:28,383 - routes.port_routes - INFO - Found 0 total available ports
+2025-08-16 04:48:28,384 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:48:28] "GET /api/ports HTTP/1.1" 200 -
+2025-08-16 04:48:28,773 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:48:28] "GET /favicon.ico HTTP/1.1" 200 -
+2025-08-16 04:49:25,131 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:25] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 04:49:25,209 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:25] "GET /static/js/cv_measurement.js HTTP/1.1" 200 -
+2025-08-16 04:49:25,209 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:25] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 04:49:28,150 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:28] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 04:49:28,349 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:28] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 04:49:37,259 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:37] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 04:49:37,303 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:37] "[36mGET /static/js/cv_measurement.js HTTP/1.1[0m" 304 -
+2025-08-16 04:49:37,304 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:37] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 04:49:37,417 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:37] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 04:49:37,579 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:37] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 04:49:51,778 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:51] "GET /data-browser HTTP/1.1" 200 -
+2025-08-16 04:49:51,835 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:51] "GET /static/js/data_browser.js HTTP/1.1" 200 -
+2025-08-16 04:49:51,836 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:51] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 04:49:51,858 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:51] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 04:49:51,970 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:51] "GET /api/data-logging/info HTTP/1.1" 200 -
+2025-08-16 04:49:52,001 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:52] "GET /api/data-logging/auto-save HTTP/1.1" 200 -
+2025-08-16 04:49:52,016 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:52] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 04:49:52,066 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:52] "GET /api/data-logging/sessions HTTP/1.1" 200 -
+2025-08-16 04:49:52,092 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:52] "GET /api/cv/status HTTP/1.1" 200 -
+2025-08-16 04:49:55,447 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:55] "GET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z HTTP/1.1" 200 -
+2025-08-16 04:49:55,479 - routes.data_logging_routes - ERROR - Failed to view PNG for session CV_2025-08-15T19-26-33-783Z: [Errno 2] No such file or directory: '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/src/data_logs/sessions/CV_2025-08-15T19-26-33-783Z/CV_2025-08-15T19-26-33-783Z.png'
+2025-08-16 04:49:55,480 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:49:55] "[35m[1mGET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z/view/png?t=1755294595424 HTTP/1.1[0m" 500 -
+2025-08-16 04:50:05,674 - routes.data_logging_routes - ERROR - Failed to download png for session CV_2025-08-15T19-26-33-783Z: [Errno 2] No such file or directory: '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/src/data_logs/sessions/CV_2025-08-15T19-26-33-783Z/CV_2025-08-15T19-26-33-783Z.png'
+2025-08-16 04:50:05,675 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:05] "[35m[1mGET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z/download/png HTTP/1.1[0m" 500 -
+2025-08-16 04:50:07,140 - routes.data_logging_routes - ERROR - Failed to download csv for session CV_2025-08-15T19-26-33-783Z: [Errno 2] No such file or directory: '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/src/data_logs/sessions/CV_2025-08-15T19-26-33-783Z/CV_2025-08-15T19-26-33-783Z.csv'
+2025-08-16 04:50:07,141 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:07] "[35m[1mGET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z/download/csv HTTP/1.1[0m" 500 -
+2025-08-16 04:50:15,936 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:15] "GET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z HTTP/1.1" 200 -
+2025-08-16 04:50:15,965 - routes.data_logging_routes - ERROR - Failed to view PNG for session CV_2025-08-15T19-26-33-783Z: [Errno 2] No such file or directory: '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/src/data_logs/sessions/CV_2025-08-15T19-26-33-783Z/CV_2025-08-15T19-26-33-783Z.png'
+2025-08-16 04:50:15,965 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:15] "[35m[1mGET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z/view/png?t=1755294615950 HTTP/1.1[0m" 500 -
+2025-08-16 04:50:21,847 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:21] "GET /api/cv/status HTTP/1.1" 200 -
+2025-08-16 04:50:25,732 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:25] "GET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z HTTP/1.1" 200 -
+2025-08-16 04:50:25,757 - routes.data_logging_routes - ERROR - Failed to view PNG for session CV_2025-08-15T19-26-33-783Z: [Errno 2] No such file or directory: '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/src/data_logs/sessions/CV_2025-08-15T19-26-33-783Z/CV_2025-08-15T19-26-33-783Z.png'
+2025-08-16 04:50:25,758 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:25] "[35m[1mGET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z/view/png?t=1755294625670 HTTP/1.1[0m" 500 -
+2025-08-16 04:50:34,199 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:34] "GET /api/data-logging/info HTTP/1.1" 200 -
+2025-08-16 04:50:40,464 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:40] "GET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z HTTP/1.1" 200 -
+2025-08-16 04:50:40,495 - routes.data_logging_routes - ERROR - Failed to view PNG for session CV_2025-08-15T19-26-33-783Z: [Errno 2] No such file or directory: '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/src/data_logs/sessions/CV_2025-08-15T19-26-33-783Z/CV_2025-08-15T19-26-33-783Z.png'
+2025-08-16 04:50:40,496 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:40] "[35m[1mGET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z/view/png?t=1755294640520 HTTP/1.1[0m" 500 -
+2025-08-16 04:50:46,942 - routes.data_logging_routes - ERROR - Failed to download png for session CV_2025-08-15T19-26-33-783Z: [Errno 2] No such file or directory: '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/src/data_logs/sessions/CV_2025-08-15T19-26-33-783Z/CV_2025-08-15T19-26-33-783Z.png'
+2025-08-16 04:50:46,942 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:46] "[35m[1mGET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z/download/png HTTP/1.1[0m" 500 -
+2025-08-16 04:50:47,911 - routes.data_logging_routes - ERROR - Failed to download csv for session CV_2025-08-15T19-26-33-783Z: [Errno 2] No such file or directory: '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/src/data_logs/sessions/CV_2025-08-15T19-26-33-783Z/CV_2025-08-15T19-26-33-783Z.csv'
+2025-08-16 04:50:47,912 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:47] "[35m[1mGET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z/download/csv HTTP/1.1[0m" 500 -
+2025-08-16 04:50:51,831 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:51] "GET /api/cv/status HTTP/1.1" 200 -
+2025-08-16 04:50:57,960 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:57] "GET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z HTTP/1.1" 200 -
+2025-08-16 04:50:57,985 - routes.data_logging_routes - ERROR - Failed to view PNG for session CV_2025-08-15T19-26-33-783Z: [Errno 2] No such file or directory: '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/src/data_logs/sessions/CV_2025-08-15T19-26-33-783Z/CV_2025-08-15T19-26-33-783Z.png'
+2025-08-16 04:50:57,986 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:50:57] "[35m[1mGET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z/view/png?t=1755294657896 HTTP/1.1[0m" 500 -
+2025-08-16 04:51:03,591 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:51:03] "GET /api/data-logging/sessions HTTP/1.1" 200 -
+2025-08-16 04:51:04,307 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:51:04] "GET /api/data-logging/sessions HTTP/1.1" 200 -
+2025-08-16 04:51:06,352 - routes.data_logging_routes - ERROR - Failed to download png for session CV_2025-08-15T19-26-33-783Z: [Errno 2] No such file or directory: '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/src/data_logs/sessions/CV_2025-08-15T19-26-33-783Z/CV_2025-08-15T19-26-33-783Z.png'
+2025-08-16 04:51:06,353 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:51:06] "[35m[1mGET /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z/download/png HTTP/1.1[0m" 500 -
+2025-08-16 04:51:13,015 - services.data_logging_service - INFO - Session deleted: CV_2025-08-15T19-26-33-783Z
+2025-08-16 04:51:13,016 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:51:13] "DELETE /api/data-logging/sessions/CV_2025-08-15T19-26-33-783Z HTTP/1.1" 200 -
+2025-08-16 04:51:13,051 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:51:13] "GET /api/data-logging/sessions HTTP/1.1" 200 -
+2025-08-16 04:51:13,149 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:51:13] "GET /api/data-logging/info HTTP/1.1" 200 -
+2025-08-16 04:51:16,172 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:51:16] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 04:51:16,227 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:51:16] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 04:51:16,230 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:51:16] "[36mGET /static/js/cv_measurement.js HTTP/1.1[0m" 304 -
+2025-08-16 04:51:16,304 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:51:16] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 04:51:16,462 - werkzeug - INFO - 172.28.0.1 - - [16/Aug/2025 04:51:16] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:08:06,757 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 05:08:06,788 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 05:08:06,789 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 05:08:06,789 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 05:08:06,831 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.2.37:8080
+2025-08-16 05:08:06,831 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 05:08:06,835 - werkzeug - INFO -  * Restarting with stat
+2025-08-16 05:08:10,442 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 05:08:10,486 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 05:08:10,487 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 05:08:10,487 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 05:08:10,504 - werkzeug - WARNING -  * Debugger is active!
+2025-08-16 05:08:10,523 - werkzeug - INFO -  * Debugger PIN: 361-562-624
+2025-08-16 05:08:16,686 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:16] "GET / HTTP/1.1" 200 -
+2025-08-16 05:08:17,017 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:17] "GET /static/js/port_manager.js HTTP/1.1" 200 -
+2025-08-16 05:08:17,041 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:17] "GET /static/js/connection_state.js HTTP/1.1" 200 -
+2025-08-16 05:08:17,053 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:17] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:08:17,058 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:17] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:08:17,065 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:17] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:08:17,428 - routes.port_routes - INFO - Port list requested
+2025-08-16 05:08:17,429 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:08:17,456 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:08:17,457 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:08:17,457 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:08:17,458 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:08:17,459 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:08:17,459 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:08:17,460 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:08:17,461 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:08:17,462 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:08:17,463 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:08:17,464 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:08:17,465 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:08:17,467 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:17] "GET /favicon.ico HTTP/1.1" 200 -
+2025-08-16 05:08:17,466 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:08:17,468 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:08:17,468 - routes.port_routes - INFO - Found 0 STM32 ports
+2025-08-16 05:08:17,469 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:08:17,490 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:08:17,491 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:08:17,492 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:08:17,492 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:08:17,493 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:08:17,493 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:08:17,494 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:08:17,495 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:08:17,495 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:08:17,496 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:08:17,497 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:08:17,498 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:08:17,498 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:08:17,500 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:08:17,500 - routes.port_routes - INFO - Found 4 total available ports
+2025-08-16 05:08:17,501 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:17] "GET /api/ports HTTP/1.1" 200 -
+2025-08-16 05:08:21,520 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:21] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 05:08:21,571 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:21] "GET /static/js/cv_measurement.js HTTP/1.1" 200 -
+2025-08-16 05:08:21,573 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:21] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 05:08:21,701 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:21] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:08:21,834 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:21] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:08:26,021 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:26] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 05:08:26,054 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:26] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 05:08:26,057 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:26] "[36mGET /static/js/cv_measurement.js HTTP/1.1[0m" 304 -
+2025-08-16 05:08:26,132 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:26] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:08:26,255 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:26] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:08:29,643 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:29] "GET / HTTP/1.1" 200 -
+2025-08-16 05:08:29,693 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:29] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 05:08:29,694 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:29] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+2025-08-16 05:08:29,736 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:29] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:08:29,742 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:29] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:08:29,747 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:29] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:08:29,852 - routes.port_routes - INFO - Port list requested
+2025-08-16 05:08:29,853 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:08:29,855 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:29] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:08:29,877 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:08:29,878 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:08:29,879 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:08:29,879 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:08:29,880 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:08:29,880 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:08:29,881 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:08:29,882 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:08:29,882 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:08:29,883 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:08:29,883 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:08:29,884 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:08:29,884 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:08:29,885 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:08:29,886 - routes.port_routes - INFO - Found 0 STM32 ports
+2025-08-16 05:08:29,886 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:08:29,909 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:08:29,909 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:08:29,910 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:08:29,910 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:08:29,911 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:08:29,911 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:08:29,912 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:08:29,913 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:08:29,913 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:08:29,914 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:08:29,914 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:08:29,915 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:08:29,915 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:08:29,917 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:08:29,917 - routes.port_routes - INFO - Found 4 total available ports
+2025-08-16 05:08:29,918 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:29] "GET /api/ports HTTP/1.1" 200 -
+2025-08-16 05:08:32,177 - hardware.port_scanner - INFO - Successfully tested connection to COM3
+2025-08-16 05:08:32,179 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:32] "GET /api/ports/test/COM3 HTTP/1.1" 200 -
+2025-08-16 05:08:32,988 - hardware.scpi_handler - INFO - Connected to COM3 at 115200 baud
+2025-08-16 05:08:32,989 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:32] "POST /api/connection/connect HTTP/1.1" 200 -
+2025-08-16 05:08:35,555 - hardware.scpi_handler - INFO - Disconnected from device
+2025-08-16 05:08:35,556 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:35] "POST /api/connection/disconnect HTTP/1.1" 200 -
+2025-08-16 05:08:36,714 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:36] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 05:08:36,762 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:36] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 05:08:36,766 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:36] "[36mGET /static/js/cv_measurement.js HTTP/1.1[0m" 304 -
+2025-08-16 05:08:36,839 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:36] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:08:36,952 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:36] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:08:39,808 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:39] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 05:08:39,876 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:39] "GET /static/js/cv_measurement.js HTTP/1.1" 200 -
+2025-08-16 05:08:39,877 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:39] "GET /static/js/connection_state.js HTTP/1.1" 200 -
+2025-08-16 05:08:40,196 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:40] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:08:40,331 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:08:40] "GET /favicon.ico HTTP/1.1" 200 -
+2025-08-16 05:10:19,760 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:10:19] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 05:10:19,800 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:10:19] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 05:10:19,805 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:10:19] "GET /static/js/measurement.js HTTP/1.1" 200 -
+2025-08-16 05:10:19,806 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:10:19] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+2025-08-16 05:10:19,930 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:10:19] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:10:19,936 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:10:19] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:10:20,099 - routes.port_routes - INFO - Port list requested
+2025-08-16 05:10:20,099 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:10:20,126 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:10:20] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:10:20,135 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:10:20,135 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:10:20,136 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:10:20,136 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:10:20,137 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:10:20,138 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:10:20,140 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:10:20,141 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:10:20,141 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:10:20,142 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:10:20,143 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:10:20,144 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:10:20,144 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:10:20,145 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:10:20,146 - routes.port_routes - INFO - Found 0 STM32 ports
+2025-08-16 05:10:20,146 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:10:20,167 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:10:20,168 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:10:20,168 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:10:20,169 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:10:20,169 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:10:20,170 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:10:20,170 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:10:20,171 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:10:20,172 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:10:20,172 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:10:20,173 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:10:20,173 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:10:20,174 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:10:20,176 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:10:20,176 - routes.port_routes - INFO - Found 4 total available ports
+2025-08-16 05:10:20,177 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:10:20] "GET /api/ports HTTP/1.1" 200 -
+2025-08-16 05:11:00,560 - hardware.port_scanner - INFO - Successfully tested connection to COM3
+2025-08-16 05:11:00,561 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:11:00] "GET /api/ports/test/COM3 HTTP/1.1" 200 -
+2025-08-16 05:11:01,262 - hardware.scpi_handler - INFO - Connected to COM3 at 115200 baud
+2025-08-16 05:11:01,263 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:11:01] "POST /api/connection/connect HTTP/1.1" 200 -
+2025-08-16 05:11:04,158 - services.measurement_service - ERROR - Error in start_measurement: No measurement mode set
+2025-08-16 05:11:04,159 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:11:04] "POST /api/measurement/start HTTP/1.1" 200 -
+2025-08-16 05:11:13,312 - services.measurement_service - ERROR - Error in start_measurement: No measurement mode set
+2025-08-16 05:11:13,313 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:11:13] "POST /api/measurement/start HTTP/1.1" 200 -
+2025-08-16 05:11:54,460 - services.measurement_service - ERROR - Error in start_measurement: No measurement mode set
+2025-08-16 05:11:54,461 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:11:54] "POST /api/measurement/start HTTP/1.1" 200 -
+2025-08-16 05:12:13,255 - hardware.scpi_handler - INFO - Disconnected from device
+2025-08-16 05:12:13,257 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:12:13] "POST /api/connection/disconnect HTTP/1.1" 200 -
+2025-08-16 05:12:53,016 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:12:53] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 05:12:53,060 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:12:53] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 05:12:53,064 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:12:53] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+2025-08-16 05:12:53,066 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:12:53] "[36mGET /static/js/cv_measurement.js HTTP/1.1[0m" 304 -
+2025-08-16 05:12:53,137 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:12:53] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:12:53,141 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:12:53] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:12:53,285 - routes.port_routes - INFO - Port list requested
+2025-08-16 05:12:53,285 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:12:53,287 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:12:53] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:12:53,308 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:12:53,308 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:12:53,309 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:12:53,309 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:12:53,310 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:12:53,310 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:12:53,311 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:12:53,312 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:12:53,312 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:12:53,313 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:12:53,313 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:12:53,314 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:12:53,314 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:12:53,315 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:12:53,316 - routes.port_routes - INFO - Found 0 STM32 ports
+2025-08-16 05:12:53,316 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:12:53,337 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:12:53,338 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:12:53,339 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:12:53,339 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:12:53,340 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:12:53,340 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:12:53,341 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:12:53,341 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:12:53,342 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:12:53,342 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:12:53,343 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:12:53,343 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:12:53,344 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:12:53,345 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:12:53,345 - routes.port_routes - INFO - Found 4 total available ports
+2025-08-16 05:12:53,346 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:12:53] "GET /api/ports HTTP/1.1" 200 -
+2025-08-16 05:12:55,226 - hardware.port_scanner - INFO - Successfully tested connection to COM3
+2025-08-16 05:12:55,227 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:12:55] "GET /api/ports/test/COM3 HTTP/1.1" 200 -
+2025-08-16 05:12:55,972 - hardware.scpi_handler - INFO - Connected to COM3 at 115200 baud
+2025-08-16 05:12:55,972 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:12:55] "POST /api/connection/connect HTTP/1.1" 200 -
+2025-08-16 05:13:02,048 - hardware.scpi_handler - INFO - Disconnected from device
+2025-08-16 05:13:02,049 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:02] "POST /api/connection/disconnect HTTP/1.1" 200 -
+2025-08-16 05:13:03,774 - hardware.scpi_handler - INFO - Connected to COM3 at 115200 baud
+2025-08-16 05:13:03,775 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:03] "POST /api/connection/connect HTTP/1.1" 200 -
+2025-08-16 05:13:32,420 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:32] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 05:13:32,462 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:32] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 05:13:32,466 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:32] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+2025-08-16 05:13:32,466 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:32] "[36mGET /static/js/cv_measurement.js HTTP/1.1[0m" 304 -
+2025-08-16 05:13:32,540 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:32] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:13:32,546 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:32] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:13:32,666 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:32] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:13:32,675 - routes.port_routes - INFO - Port list requested
+2025-08-16 05:13:32,677 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:13:32,698 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:13:32,699 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:13:32,699 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:13:32,700 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:13:32,701 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:13:32,701 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:13:32,702 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:13:32,703 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:13:32,703 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:13:32,704 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:13:32,705 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:13:32,705 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:13:32,706 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:13:32,707 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:13:32,707 - routes.port_routes - INFO - Found 0 STM32 ports
+2025-08-16 05:13:32,708 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:13:32,729 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:13:32,730 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:13:32,731 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:13:32,731 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:13:32,732 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:13:32,732 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:13:32,733 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:13:32,733 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:13:32,734 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:13:32,734 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:13:32,735 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:13:32,736 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:13:32,736 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:13:32,737 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:13:32,737 - routes.port_routes - INFO - Found 4 total available ports
+2025-08-16 05:13:32,738 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:32] "GET /api/ports HTTP/1.1" 200 -
+2025-08-16 05:13:35,417 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:35] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 05:13:35,446 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:35] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 05:13:35,457 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:35] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+2025-08-16 05:13:35,459 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:35] "[36mGET /static/js/cv_measurement.js HTTP/1.1[0m" 304 -
+2025-08-16 05:13:35,519 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:35] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:13:35,524 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:35] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:13:35,658 - routes.port_routes - INFO - Port list requested
+2025-08-16 05:13:35,659 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:13:35,664 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:35] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:13:35,701 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:13:35,701 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:13:35,702 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:13:35,702 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:13:35,703 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:13:35,703 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:13:35,704 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:13:35,705 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:13:35,705 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:13:35,706 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:13:35,706 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:13:35,707 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:13:35,707 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:13:35,708 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:13:35,708 - routes.port_routes - INFO - Found 0 STM32 ports
+2025-08-16 05:13:35,709 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:13:35,729 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:13:35,730 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:13:35,730 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:13:35,731 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:13:35,732 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:13:35,732 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:13:35,732 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:13:35,733 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:13:35,734 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:13:35,734 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:13:35,735 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:13:35,735 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:13:35,736 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:13:35,737 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:13:35,737 - routes.port_routes - INFO - Found 4 total available ports
+2025-08-16 05:13:35,738 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:35] "GET /api/ports HTTP/1.1" 200 -
+2025-08-16 05:13:39,594 - hardware.port_scanner - ERROR - Failed to connect to COM3: could not open port 'COM3': PermissionError(13, 'Access is denied.', None, 5)
+2025-08-16 05:13:39,595 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:39] "GET /api/ports/test/COM3 HTTP/1.1" 200 -
+2025-08-16 05:13:41,448 - hardware.scpi_handler - INFO - Disconnected from device
+2025-08-16 05:13:41,450 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:41] "POST /api/connection/disconnect HTTP/1.1" 200 -
+2025-08-16 05:13:42,359 - hardware.scpi_handler - INFO - Connected to COM3 at 115200 baud
+2025-08-16 05:13:42,361 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:13:42] "POST /api/connection/connect HTTP/1.1" 200 -
+2025-08-16 05:14:04,944 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 05:14:04,972 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 05:14:04,973 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 05:14:04,973 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 05:14:05,018 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.2.37:8080
+2025-08-16 05:14:05,019 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 05:14:05,022 - werkzeug - INFO -  * Restarting with stat
+2025-08-16 05:14:08,601 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 05:14:08,629 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 05:14:08,629 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 05:14:08,630 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 05:14:08,645 - werkzeug - WARNING -  * Debugger is active!
+2025-08-16 05:14:08,664 - werkzeug - INFO -  * Debugger PIN: 361-562-624
+2025-08-16 05:14:12,060 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:12] "GET / HTTP/1.1" 200 -
+2025-08-16 05:14:12,412 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:12] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+2025-08-16 05:14:12,428 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:12] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 05:14:12,673 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:12] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:14:12,678 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:12] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:14:12,683 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:12] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:14:12,778 - routes.port_routes - INFO - Port list requested
+2025-08-16 05:14:12,779 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:14:12,819 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:14:12,820 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:14:12,820 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:14:12,821 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:14:12,822 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:14:12,822 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:14:12,823 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:14:12,824 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:14:12,824 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:14:12,825 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:14:12,826 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:14:12,826 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:14:12,827 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:14:12,828 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:14:12,829 - routes.port_routes - INFO - Found 0 STM32 ports
+2025-08-16 05:14:12,829 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:14:12,850 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:14:12,850 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:14:12,851 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:14:12,852 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:14:12,852 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:14:12,853 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:14:12,854 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:14:12,854 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:14:12,855 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:14:12,856 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:14:12,857 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:14:12,857 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:14:12,858 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:14:12,859 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:14:12,860 - routes.port_routes - INFO - Found 4 total available ports
+2025-08-16 05:14:12,860 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:12] "GET /api/ports HTTP/1.1" 200 -
+2025-08-16 05:14:13,162 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:13] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:14:18,603 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:18] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 05:14:18,650 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:18] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 05:14:18,654 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:18] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+2025-08-16 05:14:18,656 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:18] "[36mGET /static/js/cv_measurement.js HTTP/1.1[0m" 304 -
+2025-08-16 05:14:18,766 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:18] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:14:18,772 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:18] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:14:18,910 - routes.port_routes - INFO - Port list requested
+2025-08-16 05:14:18,911 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:14:18,917 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:18] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:14:18,932 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:14:18,933 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:14:18,934 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:14:18,935 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:14:18,937 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:14:18,937 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:14:18,938 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:14:18,939 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:14:18,940 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:14:18,940 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:14:18,941 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:14:18,942 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:14:18,943 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:14:18,944 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:14:18,945 - routes.port_routes - INFO - Found 0 STM32 ports
+2025-08-16 05:14:18,945 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:14:18,974 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:14:18,975 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:14:18,975 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:14:18,976 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:14:18,977 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:14:18,977 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:14:18,978 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:14:18,979 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:14:18,980 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:14:18,981 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:14:18,982 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:14:18,983 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:14:18,983 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:14:18,984 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:14:18,985 - routes.port_routes - INFO - Found 4 total available ports
+2025-08-16 05:14:18,985 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:18] "GET /api/ports HTTP/1.1" 200 -
+2025-08-16 05:14:21,830 - hardware.port_scanner - INFO - Successfully tested connection to COM3
+2025-08-16 05:14:21,831 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:21] "GET /api/ports/test/COM3 HTTP/1.1" 200 -
+2025-08-16 05:14:22,763 - hardware.scpi_handler - INFO - Connected to COM3 at 115200 baud
+2025-08-16 05:14:22,764 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:14:22] "POST /api/connection/connect HTTP/1.1" 200 -
+2025-08-16 05:16:57,284 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:16:57] "GET /measurements HTTP/1.1" 200 -
+2025-08-16 05:16:57,328 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:16:57] "[36mGET /static/js/connection_state.js HTTP/1.1[0m" 304 -
+2025-08-16 05:16:57,331 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:16:57] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+2025-08-16 05:16:57,332 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:16:57] "GET /static/js/cv_measurement.js HTTP/1.1" 200 -
+2025-08-16 05:16:57,402 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:16:57] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:16:57,406 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:16:57] "GET /api/connection/status HTTP/1.1" 200 -
+2025-08-16 05:16:57,537 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:16:57] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-08-16 05:16:57,548 - routes.port_routes - INFO - Port list requested
+2025-08-16 05:16:57,549 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:16:57,574 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:16:57,575 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:16:57,576 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:16:57,577 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:16:57,578 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:16:57,579 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:16:57,579 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:16:57,580 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:16:57,581 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:16:57,581 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:16:57,582 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:16:57,582 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:16:57,583 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:16:57,584 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:16:57,585 - routes.port_routes - INFO - Found 0 STM32 ports
+2025-08-16 05:16:57,585 - hardware.port_scanner - DEBUG - Starting port scan...
+2025-08-16 05:16:57,610 - hardware.port_scanner - INFO - Found 4 ports in total
+2025-08-16 05:16:57,610 - hardware.port_scanner - DEBUG - Processing port: COM1
+2025-08-16 05:16:57,611 - hardware.port_scanner - INFO - Found port: COM1 - Communications Port (COM1)
+2025-08-16 05:16:57,612 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM1', 'description': 'Communications Port (COM1)', 'hwid': 'ACPI\\PNP0501\\0', 'manufacturer': '(Standard port types)', 'vid': None, 'pid': None}
+2025-08-16 05:16:57,612 - hardware.port_scanner - DEBUG - Processing port: COM6
+2025-08-16 05:16:57,613 - hardware.port_scanner - INFO - Found port: COM6 - Standard Serial over Bluetooth link (COM6)
+2025-08-16 05:16:57,613 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM6', 'description': 'Standard Serial over Bluetooth link (COM6)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&36284202&0&000000000000_00000002', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:16:57,614 - hardware.port_scanner - DEBUG - Processing port: COM3
+2025-08-16 05:16:57,615 - hardware.port_scanner - INFO - Found port: COM3 - USB Serial Device (COM3)
+2025-08-16 05:16:57,615 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM3', 'description': 'USB Serial Device (COM3)', 'hwid': 'USB VID:PID=0483:5740 SER=327939593133 LOCATION=1-3.2', 'manufacturer': 'Microsoft', 'vid': 1155, 'pid': 22336}
+2025-08-16 05:16:57,616 - hardware.port_scanner - DEBUG - Processing port: COM7
+2025-08-16 05:16:57,617 - hardware.port_scanner - INFO - Found port: COM7 - Standard Serial over Bluetooth link (COM7)
+2025-08-16 05:16:57,617 - hardware.port_scanner - DEBUG - Port details: {'device': 'COM7', 'description': 'Standard Serial over Bluetooth link (COM7)', 'hwid': 'BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\7&36284202&0&9E4F04B37652_C00000000', 'manufacturer': 'Microsoft', 'vid': None, 'pid': None}
+2025-08-16 05:16:57,618 - hardware.port_scanner - DEBUG - Port scan complete. Found 4 available ports
+2025-08-16 05:16:57,619 - routes.port_routes - INFO - Found 4 total available ports
+2025-08-16 05:16:57,619 - werkzeug - INFO - 192.168.2.37 - - [16/Aug/2025 05:16:57] "GET /api/ports HTTP/1.1" 200 -
+2025-08-16 05:17:12,387 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 05:17:12,415 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 05:17:12,415 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 05:17:12,416 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 05:17:12,456 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.2.37:8080
+2025-08-16 05:17:12,457 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 05:17:12,460 - werkzeug - INFO -  * Restarting with stat
+2025-08-16 05:17:15,820 - services.data_logging_service - INFO - Data logging directory initialized: data_logs
+2025-08-16 05:17:15,852 - __main__ - INFO - Starting H743Poten Web Interface (Development Mode)
+2025-08-16 05:17:15,853 - __main__ - INFO - Using mock SCPI handler for testing
+2025-08-16 05:17:15,853 - __main__ - INFO - Web server: http://localhost:8080
+2025-08-16 05:17:15,878 - werkzeug - WARNING -  * Debugger is active!
+2025-08-16 05:17:15,897 - werkzeug - INFO -  * Debugger PIN: 361-562-624

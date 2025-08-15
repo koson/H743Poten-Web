@@ -7,8 +7,13 @@ import os
 import json
 import logging
 import pandas as pd
+
+# Configure matplotlib to use Agg backend (non-interactive)
+import matplotlib
+matplotlib.use('Agg')  # Set backend before importing pyplot
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
@@ -167,7 +172,9 @@ class DataLoggingService:
             if 'cycle' in df.columns and df['cycle'].nunique() > 1:
                 # Plot multiple cycles with different colors
                 cycles = sorted(df['cycle'].unique())
-                colors = plt.cm.tab10(range(len(cycles)))
+                # Use different colors for each cycle
+                color_list = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
+                colors = [color_list[i % len(color_list)] for i in range(len(cycles))]
                 
                 for i, cycle in enumerate(cycles):
                     cycle_data = df[df['cycle'] == cycle]
