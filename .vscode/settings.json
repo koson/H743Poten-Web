@@ -1,0 +1,17 @@
+{
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "terminal.integrated.cwd": "${workspaceFolder}",
+    "terminal.integrated.persistentSessionReviveProcess": "never",
+    "terminal.integrated.enablePersistentSessions": false,
+    "terminal.integrated.allowWorkspaceConfiguration": true,
+    
+    // ป้องกันไม่ให้ copilot ใช้ background terminal
+    "terminal.integrated.commandsToSkipShell": [],
+    
+    // กำหนดให้ใช้ terminal ปัจจุบันแทนการสร้างใหม่
+    "terminal.integrated.splitCwd": "workspaceRoot",
+    
+    // Git settings
+    "git.defaultCloneDirectory": "${workspaceFolder}",
+    "git.openRepositoryInParentFolders": "always"
+}
