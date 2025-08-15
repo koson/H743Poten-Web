@@ -19,5 +19,34 @@ develop-eggs/
 .installed.cfg
 lib/
 lib64/
-data_logs/sessions/
-logs/h743poten.log
+
+# Data and logs - should not be tracked
+data_logs/
+logs/
+*.log
+
+# Environment files
+.env
+.venv/
+venv/
+env/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# VS Code
+.vscode/launch.json
+.vscode/tasks.json
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
