@@ -170,6 +170,12 @@
                         <button id="stop-btn" class="btn btn-danger" disabled>
                             <i class="fas fa-stop"></i> Stop
                         </button>
+                        <button id="save-measurement-btn" class="btn btn-info" disabled>
+                            <i class="fas fa-save"></i> Save Data
+                        </button>
+                        <a href="/data-browser" class="btn btn-outline-secondary">
+                            <i class="fas fa-database"></i> Browse Data
+                        </a>
                     </div>
                 </div>
             </div>
@@ -239,6 +245,6 @@
 {% block scripts %}
 <!-- Include Plotly.js -->
 <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
-<!-- Include custom JS -->
-<script src="{{ url_for('static', filename='js/measurement.js') }}"></script>
+<!-- Include CV measurement JS -->
+<script src="{{ url_for('static', filename='js/cv_measurement.js') }}"></script>
 {% endblock %}

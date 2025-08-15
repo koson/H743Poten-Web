@@ -72,6 +72,10 @@ class CVMeasurement {
         this.exportBtn?.addEventListener('click', () => this.exportData());
         this.fixRangeBtn?.addEventListener('click', () => this.fixPlotRange());
         
+        // Save measurement button
+        this.saveBtn = document.getElementById('save-measurement-btn');
+        this.saveBtn?.addEventListener('click', () => this.saveMeasurement());
+        
         // Parameter validation on input
         [this.beginInput, this.upperInput, this.lowerInput, this.rateInput, this.cyclesInput]
             .forEach(input => {
@@ -1029,6 +1033,9 @@ class CVMeasurement {
             this.exportBtn.disabled = this.plotData.x.length === 0;
         }
         
+        // Update save button state
+        this.updateSaveButtonState();
+        
         // Update parameter inputs (disable during measurement)
         [this.beginInput, this.upperInput, this.lowerInput, this.rateInput, this.cyclesInput]
             .forEach(input => {
@@ -1234,4 +1241,69 @@ CVMeasurement.prototype.fixPlotRange = function() {
         console.error('[DEBUG] Manual range fix failed:', error);
         this.showMessage('Failed to fix plot range', 'error');
     });
+};
+
+// Save current measurement data
+CVMeasurement.prototype.saveMeasurement = async function() {
+    try {
+        if (this.plotData.x.length === 0) {
+            this.showMessage('No measurement data to save', 'warning');
+            return;
+        }
+        
+        // Generate session ID
+        const sessionId = `CV_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+        
+        console.log(`[SAVE] Saving measurement with ${this.plotData.x.length} data points`);
+        
+        const response = await fetch('/api/data-logging/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: sessionId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            this.showMessage(`Measurement saved as ${data.session_id}`, 'success');
+            
+            // Disable save button after successful save
+            const saveBtn = document.getElementById('save-measurement-btn');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
+            }
+            
+            console.log(`[SAVE] Successfully saved: ${data.session_id}`);
+        } else {
+            this.showMessage(`Failed to save measurement: ${data.error}`, 'error');
+            console.error(`[SAVE] Save failed: ${data.error}`);
+        }
+        
+    } catch (error) {
+        console.error('[SAVE] Save measurement error:', error);
+        this.showMessage('Failed to save measurement', 'error');
+    }
+};
+
+// Update save button state based on data availability
+CVMeasurement.prototype.updateSaveButtonState = function() {
+    const saveBtn = document.getElementById('save-measurement-btn');
+    if (saveBtn) {
+        const hasData = this.plotData.x.length > 0;
+        const isRunning = this.isRunning;
+        
+        saveBtn.disabled = !hasData || isRunning;
+        
+        if (hasData && !isRunning) {
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Data';
+            saveBtn.title = `Save ${this.plotData.x.length} data points`;
+        } else if (isRunning) {
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Data';
+            saveBtn.title = 'Stop measurement to save data';
+        } else {
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Data';
+            saveBtn.title = 'No data to save';
+        }
+    }
 };

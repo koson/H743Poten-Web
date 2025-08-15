@@ -59,86 +59,24 @@
                     <!-- CV Parameters -->
                     <div id="cv-params" class="parameter-group">
                         <div class="mb-2">
-                            <label class="form-label">Begin E (V)</label>
-                            <input type="number" class="form-control" id="cv-begin" value="0.0" step="0.01">
-                            <div class="form-text">Starting potential</div>
+                            <label class="form-label">Initial E (V)</label>
+                            <input type="number" class="form-control" id="cv-initial" value="-0.5" step="0.1">
                         </div>
                         <div class="mb-2">
-                            <label class="form-label">Upper E (V)</label>
-                            <input type="number" class="form-control" id="cv-upper" value="0.7" step="0.01">
-                            <div class="form-text">Upper potential limit</div>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">Lower E (V)</label>
-                            <input type="number" class="form-control" id="cv-lower" value="-0.4" step="0.01">
-                            <div class="form-text">Lower potential limit</div>
+                            <label class="form-label">Final E (V)</label>
+                            <input type="number" class="form-control" id="cv-final" value="0.5" step="0.1">
                         </div>
                         <div class="mb-2">
                             <label class="form-label">Scan Rate (V/s)</label>
-                            <input type="number" class="form-control" id="cv-rate" value="0.1" step="0.001" min="0.001">
-                            <div class="form-text">Potential scan rate</div>
+                            <input type="number" class="form-control" id="cv-scan-rate" value="0.1" step="0.01">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Step E (V)</label>
+                            <input type="number" class="form-control" id="cv-step" value="0.01" step="0.001">
                         </div>
                         <div class="mb-2">
                             <label class="form-label">Cycles</label>
-                            <input type="number" class="form-control" id="cv-cycles" value="1" min="1" max="100">
-                            <div class="form-text">Number of cycles</div>
-                        </div>
-                        
-                        <!-- CV Parameter Validation -->
-                        <div id="cv-validation" class="mb-3">
-                            <!-- Validation messages will appear here -->
-                        </div>
-                        
-                        <!-- Simulation Mode Toggle -->
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="cv-simulation-mode">
-                                <label class="form-check-label" for="cv-simulation-mode">
-                                    <i class="fas fa-flask"></i> Simulation Mode
-                                </label>
-                            </div>
-                            <div class="form-text">Enable for testing without hardware connection</div>
-                        </div>
-                        
-                        <!-- CV Control Buttons -->
-                        <div id="cv-controls" class="mb-3">
-                            <div class="d-grid gap-2 mb-2">
-                                <button id="cv-start-btn" class="btn btn-success" disabled>
-                                    <i class="fas fa-play"></i> Start CV
-                                </button>
-                            </div>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <button id="cv-pause-btn" class="btn btn-warning" disabled>
-                                        <i class="fas fa-pause"></i> Pause
-                                    </button>
-                                </div>
-                                <div class="col-6">
-                                    <button id="cv-stop-btn" class="btn btn-danger" disabled>
-                                        <i class="fas fa-stop"></i> Stop
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="d-grid gap-2 mt-2">
-                                <button id="cv-defaults-btn" class="btn btn-outline-secondary">
-                                    <i class="fas fa-undo"></i> Load Defaults
-                                </button>
-                                <button id="cv-export-btn" class="btn btn-outline-primary" disabled>
-                                    <i class="fas fa-download"></i> Export Data
-                                </button>
-                                <button id="cv-fix-range-btn" class="btn btn-outline-warning">
-                                    <i class="fas fa-expand-arrows-alt"></i> Fix Plot Range
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- CV Status -->
-                        <div class="card bg-light">
-                            <div class="card-body p-2">
-                                <h6 class="card-title mb-1">CV Status</h6>
-                                <div id="cv-status" class="small text-muted">Status: Stopped</div>
-                                <div id="cv-progress" class="small text-muted">Ready to start</div>
-                            </div>
+                            <input type="number" class="form-control" id="cv-cycles" value="1" min="1">
                         </div>
                     </div>
 
@@ -232,6 +170,12 @@
                         <button id="stop-btn" class="btn btn-danger" disabled>
                             <i class="fas fa-stop"></i> Stop
                         </button>
+                        <button id="save-measurement-btn" class="btn btn-info" disabled>
+                            <i class="fas fa-save"></i> Save Data
+                        </button>
+                        <a href="/data-browser" class="btn btn-outline-secondary">
+                            <i class="fas fa-database"></i> Browse Data
+                        </a>
                     </div>
                 </div>
             </div>
@@ -258,13 +202,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <!-- CV Specific Plot -->
-                    <div id="cv-plot-container" class="measurement-plot" style="display: none;">
-                        <div id="cv-plot" style="height: 500px;"></div>
-                    </div>
-                    
-                    <!-- General Plot Container -->
-                    <div id="plot-container" class="measurement-plot" style="height: 500px;"></div>
+                    <div id="plot-container" style="height: 500px;"></div>
                 </div>
             </div>
 
@@ -307,35 +245,6 @@
 {% block scripts %}
 <!-- Include Plotly.js -->
 <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
-<!-- Include custom JS -->
-<script src="{{ url_for('static', filename='js/port_manager.js') }}"></script>
-<script src="{{ url_for('static', filename='js/measurement.js') }}"></script>
+<!-- Include CV measurement JS -->
 <script src="{{ url_for('static', filename='js/cv_measurement.js') }}"></script>
-
-<script>
-// Show/hide CV plot when CV mode is selected
-document.addEventListener('DOMContentLoaded', () => {
-    const modeSelect = document.getElementById('mode-select');
-    const cvPlotContainer = document.getElementById('cv-plot-container');
-    const generalPlotContainer = document.getElementById('plot-container');
-    
-    function updatePlotVisibility() {
-        const selectedMode = modeSelect?.value;
-        
-        if (selectedMode === 'CV') {
-            cvPlotContainer.style.display = 'block';
-            generalPlotContainer.style.display = 'none';
-        } else {
-            cvPlotContainer.style.display = 'none';
-            generalPlotContainer.style.display = 'block';
-        }
-    }
-    
-    // Initial setup
-    updatePlotVisibility();
-    
-    // Update on mode change
-    modeSelect?.addEventListener('change', updatePlotVisibility);
-});
-</script>
-{% endblock scripts %}
+{% endblock %}
