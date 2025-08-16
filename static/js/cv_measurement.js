@@ -914,9 +914,16 @@ class CVMeasurement {
             // Update UI state if status changed
             if (this.isRunning !== status.is_measuring || this.isPaused !== status.is_paused) {
                 console.log('[DEBUG] Status changed - updating UI state');
+                const wasRunning = this.isRunning;
                 this.isRunning = status.is_measuring;
                 this.isPaused = status.is_paused;
                 this.updateUIState();
+                
+                // Auto-save when measurement ends
+                if (wasRunning && !this.isRunning && this.plotData.x.length > 0) {
+                    console.log('[AUTOSAVE] Measurement completed - auto-saving data...');
+                    this.autoSaveMeasurement();
+                }
                 
                 // Stop data updates if measurement ended
                 if (!this.isRunning) {
@@ -1423,5 +1430,90 @@ CVMeasurement.prototype.updateSaveButtonState = function() {
             saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Data';
             saveBtn.title = 'No data to save';
         }
+    }
+};
+
+// Auto-save measurement data when measurement completes
+CVMeasurement.prototype.autoSaveMeasurement = async function() {
+    try {
+        if (this.plotData.x.length === 0) {
+            console.log('[AUTOSAVE] No data to auto-save');
+            return;
+        }
+        
+        // Generate session ID with autosave prefix
+        const sessionId = `CV_AUTO_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+        
+        console.log(`[AUTOSAVE] Auto-saving measurement with ${this.plotData.x.length} data points`);
+        
+        // Prepare data points in the format expected by backend
+        const dataPoints = [];
+        for (let i = 0; i < this.plotData.x.length; i++) {
+            dataPoints.push({
+                potential: this.plotData.x[i],
+                current: this.plotData.y[i],
+                cycle: this.plotData.cycle[i] || 1,
+                direction: this.plotData.direction[i] || 'forward',
+                timestamp: Date.now() / 1000 + i * 0.1  // Approximate timestamps
+            });
+        }
+        
+        // Get current parameters
+        const params = this.getCurrentParameters();
+        
+        const requestData = {
+            session_id: sessionId,
+            data_points: dataPoints,
+            parameters: {
+                begin: params.begin,
+                upper: params.upper,
+                lower: params.lower || params.begin,  // Use begin as lower if not available
+                rate: params.rate,
+                cycles: params.cycles,
+                measurement_type: 'CV',
+                total_points: dataPoints.length,
+                auto_saved: true  // Mark as auto-saved
+            }
+        };
+        
+        console.log(`[AUTOSAVE] Sending auto-save data:`, {
+            session_id: sessionId,
+            data_points_count: dataPoints.length,
+            parameters: requestData.parameters
+        });
+        
+        const response = await fetch('/api/data-logging/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            this.showMessage(`✓ Data auto-saved as ${data.session_id}`, 'success');
+            console.log(`[AUTOSAVE] Successfully auto-saved: ${data.session_id}`);
+            
+            // Update save button to show manual save is still available
+            const saveBtn = document.getElementById('save-measurement-btn');
+            if (saveBtn) {
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Copy';
+                saveBtn.title = `Auto-saved! Click to save another copy manually`;
+                saveBtn.classList.add('btn-outline-success');
+                saveBtn.classList.remove('btn-primary');
+            }
+        } else {
+            console.error(`[AUTOSAVE] Auto-save failed: ${data.error}`);
+            this.showMessage(`Auto-save failed: ${data.error}`, 'warning');
+        }
+        
+    } catch (error) {
+        console.error('[AUTOSAVE] Auto-save error:', error);
+        this.showMessage('Auto-save failed: ' + error.message, 'warning');
     }
 };
