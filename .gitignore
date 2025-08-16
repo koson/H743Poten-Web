@@ -23,3 +23,16 @@ lib64/
 # Data and logs
 data_logs/sessions/
 logs/*.log
+
+# Validation data (large CV files)
+validation_data/reference_cv_data/**/*.csv
+validation_data/reference_cv_data/**/*.txt
+validation_data/reference_cv_data/**/*.dat
+validation_data/analysis_results/**/*.png
+validation_data/analysis_results/**/*.pdf
+validation_data/analysis_results/**/*.json
+
+# Keep templates and documentation
+!validation_data/expert_annotations/template_*.json
+!validation_data/README.md
+!validation_data/validate_cv_data.py
