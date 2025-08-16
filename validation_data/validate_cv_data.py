@@ -41,8 +41,8 @@ class CVDataValidator:
             dict: Validation results
         """
         try:
-            # Read CSV data
-            df = pd.read_csv(file_path)
+            # Read CSV data - skip first line (filename metadata)
+            df = pd.read_csv(file_path, skiprows=1)
             
             validation_results = {
                 "file_path": str(file_path),
@@ -64,7 +64,7 @@ class CVDataValidator:
                 col_lower = col.lower()
                 if any(term in col_lower for term in ['potential', 'voltage', 'volt', 'v']):
                     potential_col = col
-                elif any(term in col_lower for term in ['current', 'i', 'amp']):
+                elif any(term in col_lower for term in ['current', 'i', 'amp', 'ua', 'ma', 'na', 'pa']):
                     current_col = col
             
             if potential_col is None:

@@ -36,3 +36,4 @@ validation_data/analysis_results/**/*.json
 !validation_data/expert_annotations/template_*.json
 !validation_data/README.md
 !validation_data/validate_cv_data.py
+validation_data/backup/
