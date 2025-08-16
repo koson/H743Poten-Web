@@ -668,55 +668,74 @@ class CVMeasurement {
                 index: i  // Keep original sequence
             }));
 
-            // Group points by direction and create voltage-ordered segments
-            let segments = [];
-            let currentSegment = [];
-            let prevDirection = null;
-            
-            // Sort by original sequence first
+            // Keep original time order first
             dataPairs.sort((a, b) => a.index - b.index);
             
-            // Split into segments on direction changes
+            // Identify segments based on direction changes
+            let segments = [];
+            let currentSegment = [];
+            let currentDirection = null;
+            
             dataPairs.forEach((point) => {
-                if (prevDirection !== null && point.direction !== prevDirection) {
+                if (currentDirection !== point.direction) {
                     if (currentSegment.length > 0) {
-                        segments.push(currentSegment);
-                        currentSegment = [];
+                        segments.push({
+                            points: currentSegment,
+                            direction: currentDirection
+                        });
                     }
+                    currentSegment = [point];
+                    currentDirection = point.direction;
+                } else {
+                    currentSegment.push(point);
                 }
-                currentSegment.push(point);
-                prevDirection = point.direction;
             });
+            
             if (currentSegment.length > 0) {
-                segments.push(currentSegment);
+                segments.push({
+                    points: currentSegment,
+                    direction: currentDirection
+                });
             }
             
-            // Sort points within each segment by voltage appropriately
-            segments = segments.map(segment => {
-                const isForward = segment[0].direction === 'forward';
-                return segment.sort((a, b) => isForward ? a.x - b.x : b.x - a.x);
-            });
+            console.log(`[DEBUG] Cycle ${cycle}: ${segments.length} segments found`);
             
-            // Create final sorted array with nulls between segments
-            let sortedPairs = [];
-            segments.forEach((segment, i) => {
-                if (i > 0) {
-                    // Add null point to break the line
-                    sortedPairs.push(null);
+            // Combine all segments into one continuous trace
+            let allPoints = [];
+            
+            segments.forEach((segment, segmentIndex) => {
+                if (segment.points.length === 0) return;
+                
+                // Sort points within segment based on direction
+                const sortedPoints = segment.direction === 'forward' 
+                    ? segment.points.sort((a, b) => a.x - b.x)  // ascending for forward
+                    : segment.points.sort((a, b) => b.x - a.x);  // descending for reverse
+                
+                // Add transition point between segments
+                if (segmentIndex > 0 && allPoints.length > 0) {
+                    const lastPoint = allPoints[allPoints.length - 1];
+                    const firstPoint = sortedPoints[0];
+                    
+                    // Add intermediate point if there's a gap
+                    if (Math.abs(lastPoint.x - firstPoint.x) > 0.001) {
+                        allPoints.push({
+                            x: firstPoint.x,
+                            y: (lastPoint.y + firstPoint.y) / 2,
+                            direction: 'transition'
+                        });
+                    }
                 }
-                sortedPairs.push(...segment);
+                
+                // Add all points from this segment
+                allPoints.push(...sortedPoints);
             });
             
-            console.log(`[DEBUG] Cycle ${cycle}: ${sortedPairs.length} total points`);
+            console.log(`[DEBUG] Cycle ${cycle}: ${allPoints.length} total points in combined trace`);
             
-            // Create arrays for plotting with nulls preserved
-            const traceX = sortedPairs.map(p => p ? p.x : null);
-            const traceY = sortedPairs.map(p => p ? p.y : null);
-
-            // Create a single trace with gaps between segments
+            // Create single trace for the entire cycle
             traces.push({
-                x: traceX,
-                y: traceY,
+                x: allPoints.map(p => p.x),
+                y: allPoints.map(p => p.y),
                 type: 'scatter',
                 mode: 'lines',
                 name: `Cycle ${cycle}`,
@@ -725,7 +744,7 @@ class CVMeasurement {
                     color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
                     shape: 'linear'
                 },
-                connectgaps: false,  // Do not connect gaps between segments
+                connectgaps: true,  // Connect any small gaps
                 showlegend: true,
                 legendgroup: `cycle${cycle}`,
                 visible: true,
