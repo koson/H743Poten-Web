@@ -94,18 +94,32 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #4CAF50;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            font-size: 18px;
             margin-right: 15px;
+            transition: all 0.3s ease;
+        }
+
+        /* Step Status Colors */
+        .step-number {
+            background: #6c757d;  /* สีเทา - ยังไม่ได้ทำ (default) */
         }
 
         .step.active .step-number {
-            background: #2196F3;
+            background: #ffc107;  /* สีเหลือง - กำลังทำ */
             animation: pulse 2s infinite;
+        }
+
+        .step.completed .step-number {
+            background: #28a745;  /* สีเขียว - สำเร็จแล้ว */
+        }
+
+        .step.error .step-number {
+            background: #dc3545;  /* สีแดง - มีข้อผิดพลาด */
         }
 
         .step.completed .step-number {
@@ -162,6 +176,228 @@
             font-family: monospace;
             color: #333;
             margin: 10px 0;
+        }
+
+        /* Instrument Grid Layout */
+        .instrument-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+            padding: 0 10px;
+        }
+
+        .instrument-card {
+            background: linear-gradient(135deg, #fff 0%, #f8f9ff 100%);
+            border: 2px solid #e1e8f0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+            min-height: 200px;
+        }
+
+        .instrument-card:hover {
+            transform: translateY(-5px);
+            border-color: #4169E1;
+            box-shadow: 0 8px 25px rgba(65,105,225,0.2);
+        }
+
+        .instrument-card.active {
+            border-color: #4169E1;
+            background: linear-gradient(135deg, #e8f0ff 0%, #f0f7ff 100%);
+        }
+
+        .instrument-header {
+            margin-bottom: 15px;
+        }
+
+        .instrument-header h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .quality-badge {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .instrument-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .folder-button {
+            background: linear-gradient(45deg, #4169E1, #6495ED);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(65,105,225,0.3);
+        }
+
+        .folder-button:hover {
+            background: linear-gradient(45deg, #365cce, #5a85e6);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(65,105,225,0.4);
+        }
+
+        .instrument-details {
+            width: 100%;
+            text-align: left;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            padding: 6px;
+            background: rgba(65,105,225,0.05);
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .detail-value.status {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+
+        .detail-value.status.ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .detail-value.status.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .detail-value.status.done {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .instrument-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .instrument-card {
+                min-height: 180px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .instrument-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* New Data Import Sections Styles */
+        .data-import-sections {
+            margin: 20px 0;
+        }
+
+        .import-section {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin: 15px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        .import-section:hover {
+            border-color: #4CAF50;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .section-header .instrument-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .section-title {
+            font-size: 16px;
+        }
+
+        .file-label {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .file-label:hover {
+            background: #45a049;
+        }
+
+        .folder-info {
+            margin: 10px 0;
+            font-style: italic;
+            color: #666;
+        }
+
+        .file-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .stat {
+            background: #e8f5e8;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #2e7d2e;
+        }
+
+        input[type="file"] {
+            display: none;
         }
 
         .progress-bar {
@@ -476,29 +712,115 @@
                                 </div>
                             </div>
 
-                            <h4>📂 Data Folder Selection</h4>
-                            <div class="file-selector">
-                                <input type="file" id="folderInput" webkitdirectory multiple>
-                                <div class="folder-path" id="selectedPath">No folder selected</div>
+                            <h4>📂 Data Import by Instrument Type</h4>
+                            <!-- Instrument Grid Layout -->
+                            <div class="instrument-grid">
+                                <!-- PalmSens Card -->
+                                <div class="instrument-card" id="palmsens-card">
+                                    <div class="instrument-header">
+                                        <h4>📊 PalmSens</h4>
+                                        <div class="quality-badge">Quality: 98%</div>
+                                    </div>
+                                    <div class="instrument-body">
+                                        <input type="file" id="palmsensInput" webkitdirectory multiple class="file-input">
+                                        <label for="palmsensInput" class="folder-button">
+                                            � Choose Folder
+                                        </label>
+                                        <div class="instrument-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">📊 Files:</span>
+                                                <span class="detail-value" id="palmsensCount">0</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">💾 Size:</span>
+                                                <span class="detail-value" id="palmsensSize">0 MB</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">⚡ Status:</span>
+                                                <span class="detail-value status ready" id="palmsens-status">Ready</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- STM32H743 Card -->
+                                <div class="instrument-card" id="stm32-card">
+                                    <div class="instrument-header">
+                                        <h4>⚡ STM32H743</h4>
+                                        <div class="quality-badge">Quality: 95%</div>
+                                    </div>
+                                    <div class="instrument-body">
+                                        <input type="file" id="stm32Input" webkitdirectory multiple class="file-input">
+                                        <label for="stm32Input" class="folder-button">
+                                            � Choose Folder
+                                        </label>
+                                        <div class="instrument-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">📊 Files:</span>
+                                                <span class="detail-value" id="stm32Count">0</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">💾 Size:</span>
+                                                <span class="detail-value" id="stm32Size">0 MB</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">⚡ Status:</span>
+                                                <span class="detail-value status ready" id="stm32-status">Ready</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Generic CSV Card -->
+                                <div class="instrument-card" id="generic-card">
+                                    <div class="instrument-header">
+                                        <h4>📁 Generic CSV</h4>
+                                        <div class="quality-badge">Quality: 85%</div>
+                                    </div>
+                                    <div class="instrument-body">
+                                        <input type="file" id="genericInput" webkitdirectory multiple class="file-input">
+                                        <label for="genericInput" class="folder-button">
+                                            📂 Choose Folder
+                                        </label>
+                                        <div class="instrument-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">📊 Files:</span>
+                                                <span class="detail-value" id="genericCount">0</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">💾 Size:</span>
+                                                <span class="detail-value" id="genericSize">0 MB</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">⚡ Status:</span>
+                                                <span class="detail-value status ready" id="generic-status">Ready</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="action-buttons">
-                                <button class="btn btn-primary" onclick="scanFiles()">🔍 Scan Files</button>
-                                <button class="btn btn-secondary" onclick="validateFormat()">✅ Validate Format</button>
+                                <button class="btn btn-primary" onclick="scanAllFiles()">🔍 Scan All Selected Files</button>
+                                <button class="btn btn-secondary" onclick="validateFormat()">✅ Validate File Formats</button>
                             </div>
 
                             <div class="results-grid">
                                 <div class="result-card">
-                                    <div class="result-value" id="fileCount">0</div>
-                                    <div class="result-label">Files Found</div>
+                                    <div class="result-value" id="totalFiles">0</div>
+                                    <div class="result-label">Total Files Selected</div>
                                 </div>
                                 <div class="result-card">
                                     <div class="result-value" id="validFiles">0</div>
                                     <div class="result-label">Valid CV Files</div>
                                 </div>
                                 <div class="result-card">
-                                    <div class="result-value" id="dataSize">0 MB</div>
-                                    <div class="result-label">Total Data Size</div>
+                                    <div class="result-value" id="totalSize">0 MB</div>
+                                    <div class="result-label">Combined Data Size</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-value" id="instrumentCount">0</div>
+                                    <div class="result-label">Instruments Selected</div>
                                 </div>
                             </div>
                         </div>

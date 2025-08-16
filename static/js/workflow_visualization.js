@@ -25,7 +25,22 @@ class H743WorkflowManager {
     }
 
     setupEventListeners() {
-        // File input handler
+        // Individual instrument file inputs
+        const palmsensInput = document.getElementById('palmsensInput');
+        const stm32Input = document.getElementById('stm32Input');
+        const genericInput = document.getElementById('genericInput');
+
+        if (palmsensInput) {
+            palmsensInput.addEventListener('change', (e) => this.handleInstrumentFileSelection(e, 'palmsens'));
+        }
+        if (stm32Input) {
+            stm32Input.addEventListener('change', (e) => this.handleInstrumentFileSelection(e, 'stm32'));
+        }
+        if (genericInput) {
+            genericInput.addEventListener('change', (e) => this.handleInstrumentFileSelection(e, 'generic'));
+        }
+
+        // Legacy file input for compatibility
         const folderInput = document.getElementById('folderInput');
         if (folderInput) {
             folderInput.addEventListener('change', (e) => this.handleFileSelection(e));
@@ -70,6 +85,189 @@ class H743WorkflowManager {
         if (status.preprocessing_done) this.markStepCompleted(2);
         if (status.peaks_detected) this.markStepCompleted(3);
         if (status.calibration_applied) this.markStepCompleted(4);
+    }
+
+    // New Functions for Individual Instrument File Handling
+    handleInstrumentFileSelection(event, instrumentType) {
+        const files = event.target.files;
+        console.log(`📂 Selected ${files.length} files for ${instrumentType}`);
+        
+        if (files.length === 0) return;
+
+        // Calculate total size
+        let totalSize = 0;
+        Array.from(files).forEach(file => {
+            totalSize += file.size;
+        });
+
+        // Update UI for specific instrument
+        this.updateInstrumentFileInfo(instrumentType, files, totalSize);
+        
+        // Store files data
+        if (!this.analysisData.instrumentFiles) {
+            this.analysisData.instrumentFiles = {};
+        }
+        this.analysisData.instrumentFiles[instrumentType] = {
+            files: Array.from(files),
+            totalSize: totalSize,
+            count: files.length
+        };
+
+        this.showNotification(
+            `Selected ${files.length} files for ${instrumentType} (${(totalSize / (1024 * 1024)).toFixed(2)}MB)`, 
+            'success'
+        );
+    }
+
+    updateInstrumentFileInfo(instrumentType, files, totalSize) {
+        const infoElement = document.getElementById(`${instrumentType}Info`);
+        const countElement = document.getElementById(`${instrumentType}Count`);
+        const sizeElement = document.getElementById(`${instrumentType}Size`);
+
+        if (infoElement) {
+            infoElement.textContent = `${files[0].webkitRelativePath.split('/')[0]} (${files.length} files)`;
+        }
+        if (countElement) {
+            countElement.textContent = files.length;
+        }
+        if (sizeElement) {
+            sizeElement.textContent = `${(totalSize / (1024 * 1024)).toFixed(2)} MB`;
+        }
+    }
+
+    // Step Status Management
+    updateStepStatus(stepNumber, status) {
+        const step = document.getElementById(`step${stepNumber}`);
+        if (!step) return;
+
+        // Remove existing status classes
+        step.classList.remove('active', 'completed', 'error');
+        
+        // Add new status based on the status parameter
+        switch(status) {
+            case 'current':
+                step.classList.add('active');
+                break;
+            case 'completed':
+                step.classList.add('completed');
+                break;
+            case 'error':
+                step.classList.add('error');
+                break;
+            default:
+                // Default pending state (no additional class)
+                break;
+        }
+    }
+
+    selectInstrument(instrumentType) {
+        this.selectedInstrument = instrumentType;
+        
+        // Update visual selection
+        document.querySelectorAll('.instrument-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Find and select the clicked instrument
+        document.querySelectorAll('.instrument-card').forEach(card => {
+            if (card.onclick.toString().includes(instrumentType)) {
+                card.classList.add('selected');
+            }
+        });
+
+        // Show/hide relevant import sections
+        this.updateImportSections(instrumentType);
+        
+        this.showNotification(`Selected ${instrumentType.toUpperCase()} as target instrument`, 'info');
+    }
+
+    updateImportSections(instrumentType) {
+        const sections = ['palmsens-section', 'stm32-section', 'generic-section'];
+        
+        sections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                if (instrumentType === 'generic') {
+                    // Show only generic section for generic mode
+                    section.style.display = sectionId === 'generic-section' ? 'block' : 'none';
+                } else {
+                    // Show palmsens and stm32 sections, hide generic
+                    section.style.display = sectionId === 'generic-section' ? 'none' : 'block';
+                }
+            }
+        });
+    }
+
+    async scanAllInstrumentFiles() {
+        const instrumentFiles = this.analysisData.instrumentFiles || {};
+        const availableInstruments = Object.keys(instrumentFiles);
+        
+        if (availableInstruments.length === 0) {
+            this.showNotification('Please select files for at least one instrument first', 'warning');
+            return;
+        }
+
+        this.setProcessing(true);
+        this.updateStepStatus(1, 'current');
+
+        try {
+            // Combine all files from all instruments
+            let allFiles = [];
+            let totalSize = 0;
+
+            availableInstruments.forEach(instrument => {
+                const instrumentData = instrumentFiles[instrument];
+                allFiles = allFiles.concat(instrumentData.files);
+                totalSize += instrumentData.totalSize;
+            });
+
+            // Create FormData for upload
+            const formData = new FormData();
+            allFiles.forEach(file => {
+                formData.append('files[]', file);
+            });
+
+            // Add instrument metadata
+            formData.append('instruments', JSON.stringify(availableInstruments));
+
+            this.showNotification(`Scanning ${allFiles.length} files from ${availableInstruments.length} instruments...`, 'info');
+
+            const response = await fetch(`${this.apiBase}/scan-files`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.status === 413) {
+                const errorData = await response.json();
+                this.updateStepStatus(1, 'error');
+                this.showNotification(`Upload failed: ${errorData.error}`, 'error');
+                return;
+            }
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.updateFileResults(data);
+                this.updateStepStatus(1, 'completed');
+                this.showNotification(
+                    `Successfully scanned ${data.valid_files} valid CV files from ${availableInstruments.join(', ')}`, 
+                    'success'
+                );
+                
+                setTimeout(() => {
+                    this.goToStep(2);
+                }, 1500);
+            } else {
+                this.updateStepStatus(1, 'error');
+                this.showNotification(data.error || 'File scanning failed', 'error');
+            }
+        } catch (error) {
+            console.error('File scanning failed:', error);
+            this.updateStepStatus(1, 'error');
+            this.showNotification('File scanning failed: ' + error.message, 'error');
+        } finally {
+            this.setProcessing(false);
+        }
     }
 
     // Step Navigation
@@ -1107,6 +1305,19 @@ function shareResults() {
 function goToStep(stepNumber) {
     if (window.workflowManager) {
         window.workflowManager.goToStep(stepNumber);
+    }
+}
+
+// New Functions for Updated UI
+function selectInstrument(instrumentType) {
+    if (window.workflowManager) {
+        window.workflowManager.selectInstrument(instrumentType);
+    }
+}
+
+function scanAllFiles() {
+    if (window.workflowManager) {
+        window.workflowManager.scanAllInstrumentFiles();
     }
 }
 
