@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H743Poten Analysis Workflow - Step by Step</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .workflow-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .workflow-header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .workflow-steps {
+            padding: 20px;
+        }
+
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #4CAF50;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .step:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .step.active {
+            background: #e8f5e8;
+            border-left-color: #2196F3;
+        }
+
+        .step.completed {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4CAF50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step.active .step-number {
+            background: #2196F3;
+            animation: pulse 2s infinite;
+        }
+
+        .step.completed .step-number {
+            background: #28a745;
+        }
+
+        .step.completed .step-number::after {
+            content: '✓';
+            font-size: 20px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .step-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .step-content {
+            margin-left: 55px;
+        }
+
+        .step-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .step-details {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+
+        .file-selector {
+            margin: 15px 0;
+        }
+
+        .file-selector input[type="file"] {
+            margin: 10px 0;
+        }
+
+        .folder-path {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .instrument-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .instrument-card {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .instrument-card:hover {
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .instrument-card.selected {
+            border-color: #4CAF50;
+            background: #e8f5e8;
+        }
+
+        .instrument-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 10px 0;
+        }
+
+        .result-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-waiting {
+            background: #ffc107;
+        }
+
+        .status-processing {
+            background: #17a2b8;
+            animation: blink 1s infinite;
+        }
+
+        .status-completed {
+            background: #28a745;
+        }
+
+        .status-error {
+            background: #dc3545;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .visualization-area {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 300px;
+            border: 2px dashed #ddd;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .visualization-placeholder {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .log-area {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+
+        .confidence-meter {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .confidence-bar {
+            flex: 1;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .confidence-high { background: #28a745; }
+        .confidence-medium { background: #ffc107; }
+        .confidence-low { background: #dc3545; }
+
+        .navigation {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: #4CAF50;
+            transform: scale(1.3);
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .step-content {
+                margin-left: 0;
+            }
+
+            .navigation {
+                display: none;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 H743Poten Analysis Workflow</h1>
+            <p>Step-by-Step Electrochemical Data Analysis & Cross-Instrument Calibration</p>
+        </div>
+
+        <div class="workflow-container">
+            <div class="workflow-header">
+                <h2>🚀 Interactive Analysis Pipeline</h2>
+                <p>Follow the complete workflow from data import to calibrated results</p>
+            </div>
+
+            <div class="workflow-steps">
+                <!-- Step 1: Data Import -->
+                <div class="step active" id="step1">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <div class="step-title">📁 Data Import & Instrument Selection</div>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-description">
+                            Select your instrument type and import CV data files. The system supports multiple formats including PalmSens, STM32H743, and other standard electrochemical instruments.
+                        </div>
+                        
+                        <div class="step-details">
+                            <h4>🔧 Instrument Selection</h4>
+                            <div class="instrument-selector">
+                                <div class="instrument-card" onclick="selectInstrument('palmsens')">
+                                    <div class="instrument-icon">🔬</div>
+                                    <div><strong>PalmSens</strong></div>
+                                    <div>Reference Standard</div>
+                                </div>
+                                <div class="instrument-card selected" onclick="selectInstrument('stm32')">
+                                    <div class="instrument-icon">⚡</div>
+                                    <div><strong>STM32H743</strong></div>
+                                    <div>Target Instrument</div>
+                                </div>
+                                <div class="instrument-card" onclick="selectInstrument('generic')">
+                                    <div class="instrument-icon">📊</div>
+                                    <div><strong>Generic CSV</strong></div>
+                                    <div>Custom Format</div>
+                                </div>
+                            </div>
+
+                            <h4>📂 Data Folder Selection</h4>
+                            <div class="file-selector">
+                                <input type="file" id="folderInput" webkitdirectory multiple>
+                                <div class="folder-path" id="selectedPath">No folder selected</div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="scanFiles()">🔍 Scan Files</button>
+                                <button class="btn btn-secondary" onclick="validateFormat()">✅ Validate Format</button>
+                            </div>
+
+                            <div class="results-grid">
+                                <div class="result-card">
+                                    <div class="result-value" id="fileCount">0</div>
+                                    <div class="result-label">Files Found</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-value" id="validFiles">0</div>
+                                    <div class="result-label">Valid CV Files</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-value" id="dataSize">0 MB</div>
+                                    <div class="result-label">Total Data Size</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Data Preprocessing -->
+                <div class="step" id="step2">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <div class="step-title">⚙️ Data Preprocessing & Quality Check</div>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-description">
+                            Analyze data quality, handle unit conversions, and prepare data for peak detection algorithms.
+                        </div>
+                        
+                        <div class="step-details">
+                            <h4>📊 Data Quality Analysis</h4>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="preprocessProgress" style="width: 0%">0%</div>
+                            </div>
+
+                            <div class="log-area" id="preprocessLog">
+                                <div>> Initializing data preprocessor...</div>
+                                <div>> Checking file formats...</div>
+                                <div>> Ready for processing</div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="startPreprocessing()">🚀 Start Processing</button>
+                                <button class="btn btn-info" onclick="showDataPreview()">👁️ Preview Data</button>
+                            </div>
+
+                            <div class="results-grid">
+                                <div class="result-card">
+                                    <div class="result-value" id="processedFiles">0</div>
+                                    <div class="result-label">Processed Files</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-value" id="qualityScore">0%</div>
+                                    <div class="result-label">Data Quality</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-value" id="unitFormat">Auto</div>
+                                    <div class="result-label">Unit Format</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Peak Detection -->
+                <div class="step" id="step3">
+                    <div class="step-header">
+                        <div class="step-number">3</div>
+                        <div class="step-title">🎯 Peak Detection Analysis</div>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-description">
+                            Apply advanced peak detection algorithms using our 3-method framework: DeepCV, TraditionalCV, and HybridCV.
+                        </div>
+                        
+                        <div class="step-details">
+                            <h4>🤖 Detection Method Selection</h4>
+                            <div class="instrument-selector">
+                                <div class="instrument-card selected" onclick="selectMethod('deepcv')">
+                                    <div class="instrument-icon">🧠</div>
+                                    <div><strong>DeepCV</strong></div>
+                                    <div>AI-Enhanced (Best)</div>
+                                </div>
+                                <div class="instrument-card" onclick="selectMethod('traditional')">
+                                    <div class="instrument-icon">📈</div>
+                                    <div><strong>TraditionalCV</strong></div>
+                                    <div>Classical Method</div>
+                                </div>
+                                <div class="instrument-card" onclick="selectMethod('hybrid')">
+                                    <div class="instrument-icon">⚡</div>
+                                    <div><strong>HybridCV</strong></div>
+                                    <div>Combined Approach</div>
+                                </div>
+                            </div>
+
+                            <h4>📊 Detection Progress</h4>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="detectionProgress" style="width: 0%">0%</div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="startDetection()">🎯 Start Detection</button>
+                                <button class="btn btn-info" onclick="compareResults()">⚖️ Compare Methods</button>
+                            </div>
+
+                            <div class="results-grid">
+                                <div class="result-card">
+                                    <div class="result-value" id="peaksDetected">0</div>
+                                    <div class="result-label">Peaks Detected</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-value" id="detectionConfidence">0%</div>
+                                    <div class="result-label">Confidence</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-value" id="processingTime">0.0s</div>
+                                    <div class="result-label">Processing Time</div>
+                                </div>
+                            </div>
+
+                            <div class="confidence-meter">
+                                <span>Confidence Level:</span>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill confidence-high" id="confidenceBar" style="width: 0%"></div>
+                                </div>
+                                <span id="confidenceText">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Cross-Instrument Calibration -->
+                <div class="step" id="step4">
+                    <div class="step-header">
+                        <div class="step-number">4</div>
+                        <div class="step-title">🔄 Cross-Instrument Calibration</div>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-description">
+                            Apply machine learning calibration to transform STM32H743 measurements to PalmSens-equivalent accuracy.
+                        </div>
+                        
+                        <div class="step-details">
+                            <h4>🤖 Calibration Model Selection</h4>
+                            <div class="instrument-selector">
+                                <div class="instrument-card selected" onclick="selectCalibration('random_forest')">
+                                    <div class="instrument-icon">🌲</div>
+                                    <div><strong>Random Forest</strong></div>
+                                    <div>Best Performance</div>
+                                </div>
+                                <div class="instrument-card" onclick="selectCalibration('neural_network')">
+                                    <div class="instrument-icon">🧠</div>
+                                    <div><strong>Neural Network</strong></div>
+                                    <div>Deep Learning</div>
+                                </div>
+                                <div class="instrument-card" onclick="selectCalibration('gradient_boost')">
+                                    <div class="instrument-icon">🚀</div>
+                                    <div><strong>Gradient Boosting</strong></div>
+                                    <div>High Speed</div>
+                                </div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="startCalibration()">🔄 Start Calibration</button>
+                                <button class="btn btn-info" onclick="viewCalibrationDetails()">📊 View Details</button>
+                            </div>
+
+                            <div class="results-grid">
+                                <div class="result-card">
+                                    <div class="result-value" id="calibrationAccuracy">0%</div>
+                                    <div class="result-label">Calibration R²</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-value" id="potentialError">0%</div>
+                                    <div class="result-label">Potential Error</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-value" id="currentError">0%</div>
+                                    <div class="result-label">Current Error</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Results & Visualization -->
+                <div class="step" id="step5">
+                    <div class="step-header">
+                        <div class="step-number">5</div>
+                        <div class="step-title">📊 Results & Visualization</div>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-description">
+                            View comprehensive analysis results with interactive visualizations and export options.
+                        </div>
+                        
+                        <div class="step-details">
+                            <h4>📈 Visualization Options</h4>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="showCVPlots()">📈 CV Plots</button>
+                                <button class="btn btn-info" onclick="showPeakAnalysis()">🎯 Peak Analysis</button>
+                                <button class="btn btn-secondary" onclick="showCalibrationComparison()">⚖️ Before/After</button>
+                            </div>
+
+                            <div class="visualization-area" id="visualizationArea">
+                                <div class="visualization-placeholder">
+                                    <p>📊 Interactive visualizations will appear here</p>
+                                    <p>Select a visualization option above to begin</p>
+                                </div>
+                            </div>
+
+                            <h4>💾 Export Results</h4>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="exportJSON()">📄 Export JSON</button>
+                                <button class="btn btn-info" onclick="exportCSV()">📊 Export CSV</button>
+                                <button class="btn btn-secondary" onclick="generateReport()">📋 Generate Report</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Quality Assurance -->
+                <div class="step" id="step6">
+                    <div class="step-header">
+                        <div class="step-number">6</div>
+                        <div class="step-title">✅ Quality Assurance & Validation</div>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-description">
+                            Final quality checks and validation to ensure scientific accuracy and reliability of results.
+                        </div>
+                        
+                        <div class="step-details">
+                            <h4>🔍 Quality Metrics</h4>
+                            <div class="results-grid">
+                                <div class="result-card">
+                                    <div class="result-value" id="overallQuality">0%</div>
+                                    <div class="result-label">Overall Quality</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-value" id="scientificAccuracy">0%</div>
+                                    <div class="result-label">Scientific Accuracy</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-value" id="reliabilityScore">0%</div>
+                                    <div class="result-label">Reliability Score</div>
+                                </div>
+                            </div>
+
+                            <h4>📋 Validation Status</h4>
+                            <div style="margin: 15px 0;">
+                                <div><span class="status-indicator status-completed"></span>Peak Detection Validated</div>
+                                <div><span class="status-indicator status-completed"></span>Calibration Applied</div>
+                                <div><span class="status-indicator status-completed"></span>Quality Checks Passed</div>
+                                <div><span class="status-indicator status-completed"></span>Ready for Scientific Use</div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="finalizeResults()">🎉 Finalize Results</button>
+                                <button class="btn btn-info" onclick="shareResults()">🔗 Share Results</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <div class="nav-dot active" onclick="goToStep(1)"></div>
+            <div class="nav-dot" onclick="goToStep(2)"></div>
+            <div class="nav-dot" onclick="goToStep(3)"></div>
+            <div class="nav-dot" onclick="goToStep(4)"></div>
+            <div class="nav-dot" onclick="goToStep(5)"></div>
+            <div class="nav-dot" onclick="goToStep(6)"></div>
+        </div>
+
+        <div class="footer">
+            <p>🔬 H743Poten Research Platform | Cross-Instrument Electrochemical Analysis</p>
+            <p>Developed with ❤️ for Scientific Excellence</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/workflow_visualization.js') }}"></script>
+</body>
+</html>

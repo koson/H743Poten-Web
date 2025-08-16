@@ -27,6 +27,7 @@ try:
     from .routes import ai_bp, port_bp
     from .routes.cv_routes import cv_bp
     from .routes.data_logging_routes import data_logging_bp
+    from .routes.workflow_routes import workflow_bp
 except ImportError:
     # Fall back to absolute imports (when run directly)
     from config.settings import Config
@@ -38,6 +39,7 @@ except ImportError:
     from routes import ai_bp, port_bp
     from routes.cv_routes import cv_bp
     from routes.data_logging_routes import data_logging_bp
+    from routes.workflow_routes import workflow_bp
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +85,7 @@ def create_app():
     app.register_blueprint(port_bp)
     app.register_blueprint(cv_bp)
     app.register_blueprint(data_logging_bp)
+    app.register_blueprint(workflow_bp)
     
     @app.route('/debug')
     def debug():

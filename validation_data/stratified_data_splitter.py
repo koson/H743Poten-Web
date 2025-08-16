@@ -12,6 +12,7 @@ import numpy as np
 from pathlib import Path
 import json
 import random
+import re
 from collections import defaultdict, Counter
 import shutil
 from datetime import datetime
@@ -19,8 +20,15 @@ from datetime import datetime
 class StratifiedDataSplitter:
     """แบ่งข้อมูล CV แบบ stratified สำหรับ peak detection validation"""
     
-    def __init__(self, base_path="validation_data", random_seed=42):
-        self.base_path = Path(base_path)
+    def __init__(self, base_path=None, random_seed=42):
+        if base_path is None:
+            # Use current script directory as base
+            self.base_path = Path(__file__).parent
+        else:
+            self.base_path = Path(base_path)
+            if not self.base_path.is_absolute():
+                self.base_path = Path(__file__).parent / base_path
+        
         self.palmsens_path = self.base_path / "reference_cv_data" / "palmsens"
         self.stm32_path = self.base_path / "reference_cv_data" / "stm32h743"
         self.splits_path = self.base_path / "splits"
@@ -95,61 +103,103 @@ class StratifiedDataSplitter:
         return file_metadata
     
     def _extract_file_metadata(self, file_path, instrument):
-        """สกัด metadata จากชื่อไฟล์"""
+        """สกัด metadata จากชื่อไฟล์ด้วย regex patterns"""
         
         try:
-            name = file_path.name
+            name = file_path.name.replace('.csv', '')
             
             if instrument == "palmsens":
-                # Palmsens_0.5mM_CV_100mVpS_E1_scan_01.csv
-                parts = name.replace('.csv', '').split('_')
-                if len(parts) >= 6:
-                    return {
-                        'file_path': str(file_path),
-                        'filename': name,
-                        'instrument': instrument,
-                        'concentration': parts[1],
-                        'scan_rate': parts[3],
-                        'electrode': parts[4],
-                        'scan_number': parts[6],
-                        'condition_key': f"{parts[1]}_{parts[3]}_{parts[4]}"
-                    }
-            
-            elif instrument == "stm32h743":
-                # Pipot_Ferro_0_5mM_100mVpS_E1_scan_01.csv หรือ Pipot_Ferro-10mM_100mVpS_E1_scan_01.csv
-                parts = name.replace('.csv', '').split('_')
+                # PalmSens: Palmsens_[conc]mM_CV_[rate]mVpS_E[electrode]_scan_[num]
+                # Example: Palmsens_0.5mM_CV_100mVpS_E1_scan_01.csv
+                pattern = r'Palmsens_(\d+\.?\d*)mM_CV_(\d+)mVpS_E(\d+)_scan_(\d+)'
+                match = re.match(pattern, name)
                 
-                if len(parts) >= 6:
-                    # Handle different naming patterns
-                    if 'Ferro-' in parts[1]:
-                        # Pipot_Ferro-10mM_100mVpS_E1_scan_01.csv
-                        concentration = parts[1].replace('Ferro-', '')
-                        scan_rate = parts[2]
-                        electrode = parts[3]
-                        scan_number = parts[5]
-                    else:
-                        # Pipot_Ferro_0_5mM_100mVpS_E1_scan_01.csv
-                        concentration = f"{parts[2]}.{parts[3]}"
-                        scan_rate = parts[4]
-                        electrode = parts[5]
-                        scan_number = parts[7] if len(parts) > 7 else parts[6]
+                if match:
+                    concentration = float(match.group(1))
+                    scan_rate = int(match.group(2))
+                    electrode = int(match.group(3))
+                    scan_number = int(match.group(4))
                     
                     return {
                         'file_path': str(file_path),
-                        'filename': name,
-                        'instrument': instrument,
+                        'filename': file_path.name,
+                        'instrument': 'PalmSens',
                         'concentration': concentration,
                         'scan_rate': scan_rate,
                         'electrode': electrode,
                         'scan_number': scan_number,
-                        'condition_key': f"{concentration}_{scan_rate}_{electrode}"
+                        'condition_key': f"{concentration}mM_{scan_rate}mVpS_E{electrode}"
                     }
             
-        except Exception as e:
-            print(f"⚠️  Warning: Could not parse {file_path}: {e}")
+            elif instrument == "stm32h743":
+                # STM32H743: Pipot_Ferro[_/-][conc]mM_[rate]mVpS_E[electrode]_scan_[num]
+                # Examples: 
+                # - Pipot_Ferro_0_5mM_100mVpS_E1_scan_01.csv (decimal with underscore)
+                # - Pipot_Ferro-1_0mM_200mVpS_E2_scan_05.csv (decimal with underscore after dash)
+                # - Pipot_Ferro_10mM_50mVpS_E3_scan_11.csv (integer)
+                # - Pipot_Ferro-10mM_50mVpS_E3_scan_11.csv (integer with dash)
+                
+                # Try pattern with underscore separator for decimal concentrations
+                pattern1 = r'Pipot_Ferro_(\d+)_(\d+)mM_(\d+)mVpS_E(\d+)_scan_(\d+)'
+                match = re.match(pattern1, name)
+                
+                if match:
+                    # Handle decimal concentrations like 0_5mM -> 0.5
+                    concentration = float(f"{match.group(1)}.{match.group(2)}")
+                    scan_rate = int(match.group(3))
+                    electrode = int(match.group(4))
+                    scan_number = int(match.group(5))
+                else:
+                    # Try pattern with dash separator for decimal concentrations
+                    pattern2 = r'Pipot_Ferro-(\d+)_(\d+)mM_(\d+)mVpS_E(\d+)_scan_(\d+)'
+                    match = re.match(pattern2, name)
+                    
+                    if match:
+                        # Handle decimal concentrations like 1_0mM -> 1.0
+                        concentration = float(f"{match.group(1)}.{match.group(2)}")
+                        scan_rate = int(match.group(3))
+                        electrode = int(match.group(4))
+                        scan_number = int(match.group(5))
+                    else:
+                        # Try pattern with underscore separator for integer concentrations
+                        pattern3 = r'Pipot_Ferro_(\d+)mM_(\d+)mVpS_E(\d+)_scan_(\d+)'
+                        match = re.match(pattern3, name)
+                        
+                        if match:
+                            concentration = float(match.group(1))
+                            scan_rate = int(match.group(2))
+                            electrode = int(match.group(3))
+                            scan_number = int(match.group(4))
+                        else:
+                            # Try pattern with dash separator for integer concentrations
+                            pattern4 = r'Pipot_Ferro-(\d+)mM_(\d+)mVpS_E(\d+)_scan_(\d+)'
+                            match = re.match(pattern4, name)
+                            
+                            if match:
+                                concentration = float(match.group(1))
+                                scan_rate = int(match.group(2))
+                                electrode = int(match.group(3))
+                                scan_number = int(match.group(4))
+                            else:
+                                print(f"⚠️  STM32H743 filename pattern not recognized: {name}")
+                                return None
+                
+                return {
+                    'file_path': str(file_path),
+                    'filename': file_path.name,
+                    'instrument': 'STM32H743',
+                    'concentration': concentration,
+                    'scan_rate': scan_rate,
+                    'electrode': electrode,
+                    'scan_number': scan_number,
+                    'condition_key': f"{concentration}mM_{scan_rate}mVpS_E{electrode}"
+                }
+            
             return None
-        
-        return None
+            
+        except Exception as e:
+            print(f"⚠️  Failed to extract metadata from {file_path.name}: {e}")
+            return None
     
     def _create_primary_splits(self, file_metadata):
         """สร้าง primary splits แบบ stratified 70/15/15"""
