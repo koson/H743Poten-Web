@@ -179,7 +179,40 @@ class H743WorkflowManager {
             return;
         }
 
+        // Check file size before upload
+        let totalSize = 0;
+        let oversizedFiles = [];
+        
+        Array.from(files).forEach(file => {
+            totalSize += file.size;
+            if (file.size > 50 * 1024 * 1024) { // 50MB per file
+                oversizedFiles.push({
+                    name: file.name,
+                    size: (file.size / (1024 * 1024)).toFixed(2)
+                });
+            }
+        });
+
+        // Check total size (100MB limit)
+        if (totalSize > 100 * 1024 * 1024) {
+            this.showNotification(
+                `Total file size (${(totalSize / (1024 * 1024)).toFixed(2)}MB) exceeds 100MB limit`, 
+                'error'
+            );
+            return;
+        }
+
+        // Warn about oversized individual files
+        if (oversizedFiles.length > 0) {
+            const fileList = oversizedFiles.map(f => `${f.name} (${f.size}MB)`).join('\n');
+            this.showNotification(
+                `Large files detected (>50MB per file):\n${fileList}`, 
+                'warning'
+            );
+        }
+
         this.setProcessing(true);
+        this.showNotification(`Uploading ${files.length} files (${(totalSize / (1024 * 1024)).toFixed(2)}MB)...`, 'info');
         
         try {
             // Create FormData for file upload
@@ -188,16 +221,33 @@ class H743WorkflowManager {
                 formData.append('files[]', file);
             });
 
+            // Show upload progress
+            const progressBar = this.createProgressBar('Uploading files...');
+
             const response = await fetch(`${this.apiBase}/scan-files`, {
                 method: 'POST',
                 body: formData
             });
 
+            progressBar.remove();
+
+            if (response.status === 413) {
+                const errorData = await response.json();
+                this.showNotification(
+                    `Upload failed: ${errorData.error}. Try reducing file size or selecting fewer files.`, 
+                    'error'
+                );
+                return;
+            }
+
             const data = await response.json();
             
             if (data.success) {
                 this.updateFileResults(data);
-                this.showNotification(`Scanned ${data.valid_files} valid CV files`, 'success');
+                this.showNotification(
+                    `Successfully scanned ${data.valid_files} valid CV files (${data.total_size_mb}MB)`, 
+                    'success'
+                );
                 
                 if (data.valid_files > 0) {
                     setTimeout(() => {
@@ -206,14 +256,40 @@ class H743WorkflowManager {
                     }, 1500);
                 }
             } else {
-                this.showNotification(data.error, 'error');
+                this.showNotification(data.error || 'File scanning failed', 'error');
             }
         } catch (error) {
             console.error('File scanning failed:', error);
-            this.showNotification('File scanning failed', 'error');
+            if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                this.showNotification('Network error. Please check connection and try again.', 'error');
+            } else {
+                this.showNotification('File scanning failed: ' + error.message, 'error');
+            }
         } finally {
             this.setProcessing(false);
         }
+    }
+
+    createProgressBar(message) {
+        const progressDiv = document.createElement('div');
+        progressDiv.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 10000; min-width: 300px; text-align: center;
+        `;
+        
+        progressDiv.innerHTML = `
+            <div style="margin-bottom: 15px; font-weight: bold;">${message}</div>
+            <div style="width: 100%; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;">
+                <div style="height: 100%; background: linear-gradient(45deg, #4CAF50, #45a049); 
+                           width: 0%; transition: width 0.3s ease; animation: pulse 1.5s infinite;">
+                </div>
+            </div>
+            <div style="margin-top: 10px; font-size: 0.9em; color: #666;">Please wait...</div>
+        `;
+        
+        document.body.appendChild(progressDiv);
+        return progressDiv;
     }
 
     updateFileResults(data) {

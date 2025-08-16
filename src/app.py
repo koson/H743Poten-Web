@@ -63,6 +63,11 @@ def create_app():
                 static_folder=str(static_dir),
                 static_url_path='/static')
     
+    # Configure file upload limits and security
+    app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
+    app.config['UPLOAD_EXTENSIONS'] = ['.csv', '.txt', '.xlsx', '.json']
+    app.config['SECRET_KEY'] = 'h743poten-workflow-2025'  # For session management
+    
     # Initialize services
     scpi_handler = SCPIHandler()
     measurement_service = MeasurementService(scpi_handler)
@@ -86,6 +91,35 @@ def create_app():
     app.register_blueprint(cv_bp)
     app.register_blueprint(data_logging_bp)
     app.register_blueprint(workflow_bp)
+    
+    # Error handlers
+    @app.errorhandler(413)
+    def request_entity_too_large(error):
+        """Handle file too large error"""
+        return jsonify({
+            'success': False,
+            'error': 'File too large. Maximum size is 100MB.',
+            'error_code': 413,
+            'max_size_mb': 100
+        }), 413
+    
+    @app.errorhandler(404)
+    def not_found(error):
+        """Handle 404 errors"""
+        return jsonify({
+            'success': False,
+            'error': 'Resource not found',
+            'error_code': 404
+        }), 404
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        """Handle internal server errors"""
+        return jsonify({
+            'success': False,
+            'error': 'Internal server error',
+            'error_code': 500
+        }), 500
     
     @app.route('/debug')
     def debug():

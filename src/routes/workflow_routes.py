@@ -32,40 +32,111 @@ def workflow_visualization():
 def scan_files():
     """Scan uploaded files and analyze them"""
     try:
-        files = request.files.getlist('files[]')
-        
-        if not files:
+        # Check if files were uploaded
+        if 'files[]' not in request.files:
             return jsonify({
                 'success': False,
                 'error': 'No files uploaded'
-            })
+            }), 400
+        
+        files = request.files.getlist('files[]')
+        
+        if not files or len(files) == 0:
+            return jsonify({
+                'success': False,
+                'error': 'No files uploaded'
+            }), 400
+        
+        # Check total size before processing
+        total_size = 0
+        for file in files:
+            if file.filename:
+                # Check individual file size
+                file.seek(0, 2)  # Seek to end
+                file_size = file.tell()
+                file.seek(0)     # Reset to beginning
+                
+                total_size += file_size
+                
+                # Check if individual file is too large (50MB per file)
+                if file_size > 50 * 1024 * 1024:
+                    return jsonify({
+                        'success': False,
+                        'error': f'File "{file.filename}" is too large. Maximum size per file is 50MB.',
+                        'file_size_mb': round(file_size / (1024 * 1024), 2),
+                        'max_size_mb': 50
+                    }), 413
+        
+        # Check total upload size (100MB total)
+        if total_size > 100 * 1024 * 1024:
+            return jsonify({
+                'success': False,
+                'error': 'Total upload size too large. Maximum total size is 100MB.',
+                'total_size_mb': round(total_size / (1024 * 1024), 2),
+                'max_total_mb': 100
+            }), 413
         
         # Analyze files
         total_files = len(files)
         valid_files = 0
-        total_size = 0
         file_info = []
         
+        allowed_extensions = {'.csv', '.txt', '.xlsx', '.json'}
+        
         for file in files:
-            if file.filename and (file.filename.endswith('.csv') or file.filename.endswith('.txt')):
-                valid_files += 1
-                # Note: file.content_length might not be available, so we estimate
-                total_size += len(file.read())
-                file.seek(0)  # Reset file pointer
+            if file.filename:
+                file_ext = os.path.splitext(file.filename.lower())[1]
                 
-                file_info.append({
-                    'name': file.filename,
-                    'size': len(file.read()) if hasattr(file, 'read') else 0,
-                    'type': 'CV Data' if 'cv' in file.filename.lower() else 'Electrochemical Data'
-                })
-                file.seek(0)  # Reset again
+                if file_ext in allowed_extensions:
+                    valid_files += 1
+                    
+                    # Get file size
+                    file.seek(0, 2)
+                    file_size = file.tell()
+                    file.seek(0)
+                    
+                    # Try to read a small sample to validate format
+                    try:
+                        sample = file.read(1024).decode('utf-8', errors='ignore')
+                        file.seek(0)
+                        
+                        # Detect file type based on content
+                        file_type = 'Unknown'
+                        if 'potential' in sample.lower() and 'current' in sample.lower():
+                            file_type = 'CV Data'
+                        elif ',' in sample and '\n' in sample:
+                            file_type = 'CSV Data'
+                        elif '\t' in sample:
+                            file_type = 'Tab-delimited Data'
+                        
+                    except Exception:
+                        file_type = 'Binary/Unknown'
+                    
+                    file_info.append({
+                        'name': file.filename,
+                        'size': file_size,
+                        'size_mb': round(file_size / (1024 * 1024), 2),
+                        'type': file_type,
+                        'extension': file_ext,
+                        'valid': True
+                    })
+                else:
+                    file_info.append({
+                        'name': file.filename,
+                        'size': 0,
+                        'type': 'Unsupported',
+                        'extension': file_ext,
+                        'valid': False
+                    })
         
         # Store file info in session for later steps
         session['workflow_files'] = {
             'total_files': total_files,
             'valid_files': valid_files,
             'total_size': total_size,
-            'file_info': file_info
+            'total_size_mb': round(total_size / (1024 * 1024), 2),
+            'file_info': file_info,
+            'upload_timestamp': time.time()
         }
         
         return jsonify({
@@ -73,14 +144,21 @@ def scan_files():
             'total_files': total_files,
             'valid_files': valid_files,
             'total_size_mb': round(total_size / (1024 * 1024), 2),
-            'file_info': file_info
+            'file_info': file_info,
+            'message': f'Successfully scanned {valid_files} valid files out of {total_files} total files'
         })
         
     except Exception as e:
+        # Log the full error for debugging
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"File scan error: {error_details}")
+        
         return jsonify({
             'success': False,
-            'error': str(e)
-        })
+            'error': f'Failed to scan files: {str(e)}',
+            'error_type': type(e).__name__
+        }), 500
 
 @workflow_bp.route('/api/workflow/preprocess', methods=['POST'])
 def preprocess_data():
