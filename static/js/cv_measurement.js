@@ -647,6 +647,8 @@ class CVMeasurement {
         console.log(`[DEBUG] All voltage data points:`, this.plotData.x);
         console.log(`[DEBUG] Voltage range check - Min: ${Math.min(...this.plotData.x).toFixed(4)}, Max: ${Math.max(...this.plotData.x).toFixed(4)}`);
         
+        let lastCycleEndPoint = null;
+        
         cycles.forEach((cycle, cycleIndex) => {
             // Get all points for this cycle
             const cycleIndices = this.plotData.cycle
@@ -732,10 +734,33 @@ class CVMeasurement {
             
             console.log(`[DEBUG] Cycle ${cycle}: ${allPoints.length} total points in combined trace`);
             
-            // Create single trace for the entire cycle
+            // Prepare data for this cycle
+            let cycleTraceX = [];
+            let cycleTraceY = [];
+            
+            // Add connection point from previous cycle if needed
+            if (lastCycleEndPoint && allPoints.length > 0) {
+                const firstPoint = allPoints[0];
+                // Add transition line from last cycle to this cycle
+                cycleTraceX.push(lastCycleEndPoint.x, firstPoint.x);
+                cycleTraceY.push(lastCycleEndPoint.y, firstPoint.y);
+            }
+            
+            // Add all points from this cycle
+            allPoints.forEach(point => {
+                cycleTraceX.push(point.x);
+                cycleTraceY.push(point.y);
+            });
+            
+            // Store last point for next cycle connection
+            if (allPoints.length > 0) {
+                lastCycleEndPoint = allPoints[allPoints.length - 1];
+            }
+            
+            // Create trace for this cycle
             traces.push({
-                x: allPoints.map(p => p.x),
-                y: allPoints.map(p => p.y),
+                x: cycleTraceX,
+                y: cycleTraceY,
                 type: 'scatter',
                 mode: 'lines',
                 name: `Cycle ${cycle}`,
@@ -744,7 +769,7 @@ class CVMeasurement {
                     color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
                     shape: 'linear'
                 },
-                connectgaps: true,  // Connect any small gaps
+                connectgaps: true,
                 showlegend: true,
                 legendgroup: `cycle${cycle}`,
                 visible: true,
