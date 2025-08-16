@@ -655,82 +655,80 @@ class CVMeasurement {
             
             if (cycleIndices.length === 0) return;
             
-            // Create a single trace for the entire cycle
-            const cycleX = cycleIndices.map(i => this.plotData.x[i]);
-            const cycleY = cycleIndices.map(i => this.plotData.y[i]);
-            const cycleDirection = cycleIndices.map(i => this.plotData.direction[i]);
+            // Separate forward and reverse scans for proper CV appearance
+            const forwardIndices = cycleIndices.filter(i => this.plotData.direction[i] === 'forward');
+            const reverseIndices = cycleIndices.filter(i => this.plotData.direction[i] === 'reverse');
             
-            // Create data pairs with direction info and sequence for sorting
-            const dataPairs = cycleX.map((x, i) => ({
-                x,
-                y: cycleY[i],
-                direction: cycleDirection[i],
-                index: i  // Keep original sequence
-            }));
-
-            // Group points by direction and create voltage-ordered segments
-            let segments = [];
-            let currentSegment = [];
-            let prevDirection = null;
+            // Create completely isolated traces with explicit line settings
+            const forwardX = forwardIndices.map(i => this.plotData.x[i]);
+            const forwardY = forwardIndices.map(i => this.plotData.y[i]);
+            const reverseX = reverseIndices.map(i => this.plotData.x[i]);
+            const reverseY = reverseIndices.map(i => this.plotData.y[i]);
             
-            // Sort by original sequence first
-            dataPairs.sort((a, b) => a.index - b.index);
-            
-            // Split into segments on direction changes
-            dataPairs.forEach((point) => {
-                if (prevDirection !== null && point.direction !== prevDirection) {
-                    if (currentSegment.length > 0) {
-                        segments.push(currentSegment);
-                        currentSegment = [];
-                    }
-                }
-                currentSegment.push(point);
-                prevDirection = point.direction;
-            });
-            if (currentSegment.length > 0) {
-                segments.push(currentSegment);
+            // Forward scan trace - completely isolated
+            if (forwardIndices.length > 0) {
+                // Sort forward data (ascending voltage)
+                const forwardPairs = forwardX.map((x, i) => ({ x, y: forwardY[i] }));
+                forwardPairs.sort((a, b) => a.x - b.x);
+                
+                console.log(`[DEBUG] Cycle ${cycle} Forward: ${forwardPairs.length} points`);
+                
+                traces.push({
+                    x: forwardPairs.map(p => p.x),
+                    y: forwardPairs.map(p => p.y),
+                    type: 'scatter',
+                    mode: 'markers+lines',
+                    name: `Cycle ${cycle}`,
+                    line: {
+                        width: 2,
+                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
+                        shape: 'linear'
+                    },
+                    marker: {
+                        size: 0.1,  // Extremely small markers
+                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
+                        opacity: 0  // Invisible markers
+                    },
+                    connectgaps: false,
+                    showlegend: true,
+                    legendgroup: `cycle${cycle}`,
+                    visible: true,
+                    hovertemplate: `Cycle ${cycle}<br>V: %{x:.4f}<br>I: %{y:.2e}<extra></extra>`
+                });
             }
             
-            // Sort points within each segment by voltage appropriately
-            segments = segments.map(segment => {
-                const isForward = segment[0].direction === 'forward';
-                return segment.sort((a, b) => isForward ? a.x - b.x : b.x - a.x);
-            });
-            
-            // Create final sorted array with nulls between segments
-            let sortedPairs = [];
-            segments.forEach((segment, i) => {
-                if (i > 0) {
-                    // Add null point to break the line
-                    sortedPairs.push(null);
-                }
-                sortedPairs.push(...segment);
-            });
-            
-            console.log(`[DEBUG] Cycle ${cycle}: ${sortedPairs.length} total points`);
-            
-            // Create arrays for plotting with nulls preserved
-            const traceX = sortedPairs.map(p => p ? p.x : null);
-            const traceY = sortedPairs.map(p => p ? p.y : null);
-
-            // Create a single trace with gaps between segments
-            traces.push({
-                x: traceX,
-                y: traceY,
-                type: 'scatter',
-                mode: 'lines',
-                name: `Cycle ${cycle}`,
-                line: {
-                    width: 2,
-                    color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
-                    shape: 'linear'
-                },
-                connectgaps: false,  // Do not connect gaps between segments
-                showlegend: true,
-                legendgroup: `cycle${cycle}`,
-                visible: true,
-                hovertemplate: `Cycle ${cycle}<br>V: %{x:.4f}<br>I: %{y:.2e}<extra></extra>`
-            });
+            // Add delay before reverse trace to ensure complete separation
+            if (reverseIndices.length > 0) {
+                // Sort reverse data (descending voltage)
+                const reversePairs = reverseX.map((x, i) => ({ x, y: reverseY[i] }));
+                reversePairs.sort((a, b) => b.x - a.x);
+                
+                console.log(`[DEBUG] Cycle ${cycle} Reverse: ${reversePairs.length} points`);
+                
+                // Create reverse trace with completely different configuration
+                traces.push({
+                    x: reversePairs.map(p => p.x),
+                    y: reversePairs.map(p => p.y),
+                    type: 'scatter',
+                    mode: 'markers+lines',
+                    name: `Cycle ${cycle} Rev`,
+                    line: {
+                        width: 2,
+                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
+                        shape: 'linear'
+                    },
+                    marker: {
+                        size: 0.1,  // Extremely small markers
+                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
+                        opacity: 0  // Invisible markers
+                    },
+                    connectgaps: false,
+                    showlegend: false,
+                    legendgroup: `cycle${cycle}`,
+                    visible: true,
+                    hovertemplate: `Cycle ${cycle}<br>V: %{x:.4f}<br>I: %{y:.2e}<extra></extra>`
+                });
+            }
         });
 
         // Update layout for proper CV display

@@ -5,6 +5,7 @@
 
 class CVMeasurement {
     constructor() {
+        console.log('CVMeasurement constructor called');
         this.isRunning = false;
         this.isPaused = false;
         this.currentParams = null;
@@ -22,18 +23,34 @@ class CVMeasurement {
         this.lastPlotUpdate = 0;
         this.plotUpdateThrottle = 500; // Update plot max every 500ms
         
+        // Wait for PortManager to be available
+        if (window.portManager) {
+            this.setupPortManagerListeners();
+        } else {
+            // Wait for PortManager to be initialized
+            const checkInterval = setInterval(() => {
+                if (window.portManager) {
+                    this.setupPortManagerListeners();
+                    clearInterval(checkInterval);
+                }
+            }, 100);
+        }
+        
         this.initializeUI();
         this.initializePlot();
+        
+        // Force initial validation
+        setTimeout(() => this.validateParameters(), 500);
     }
     
     initializeUI() {
         console.log('Initializing CV UI...');
         
         // Get CV parameter inputs
-        this.beginInput = document.getElementById('cv-initial');
-        this.upperInput = document.getElementById('cv-final');
-        this.lowerInput = document.getElementById('cv-initial');
-        this.rateInput = document.getElementById('cv-scan-rate');
+        this.beginInput = document.getElementById('cv-initial');      // Changed from cv-begin
+        this.upperInput = document.getElementById('cv-final');        // Changed from cv-upper
+        this.lowerInput = document.getElementById('cv-initial');      // Changed to use initial
+        this.rateInput = document.getElementById('cv-scan-rate');     // Changed from cv-rate
         this.cyclesInput = document.getElementById('cv-cycles');
         this.simulationToggle = document.getElementById('cv-simulation-mode');
         
@@ -47,37 +64,30 @@ class CVMeasurement {
         });
         
         // Get CV control buttons
-        this.startBtn = document.getElementById('start-btn');
-        this.stopBtn = document.getElementById('stop-btn');
-        this.pauseBtn = document.getElementById('pause-btn');
-        this.exportBtn = document.getElementById('export-csv-btn');
-        this.fixRangeBtn = document.getElementById('reset-zoom-btn');
+        this.startBtn = document.getElementById('start-btn');        // Changed from cv-start-btn
+        this.stopBtn = document.getElementById('stop-btn');         // Changed from cv-stop-btn
+        this.pauseBtn = document.getElementById('pause-btn');       // Changed from cv-pause-btn
+        this.exportBtn = document.getElementById('export-csv-btn'); // Changed from cv-export-btn
         
         console.log('CV buttons found:', {
             start: !!this.startBtn,
             stop: !!this.stopBtn,
             pause: !!this.pauseBtn,
-            export: !!this.exportBtn,
-            fixRange: !!this.fixRangeBtn
+            export: !!this.exportBtn
         });
         
         // Get status elements
-        this.statusText = document.getElementById('connection-status');
-        this.progressText = document.getElementById('data-table-body');
+        this.statusText = document.getElementById('cv-status');
+        this.progressText = document.getElementById('cv-progress');
         
         // Bind event listeners
         this.startBtn?.addEventListener('click', () => this.startMeasurement());
         this.stopBtn?.addEventListener('click', () => this.stopMeasurement());
         this.pauseBtn?.addEventListener('click', () => this.togglePause());
         this.exportBtn?.addEventListener('click', () => this.exportData());
-        this.fixRangeBtn?.addEventListener('click', () => this.fixPlotRange());
-        
-        // Save measurement button
-        this.saveBtn = document.getElementById('save-measurement-btn');
-        this.saveBtn?.addEventListener('click', () => this.saveMeasurement());
         
         // Parameter validation on input
-        [this.beginInput, this.upperInput, this.rateInput, this.cyclesInput]
+        [this.beginInput, this.upperInput, this.lowerInput, this.rateInput, this.cyclesInput]
             .forEach(input => {
                 if (input) {
                     input.addEventListener('input', () => {
@@ -143,21 +153,8 @@ class CVMeasurement {
     }
     
     initializePlot() {
-        console.log('[CV] Initializing plot...');
-        
-        // Try both possible plot container IDs
-        let plotDiv = document.getElementById('cv-plot');
-        if (!plotDiv) {
-            plotDiv = document.getElementById('plot-container');
-            console.log('[CV] cv-plot not found, using plot-container');
-        }
-        
-        if (!plotDiv) {
-            console.error('[CV] No plot container found! Looked for cv-plot and plot-container');
-            return;
-        }
-        
-        console.log('[CV] Found plot container:', plotDiv.id);
+        const plotDiv = document.getElementById('cv-plot');
+        if (!plotDiv) return;
         
         const layout = {
             title: 'Cyclic Voltammetry',
@@ -181,35 +178,23 @@ class CVMeasurement {
             modeBarButtonsToRemove: ['lasso2d', 'select2d']
         };
         
-        try {
-            // Initialize empty plot
-            Plotly.newPlot(plotDiv, [], layout, config);
-            console.log('[CV] Plot initialized successfully');
-            
-            this.plotDiv = plotDiv;
-            this.plotInitialized = true;
-        } catch (error) {
-            console.error('[CV] Failed to initialize plot:', error);
-        }
-    }
-    
-    getCurrentParameters() {
-        return {
-            begin: this.beginInput ? this.beginInput.value : 0.0,
-            upper: this.upperInput ? this.upperInput.value : 0.7,
-            lower: this.beginInput ? this.beginInput.value : -0.4,
-            rate: this.rateInput ? this.rateInput.value : 0.1,
-            cycles: this.cyclesInput ? this.cyclesInput.value : 1
-        };
+        // Initialize empty plot
+        Plotly.newPlot(plotDiv, [], layout, config);
+        
+        this.plotDiv = plotDiv;
     }
     
     async validateParameters() {
+        console.log('Validating parameters...');
         try {
             const params = this.getParameters();
             if (!params) {
                 console.warn('Cannot get parameters for validation');
+                this.showValidationError('Cannot get parameters');
                 return false;
             }
+            
+            console.log('Sending parameters for validation:', params);
             
             const response = await fetch('/api/cv/validate', {
                 method: 'POST',
@@ -226,6 +211,7 @@ class CVMeasurement {
             }
             
             const result = await response.json();
+            console.log('Validation response:', result);
             console.log('Validation result:', result);
             
             // Update validation UI
@@ -246,9 +232,27 @@ class CVMeasurement {
                 }
             }
             
-            // Enable/disable start button
+            // Track validation state in the start button
             if (this.startBtn) {
-                this.startBtn.disabled = !result.valid || this.isRunning;
+                console.log('Validation result:', result);
+                
+                if (result.valid) {
+                    console.log('Parameters are valid, enabling start button');
+                    this.startBtn.removeAttribute('data-invalid-params');
+                } else {
+                    console.log('Parameters are invalid, disabling start button');
+                    this.startBtn.setAttribute('data-invalid-params', 'true');
+                }
+                
+                // Debug current button state
+                console.log('Start button state after validation:', {
+                    disabled: this.startBtn.disabled,
+                    hasInvalidParams: this.startBtn.hasAttribute('data-invalid-params'),
+                    validationResult: result.valid
+                });
+                
+                // Call updateUIState to properly update button state
+                this.updateUIState();
             }
             
             return result.valid;
@@ -274,11 +278,37 @@ class CVMeasurement {
             this.startBtn.disabled = true;
         }
     }
+
+    setupPortManagerListeners() {
+        console.log('Setting up PortManager listeners');
+        
+        window.portManager.addEventListener('connected', async () => {
+            console.log('PortManager: Device connected');
+            await this.validateParameters();
+            await this.updateUIState();
+        });
+
+        window.portManager.addEventListener('disconnected', async () => {
+            console.log('PortManager: Device disconnected');
+            if (this.startBtn) {
+                this.startBtn.disabled = true;
+            }
+            await this.updateUIState();
+        });
+
+        // Handle initial connection state
+        if (window.portManager.isConnected) {
+            console.log('PortManager: Already connected on setup');
+            this.validateParameters();
+            this.updateUIState();
+        }
+    }
     
     getParameters() {
         console.log('Getting CV parameters...');
         
-        if (!this.beginInput || !this.upperInput || !this.rateInput || !this.cyclesInput) {
+        if (!this.beginInput || !this.upperInput || !this.lowerInput || 
+            !this.rateInput || !this.cyclesInput) {
             console.error('CV input elements not found');
             return null;
         }
@@ -286,7 +316,7 @@ class CVMeasurement {
         const params = {
             begin: parseFloat(this.beginInput.value) || 0.0,
             upper: parseFloat(this.upperInput.value) || 0.7,
-            lower: parseFloat(this.beginInput.value) || -0.4,
+            lower: parseFloat(this.lowerInput.value) || -0.4,
             rate: parseFloat(this.rateInput.value) || 0.1,
             cycles: parseInt(this.cyclesInput.value) || 1
         };
@@ -374,12 +404,6 @@ class CVMeasurement {
             
             // Clear previous data
             this.clearPlotData();
-            
-            // Make sure plot is initialized
-            if (!this.plotInitialized || !this.plotDiv) {
-                console.log('[CV] Plot not initialized, initializing now...');
-                this.initializePlot();
-            }
             
             // Start data updates
             this.startDataUpdates();
@@ -528,10 +552,15 @@ class CVMeasurement {
                 
                 console.log(`[DEBUG] Total points from server: ${dataPoints.length}, Current local points: ${currentDataLength}`);
                 
+                // Log last few points for inspection
+                if (dataPoints.length > 0) {
+                    console.log('[DEBUG] Latest server data points:', dataPoints.slice(-3));
+                }
+                
                 // If server has more points than we have locally, add the new ones
                 if (dataPoints.length > currentDataLength) {
                     const newPoints = dataPoints.slice(currentDataLength);
-                    console.log(`[DEBUG] Adding ${newPoints.length} new data points:`, newPoints.slice(0, 3));
+                    console.log(`[DEBUG] Adding ${newPoints.length} new data points:`, newPoints);
                     
                     // Add new data points to plot
                     newPoints.forEach((point, index) => {
@@ -539,18 +568,17 @@ class CVMeasurement {
                         this.plotData.y.push(point.current);
                         this.plotData.cycle.push(point.cycle);
                         this.plotData.direction.push(point.direction);
+                        
+                        console.log(`[DEBUG] Added point ${index + 1}/${newPoints.length}:`, {
+                            potential: point.potential,
+                            current: point.current,
+                            cycle: point.cycle,
+                            direction: point.direction
+                        });
+                        
+                        // Update plot for each new point
+                        this.updatePlotIncremental(point);
                     });
-                    
-                    // Force complete plot update after adding all new points
-                    console.log(`[DEBUG] Forcing complete plot update with ${this.plotData.x.length} total points`);
-                    console.log(`[DEBUG] Plot container exists:`, !!this.plotDiv);
-                    console.log(`[DEBUG] Plot initialized:`, this.plotInitialized);
-                    
-                    if (this.plotDiv && this.plotInitialized) {
-                        this.updatePlotComplete();
-                    } else {
-                        console.error('[DEBUG] Cannot update plot - container or initialization missing');
-                    }
                 } else {
                     console.log('[DEBUG] No new data points to add');
                 }
@@ -565,175 +593,64 @@ class CVMeasurement {
     
     updatePlotIncremental(newPoint) {
         if (!this.plotDiv) return;
+
+        console.log(`Adding point: V=${newPoint.potential}V, I=${newPoint.current}A, Cycle=${newPoint.cycle}`);
         
-        console.log(`Adding point: V=${newPoint.potential}V, I=${newPoint.current}A, Cycle=${newPoint.cycle}, Dir=${newPoint.direction}`);
+        // Add point to data arrays
+        this.plotData.x.push(newPoint.potential);
+        this.plotData.y.push(newPoint.current);
+        this.plotData.cycle.push(newPoint.cycle);
         
         // Throttle plot updates to prevent UI freeze
         const now = Date.now();
         if (now - this.lastPlotUpdate > this.plotUpdateThrottle) {
             this.updatePlotComplete();
             this.lastPlotUpdate = now;
+            console.log('Plot updated after throttle');
         }
-    }
-    
-    updatePlotComplete() {
+    }    updatePlotComplete() {
         if (!this.plotDiv || this.plotData.x.length === 0) return;
         
         console.log(`Updating complete plot with ${this.plotData.x.length} data points`);
 
-        // Calculate actual data range for proper axis scaling
-        let minPotential = Math.min(...this.plotData.x);
-        let maxPotential = Math.max(...this.plotData.x);
-        let minCurrent = Math.min(...this.plotData.y);
-        let maxCurrent = Math.max(...this.plotData.y);
-        
-        // Validate ranges (fallback to default if invalid)
-        if (!isFinite(minPotential) || !isFinite(maxPotential)) {
-            console.warn('[DEBUG] Invalid potential range, using defaults');
-            minPotential = -0.5;
-            maxPotential = 0.8;
-        }
-        if (!isFinite(minCurrent) || !isFinite(maxCurrent)) {
-            console.warn('[DEBUG] Invalid current range, using defaults');
-            minCurrent = -1e-6;
-            maxCurrent = 1e-6;
-        }
-        
-        // Force expand range to include CV parameters if data is limited
-        const cvParams = this.getCurrentParameters();
-        if (cvParams) {
-            const lowerV = parseFloat(cvParams.lower) || -0.4;
-            const upperV = parseFloat(cvParams.upper) || 0.7;
-            
-            // Ensure range includes parameter range even if data doesn't
-            minPotential = Math.min(minPotential, lowerV);
-            maxPotential = Math.max(maxPotential, upperV);
-            
-            console.log(`[DEBUG] CV parameters - Lower: ${lowerV}V, Upper: ${upperV}V`);
-            console.log(`[DEBUG] Expanded range to include parameters: ${minPotential.toFixed(4)}V to ${maxPotential.toFixed(4)}V`);
-        }
-        
-        // Force minimum range if data is too narrow
-        const dataRange = maxPotential - minPotential;
-        if (dataRange < 0.5) {
-            const center = (minPotential + maxPotential) / 2;
-            minPotential = center - 0.6;
-            maxPotential = center + 0.6;
-            console.log(`[DEBUG] Data range too narrow (${dataRange.toFixed(4)}V), forcing wider range: ${minPotential.toFixed(4)}V to ${maxPotential.toFixed(4)}V`);
-        }
-        
-        // Add 10% padding to ranges for better visualization
-        const potentialRange = maxPotential - minPotential;
-        const currentRange = Math.abs(maxCurrent - minCurrent);
-        const potentialPadding = potentialRange * 0.1;
-        const currentPadding = currentRange * 0.1;
-        
-        console.log(`[DEBUG] Raw data range - Potential: ${minPotential.toFixed(4)}V to ${maxPotential.toFixed(4)}V`);
-        console.log(`[DEBUG] Raw data range - Current: ${minCurrent.toExponential(3)}A to ${maxCurrent.toExponential(3)}A`);
-        console.log(`[DEBUG] Final plot range - Potential: ${(minPotential - potentialPadding).toFixed(4)}V to ${(maxPotential + potentialPadding).toFixed(4)}V`);
-        console.log(`[DEBUG] Plot data sample:`, {
-            firstPotential: this.plotData.x[0],
-            lastPotential: this.plotData.x[this.plotData.x.length - 1],
-            totalPoints: this.plotData.x.length,
-            sampleVoltages: this.plotData.x.slice(0, 10)
-        });
-        
         // Group data by cycle for proper CV curves
         const cycles = [...new Set(this.plotData.cycle)];
         const traces = [];
-        
-        // Extra debugging for trace data
-        console.log(`[DEBUG] Creating traces for ${cycles.length} cycles`);
-        console.log(`[DEBUG] All voltage data points:`, this.plotData.x);
-        console.log(`[DEBUG] Voltage range check - Min: ${Math.min(...this.plotData.x).toFixed(4)}, Max: ${Math.max(...this.plotData.x).toFixed(4)}`);
-        
+
         cycles.forEach((cycle, cycleIndex) => {
             // Get all points for this cycle
-            const cycleIndices = this.plotData.cycle
-                .map((c, i) => c === cycle ? i : -1)
-                .filter(i => i !== -1);
-            
-            if (cycleIndices.length === 0) return;
-            
-            // Create a single trace for the entire cycle
-            const cycleX = cycleIndices.map(i => this.plotData.x[i]);
-            const cycleY = cycleIndices.map(i => this.plotData.y[i]);
-            const cycleDirection = cycleIndices.map(i => this.plotData.direction[i]);
-            
-            // Create data pairs with direction info and sequence for sorting
-            const dataPairs = cycleX.map((x, i) => ({
-                x,
-                y: cycleY[i],
-                direction: cycleDirection[i],
-                index: i  // Keep original sequence
-            }));
+            const cyclePoints = this.plotData.cycle
+                .map((c, i) => ({
+                    index: i,
+                    potential: this.plotData.x[i],
+                    current: this.plotData.y[i],
+                    time: i  // Use index as time reference since points are added sequentially
+                }))
+                .filter((point, i) => this.plotData.cycle[i] === cycle);
 
-            // Group points by direction and create voltage-ordered segments
-            let segments = [];
-            let currentSegment = [];
-            let prevDirection = null;
-            
-            // Sort by original sequence first
-            dataPairs.sort((a, b) => a.index - b.index);
-            
-            // Split into segments on direction changes
-            dataPairs.forEach((point) => {
-                if (prevDirection !== null && point.direction !== prevDirection) {
-                    if (currentSegment.length > 0) {
-                        segments.push(currentSegment);
-                        currentSegment = [];
-                    }
-                }
-                currentSegment.push(point);
-                prevDirection = point.direction;
-            });
-            if (currentSegment.length > 0) {
-                segments.push(currentSegment);
-            }
-            
-            // Sort points within each segment by voltage appropriately
-            segments = segments.map(segment => {
-                const isForward = segment[0].direction === 'forward';
-                return segment.sort((a, b) => isForward ? a.x - b.x : b.x - a.x);
-            });
-            
-            // Create final sorted array with nulls between segments
-            let sortedPairs = [];
-            segments.forEach((segment, i) => {
-                if (i > 0) {
-                    // Add null point to break the line
-                    sortedPairs.push(null);
-                }
-                sortedPairs.push(...segment);
-            });
-            
-            console.log(`[DEBUG] Cycle ${cycle}: ${sortedPairs.length} total points`);
-            
-            // Create arrays for plotting with nulls preserved
-            const traceX = sortedPairs.map(p => p ? p.x : null);
-            const traceY = sortedPairs.map(p => p ? p.y : null);
+            if (cyclePoints.length === 0) return;
 
-            // Create a single trace with gaps between segments
+            // Sort points by time to maintain scanning order
+            cyclePoints.sort((a, b) => a.time - b.time);
+
+            // Create single trace for the entire cycle
             traces.push({
-                x: traceX,
-                y: traceY,
+                x: cyclePoints.map(p => p.potential),
+                y: cyclePoints.map(p => p.current),
                 type: 'scatter',
-                mode: 'lines',
+                mode: 'lines+markers',
                 name: `Cycle ${cycle}`,
                 line: {
                     width: 2,
                     color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
-                    shape: 'linear'
                 },
-                connectgaps: false,  // Do not connect gaps between segments
-                showlegend: true,
-                legendgroup: `cycle${cycle}`,
-                visible: true,
-                hovertemplate: `Cycle ${cycle}<br>V: %{x:.4f}<br>I: %{y:.2e}<extra></extra>`
+                marker: {
+                    size: 3,
+                    color: `hsl(${cycleIndex * 60}, 70%, 50%)`
+                },
+                showlegend: true
             });
-        });
-
-        // Update layout for proper CV display
+        });        // Update layout for proper CV display
         const layout = {
             title: {
                 text: 'Cyclic Voltammetry',
@@ -745,8 +662,7 @@ class CVMeasurement {
                 gridcolor: '#f0f0f0',
                 zeroline: true,
                 zerolinecolor: '#666',
-                range: [minPotential - potentialPadding, maxPotential + potentialPadding],
-                autorange: false
+                autorange: true
             },
             yaxis: {
                 title: 'Current (A)', 
@@ -755,8 +671,7 @@ class CVMeasurement {
                 zeroline: true,
                 zerolinecolor: '#666',
                 tickformat: '.2e',
-                range: [minCurrent - currentPadding, maxCurrent + currentPadding],
-                autorange: false
+                autorange: true
             },
             showlegend: true,
             legend: {
@@ -775,47 +690,12 @@ class CVMeasurement {
             responsive: true,
             displayModeBar: true,
             displaylogo: false,
-            modeBarButtonsToRemove: ['lasso2d', 'select2d', 'pan2d', 'autoScale2d'],
-            // Force no line connections across traces
-            plotGlPixelRatio: 2,
-            toImageButtonOptions: {
-                format: 'png',
-                filename: 'cv_measurement',
-                height: 500,
-                width: 700,
-                scale: 1
-            }
+            modeBarButtonsToRemove: ['lasso2d', 'select2d', 'pan2d', 'autoScale2d']
         };
         
         try {
-            console.log(`[DEBUG] Updating Plotly with ${traces.length} traces`);
-            console.log(`[DEBUG] X-axis range: [${minPotential - potentialPadding}, ${maxPotential + potentialPadding}]`);
-            console.log(`[DEBUG] Y-axis range: [${minCurrent - currentPadding}, ${maxCurrent + currentPadding}]`);
-            console.log(`[DEBUG] Sample trace data:`, traces.length > 0 ? {
-                traceCount: traces.length,
-                firstTrace: {
-                    name: traces[0].name,
-                    xSample: traces[0].x.slice(0, 5),
-                    ySample: traces[0].y.slice(0, 5),
-                    totalPoints: traces[0].x.length
-                }
-            } : 'No traces');
-            
-            console.log(`[DEBUG] About to call Plotly.react with layout:`, {
-                xRange: layout.xaxis.range,
-                yRange: layout.yaxis.range,
-                tracesCount: traces.length
-            });
-            
             Plotly.react(this.plotDiv, traces, layout, config);
             console.log(`Plot updated with ${traces.length} traces for ${cycles.length} cycles`);
-            
-            // Verify the plot was updated correctly
-            setTimeout(() => {
-                const currentLayout = this.plotDiv.layout;
-                console.log(`[DEBUG] Plot verification - Current x-axis range:`, currentLayout.xaxis?.range);
-                console.log(`[DEBUG] Plot verification - Current y-axis range:`, currentLayout.yaxis?.range);
-            }, 100);
         } catch (error) {
             console.error('Failed to update plot:', error);
             // Fallback: clear and recreate
@@ -837,32 +717,20 @@ class CVMeasurement {
             const status = await response.json();
             console.log('[DEBUG] Status response:', status);
             
-            // Update status text with connection info
+            // Update status text
             if (this.statusText) {
                 let statusStr = `Status: ${status.is_measuring ? 'Running' : 'Stopped'}`;
                 if (status.is_paused) statusStr += ' (Paused)';
-                if (status.device_connected !== undefined) {
-                    statusStr += ` | Device: ${status.device_connected ? 'Connected' : 'Disconnected'}`;
-                }
                 this.statusText.textContent = statusStr;
                 console.log('[DEBUG] Updated status text:', statusStr);
             }
             
-            // Update progress text with timeout info
+            // Update progress text
             if (this.progressText) {
-                let progress = `Cycle: ${status.current_cycle} | Direction: ${status.scan_direction} | ` +
+                const progress = `Cycle: ${status.current_cycle} | Direction: ${status.scan_direction} | ` +
                               `Potential: ${status.current_potential?.toFixed(3)}V | ` +
                               `Points: ${status.data_points_count} | ` +
                               `Time: ${status.elapsed_time?.toFixed(1)}s`;
-                
-                // Add timeout warning if no data received recently
-                if (status.is_measuring && status.time_since_last_data !== null && status.time_since_last_data > 5) {
-                    progress += ` | WARNING: No data for ${status.time_since_last_data?.toFixed(1)}s`;
-                    if (status.time_since_last_data > 8) {
-                        progress += ' (May stop soon)';
-                    }
-                }
-                
                 this.progressText.textContent = progress;
                 console.log('[DEBUG] Updated progress text:', progress);
             }
@@ -949,80 +817,61 @@ class CVMeasurement {
     }
     
     clearPlotData() {
-        console.log('[CV] Clearing plot data...');
         this.plotData = { x: [], y: [], cycle: [], direction: [] };
+        this.plotInitialized = false;
         
-        if (this.plotDiv && this.plotInitialized) {
-            // Clear the plot data but keep the plot structure
-            try {
-                Plotly.react(this.plotDiv, [], {
-                    title: 'Cyclic Voltammetry',
-                    xaxis: { title: 'Potential (V)', showgrid: true },
-                    yaxis: { title: 'Current (A)', showgrid: true },
-                    showlegend: true,
-                    autosize: true,
-                    margin: { l: 60, r: 40, t: 40, b: 60 }
-                });
-                console.log('[CV] Plot cleared successfully');
-            } catch (error) {
-                console.error('[CV] Error clearing plot:', error);
-            }
+        if (this.plotDiv) {
+            // Clear the plot completely
+            Plotly.react(this.plotDiv, []);
         }
     }
     
-    updateUIState() {
+    async updateUIState() {
         // Get connection state from multiple sources with better detection
         let isConnected = false;
-        
-        console.log('[CV] updateUIState called, checking connection...');
         
         // Method 1: Check PortManager directly
         if (window.portManager && typeof window.portManager.isConnected === 'boolean') {
             isConnected = window.portManager.isConnected;
-            console.log('[CV] Method 1 - PortManager.isConnected:', isConnected);
+            console.log('Connection state from PortManager:', isConnected);
         }
-        // Method 2: Check global connectionState
-        else if (typeof connectionState !== 'undefined' && typeof connectionState.isConnected === 'boolean') {
-            isConnected = connectionState.isConnected;
-            console.log('[CV] Method 2 - connectionState.isConnected:', isConnected);
-        }
-        // Method 3: Check connection status from DOM
-        else {
-            const statusElement = document.getElementById('connection-status');
-            if (statusElement) {
-                isConnected = statusElement.textContent.includes('Connected');
-                console.log('[CV] Method 3 - DOM status element:', statusElement.textContent, 'isConnected:', isConnected);
+        // Method 2: Check API directly
+        try {
+            const response = await fetch('/api/connection/status');
+            if (response.ok) {
+                const status = await response.json();
+                isConnected = status.connected;
+                console.log('Connection state from API:', isConnected);
             }
+        } catch (e) {
+            console.warn('Failed to check connection via API:', e);
         }
         
-        console.log('[CV] Final connection state:', isConnected);
-        console.log('[CV] Current UI state:', {
-            isRunning: this.isRunning,
-            isPaused: this.isPaused,
-            isConnected: isConnected,
-            startBtnExists: !!this.startBtn,
-            startBtnDisabled: this.startBtn ? this.startBtn.disabled : 'N/A'
+        // Method 3: Check global connectionState
+        if (typeof connectionState !== 'undefined' && typeof connectionState.connected === 'boolean') {
+            isConnected = isConnected || connectionState.connected;
+            console.log('Connection state from global:', connectionState.connected);
+        }
+        
+        // Debug connection state
+        console.log('Connection Status Debug:', {
+            portManagerExists: !!window.portManager,
+            portManagerConnected: window.portManager?.isConnected,
+            globalConnectionState: typeof connectionState !== 'undefined' ? connectionState.connected : 'undefined',
+            finalIsConnected: isConnected
         });
         
         // Update button states
         if (this.startBtn) {
-            const shouldDisable = this.isRunning || !isConnected;
-            this.startBtn.disabled = shouldDisable;
-            console.log('[CV] Start button - should disable:', shouldDisable, 'reasons:', {
+            // Only enable if connected, not running, and parameters are valid
+            const paramsValid = !this.startBtn.hasAttribute('data-invalid-params');
+            this.startBtn.disabled = this.isRunning || !isConnected || !paramsValid;
+            console.log('Start button state:', {
+                disabled: this.startBtn.disabled,
                 isRunning: this.isRunning,
-                notConnected: !isConnected
+                isConnected: isConnected,
+                paramsValid: paramsValid
             });
-            
-            // Visual feedback
-            if (!shouldDisable) {
-                this.startBtn.classList.remove('btn-secondary');
-                this.startBtn.classList.add('btn-success');
-            } else {
-                this.startBtn.classList.remove('btn-success');
-                this.startBtn.classList.add('btn-secondary');
-            }
-        } else {
-            console.log('[CV] Start button not found!');
         }
         
         if (this.stopBtn) {
@@ -1040,47 +889,13 @@ class CVMeasurement {
             this.exportBtn.disabled = this.plotData.x.length === 0;
         }
         
-        // Update save button state
-        this.updateSaveButtonState();
-        
         // Update parameter inputs (disable during measurement)
-        [this.beginInput, this.upperInput, this.rateInput, this.cyclesInput]
+        [this.beginInput, this.upperInput, this.lowerInput, this.rateInput, this.cyclesInput]
             .forEach(input => {
                 if (input) {
                     input.disabled = this.isRunning;
                 }
             });
-    }
-    
-    fixPlotRange() {
-        console.log('[DEBUG] Manually fixing plot range...');
-        
-        if (!this.plotDiv) {
-            console.warn('Plot not initialized');
-            this.showMessage('Plot not initialized', 'error');
-            return;
-        }
-        
-        // Get current parameters
-        const params = this.getCurrentParameters();
-        const lowerV = parseFloat(params.lower) || -0.4;
-        const upperV = parseFloat(params.upper) || 0.7;
-        
-        // Force reset plot range to parameter range
-        const layout_update = {
-            'xaxis.range': [lowerV - 0.1, upperV + 0.1],
-            'xaxis.autorange': false
-        };
-        
-        console.log(`[DEBUG] Forcing plot range to: ${lowerV - 0.1}V to ${upperV + 0.1}V`);
-        
-        Plotly.relayout(this.plotDiv, layout_update).then(() => {
-            console.log('[DEBUG] Plot range fixed successfully');
-            this.showMessage(`Plot range fixed: ${lowerV}V to ${upperV}V`, 'success');
-        }).catch(error => {
-            console.error('[DEBUG] Failed to fix plot range:', error);
-            this.showMessage('Failed to fix plot range', 'error');
-        });
     }
     
     showMessage(message, type = 'info') {
@@ -1104,64 +919,64 @@ class CVMeasurement {
             if (this.rateInput) this.rateInput.value = defaults.rate;
             if (this.cyclesInput) this.cyclesInput.value = defaults.cycles;
             
-            this.validateParameters();
+            // Clear any existing validation state
+            if (this.startBtn) {
+                this.startBtn.removeAttribute('data-invalid-params');
+            }
+            
+            // Validate parameters and update UI
+            await this.validateParameters();
+            this.updateUIState();
             
         } catch (error) {
             console.error('Failed to load defaults:', error);
+            this.showMessage('Failed to load default parameters', 'error');
         }
     }
 }
 
 // Initialize CV measurement when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('[CV] DOM loaded, checking for cv-controls...');
-    
-    // Wait a bit for other scripts to initialize
-    setTimeout(() => {
-        if (document.getElementById('cv-controls')) {
-            console.log('[CV] Found cv-controls, initializing CV measurement...');
-            window.cvMeasurement = new CVMeasurement();
+document.addEventListener('DOMContentLoaded', async () => {
+    if (document.getElementById('cv-controls')) {
+        window.cvMeasurement = new CVMeasurement();
+        
+        // Initial connection check and setup
+        console.log('Initial connection check...');
+        
+        // Load defaults on page load
+        await window.cvMeasurement.loadDefaults();
+        
+        // Force an immediate UI state update
+        await window.cvMeasurement.updateUIState();
+        
+        // Listen for port manager events if available
+        if (window.portManager) {
+            window.portManager.addEventListener('connected', async () => {
+                console.log('PortManager connected event');
+                await window.cvMeasurement.updateUIState();
+            });
             
-            // Load defaults on page load
-            window.cvMeasurement.loadDefaults();
-        } else {
-            console.log('[CV] cv-controls not found, looking for start-btn...');
-            if (document.getElementById('start-btn')) {
-                console.log('[CV] Found start-btn, initializing CV measurement for measurement page...');
-                window.cvMeasurement = new CVMeasurement();
-                
-                // Force check connection state every second
-                setInterval(() => {
-                    if (window.cvMeasurement) {
-                        console.log('[CV] Periodic UI update check...');
-                        window.cvMeasurement.updateUIState();
-                    }
-                }, 1000);
-            } else {
-                console.log('[CV] Neither cv-controls nor start-btn found, skipping CV initialization');
-            }
+            window.portManager.addEventListener('disconnected', async () => {
+                console.log('PortManager disconnected event');
+                await window.cvMeasurement.updateUIState();
+            });
         }
         
-        // Update UI state based on connection
-        // Check if connectionState exists and has addEventListener
-        if (typeof connectionState !== 'undefined' && connectionState.addListener) {
-            console.log('[CV] Setting up connectionState listener...');
-            connectionState.addListener((state) => {
-                console.log('[CV] Connection state changed:', state);
-                if (window.cvMeasurement) {
-                    window.cvMeasurement.updateUIState();
-                }
+        // Listen for global connection state changes
+        if (typeof connectionState !== 'undefined' && connectionState.addEventListener) {
+            connectionState.addEventListener('change', async (event) => {
+                console.log('Connection state changed:', event);
+                await window.cvMeasurement.updateUIState();
             });
-        } else {
-            console.log('[CV] connectionState not available, using fallback periodic check');
-            // Fallback: Check connection state periodically
-            setInterval(() => {
-                if (window.cvMeasurement) {
-                    window.cvMeasurement.updateUIState();
-                }
-            }, 1000);
         }
-    }, 500); // Wait 500ms for other scripts
+        
+        // Periodic state check as fallback
+        setInterval(async () => {
+            if (window.cvMeasurement) {
+                await window.cvMeasurement.updateUIState();
+            }
+        }, 1000);
+    }
 });
 
 // Add default button handler
@@ -1217,167 +1032,6 @@ CVMeasurement.prototype.setSimulationMode = async function(enabled) {
         // Revert toggle state
         if (this.simulationToggle) {
             this.simulationToggle.checked = !enabled;
-        }
-    }
-};
-
-// Function to manually fix plot range when automatic detection fails
-window.fixPlotRange = function() {
-    if (window.cvMeasurement && window.cvMeasurement.fixPlotRange) {
-        window.cvMeasurement.fixPlotRange();
-    }
-};
-
-// Add fixPlotRange method to CVMeasurement prototype
-CVMeasurement.prototype.fixPlotRange = function() {
-    if (!this.plotDiv || this.plotData.x.length === 0) {
-        console.warn('[DEBUG] Cannot fix plot range - no plot data available');
-        return;
-    }
-    
-    console.log('[DEBUG] Manual plot range fix initiated');
-    
-    // Get CV parameters for expected range
-    const cvParams = this.getCurrentParameters();
-    let lowerV = -0.4, upperV = 0.7;  // Default range
-    
-    if (cvParams) {
-        lowerV = parseFloat(cvParams.lower) || -0.4;
-        upperV = parseFloat(cvParams.upper) || 0.7;
-    }
-    
-    // Calculate actual data range
-    const minV = Math.min(...this.plotData.x);
-    const maxV = Math.max(...this.plotData.x);
-    const minI = Math.min(...this.plotData.y);
-    const maxI = Math.max(...this.plotData.y);
-    
-    // Use the wider of parameter range vs data range
-    const finalMinV = Math.min(lowerV, minV);
-    const finalMaxV = Math.max(upperV, maxV);
-    
-    console.log(`[DEBUG] Range fix - Data: ${minV.toFixed(4)} to ${maxV.toFixed(4)}V`);
-    console.log(`[DEBUG] Range fix - Params: ${lowerV.toFixed(4)} to ${upperV.toFixed(4)}V`);
-    console.log(`[DEBUG] Range fix - Final: ${finalMinV.toFixed(4)} to ${finalMaxV.toFixed(4)}V`);
-    
-    // Update plot layout with explicit range
-    const update = {
-        'xaxis.range': [finalMinV - 0.05, finalMaxV + 0.05],
-        'yaxis.range': [minI - Math.abs(minI) * 0.1, maxI + Math.abs(maxI) * 0.1],
-        'xaxis.autorange': false,
-        'yaxis.autorange': false
-    };
-    
-    Plotly.relayout(this.plotDiv, update).then(() => {
-        console.log('[DEBUG] Manual range fix completed successfully');
-        this.showMessage('Plot range fixed manually', 'success');
-    }).catch(error => {
-        console.error('[DEBUG] Manual range fix failed:', error);
-        this.showMessage('Failed to fix plot range', 'error');
-    });
-};
-
-// Save current measurement data
-CVMeasurement.prototype.saveMeasurement = async function() {
-    try {
-        if (this.plotData.x.length === 0) {
-            this.showMessage('No measurement data to save', 'warning');
-            return;
-        }
-        
-        // Generate session ID
-        const sessionId = `CV_${new Date().toISOString().replace(/[:.]/g, '-')}`;
-        
-        console.log(`[SAVE] Saving measurement with ${this.plotData.x.length} data points`);
-        
-        // Prepare data points in the format expected by backend
-        const dataPoints = [];
-        for (let i = 0; i < this.plotData.x.length; i++) {
-            dataPoints.push({
-                potential: this.plotData.x[i],
-                current: this.plotData.y[i],
-                cycle: this.plotData.cycle[i] || 1,
-                direction: this.plotData.direction[i] || 'forward',
-                timestamp: Date.now() / 1000 + i * 0.1  // Approximate timestamps
-            });
-        }
-        
-        // Get current parameters
-        const params = this.getCurrentParameters();
-        
-        const requestData = {
-            session_id: sessionId,
-            data_points: dataPoints,
-            parameters: {
-                begin: params.begin,
-                upper: params.upper,
-                lower: params.lower || params.begin,  // Use begin as lower if not available
-                rate: params.rate,
-                cycles: params.cycles,
-                measurement_type: 'CV',
-                total_points: dataPoints.length
-            }
-        };
-        
-        console.log(`[SAVE] Sending data:`, {
-            session_id: sessionId,
-            data_points_count: dataPoints.length,
-            parameters: requestData.parameters
-        });
-        
-        const response = await fetch('/api/data-logging/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestData)
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            this.showMessage(`Measurement saved as ${data.session_id}`, 'success');
-            
-            // Disable save button after successful save
-            const saveBtn = document.getElementById('save-measurement-btn');
-            if (saveBtn) {
-                saveBtn.disabled = true;
-                saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
-            }
-            
-            console.log(`[SAVE] Successfully saved: ${data.session_id}`);
-        } else {
-            this.showMessage(`Failed to save measurement: ${data.error}`, 'error');
-            console.error(`[SAVE] Save failed: ${data.error}`);
-        }
-        
-    } catch (error) {
-        console.error('[SAVE] Save measurement error:', error);
-        this.showMessage('Failed to save measurement: ' + error.message, 'error');
-    }
-};
-
-// Update save button state based on data availability
-CVMeasurement.prototype.updateSaveButtonState = function() {
-    const saveBtn = document.getElementById('save-measurement-btn');
-    if (saveBtn) {
-        const hasData = this.plotData.x.length > 0;
-        const isRunning = this.isRunning;
-        
-        saveBtn.disabled = !hasData || isRunning;
-        
-        if (hasData && !isRunning) {
-            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Data';
-            saveBtn.title = `Save ${this.plotData.x.length} data points`;
-        } else if (isRunning) {
-            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Data';
-            saveBtn.title = 'Stop measurement to save data';
-        } else {
-            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Data';
-            saveBtn.title = 'No data to save';
         }
     }
 };
