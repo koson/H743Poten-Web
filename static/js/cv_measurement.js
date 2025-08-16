@@ -22,6 +22,12 @@ class CVMeasurement {
         this.lastPlotUpdate = 0;
         this.plotUpdateThrottle = 500; // Update plot max every 500ms
         
+        // Initialize plot parameters
+        const initParams = this.getCurrentParameters();
+        this.targetLowerV = parseFloat(initParams?.lower || -0.4);
+        this.targetUpperV = parseFloat(initParams?.upper || 0.7);
+        this.targetStartV = parseFloat(initParams?.begin || -0.4);
+        
         this.initializeUI();
         this.initializePlot();
     }
@@ -297,15 +303,24 @@ class CVMeasurement {
     
     async startMeasurement() {
         try {
-            // Check connection using multiple methods
+            // Check connection status or simulation mode
             let isConnected = false;
+            let isSimulation = this.simulationToggle?.checked || false;
             
-            // Method 1: PortManager
-            if (window.portManager && typeof window.portManager.isConnected === 'boolean') {
+            console.log('[DEBUG] Checking connection state:', {
+                simulationMode: isSimulation,
+                simulationToggleExists: !!this.simulationToggle
+            });
+            
+            // Allow start if in simulation mode
+            if (isSimulation) {
+                isConnected = true;
+                console.log('[DEBUG] Simulation mode active, bypassing connection check');
+            } 
+            // Otherwise check real connection
+            else if (window.portManager && typeof window.portManager.isConnected === 'boolean') {
                 isConnected = window.portManager.isConnected;
-            }
-            // Method 2: API call to check connection
-            else {
+            } else {
                 try {
                     const response = await fetch('/api/connection/status');
                     const status = await response.json();
@@ -598,204 +613,344 @@ class CVMeasurement {
         
         console.log(`Updating complete plot with ${this.plotData.x.length} data points`);
 
-        // Calculate actual data range for proper axis scaling
+        // Use stored voltage parameters
+        const currentLowerV = this.targetLowerV;
+        const currentUpperV = this.targetUpperV;
+        const targetStartV = parseFloat(currentParams?.begin || -0.4);
+        
+        console.log(`[DEBUG] CV Target Range: ${targetLowerV}V to ${targetUpperV}V, Start: ${targetStartV}V`);
+        
+        // Helper function to find cycle transition points
+        const findTransitionPoints = (voltages) => {
+            if (voltages.length < 2) return { minPoints: [], maxPoints: [] };
+            
+            // Find local extrema
+            const minPoints = [];
+            const maxPoints = [];
+            const threshold = 0.05;
+            
+            for (let i = 1; i < voltages.length - 1; i++) {
+                if (Math.abs(voltages[i] - targetLowerV) < threshold) {
+                    minPoints.push(i);
+                }
+                if (Math.abs(voltages[i] - targetUpperV) < threshold) {
+                    maxPoints.push(i);
+                }
+            }
+            
+            return { minPoints, maxPoints };
+        };
+
+        // Find cycle transition points
+        const { minPoints, maxPoints } = findTransitionPoints(this.plotData.x);
+        console.log(`[DEBUG] Found transitions:`, 
+            `${minPoints.length} at lower voltage,`,
+            `${maxPoints.length} at upper voltage`);
+            
+        // Calculate actual ranges for axis scaling
         let minPotential = Math.min(...this.plotData.x);
         let maxPotential = Math.max(...this.plotData.x);
         let minCurrent = Math.min(...this.plotData.y);
         let maxCurrent = Math.max(...this.plotData.y);
         
-        // Validate ranges (fallback to default if invalid)
+        // Default ranges if data is invalid
         if (!isFinite(minPotential) || !isFinite(maxPotential)) {
-            console.warn('[DEBUG] Invalid potential range, using defaults');
             minPotential = -0.5;
             maxPotential = 0.8;
+            console.warn('[DEBUG] Using default potential range');
         }
         if (!isFinite(minCurrent) || !isFinite(maxCurrent)) {
-            console.warn('[DEBUG] Invalid current range, using defaults');
             minCurrent = -1e-6;
             maxCurrent = 1e-6;
+            console.warn('[DEBUG] Using default current range');
         }
         
-        // Force expand range to include CV parameters if data is limited
-        const cvParams = this.getCurrentParameters();
-        if (cvParams) {
-            const lowerV = parseFloat(cvParams.lower) || -0.4;
-            const upperV = parseFloat(cvParams.upper) || 0.7;
-            
-            // Ensure range includes parameter range even if data doesn't
-            minPotential = Math.min(minPotential, lowerV);
-            maxPotential = Math.max(maxPotential, upperV);
-            
-            console.log(`[DEBUG] CV parameters - Lower: ${lowerV}V, Upper: ${upperV}V`);
-            console.log(`[DEBUG] Expanded range to include parameters: ${minPotential.toFixed(4)}V to ${maxPotential.toFixed(4)}V`);
-        }
+        // Ensure range includes target voltages and add minimal padding
+        minPotential = Math.min(minPotential, targetLowerV - 0.1);
+        maxPotential = Math.max(maxPotential, targetUpperV + 0.1);
         
-        // Force minimum range if data is too narrow
-        const dataRange = maxPotential - minPotential;
-        if (dataRange < 0.5) {
+        // Force minimal range if data is too narrow
+        if (maxPotential - minPotential < 0.5) {
             const center = (minPotential + maxPotential) / 2;
-            minPotential = center - 0.6;
-            maxPotential = center + 0.6;
-            console.log(`[DEBUG] Data range too narrow (${dataRange.toFixed(4)}V), forcing wider range: ${minPotential.toFixed(4)}V to ${maxPotential.toFixed(4)}V`);
+            minPotential = center - 0.3;
+            maxPotential = center + 0.3;
+            console.log('[DEBUG] Expanded narrow voltage range');
         }
         
-        // Add 10% padding to ranges for better visualization
-        const potentialRange = maxPotential - minPotential;
-        const currentRange = Math.abs(maxCurrent - minCurrent);
-        const potentialPadding = potentialRange * 0.1;
-        const currentPadding = currentRange * 0.1;
+        // Add padding to ranges for visualization
+        const potentialPadding = (maxPotential - minPotential) * 0.1;
+        const currentPadding = Math.abs(maxCurrent - minCurrent) * 0.1;
         
-        console.log(`[DEBUG] Raw data range - Potential: ${minPotential.toFixed(4)}V to ${maxPotential.toFixed(4)}V`);
-        console.log(`[DEBUG] Raw data range - Current: ${minCurrent.toExponential(3)}A to ${maxCurrent.toExponential(3)}A`);
-        console.log(`[DEBUG] Final plot range - Potential: ${(minPotential - potentialPadding).toFixed(4)}V to ${(maxPotential + potentialPadding).toFixed(4)}V`);
-        console.log(`[DEBUG] Plot data sample:`, {
-            firstPotential: this.plotData.x[0],
-            lastPotential: this.plotData.x[this.plotData.x.length - 1],
-            totalPoints: this.plotData.x.length,
-            sampleVoltages: this.plotData.x.slice(0, 10)
-        });
-        
-        // Group data by cycle for proper CV curves
-        const cycles = [...new Set(this.plotData.cycle)];
-        const traces = [];
-        
-        // Extra debugging for trace data
-        console.log(`[DEBUG] Creating traces for ${cycles.length} cycles`);
-        console.log(`[DEBUG] All voltage data points:`, this.plotData.x);
-        console.log(`[DEBUG] Voltage range check - Min: ${Math.min(...this.plotData.x).toFixed(4)}, Max: ${Math.max(...this.plotData.x).toFixed(4)}`);
-        
-        cycles.forEach((cycle, cycleIndex) => {
-            // Get all points for this cycle
-            const cycleIndices = this.plotData.cycle
-                .map((c, i) => c === cycle ? i : -1)
-                .filter(i => i !== -1);
-            
-            if (cycleIndices.length === 0) return;
-            
-            // Separate forward and reverse scans for proper CV appearance
-            const forwardIndices = cycleIndices.filter(i => this.plotData.direction[i] === 'forward');
-            const reverseIndices = cycleIndices.filter(i => this.plotData.direction[i] === 'reverse');
-            
-            // Create completely isolated traces with explicit line settings
-            const forwardX = forwardIndices.map(i => this.plotData.x[i]);
-            const forwardY = forwardIndices.map(i => this.plotData.y[i]);
-            const reverseX = reverseIndices.map(i => this.plotData.x[i]);
-            const reverseY = reverseIndices.map(i => this.plotData.y[i]);
-            
-            // Forward scan trace - completely isolated
-            if (forwardIndices.length > 0) {
-                // For real-time plotting, maintain chronological order
-                // For completed measurements, sort for proper CV display
-                let forwardPairs;
-                if (this.isRunning) {
-                    // Real-time mode: maintain chronological order
-                    forwardPairs = forwardIndices.map(i => ({ 
-                        x: this.plotData.x[i], 
-                        y: this.plotData.y[i], 
-                        index: i 
-                    }));
-                } else {
-                    // Completed measurement: sort for proper display
-                    forwardPairs = forwardX.map((x, i) => ({ x, y: forwardY[i] }));
-                    forwardPairs.sort((a, b) => a.x - b.x);
+        // Log range information for debugging
+        console.log(`[DEBUG] Range Analysis:`, {
+            potential: {
+                min: minPotential.toFixed(3),
+                max: maxPotential.toFixed(3),
+                padded: {
+                    min: (minPotential - potentialPadding).toFixed(3),
+                    max: (maxPotential + potentialPadding).toFixed(3)
                 }
-                
-                console.log(`[DEBUG] Cycle ${cycle} Forward: ${forwardPairs.length} points${this.isRunning ? ' (real-time)' : ' (sorted)'}`);
-                
-                traces.push({
-                    x: forwardPairs.map(p => p.x),
-                    y: forwardPairs.map(p => p.y),
-                    type: 'scatter',
-                    mode: 'markers+lines',
-                    name: `Cycle ${cycle}`,
-                    line: {
-                        width: 2,
-                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
-                        shape: 'linear'
-                    },
-                    marker: {
-                        size: 0.1,  // Extremely small markers
-                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
-                        opacity: 0  // Invisible markers
-                    },
-                    connectgaps: false,
-                    showlegend: true,
-                    legendgroup: `cycle${cycle}`,
-                    visible: true,
-                    hovertemplate: `Cycle ${cycle}<br>V: %{x:.4f}<br>I: %{y:.2e}<extra></extra>`
-                });
-            }
-            
-            // Add delay before reverse trace to ensure complete separation
-            if (reverseIndices.length > 0) {
-                // For real-time plotting, maintain chronological order
-                // For completed measurements, sort for proper CV display
-                let reversePairs;
-                if (this.isRunning) {
-                    // Real-time mode: maintain chronological order 
-                    reversePairs = reverseIndices.map(i => ({ 
-                        x: this.plotData.x[i], 
-                        y: this.plotData.y[i], 
-                        index: i 
-                    }));
-                } else {
-                    // Completed measurement: sort for proper display
-                    reversePairs = reverseX.map((x, i) => ({ x, y: reverseY[i] }));
-                    reversePairs.sort((a, b) => b.x - a.x);
+            },
+            current: {
+                min: minCurrent.toExponential(2),
+                max: maxCurrent.toExponential(2),
+                padded: {
+                    min: (minCurrent - currentPadding).toExponential(2),
+                    max: (maxCurrent + currentPadding).toExponential(2)
                 }
-                
-                console.log(`[DEBUG] Cycle ${cycle} Reverse: ${reversePairs.length} points${this.isRunning ? ' (real-time)' : ' (sorted)'}`);
-                
-                // Create reverse trace with completely different configuration
-                traces.push({
-                    x: reversePairs.map(p => p.x),
-                    y: reversePairs.map(p => p.y),
-                    type: 'scatter',
-                    mode: 'markers+lines',
-                    name: `Cycle ${cycle} Rev`,
-                    line: {
-                        width: 2,
-                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
-                        shape: 'linear'
-                    },
-                    marker: {
-                        size: 0.1,  // Extremely small markers
-                        color: `hsl(${cycleIndex * 60}, 70%, 50%)`,
-                        opacity: 0  // Invisible markers
-                    },
-                    connectgaps: false,
-                    showlegend: false,
-                    legendgroup: `cycle${cycle}`,
-                    visible: true,
-                    hovertemplate: `Cycle ${cycle}<br>V: %{x:.4f}<br>I: %{y:.2e}<extra></extra>`
-                });
+            },
+            transitions: {
+                lowerCount: minPoints.length,
+                upperCount: maxPoints.length,
+                firstLower: minPoints[0],
+                firstUpper: maxPoints[0]
             }
         });
 
-        // Update layout for proper CV display
+        // Group data by cycle for proper CV curves
+        const cycles = [...new Set(this.plotData.cycle)];
+        const traces = [];
+
+        // Get voltage range parameters
+        const cvParams = this.getCurrentParameters();
+        const targetLowerV = parseFloat(cvParams?.lower || -0.4);
+        const targetUpperV = parseFloat(cvParams?.upper || 0.7);
+        
+        console.log(`[DEBUG] CV Target Range: ${targetLowerV}V to ${targetUpperV}V`);
+        console.log(`[DEBUG] Creating traces for ${cycles.length} cycles`);
+
+        // Helper function to find extreme points
+        const findExtremePoints = (points, isMin) => {
+            if (points.length === 0) return [];
+            const extremeV = isMin ? 
+                Math.min(...points.map(p => p.x)) :
+                Math.max(...points.map(p => p.x));
+            return points.filter(p => Math.abs(p.x - extremeV) < 0.05);
+        };
+
+        // Process each cycle
+        cycles.forEach((cycle, cycleIndex) => {
+            // Get points for this cycle
+            const cyclePoints = Array.from({length: this.plotData.x.length}, (_, i) => ({
+                x: this.plotData.x[i],
+                y: this.plotData.y[i],
+                cycle: this.plotData.cycle[i],
+                direction: this.plotData.direction[i],
+                index: i
+            })).filter(p => p.cycle === cycle);
+
+            // Create single trace for each cycle with proper voltage-based organization
+            let cycleData;
+            if (this.isRunning) {
+                // Organize data based on measurement state and cycle boundaries
+            let organizedPoints;
+            if (this.isRunning) {
+                // During measurement, maintain chronological order
+                organizedPoints = cyclePoints;
+            } else {
+                // For completed measurements, organize proper CV loop
+                const forward = cyclePoints.filter(p => p.direction === 1);
+                const reverse = cyclePoints.filter(p => p.direction === -1);
+                
+                // Find closest points to target voltages
+                const findClosestTo = (points, target) => points.reduce((prev, curr) => 
+                    Math.abs(curr.x - target) < Math.abs(prev.x - target) ? curr : prev
+                );
+                
+                const closestToLower = findClosestTo(cyclePoints, targetLowerV);
+                const closestToUpper = findClosestTo(cyclePoints, targetUpperV);
+
+                // Organize data based on CV parameters and scan direction
+                if (Math.abs(targetStartV - targetLowerV) < Math.abs(targetStartV - targetUpperV)) {
+                    // CV starts from lower voltage
+                    const forward = [...lowerRegion, ...middleRegion.filter(p => p.direction === 'forward'), ...upperRegion]
+                        .sort((a, b) => a.x - b.x);
+                    const reverse = [...upperRegion, ...middleRegion.filter(p => p.direction === 'reverse'), ...lowerRegion]
+                        .sort((a, b) => b.x - a.x);
+                    
+                    // Ensure proper cycle starts from the lowest voltage point
+                    const lowestPoint = Math.min(...forward.map(p => p.x));
+                    const forwardStart = forward.findIndex(p => Math.abs(p.x - lowestPoint) < 0.05);
+                    
+                    if (forwardStart > 0) {
+                        // Rotate array to start from lowest voltage
+                        const rotatedForward = [
+                            ...forward.slice(forwardStart),
+                            ...forward.slice(0, forwardStart)
+                        ];
+                        cycleData = [...rotatedForward, ...reverse];
+                    } else {
+                        cycleData = [...forward, ...reverse];
+                    }
+                } else {
+                    // CV starts from upper voltage
+                    const reverse = [...upperRegion, ...middleRegion.filter(p => p.direction === 'reverse'), ...lowerRegion]
+                        .sort((a, b) => b.x - a.x);
+                    const forward = [...lowerRegion, ...middleRegion.filter(p => p.direction === 'forward'), ...upperRegion]
+                        .sort((a, b) => a.x - b.x);
+                    
+                    // Ensure proper cycle starts from the highest voltage point
+                    const highestPoint = Math.max(...reverse.map(p => p.x));
+                    const reverseStart = reverse.findIndex(p => Math.abs(p.x - highestPoint) < 0.05);
+                    
+                    if (reverseStart > 0) {
+                        // Rotate array to start from highest voltage
+                        const rotatedReverse = [
+                            ...reverse.slice(reverseStart),
+                            ...reverse.slice(0, reverseStart)
+                        ];
+                        cycleData = [...rotatedReverse, ...forward];
+                    } else {
+                        cycleData = [...reverse, ...forward];
+                    }
+                }
+                }
+            }
+            
+            console.log(`[DEBUG] Cycle ${cycle}: ${cycleData.length} points${this.isRunning ? ' (chronological)' : ' (smart CV loop)'}`);
+            if (!this.isRunning && cycleData.length > 0) {
+                console.log(`[DEBUG] Cycle ${cycle} voltage range: ${Math.min(...cycleData.map(p => p.x)).toFixed(3)}V to ${Math.max(...cycleData.map(p => p.x)).toFixed(3)}V`);
+            }
+            
+            // Single trace per cycle for continuous CV curve
+            // Helper function to get hue for cycle coloring
+            const getTraceHue = (cycleIndex, totalCycles) => {
+                // Start with blue (240°), progress through spectrum
+                return 240 - (cycleIndex * 300 / (totalCycles || 1));
+            };
+
+            // Organize and create trace for this cycle
+            const cyclePoints = Array.from({length: this.plotData.x.length}, (_, i) => ({
+                x: this.plotData.x[i],
+                y: this.plotData.y[i],
+                cycle: this.plotData.cycle[i],
+                direction: this.plotData.direction[i],
+                index: i
+            })).filter(p => p.cycle === cycle);
+
+            if (cyclePoints.length === 0) return;
+
+            // Organize points into proper CV loop based on cycle boundaries
+            const cycleTrace = this.isRunning ? cyclePoints : (() => {
+                // Separate points by direction
+                const forward = cyclePoints.filter(p => p.direction === 1);
+                const reverse = cyclePoints.filter(p => p.direction === -1);
+                
+                // For cycle 1, ensure proper start from target voltage
+                if (cycle === 1) {
+                    if (Math.abs(cyclePoints[0]?.x - targetLowerV) < 0.1) {
+                        // First cycle starts from lower voltage, maintain chronological order
+                        return cyclePoints;
+                    } else {
+                        // Adjust cycle 1 to start from proper voltage
+                        return Math.abs(cyclePoints[0]?.x - targetUpperV) < 0.1 ?
+                            cyclePoints : 
+                            [...reverse.sort((a, b) => b.x - a.x), ...forward.sort((a, b) => a.x - b.x)];
+                    }
+                }
+                
+                // For subsequent cycles, ensure they start at voltage extremes
+                const voltageExtreme = forward[0]?.x < reverse[0]?.x ? 
+                    Math.min(...forward.map(p => p.x)) : 
+                    Math.max(...forward.map(p => p.x));
+                
+                // Organize based on where this cycle naturally starts
+                if (Math.abs(voltageExtreme - targetLowerV) < 0.1) {
+                    return [...forward.sort((a, b) => a.x - b.x), 
+                            ...reverse.sort((a, b) => b.x - a.x)];
+                } else {
+                    return [...reverse.sort((a, b) => b.x - a.x), 
+                            ...forward.sort((a, b) => a.x - b.x)];
+                }
+            })();
+            
+            // Log cycle trace information for debugging
+            console.log(`[DEBUG] Cycle ${cycle} analysis:`, {
+                points: cycleTrace.length,
+                voltageRange: {
+                    min: Math.min(...cycleTrace.map(p => p.x)).toFixed(3),
+                    max: Math.max(...cycleTrace.map(p => p.x)).toFixed(3)
+                },
+                directions: {
+                    forward: cycleTrace.filter(p => p.direction === 1).length,
+                    reverse: cycleTrace.filter(p => p.direction === -1).length
+                },
+                isRunning: this.isRunning
+            });
+            
+            // Create color-coded trace
+            const traceHue = getTraceHue(cycleIndex, cycles.length);
+            const traceColor = `hsl(${traceHue}, 70%, 50%)`;
+            
+            traces.push({
+                x: cycleTrace.map(p => p.x),
+                y: cycleTrace.map(p => p.y),
+                type: 'scatter',
+                mode: 'lines',
+                name: `Cycle ${cycle}`,
+                line: {
+                    width: 2,
+                    color: traceColor,
+                    shape: 'linear'
+                },
+                marker: {
+                    size: 2,
+                    color: traceColor,
+                    opacity: 0.5
+                },
+                connectgaps: false,
+                showlegend: true,
+                hovertemplate: `Cycle ${cycle}<br>V: %{x:.4f}V<br>I: %{y:.2e}A<extra></extra>`
+            });
+        });
+
+        // Calculate optimal plot ranges based on CV parameters and data
+        const plotRanges = {
+            x: {
+                min: Math.min(minPotential, targetLowerV) - potentialPadding,
+                max: Math.max(maxPotential, targetUpperV) + potentialPadding
+            },
+            y: {
+                min: minCurrent - currentPadding,
+                max: maxCurrent + currentPadding
+            }
+        };
+        
+        // Create layout optimized for CV display
         const layout = {
             title: {
                 text: 'Cyclic Voltammetry',
                 font: { size: 16 }
             },
             xaxis: {
-                title: 'Potential (V)',
+                title: {
+                    text: 'Potential (V)',
+                    font: { size: 14 }
+                },
                 showgrid: true,
                 gridcolor: '#f0f0f0',
                 zeroline: true,
                 zerolinecolor: '#666',
-                range: [minPotential - potentialPadding, maxPotential + potentialPadding],
-                autorange: false
+                range: [plotRanges.x.min, plotRanges.x.max],
+                autorange: false,
+                tickmode: 'linear',
+                dtick: 0.2,  // Show ticks every 0.2V
+                tickformat: '.2f'
             },
             yaxis: {
-                title: 'Current (A)', 
+                title: {
+                    text: 'Current (A)',
+                    font: { size: 14 }
+                },
                 showgrid: true,
                 gridcolor: '#f0f0f0',
                 zeroline: true,
                 zerolinecolor: '#666',
                 tickformat: '.2e',
-                range: [minCurrent - currentPadding, maxCurrent + currentPadding],
-                autorange: false
+                range: [plotRanges.y.min, plotRanges.y.max],
+                autorange: false,
+                showexponent: 'all',
+                exponentformat: 'e'
             },
             showlegend: true,
             legend: {
@@ -1010,27 +1165,35 @@ class CVMeasurement {
     }
     
     updateUIState() {
-        // Get connection state from multiple sources with better detection
+        // Check connection state and simulation mode
         let isConnected = false;
+        let isSimulation = this.simulationToggle?.checked || false;
         
-        console.log('[CV] updateUIState called, checking connection...');
+        console.log('[CV] updateUIState called:', {
+            simulationMode: isSimulation,
+            isRunning: this.isRunning,
+            isPaused: this.isPaused
+        });
         
-        // Method 1: Check PortManager directly
-        if (window.portManager && typeof window.portManager.isConnected === 'boolean') {
-            isConnected = window.portManager.isConnected;
-            console.log('[CV] Method 1 - PortManager.isConnected:', isConnected);
+        // Always consider connected in simulation mode
+        if (isSimulation) {
+            isConnected = true;
+            console.log('[CV] Simulation mode active - connection state bypassed');
         }
-        // Method 2: Check global connectionState
+        // Otherwise check real connection state
+        else if (window.portManager && typeof window.portManager.isConnected === 'boolean') {
+            isConnected = window.portManager.isConnected;
+            console.log('[CV] PortManager connection state:', isConnected);
+        }
         else if (typeof connectionState !== 'undefined' && typeof connectionState.isConnected === 'boolean') {
             isConnected = connectionState.isConnected;
-            console.log('[CV] Method 2 - connectionState.isConnected:', isConnected);
+            console.log('[CV] Global connection state:', isConnected);
         }
-        // Method 3: Check connection status from DOM
         else {
             const statusElement = document.getElementById('connection-status');
             if (statusElement) {
                 isConnected = statusElement.textContent.includes('Connected');
-                console.log('[CV] Method 3 - DOM status element:', statusElement.textContent, 'isConnected:', isConnected);
+                console.log('[CV] DOM connection state:', isConnected);
             }
         }
         
@@ -1101,9 +1264,9 @@ class CVMeasurement {
         }
         
         // Get current parameters
-        const params = this.getCurrentParameters();
-        const lowerV = parseFloat(params.lower) || -0.4;
-        const upperV = parseFloat(params.upper) || 0.7;
+        const currentCVParams = this.getCurrentParameters();
+        const lowerV = parseFloat(currentCVParams.lower) || -0.4;
+        const upperV = parseFloat(currentCVParams.upper) || 0.7;
         
         // Force reset plot range to parameter range
         const layout_update = {
@@ -1276,16 +1439,14 @@ CVMeasurement.prototype.fixPlotRange = function() {
     
     console.log('[DEBUG] Manual plot range fix initiated');
     
-    // Get CV parameters for expected range
-    const cvParams = this.getCurrentParameters();
-    let lowerV = -0.4, upperV = 0.7;  // Default range
-    
-    if (cvParams) {
-        lowerV = parseFloat(cvParams.lower) || -0.4;
-        upperV = parseFloat(cvParams.upper) || 0.7;
-    }
-    
-    // Calculate actual data range
+            // Get CV parameters for expected range
+            const currentParams = this.getCurrentParameters();
+            let lowerV = -0.4, upperV = 0.7;  // Default range
+            
+            if (currentParams) {
+                lowerV = parseFloat(currentParams.lower) || -0.4;
+                upperV = parseFloat(currentParams.upper) || 0.7;
+            }    // Calculate actual data range
     const minV = Math.min(...this.plotData.x);
     const maxV = Math.max(...this.plotData.x);
     const minI = Math.min(...this.plotData.y);
@@ -1348,17 +1509,17 @@ CVMeasurement.prototype.saveMeasurement = async function(isAutoSave = false) {
         }
         
         // Get current parameters
-        const params = this.getCurrentParameters();
+        const currentCVParams = this.getCurrentParameters();
         
         const requestData = {
             session_id: sessionId,
             data_points: dataPoints,
             parameters: {
-                begin: params.begin,
-                upper: params.upper,
-                lower: params.lower || params.begin,  // Use begin as lower if not available
-                rate: params.rate,
-                cycles: params.cycles,
+                begin: currentCVParams.begin,
+                upper: currentCVParams.upper,
+                lower: currentCVParams.lower || currentCVParams.begin,  // Use begin as lower if not available
+                rate: currentCVParams.rate,
+                cycles: currentCVParams.cycles,
                 measurement_type: 'CV',
                 total_points: dataPoints.length
             }

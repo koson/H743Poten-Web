@@ -186,7 +186,14 @@ function copyDataToClipboard() {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('[DEBUG] DOM loaded - initializing measurement interface');
     initializePlot();
+    
+    // Ensure Start button is in correct initial state
+    if (startBtn) {
+        startBtn.disabled = !isConnected;
+        console.log('[DEBUG] Initial Start button state:', !isConnected ? 'disabled' : 'enabled');
+    }
     
     // Mode selection
     modeSelect.addEventListener('change', (e) => {
@@ -214,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     connectionStatus.className = 'badge bg-success';
                     connectionStatus.innerHTML = '<i class="fas fa-plug"></i> Connected';
                     startBtn.disabled = false;
+                    console.log('[DEBUG] Connection successful - enabling Start button');
                 }
             } catch (error) {
                 console.error('Connection error:', error);
@@ -237,6 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Start measurement
     startBtn.addEventListener('click', async () => {
+        console.log('[DEBUG] Start button clicked - Connection state:', isConnected);
         if (!isConnected) return;
         
         try {
@@ -373,5 +382,24 @@ async function loadPorts() {
     }
 }
 
-// Initial port load
+    // Check initial connection state
+async function checkInitialConnection() {
+    try {
+        const response = await fetch('/api/connection/status');
+        const status = await response.json();
+        if (status.connected) {
+            isConnected = true;
+            connectBtn.innerHTML = '<i class="fas fa-unlink"></i> Disconnect';
+            connectionStatus.className = 'badge bg-success';
+            connectionStatus.innerHTML = '<i class="fas fa-plug"></i> Connected';
+            startBtn.disabled = false;
+            console.log('[DEBUG] Initial connection check - device connected');
+        }
+    } catch (error) {
+        console.warn('[DEBUG] Initial connection check failed:', error);
+    }
+}
+
+// Initial setup
 loadPorts();
+checkInitialConnection();
