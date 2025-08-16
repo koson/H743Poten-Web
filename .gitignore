@@ -19,6 +19,7 @@ develop-eggs/
 .installed.cfg
 lib/
 lib64/
+
+# Data and logs
 data_logs/sessions/
-logs/h743poten.log
-logs/h743poten.log
+logs/*.log
