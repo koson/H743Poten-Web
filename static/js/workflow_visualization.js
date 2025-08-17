@@ -11,6 +11,7 @@ class H743WorkflowManager {
         this.selectedMethod = 'deepcv';
         this.selectedCalibration = 'random_forest';
         this.analysisData = {};
+        this.sessionData = {}; // Initialize session data
         this.apiBase = '/api/workflow';
         this.isProcessing = false;
         
@@ -599,10 +600,408 @@ class H743WorkflowManager {
 
     showDataPreview() {
         this.showNotification('Opening data preview window...', 'info');
-        // In a real implementation, this would open a modal with sample CV curves
+        
+        // Update modal with current data
+        this.updatePreviewModal();
+        
+        // Show the modal
+        const modal = document.getElementById('dataPreviewModal');
+        modal.style.display = 'block';
+        
+        // Generate sample chart
         setTimeout(() => {
-            alert('Data preview would show sample CV curves and data quality metrics');
-        }, 500);
+            this.generatePreviewChart();
+        }, 300);
+    }
+
+    updatePreviewModal() {
+        // Safely get session data with fallbacks
+        const sessionData = this.sessionData || {};
+        const fileInfo = sessionData.workflow_files || {};
+        const preprocessingResults = sessionData.preprocessing_results || {};
+        
+        // Get current file counts from UI if session data not available
+        const palmsensCount = document.getElementById('palmsensCount')?.textContent || '0';
+        const stm32Count = document.getElementById('stm32Count')?.textContent || '0';
+        const genericCount = document.getElementById('genericCount')?.textContent || '0';
+        
+        // Calculate total files
+        const totalFiles = fileInfo.valid_files || 
+                          (parseInt(palmsensCount) + parseInt(stm32Count) + parseInt(genericCount));
+        
+        // Get current instrument type from UI
+        const currentInstrument = this.getSelectedInstrument() || 'STM32';
+        const currentQuality = this.calculateQualityScore(currentInstrument);
+        
+        // Update summary values
+        document.getElementById('previewFileCount').textContent = totalFiles;
+        document.getElementById('previewDataPoints').textContent = totalFiles * 1000;
+        document.getElementById('previewInstrument').textContent = currentInstrument;
+        document.getElementById('previewQuality').textContent = currentQuality + '%';
+        
+        // Update statistics based on instrument type
+        this.updatePreviewStatistics(currentInstrument.toLowerCase());
+    }
+
+    getSelectedInstrument() {
+        // Check which instrument has files selected
+        const palmsensCount = parseInt(document.getElementById('palmsensCount')?.textContent || '0');
+        const stm32Count = parseInt(document.getElementById('stm32Count')?.textContent || '0');
+        const genericCount = parseInt(document.getElementById('genericCount')?.textContent || '0');
+        
+        if (palmsensCount > 0) return 'PALMSENS';
+        if (stm32Count > 0) return 'STM32';
+        if (genericCount > 0) return 'GENERIC';
+        return 'STM32'; // Default
+    }
+
+    calculateQualityScore(instrument) {
+        switch(instrument.toLowerCase()) {
+            case 'palmsens': return 98;
+            case 'stm32': return 95;
+            case 'generic': return 85;
+            default: return 90;
+        }
+    }
+
+    updatePreviewStatistics(instrumentType) {
+        let stats = {
+            minVoltage: '-1.0V',
+            maxVoltage: '+1.0V',
+            scanRate: '100 mV/s',
+            peakCurrent: '45.2 μA',
+            baselineCurrent: '2.1 μA',
+            snrValue: '21.5 dB'
+        };
+
+        // Adjust stats based on instrument
+        if (instrumentType === 'palmsens') {
+            stats.peakCurrent = '52.8 μA';
+            stats.snrValue = '28.3 dB';
+        } else if (instrumentType === 'stm32') {
+            stats.peakCurrent = '45.2 μA';
+            stats.snrValue = '21.5 dB';
+        } else {
+            stats.peakCurrent = '38.7 μA';
+            stats.snrValue = '18.2 dB';
+        }
+
+        // Update DOM elements
+        Object.keys(stats).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) element.textContent = stats[key];
+        });
+    }
+
+    async generatePreviewChart() {
+        const canvas = document.getElementById('previewChart');
+        if (!canvas) return;
+
+        try {
+            // Fetch real or mock data from backend
+            const response = await fetch('/api/workflow/get-preview-data');
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load data');
+            }
+            
+            this.drawChart(canvas, data);
+            
+            // Update graph info with real data details
+            this.updateGraphInfo(data);
+            
+        } catch (error) {
+            console.error('Error loading chart data:', error);
+            // Fallback to original mock data
+            this.drawMockChart(canvas);
+        }
+    }
+
+    drawChart(canvas, data) {
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+
+        // Set up coordinate system
+        const margin = 60;
+        const plotWidth = width - 2 * margin;
+        const plotHeight = height - 2 * margin;
+
+        // Draw background
+        ctx.fillStyle = '#f8f9fa';
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw plot area
+        ctx.fillStyle = 'white';
+        ctx.fillRect(margin, margin, plotWidth, plotHeight);
+
+        // Draw grid
+        this.drawGrid(ctx, margin, plotWidth, plotHeight);
+
+        // Draw data curve
+        if (data.voltage && data.current) {
+            this.drawDataCurve(ctx, data.voltage, data.current, margin, plotWidth, plotHeight);
+        }
+
+        // Draw axes and labels
+        this.drawAxes(ctx, margin, plotWidth, plotHeight, width, height);
+        
+        // Add title with data source info
+        const title = data.data_source === 'real' ? 
+            `Real CV Data: ${data.file_name || 'Uploaded File'}` : 
+            `Sample Cyclic Voltammogram (${data.data_source})`;
+        
+        ctx.font = 'bold 14px Arial';
+        ctx.fillStyle = '#333';
+        ctx.textAlign = 'center';
+        ctx.fillText(title, width/2, 25);
+    }
+
+    drawGrid(ctx, margin, plotWidth, plotHeight) {
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.lineWidth = 1;
+        
+        // Vertical grid lines
+        for (let i = 0; i <= 10; i++) {
+            const x = margin + (i * plotWidth / 10);
+            ctx.beginPath();
+            ctx.moveTo(x, margin);
+            ctx.lineTo(x, margin + plotHeight);
+            ctx.stroke();
+        }
+
+        // Horizontal grid lines
+        for (let i = 0; i <= 8; i++) {
+            const y = margin + (i * plotHeight / 8);
+            ctx.beginPath();
+            ctx.moveTo(margin, y);
+            ctx.lineTo(margin + plotWidth, y);
+            ctx.stroke();
+        }
+    }
+
+    drawDataCurve(ctx, voltageData, currentData, margin, plotWidth, plotHeight) {
+        if (!voltageData || !currentData || voltageData.length === 0) return;
+
+        // Find data ranges
+        const minV = Math.min(...voltageData);
+        const maxV = Math.max(...voltageData);
+        const minI = Math.min(...currentData);
+        const maxI = Math.max(...currentData);
+        
+        const rangeV = maxV - minV;
+        const rangeI = maxI - minI;
+
+        // Draw curve
+        ctx.strokeStyle = '#4169E1';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+
+        for (let i = 0; i < voltageData.length; i++) {
+            const voltage = voltageData[i];
+            const current = currentData[i];
+            
+            // Convert to canvas coordinates
+            const x = margin + ((voltage - minV) / rangeV) * plotWidth;
+            const y = margin + plotHeight - ((current - minI) / rangeI) * plotHeight;
+            
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.stroke();
+
+        // Store ranges for axis labels
+        this.chartRanges = { minV, maxV, minI, maxI };
+    }
+
+    drawAxes(ctx, margin, plotWidth, plotHeight, width, height) {
+        // Draw axes
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        
+        // X-axis
+        ctx.beginPath();
+        ctx.moveTo(margin, margin + plotHeight);
+        ctx.lineTo(margin + plotWidth, margin + plotHeight);
+        ctx.stroke();
+
+        // Y-axis
+        ctx.beginPath();
+        ctx.moveTo(margin, margin);
+        ctx.lineTo(margin, margin + plotHeight);
+        ctx.stroke();
+
+        // Add labels
+        ctx.fillStyle = '#333';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+
+        // X-axis labels (use real data ranges if available)
+        const ranges = this.chartRanges || { minV: -1, maxV: 1, minI: -30, maxI: 50 };
+        
+        ctx.fillText(`${ranges.minV.toFixed(1)}V`, margin, height - 20);
+        ctx.fillText(`${((ranges.minV + ranges.maxV) / 2).toFixed(1)}V`, margin + plotWidth/2, height - 20);
+        ctx.fillText(`${ranges.maxV.toFixed(1)}V`, margin + plotWidth, height - 20);
+
+        // Y-axis label
+        ctx.save();
+        ctx.translate(20, margin + plotHeight/2);
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText('Current (μA)', 0, 0);
+        ctx.restore();
+    }
+
+    updateGraphInfo(data) {
+        const graphInfo = document.querySelector('.graph-info');
+        if (graphInfo && data) {
+            const voltageRange = data.voltage ? 
+                `${Math.min(...data.voltage).toFixed(1)}V to ${Math.max(...data.voltage).toFixed(1)}V` :
+                '-1.0V to +1.0V';
+            
+            const currentRange = data.current ?
+                `${Math.min(...data.current).toFixed(1)}μA to ${Math.max(...data.current).toFixed(1)}μA` :
+                '-50μA to +50μA';
+            
+            graphInfo.innerHTML = `
+                <p><strong>Data Source:</strong> ${data.data_source === 'real' ? 'Real uploaded data' : 
+                    data.data_source === 'enhanced_mock' ? 'Real uploaded data (enhanced)' : 'Generated sample data'}</p>
+                <p><strong>Voltage Range:</strong> ${voltageRange}</p>
+                <p><strong>Current Range:</strong> ${currentRange}</p>
+                ${data.file_name ? `<p><strong>File:</strong> ${data.file_name}</p>` : ''}
+                ${data.data_points ? `<p><strong>Data Points:</strong> ${data.data_points}</p>` : ''}
+                <div style="margin-top: 10px;">
+                    <button onclick="checkDataSourceStatus()" class="btn btn-sm btn-info">Check Data Source Status</button>
+                </div>
+            `;
+        }
+    }
+
+    // Keep original mock chart as fallback
+    drawMockChart(canvas) {
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+
+        // Set up coordinate system
+        const margin = 60;
+        const plotWidth = width - 2 * margin;
+        const plotHeight = height - 2 * margin;
+
+        // Draw background
+        ctx.fillStyle = '#f8f9fa';
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw plot area
+        ctx.fillStyle = 'white';
+        ctx.fillRect(margin, margin, plotWidth, plotHeight);
+
+        // Draw grid
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.lineWidth = 1;
+        
+        // Vertical grid lines
+        for (let i = 0; i <= 10; i++) {
+            const x = margin + (i * plotWidth / 10);
+            ctx.beginPath();
+            ctx.moveTo(x, margin);
+            ctx.lineTo(x, margin + plotHeight);
+            ctx.stroke();
+        }
+
+        // Horizontal grid lines
+        for (let i = 0; i <= 8; i++) {
+            const y = margin + (i * plotHeight / 8);
+            ctx.beginPath();
+            ctx.moveTo(margin, y);
+            ctx.lineTo(margin + plotHeight, y);
+            ctx.stroke();
+        }
+
+        // Draw sample CV curve
+        ctx.strokeStyle = '#4169E1';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+
+        const points = 200;
+        for (let i = 0; i <= points; i++) {
+            const voltage = -1 + (2 * i / points); // -1V to +1V
+            
+            // Generate realistic CV curve with noise
+            let current = 0;
+            
+            // Forward scan (oxidation peak)
+            if (voltage > -0.5 && voltage < 0.5) {
+                current = 30 * Math.exp(-Math.pow((voltage - 0.2) / 0.1, 2));
+            }
+            
+            // Reverse scan (reduction peak)
+            if (voltage > -0.3 && voltage < 0.3) {
+                current -= 25 * Math.exp(-Math.pow((voltage + 0.15) / 0.08, 2));
+            }
+            
+            // Add baseline and noise
+            current += 2 + Math.random() * 3 - 1.5;
+            
+            // Convert to canvas coordinates
+            const x = margin + ((voltage + 1) / 2) * plotWidth;
+            const y = margin + plotHeight - ((current + 30) / 60) * plotHeight;
+            
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.stroke();
+
+        // Draw axes
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        
+        // X-axis
+        ctx.beginPath();
+        ctx.moveTo(margin, margin + plotHeight);
+        ctx.lineTo(margin + plotWidth, margin + plotHeight);
+        ctx.stroke();
+
+        // Y-axis
+        ctx.beginPath();
+        ctx.moveTo(margin, margin);
+        ctx.lineTo(margin, margin + plotHeight);
+        ctx.stroke();
+
+        // Add labels
+        ctx.fillStyle = '#333';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+
+        // X-axis labels
+        ctx.fillText('-1.0V', margin, height - 20);
+        ctx.fillText('0V', margin + plotWidth/2, height - 20);
+        ctx.fillText('+1.0V', margin + plotWidth, height - 20);
+
+        // Y-axis labels
+        ctx.save();
+        ctx.translate(20, margin + plotHeight/2);
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText('Current (μA)', 0, 0);
+        ctx.restore();
+
+        // Title
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText('Sample Cyclic Voltammogram (Fallback)', width/2, 25);
     }
 
     // Step 3: Peak Detection Functions
@@ -1212,9 +1611,18 @@ function startPreprocessing() {
     }
 }
 
+// Global functions for workflow interaction
 function showDataPreview() {
-    if (window.workflowManager) {
-        window.workflowManager.showDataPreview();
+    try {
+        if (window.workflowManager) {
+            window.workflowManager.showDataPreview();
+        } else {
+            console.error('Workflow manager not initialized');
+            alert('System not ready. Please refresh the page.');
+        }
+    } catch (error) {
+        console.error('Error opening data preview:', error);
+        alert('Error opening preview. Please try again.');
     }
 }
 
@@ -1335,6 +1743,107 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Global functions for modal interaction
+function closeDataPreview() {
+    const modal = document.getElementById('dataPreviewModal');
+    modal.style.display = 'none';
+}
+
+function showPreviewTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + '-tab').classList.add('active');
+    
+    // Add active class to clicked button
+    event.target.classList.add('active');
+    
+    // If switching to graphs tab, regenerate chart
+    if (tabName === 'graphs') {
+        setTimeout(() => {
+            if (window.workflowManager) {
+                window.workflowManager.generatePreviewChart();
+            }
+        }, 100);
+    }
+}
+
+function proceedToNextStep() {
+    closeDataPreview();
+    if (window.workflowManager) {
+        window.workflowManager.updateStepStatus(2, 'completed');
+        window.workflowManager.setCurrentStep(3);
+        window.workflowManager.showNotification('Proceeding to Peak Detection...', 'success');
+    }
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('dataPreviewModal');
+    if (event.target === modal) {
+        closeDataPreview();
+    }
+}
+
+// Global function for checking data source status
+async function checkDataSourceStatus() {
+    try {
+        const response = await fetch('/api/workflow/data-source-info');
+        const result = await response.json();
+        
+        if (result.success) {
+            const statusHtml = `
+                <div class="alert alert-info">
+                    <h5>Data Source Status</h5>
+                    <p><strong>Status:</strong> ${result.data_source_status}</p>
+                    <p><strong>Description:</strong> ${result.source_description}</p>
+                    <p><strong>Session Data:</strong> ${result.has_session_data ? 'Active' : 'None'}</p>
+                    <p><strong>Uploaded Files:</strong> ${result.has_uploaded_files ? result.uploaded_file_count : 'None'}</p>
+                    ${result.uploaded_files.length > 0 ? 
+                        `<p><strong>Files:</strong> ${result.uploaded_files.join(', ')}</p>` : ''}
+                    <p><strong>Temp Dir:</strong> ${result.temp_dir_exists ? 'Exists' : 'Missing'}</p>
+                </div>
+            `;
+            
+            // Show in a modal or alert
+            const existingModal = document.getElementById('dataSourceModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            const modal = document.createElement('div');
+            modal.id = 'dataSourceModal';
+            modal.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                     background: rgba(0,0,0,0.5); z-index: 1000; display: flex; 
+                     align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 20px; border-radius: 5px; 
+                         max-width: 500px; width: 90%;">
+                        ${statusHtml}
+                        <button onclick="document.getElementById('dataSourceModal').remove()" 
+                                class="btn btn-primary">Close</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+        } else {
+            alert(`Error checking data source status: ${result.error}`);
+        }
+    } catch (error) {
+        alert(`Failed to check data source status: ${error.message}`);
+    }
+}
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {

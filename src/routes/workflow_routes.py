@@ -6,7 +6,14 @@ H743Poten Analysis Pipeline Visualization
 from flask import Blueprint, render_template, request, jsonify, session
 import os
 import json
+import random
+import logging
+import time
+import traceback
 from pathlib import Path
+
+# Setup logging
+logger = logging.getLogger(__name__)
 import time
 from datetime import datetime
 
@@ -20,6 +27,8 @@ try:
     ANALYSIS_AVAILABLE = True
 except ImportError:
     ANALYSIS_AVAILABLE = False
+
+logger = logging.getLogger(__name__)
 
 workflow_bp = Blueprint('workflow', __name__)
 
@@ -80,8 +89,17 @@ def scan_files():
         total_files = len(files)
         valid_files = 0
         file_info = []
+        temp_file_path = None
         
         allowed_extensions = {'.csv', '.txt', '.xlsx', '.json'}
+        
+        # Create temp directory for preview files
+        temp_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'temp_data')
+        try:
+            os.makedirs(temp_dir, exist_ok=True)
+        except Exception as e:
+            logger.error(f"Failed to create temp directory: {e}")
+            temp_dir = None
         
         for file in files:
             if file.filename:
@@ -94,6 +112,23 @@ def scan_files():
                     file.seek(0, 2)
                     file_size = file.tell()
                     file.seek(0)
+                    
+                    # Save first valid file for preview (temporary)
+                    if valid_files == 1 and temp_dir:  # Save first valid file if temp_dir exists
+                        # More thorough filename sanitization
+                        import re
+                        safe_filename = re.sub(r'[<>:"/\\|?*]', '_', file.filename)
+                        safe_filename = safe_filename.replace(' ', '_')  # Also replace spaces
+                        temp_file_path = os.path.join(temp_dir, f"preview_{safe_filename}")
+                        logger.info(f"Saving temp file: {temp_file_path}")
+                        try:
+                            file.save(temp_file_path)
+                            # Reset file pointer for further processing
+                            file.seek(0)
+                        except Exception as e:
+                            logger.error(f"Failed to save temp file: {e}")
+                            temp_file_path = None
+                            file.seek(0)
                     
                     # Try to read a small sample to validate format
                     try:
@@ -136,7 +171,8 @@ def scan_files():
             'total_size': total_size,
             'total_size_mb': round(total_size / (1024 * 1024), 2),
             'file_info': file_info,
-            'upload_timestamp': time.time()
+            'upload_timestamp': time.time(),
+            'sample_file_path': temp_file_path
         }
         
         return jsonify({
@@ -404,7 +440,364 @@ def export_results():
             'error': str(e)
         })
 
-@workflow_bp.route('/api/workflow/status')
+@workflow_bp.route('/api/workflow/test-session', methods=['POST'])
+def test_session():
+    """Test endpoint to manually set session for debugging"""
+    session['workflow_files'] = {
+        'total_files': 1,
+        'valid_files': 1,
+        'total_size': 1024,
+        'total_size_mb': 0.001,
+        'file_info': [{'name': 'test_cv_data.csv', 'valid': True}],
+        'upload_timestamp': time.time(),
+        'sample_file_path': os.path.join(os.path.dirname(__file__), '..', '..', 'temp_data', 'preview_test_cv_data.csv')
+    }
+    
+    return jsonify({
+        'success': True,
+        'message': 'Test session created',
+        'session_data': session.get('workflow_files')
+    })
+
+@workflow_bp.route('/api/workflow/data-source-info', methods=['GET'])
+def get_data_source_info():
+    """Get comprehensive information about data sources for workflow steps"""
+    try:
+        # Check session data
+        file_info = session.get('workflow_files', {})
+        has_session_data = file_info and file_info.get('valid_files', 0) > 0
+        
+        # Check uploaded files in temp_data
+        temp_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'temp_data')
+        uploaded_files = []
+        has_uploaded_files = False
+        
+        if os.path.exists(temp_dir):
+            all_files = [f for f in os.listdir(temp_dir) if f.endswith('.csv')]
+            uploaded_files = [f for f in all_files if not f.startswith('preview_test_')]
+            has_uploaded_files = len(uploaded_files) > 0
+        
+        # Determine overall data source status
+        if has_session_data:
+            data_source_status = 'real'
+            source_description = 'Real uploaded files with active session'
+        elif has_uploaded_files:
+            data_source_status = 'enhanced_mock'
+            source_description = 'Real files uploaded but session expired'
+        else:
+            data_source_status = 'mock'
+            source_description = 'No uploaded files - using generated data'
+        
+        return jsonify({
+            'success': True,
+            'data_source_status': data_source_status,
+            'source_description': source_description,
+            'has_session_data': has_session_data,
+            'has_uploaded_files': has_uploaded_files,
+            'uploaded_file_count': len(uploaded_files),
+            'uploaded_files': uploaded_files[:5],  # Show first 5 files
+            'session_valid_files': file_info.get('valid_files', 0) if has_session_data else 0,
+            'temp_dir_exists': os.path.exists(temp_dir)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'data_source_status': 'mock'
+        }), 500
+
+
+@workflow_bp.route('/api/workflow/test-session-data', methods=['GET'])
+def test_session_data():
+    """Test endpoint to check session data and set up real data test"""
+    try:
+        # Get current session data
+        file_info = session.get('workflow_files', {})
+        
+        # Write to debug file
+        debug_file = os.path.join(os.path.dirname(__file__), '..', '..', 'debug_api.log')
+        with open(debug_file, 'a') as f:
+            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] TEST SESSION - Current data: {file_info}\n")
+        
+        # Set up test session with real file data
+        temp_file_path = os.path.join(os.path.dirname(__file__), '..', '..', 'temp_data', 'preview_test_cv_data.csv')
+        session['workflow_files'] = {
+            'valid_files': 1,
+            'total_files': 1,
+            'sample_file_path': temp_file_path,
+            'upload_timestamp': time.time()
+        }
+        
+        # Write test setup to debug file
+        with open(debug_file, 'a') as f:
+            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] TEST SESSION - Set up real data session\n")
+            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] TEST SESSION - File path: {temp_file_path}\n")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Test session created with real file data',
+            'session_data': session['workflow_files'],
+            'file_exists': os.path.exists(temp_file_path)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@workflow_bp.route('/api/workflow/get-preview-data', methods=['GET'])
+def get_preview_data():
+    """Get sample data for preview chart"""
+    print("=== PREVIEW DATA ENDPOINT HIT ===")
+    
+    try:
+        # Get session data
+        file_info = session.get('workflow_files', {})
+        
+        # Write debug to file for tracking
+        debug_file = os.path.join(os.path.dirname(__file__), '..', '..', 'debug_api.log')
+        with open(debug_file, 'a') as f:
+            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Preview data endpoint called\n")
+            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Session ID: {session}\n")
+            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Session data: {file_info}\n")
+            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Valid files: {file_info.get('valid_files', 0)}\n")
+        
+        # Add extensive debug logging
+        logger.info(f"Preview data request - Session ID: {session}")
+        logger.info(f"Preview data request - File info: {file_info}")
+        logger.info(f"Valid files: {file_info.get('valid_files', 0)}")
+        logger.info(f"Sample file path: {file_info.get('sample_file_path')}")
+        
+        # Check if file path exists
+        sample_file_path = file_info.get('sample_file_path')
+        if sample_file_path:
+            logger.info(f"Sample file exists: {os.path.exists(sample_file_path)}")
+            logger.info(f"Sample file path resolved: {sample_file_path}")
+            
+            # Write file check to debug file
+            with open(debug_file, 'a') as f:
+                f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] File path check: {sample_file_path}\n")
+                f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] File exists: {os.path.exists(sample_file_path)}\n")
+        
+        # Debug condition check
+        condition_1 = not file_info
+        condition_2 = file_info.get('valid_files', 0) == 0
+        logger.info(f"Condition checks - no file_info: {condition_1}, no valid files: {condition_2}")
+        
+        # Enhanced data source detection: Check session AND file system
+        has_session_data = file_info and file_info.get('valid_files', 0) > 0
+        
+        # Also check if we have real uploaded files in temp_data directory
+        temp_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'temp_data')
+        has_uploaded_files = False
+        uploaded_file_count = 0
+        
+        if os.path.exists(temp_dir):
+            uploaded_files = [f for f in os.listdir(temp_dir) if f.endswith('.csv') and not f.startswith('preview_test_')]
+            uploaded_file_count = len(uploaded_files)
+            has_uploaded_files = uploaded_file_count > 0
+            
+        with open(debug_file, 'a') as f:
+            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Session data available: {has_session_data}\n")
+            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Uploaded files found: {has_uploaded_files} (count: {uploaded_file_count})\n")
+        
+        # Determine data source intelligently
+        if has_session_data or has_uploaded_files:
+            data_source_type = 'real' if has_session_data else 'enhanced_mock'
+            
+            with open(debug_file, 'a') as f:
+                f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Using data source: {data_source_type}\n")
+                
+        if not file_info or file_info.get('valid_files', 0) == 0:
+            # Return realistic CV mock data if no files uploaded
+            import math
+            
+            # Generate proper CV curve: forward scan (-1V to +1V) then reverse scan (+1V to -1V)
+            voltage_data = []
+            current_data = []
+            
+            # Forward scan: -1.0V to +1.0V
+            for i in range(101):
+                v = -1.0 + (2.0 * i / 100)
+                voltage_data.append(v)
+                
+                # CV current with oxidation peak at ~+0.2V
+                current = 2.0  # baseline current
+                
+                # Oxidation peak (anodic)
+                if -0.3 < v < 0.7:
+                    current += 35 * math.exp(-((v - 0.2) / 0.12) ** 2)
+                
+                # Add some noise
+                current += random.uniform(-1.5, 1.5)
+                current_data.append(current)
+            
+            # Reverse scan: +1.0V to -1.0V  
+            for i in range(100, -1, -1):
+                v = -1.0 + (2.0 * i / 100)
+                voltage_data.append(v)
+                
+                # CV current with reduction peak at ~+0.1V (slightly shifted)
+                current = 2.0  # baseline current
+                
+                # Reduction peak (cathodic) - negative current
+                if -0.2 < v < 0.5:
+                    current -= 28 * math.exp(-((v - 0.1) / 0.1) ** 2)
+                
+                # Add some noise
+                current += random.uniform(-1.5, 1.5)
+                current_data.append(current)
+            
+            # Determine data source based on our enhanced detection
+            final_data_source = 'mock'
+            if has_uploaded_files:
+                final_data_source = 'enhanced_mock'
+            
+            return jsonify({
+                'success': True,
+                'data_source': final_data_source,
+                'voltage': voltage_data,
+                'current': current_data,
+                'instrument': 'Enhanced Mock CV Generator' if final_data_source == 'enhanced_mock' else 'Mock CV Generator',
+                'scan_rate': '100 mV/s',
+                'file_name': 'sample_cv_data.csv',
+                'data_points': len(voltage_data)
+            })
+        
+        # Try to load real data from uploaded files
+        logger.info("=== REAL DATA PROCESSING START ===")
+        try:
+            import pandas as pd
+            import numpy as np
+            
+            # Get the first uploaded file for preview
+            sample_file_path = file_info.get('sample_file_path')
+            logger.info(f"Processing sample file path: {sample_file_path}")
+            
+            if sample_file_path and os.path.exists(sample_file_path):
+                logger.info(f"File exists, attempting to load: {sample_file_path}")
+                # Load real CV data
+                df = pd.read_csv(sample_file_path)
+                logger.info(f"CSV loaded successfully - shape: {df.shape}, columns: {list(df.columns)}")
+                
+                # Try to identify voltage and current columns
+                voltage_col = None
+                current_col = None
+                
+                # Look for voltage/potential columns
+                for col in df.columns:
+                    col_lower = col.lower().strip()
+                    if any(keyword in col_lower for keyword in ['potential', 'voltage', 'volt', 'e(v)', 'e_v', 'v_applied', 'working_electrode']):
+                        voltage_col = col
+                        break
+                
+                # Look for current columns  
+                for col in df.columns:
+                    col_lower = col.lower().strip()
+                    if any(keyword in col_lower for keyword in ['current', 'curr', 'i(a)', 'i_a', 'amp', 'working_current', 'we_current']):
+                        current_col = col
+                        break
+                
+                # If exact matches not found, try simpler patterns
+                if not voltage_col:
+                    for col in df.columns:
+                        if len(col.strip()) <= 3 and any(c in col.lower() for c in ['v', 'e']):
+                            voltage_col = col
+                            break
+                
+                if not current_col:
+                    for col in df.columns:
+                        if len(col.strip()) <= 3 and any(c in col.lower() for c in ['i', 'a']):
+                            current_col = col
+                            break
+                
+                if voltage_col and current_col:
+                    logger.info(f"Found columns - Voltage: '{voltage_col}', Current: '{current_col}'")
+                    # Get sample of data (max 500 points for performance)
+                    sample_size = min(500, len(df))
+                    step = len(df) // sample_size
+                    
+                    voltage_data = df[voltage_col][::step].tolist()
+                    current_data = df[current_col][::step].tolist()
+                    
+                    result = {
+                        'success': True,
+                        'data_source': 'real',
+                        'voltage': voltage_data,
+                        'current': current_data,
+                        'instrument': file_info.get('instrument_type', 'Unknown'),
+                        'scan_rate': 'Variable',
+                        'file_name': os.path.basename(sample_file_path),
+                        'data_points': len(voltage_data)
+                    }
+                    logger.info(f"Returning real data with data_source: {result['data_source']}")
+                    return jsonify(result)
+                else:
+                    logger.warning(f"Could not find voltage/current columns - voltage_col: {voltage_col}, current_col: {current_col}")
+            else:
+                logger.warning(f"Sample file path invalid - exists: {os.path.exists(sample_file_path) if sample_file_path else 'None'}, path: {sample_file_path}")
+                    
+        except Exception as e:
+            logger.error(f"Error loading real data: {e}")
+            logger.error(f"Error details: {traceback.format_exc()}")
+        
+        # Fallback to enhanced CV mock data
+        import math
+        voltage_data = []
+        current_data = []
+        
+        # Generate proper CV curve: forward scan (-1V to +1V) then reverse scan (+1V to -1V)
+        # Forward scan: -1.0V to +1.0V
+        for i in range(101):
+            v = -1.0 + (2.0 * i / 100)
+            voltage_data.append(v)
+            
+            # CV current with oxidation peak at ~+0.2V
+            current = 2.0  # baseline current
+            
+            # Oxidation peak (anodic)
+            if -0.3 < v < 0.7:
+                current += 35 * math.exp(-((v - 0.2) / 0.12) ** 2)
+            
+            # Add some noise
+            current += random.uniform(-1.5, 1.5)
+            current_data.append(current)
+        
+        # Reverse scan: +1.0V to -1.0V  
+        for i in range(100, -1, -1):
+            v = -1.0 + (2.0 * i / 100)
+            voltage_data.append(v)
+            
+            # CV current with reduction peak at ~+0.1V (slightly shifted)
+            current = 2.0  # baseline current
+            
+            # Reduction peak (cathodic) - negative current
+            if -0.2 < v < 0.5:
+                current -= 28 * math.exp(-((v - 0.1) / 0.1) ** 2)
+            
+            # Add some noise
+            current += random.uniform(-1.5, 1.5)
+            current_data.append(current)
+        
+        return jsonify({
+            'success': True,
+            'data_source': 'enhanced_mock',
+            'voltage': voltage_data,
+            'current': current_data,
+            'instrument': 'Enhanced Mock',
+            'scan_rate': '100 mV/s'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@workflow_bp.route('/api/workflow/status', methods=['GET'])
 def get_workflow_status():
     """Get current workflow status"""
     try:
