@@ -125,20 +125,48 @@
     <title>Peak Detection Visualization</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Modal Backdrop Fix */
+        /* Prevent FOUC and flickering */
+        .workflow-peak-modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.15s ease-out, visibility 0.15s ease-out;
+        }
+        
+        .workflow-peak-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Modal and Backdrop Positioning */
         .workflow-peak-modal {
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
             width: 100vw !important;
             height: 100vh !important;
-            z-index: 1050 !important;
+            z-index: 9999 !important; /* Increased z-index */
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transform: translateZ(0) !important; /* Force GPU acceleration */
+            will-change: transform !important; /* Optimize performance */
+            pointer-events: none !important; /* Allow scrolling of background */
+        }
+        
+        .workflow-peak-modal.show {
+            pointer-events: auto !important; /* Re-enable pointer events when modal is shown */
         }
         
         .workflow-peak-modal .modal-dialog {
-            position: relative !important;
-            margin: 1.75rem auto !important;
+            position: fixed !important; /* Changed from relative to fixed */
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            margin: 0 !important;
             max-width: 90% !important;
+            width: 90% !important;
+            max-height: 90vh !important;
+            pointer-events: auto !important; /* Ensure modal is clickable */
         }
 
         .workflow-peak-modal .modal-content {
@@ -146,25 +174,56 @@
             background: white !important;
             border-radius: 0.3rem !important;
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            max-height: 90vh !important;
+            overflow: hidden !important;
         }
 
         .modal-backdrop {
-            z-index: 1040 !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9998 !important; /* Just below modal */
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            backdrop-filter: blur(2px) !important; /* Optional: adds blur effect */
         }
 
-        .modal-open {
-            overflow: auto !important;
+        /* Prevent background interaction while modal is open */
+        body.modal-open .workflow-container {
+            pointer-events: none !important;
         }
 
+        body.modal-open .workflow-peak-modal,
+        body.modal-open .workflow-peak-modal * {
+            pointer-events: auto !important;
+        }
+
+        /* Scrolling behavior */
         .modal-open .modal {
-            overflow-x: hidden;
-            overflow-y: auto;
+            overflow: hidden !important;
+        }
+
+        .workflow-peak-modal .modal-body {
+            max-height: calc(90vh - 120px) !important; /* Account for header/footer */
+            overflow-y: auto !important;
+            overscroll-behavior: contain !important; /* Prevent scroll chaining */
         }
 
         /* Fix for workflow page */
         .workflow-container .step-details {
-            position: relative;
-            z-index: auto;
+            position: relative !important;
+            z-index: 1 !important; /* Lower than modal */
+        }
+
+        /* Performance optimizations */
+        .workflow-peak-modal,
+        .workflow-peak-modal .modal-dialog,
+        .workflow-peak-modal .modal-content {
+            backface-visibility: hidden !important;
+            -webkit-backface-visibility: hidden !important;
+            perspective: 1000px !important;
+            transform-style: preserve-3d !important;
         }
 
         .peak-visualization-container {
@@ -594,24 +653,91 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/peak_visualization.js"></script>
     <script>
-        // Safety check to prevent page locking
-        function checkAndUnlockPage() {
-            // Remove any lingering modal classes from body
-            document.body.classList.remove('modal-open');
-            // Remove any inline overflow styles
-            document.body.style.removeProperty('overflow');
-            document.body.style.removeProperty('padding-right');
-            // Remove any lingering backdrop
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.remove();
+        // Enhanced modal management
+        const modalManager = {
+            scrollPosition: 0,
+            
+            lockPage() {
+                // Store current scroll position
+                this.scrollPosition = window.pageYOffset;
+                // Add modal classes
+                document.body.classList.add('modal-open');
+                // Prevent background interaction
+                document.querySelector('.workflow-container')?.classList.add('modal-active');
+            },
+            
+            unlockPage() {
+                // Remove modal classes
+                document.body.classList.remove('modal-open');
+                // Remove background interaction prevention
+                document.querySelector('.workflow-container')?.classList.remove('modal-active');
+                // Clean up any lingering backdrop
+                const backdrop = document.querySelector('.modal-backdrop');
+                backdrop?.remove();
+            },
+            
+            handleModalShow() {
+                this.lockPage();
+                // Add show class for pointer events
+                document.querySelector('.workflow-peak-modal')?.classList.add('show');
+            },
+            
+            handleModalHide() {
+                this.unlockPage();
+                // Remove show class
+                document.querySelector('.workflow-peak-modal')?.classList.remove('show');
+            },
+            
+            init() {
+                const modal = document.getElementById('analysisModal');
+                if (!modal) return;
+                
+                // Handle modal events
+                modal.addEventListener('show.bs.modal', () => this.handleModalShow());
+                modal.addEventListener('hidden.bs.modal', () => this.handleModalHide());
+                
+                // Handle scroll blocking on modal content
+                const modalBody = modal.querySelector('.modal-body');
+                if (modalBody) {
+                    modalBody.addEventListener('wheel', (e) => {
+                        const maxScroll = modalBody.scrollHeight - modalBody.clientHeight;
+                        const currentScroll = modalBody.scrollTop;
+                        
+                        // Prevent scroll chaining
+                        if ((currentScroll <= 0 && e.deltaY < 0) || 
+                            (currentScroll >= maxScroll && e.deltaY > 0)) {
+                            e.preventDefault();
+                        }
+                    });
+                }
+                
+                // Handle ESC key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        const bsModal = bootstrap.Modal.getInstance(modal);
+                        if (bsModal) {
+                            bsModal.hide();
+                        }
+                    }
+                });
             }
-        }
+        };
 
-        // Run check on page load
-        document.addEventListener('DOMContentLoaded', checkAndUnlockPage);
-        // Run check periodically
-        setInterval(checkAndUnlockPage, 2000);
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            modalManager.init();
+            // Initial cleanup in case of page refresh
+            modalManager.unlockPage();
+        });
+
+        // Safety check every 5 seconds
+        setInterval(() => {
+            const modal = document.getElementById('analysisModal');
+            const bsModal = modal ? bootstrap.Modal.getInstance(modal) : null;
+            if (!bsModal || !bsModal._isShown) {
+                modalManager.unlockPage();
+            }
+        }, 5000);
     </script>
     <script>
         // Fix modal backdrop scrolling
