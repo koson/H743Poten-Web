@@ -1,5 +1,4 @@
 {
-    "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "terminal.integrated.cwd": "${workspaceFolder}",
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.enablePersistentSessions": false,
@@ -10,6 +9,31 @@
     
     // กำหนดให้ใช้ terminal ปัจจุบันแทนการสร้างใหม่
     "terminal.integrated.splitCwd": "workspaceRoot",
+    
+    // รัน dev command ทุกครั้งที่เปิด terminal
+    "terminal.integrated.shellIntegration.enabled": true,
+    "terminal.integrated.shellIntegration.showWelcome": false,
+    "terminal.integrated.profiles.windows": {
+        "H743Poten-CMD": {
+            "path": "cmd.exe",
+            "args": ["/k", "python auto_dev.py && echo Ready for development!"]
+        },
+        "H743Poten-WSL": {
+            "source": "WSL",
+            "path": "wsl.exe",
+            "args": ["--distribution", "Ubuntu", "--exec", "/bin/bash", "-l", "-c", "cd '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web' && ./dev.sh"]
+        },
+        "H743Poten-Auto": {
+            "path": "cmd.exe",
+            "args": ["/k", "echo Choose your environment: && echo 1. CMD (type 'dev') && echo 2. WSL (switch to WSL profile) && echo."]
+        },      
+        "Ubuntu (WSL)": {
+            "source": "WSL",
+            "path": "wsl.exe",
+            "args": ["-d", "Ubuntu"]
+        },
+    },
+    "terminal.integrated.defaultProfile.windows": "Ubuntu (WSL)",
     
     // Git settings
     "git.defaultCloneDirectory": "${workspaceFolder}",

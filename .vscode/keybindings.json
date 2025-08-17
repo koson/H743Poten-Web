@@ -1,0 +1,34 @@
+[
+    {
+        "key": "ctrl+shift+d",
+        "command": "workbench.action.terminal.new",
+        "when": "!terminalFocus"
+    },
+    {
+        "key": "ctrl+shift+e",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": {"text": "env_switcher.bat\r"},
+        "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+shift+w",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": {"text": "wsl.bat\r"},
+        "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+shift+s",
+        "command": "workbench.action.tasks.runTask",
+        "args": "H743Poten: Start Development Server"
+    },
+    {
+        "key": "ctrl+shift+x", 
+        "command": "workbench.action.tasks.runTask",
+        "args": "H743Poten: Stop Development Server"
+    },
+    {
+        "key": "ctrl+shift+q",
+        "command": "workbench.action.tasks.runTask", 
+        "args": "H743Poten: Server Status"
+    }
+]
