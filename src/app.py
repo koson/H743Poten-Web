@@ -1,5 +1,5 @@
 """
-Flask application factory and routes for H743Poten Web Interface
+Flask application routes for H743Poten Web Interface
 """
 
 from flask import Flask, render_template, request, jsonify, send_file, send_from_directory
@@ -30,6 +30,7 @@ try:
     from .routes.workflow_routes import workflow_bp
     from .routes.preview_data import preview_bp
     from .routes.workflow_api import workflow_api_bp
+    from .routes.peak_detection import peak_detection_bp
 except ImportError:
     # Fall back to absolute imports (when run directly)
     from config.settings import Config
@@ -44,6 +45,7 @@ except ImportError:
     from routes.workflow_routes import workflow_bp
     from routes.preview_data import preview_bp
     from routes.workflow_api import workflow_api_bp
+    from routes.peak_detection import peak_detection_bp
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +107,7 @@ def create_app():
     app.register_blueprint(workflow_bp)
     app.register_blueprint(preview_bp)
     app.register_blueprint(workflow_api_bp)
+    app.register_blueprint(peak_detection_bp, url_prefix='/api/peak-detection')
     
     # Error handlers
     @app.errorhandler(413)
@@ -165,6 +168,11 @@ def create_app():
     def data_browser():
         """Data browser interface"""
         return render_template('data_browser.html')
+        
+    @app.route('/peak-detection')
+    def peak_detection_view():
+        """Peak detection visualization interface"""
+        return render_template('peak_detection.html')
     
     @app.route('/favicon.ico')
     def favicon():

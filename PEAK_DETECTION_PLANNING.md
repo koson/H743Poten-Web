@@ -28,23 +28,27 @@
 
 ## 📊 Implementation Plan
 
-### Phase 1: Core Detection Engine
+### Phase 1: Peak Detection Visualization
+- [ ] Create interactive peak visualization component
+- [ ] Implement dynamic peak markers and labels
+- [ ] Add hover effects for peak details
+- [ ] Enable peak selection and highlighting
+- [ ] Add data export for Excel verification
+- [ ] Implement real-time plot updates
+
+### Phase 2: Core Detection Engine
 - [ ] Set up detection method interfaces
 - [ ] Implement base peak detection class
 - [ ] Create method-specific implementations
 - [ ] Add unit tests for each method
+- [ ] Integrate with visualization system
 
-### Phase 2: Real-Time Analysis
-- [ ] Implement streaming data processing
-- [ ] Add real-time visualization
-- [ ] Create progress tracking system
-- [ ] Optimize performance
-
-### Phase 3: Method Comparison
+### Phase 3: Method Comparison & Analysis
 - [ ] Implement side-by-side visualization
 - [ ] Add comparison metrics
 - [ ] Create statistical analysis tools
 - [ ] Generate comparison reports
+- [ ] Add Excel export for validation
 
 ### Phase 4: Batch Processing
 - [ ] Add batch file handling
@@ -73,14 +77,21 @@
    - Batch management
 
 ### Frontend Components
-1. Method Selection Interface
+1. Peak Visualization System
+   - Interactive CV plot with peak markers
+   - Peak detail tooltips and labels
+   - Dynamic peak highlighting
+   - Real-time updates
+   - Excel-compatible data export
+
+2. Method Selection Interface
    - Method cards with details
    - Parameter configuration
    - Method comparison view
-
-2. Real-Time Visualization
-   - Live peak detection display
-   - Confidence indicators
+   
+3. Real-Time Analysis Display
+   - Live peak detection indicators
+   - Confidence metrics
    - Progress tracking
    - Error feedback
 
