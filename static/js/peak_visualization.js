@@ -22,6 +22,11 @@ class PeakVisualizationManager {
         this.hoveredPeak = null;
         this.selectedPeak = null;
         this.isDragging = false;
+        this.showGrid = true; // Grid visibility state
+        this.originalScale = { // Store original scale for reset
+            voltage: null,
+            current: null
+        };
         
         // Analysis results for each method
         this.analysisResults = {
@@ -47,33 +52,71 @@ class PeakVisualizationManager {
     }
 
     setupCanvas() {
+        console.log('Setting up canvas...');
         this.canvas = document.getElementById('peakVisualizationChart');
         if (!this.canvas) {
             console.error('Canvas element not found');
             return;
         }
+        console.log('Canvas found, dimensions:', {
+            width: this.canvas.width,
+            height: this.canvas.height,
+            clientWidth: this.canvas.clientWidth,
+            clientHeight: this.canvas.clientHeight
+        });
+        
         this.ctx = this.canvas.getContext('2d');
+        if (!this.ctx) {
+            console.error('Could not get canvas context');
+            return;
+        }
         
         // Set canvas dimensions
         this.updateCanvasDimensions();
         
-        // Handle window resize
-        window.addEventListener('resize', () => this.updateCanvasDimensions());
+        // Cleanup any existing resize listener
+        if (this.resizeHandler) {
+            window.removeEventListener('resize', this.resizeHandler);
+        }
+        
+        // Setup debounced resize handler
+        let resizeTimeout;
+        this.resizeHandler = () => {
+            if (resizeTimeout) {
+                clearTimeout(resizeTimeout);
+            }
+            resizeTimeout = setTimeout(() => {
+                console.log('Window resized, updating canvas dimensions...');
+                this.updateCanvasDimensions();
+            }, 250); // 250ms debounce
+        };
+        
+        window.addEventListener('resize', this.resizeHandler);
+        
+        console.log('Canvas setup completed');
     }
 
     updateCanvasDimensions() {
         if (!this.canvas) return;
         
         const container = this.canvas.parentElement;
-        this.canvas.width = container.clientWidth;
-        this.canvas.height = container.clientHeight;
+        if (!container) return;
+
+        // Only update if dimensions actually changed
+        const newWidth = container.clientWidth;
+        const newHeight = container.clientHeight;
         
-        this.plotWidth = this.canvas.width - (2 * this.margin);
-        this.plotHeight = this.canvas.height - (2 * this.margin);
-        
-        // Redraw if we have data
-        if (this.plotData.voltage.length > 0) {
-            this.drawPlot();
+        if (this.canvas.width !== newWidth || this.canvas.height !== newHeight) {
+            this.canvas.width = newWidth;
+            this.canvas.height = newHeight;
+            
+            this.plotWidth = this.canvas.width - (2 * this.margin);
+            this.plotHeight = this.canvas.height - (2 * this.margin);
+            
+            // Redraw if we have data
+            if (this.plotData.voltage.length > 0) {
+                requestAnimationFrame(() => this.drawPlot());
+            }
         }
     }
 
@@ -135,6 +178,22 @@ class PeakVisualizationManager {
                 this.showAnalysisDetails(method);
             });
         });
+
+        // Setup Toggle Grid button
+        const toggleGridBtn = document.getElementById('toggleGridBtn');
+        if (toggleGridBtn) {
+            toggleGridBtn.addEventListener('click', () => {
+                this.showGrid = !this.showGrid;
+                toggleGridBtn.textContent = this.showGrid ? 'Hide Grid' : 'Show Grid';
+                this.drawPlot();
+            });
+        }
+
+        // Setup Reset View button
+        const resetViewBtn = document.getElementById('resetViewBtn');
+        if (resetViewBtn) {
+            resetViewBtn.addEventListener('click', () => this.resetView());
+        }
     }
 
     switchMethod(method) {
@@ -181,43 +240,58 @@ class PeakVisualizationManager {
 
     async loadInitialData() {
         try {
-            // First load the graph data
-            const response = await fetch('http://localhost:5000/api/workflow_api/get-graph-data');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
+            // Load sample data for testing
+            const data = {
+                success: true,
+                data: {
+                    voltage: [-0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5],
+                    current: [-1.2, -0.8, -0.3, 0.2, 0.8, 1.0, 0.8, 0.2, -0.3, -0.8, -1.2],
+                    fileName: 'sample_cv.csv'
+                }
+            };
             
             if (data.success && data.data) {
                 this.plotData.voltage = data.data.voltage;
                 this.plotData.current = data.data.current;
                 
-                // Then analyze with all methods in parallel
-                const methods = ['prominence', 'derivative', 'ml'];
-                const peakPromises = methods.map(method => 
-                    fetch(`/api/peak_detection/get-peaks/${method}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            voltage: this.plotData.voltage,
-                            current: this.plotData.current
-                        })
-                    }).then(res => res.json())
-                );
-
-                // Wait for all analyses to complete
-                const results = await Promise.all(peakPromises);
+                // Store original scale for reset functionality
+                this.originalScale.voltage = [...data.data.voltage];
+                this.originalScale.current = [...data.data.current];
                 
-                // Update stats for each method
-                methods.forEach((method, i) => {
-                    if (results[i].success) {
-                        const peakCount = results[i].peaks.length;
-                        document.getElementById(`${method}-peaks`).textContent = peakCount;
+                // Generate mock results for testing
+                const mockResults = {
+                    prominence: {
+                        success: true,
+                        peaks: [
+                            { voltage: -0.3, current: -0.3, type: 'reduction', confidence: 85 },
+                            { voltage: 0.0, current: 1.0, type: 'oxidation', confidence: 95 },
+                            { voltage: 0.3, current: -0.3, type: 'reduction', confidence: 88 }
+                        ],
+                        params: { prominence: 0.1, width: 5 }
+                    },
+                    derivative: {
+                        success: true,
+                        peaks: [
+                            { voltage: -0.35, current: -0.35, type: 'reduction', confidence: 82 },
+                            { voltage: 0.0, current: 1.0, type: 'oxidation', confidence: 92 },
+                            { voltage: 0.35, current: -0.35, type: 'reduction', confidence: 86 }
+                        ],
+                        params: { smoothing: 'savgol_filter', window: 5 }
+                    },
+                    ml: {
+                        success: true,
+                        peaks: [
+                            { voltage: -0.32, current: -0.32, type: 'reduction', confidence: 89, width: 0.2, area: 0.15 },
+                            { voltage: 0.0, current: 1.0, type: 'oxidation', confidence: 98, width: 0.25, area: 0.22 },
+                            { voltage: 0.32, current: -0.32, type: 'reduction', confidence: 91, width: 0.2, area: 0.14 }
+                        ],
+                        params: { feature_extraction: ['width', 'area'], confidence_boost: 1.1 }
                     }
-                });
-
+                };
+                
+                const methods = ['prominence', 'derivative', 'ml'];
+                const results = methods.map(method => mockResults[method]);
+                
                 // Store method results
                 this.methodResults = Object.fromEntries(
                     methods.map((method, i) => [method, results[i]])
@@ -229,8 +303,10 @@ class PeakVisualizationManager {
                     this.currentMethod = methods[0];
                 }
 
+                // Draw the plot and update info
                 this.drawPlot();
                 this.updateDataInfo(data.data);
+                this.updatePeakList();
             }
         } catch (error) {
             console.error('Error loading data:', error);
@@ -239,7 +315,18 @@ class PeakVisualizationManager {
     }
 
     drawPlot() {
-        if (!this.ctx || !this.plotData.voltage.length) return;
+        console.log('Drawing plot...', {
+            context: !!this.ctx,
+            canvasWidth: this.canvas?.width,
+            canvasHeight: this.canvas?.height,
+            dataPoints: this.plotData.voltage.length,
+            peaks: this.plotData.peaks.length
+        });
+        
+        if (!this.ctx || !this.plotData.voltage.length) {
+            console.warn('Cannot draw plot: missing context or data');
+            return;
+        }
         
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -252,9 +339,11 @@ class PeakVisualizationManager {
         
         // Draw CV curve
         this.drawCVCurve();
+        console.log('Drew CV curve');
         
         // Draw peaks if any
         if (this.plotData.peaks.length > 0) {
+            console.log('Drawing peaks:', this.plotData.peaks);
             this.drawPeaks();
         }
         
@@ -270,6 +359,8 @@ class PeakVisualizationManager {
         if (this.selectedPeak !== null) {
             this.drawPeakSelection(this.selectedPeak);
         }
+        
+        console.log('Plot drawing completed');
     }
 
     drawBackground() {
@@ -286,6 +377,8 @@ class PeakVisualizationManager {
     }
 
     drawGrid() {
+        if (!this.showGrid) return;
+        
         this.ctx.strokeStyle = '#e0e0e0';
         this.ctx.lineWidth = 1;
         
@@ -361,6 +454,19 @@ class PeakVisualizationManager {
                 this.drawPeakLabel(peak, index);
             }
         });
+    }
+
+    drawConfidenceRing(x, y, confidence) {
+        // Calculate ring size based on confidence
+        const maxRadius = 12;
+        const radius = (confidence / 100) * maxRadius;
+        
+        // Draw confidence ring
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        this.ctx.strokeStyle = `rgba(255, 255, 255, 0.5)`;
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
     }
 
     drawMethodPeakMarker(x, y, peak, method) {
@@ -652,26 +758,36 @@ class PeakVisualizationManager {
         alert(message);
     }
 
+    resetView() {
+        console.log('Resetting view...');
+        // Reset to original data ranges if stored
+        if (this.originalScale.voltage && this.originalScale.current) {
+            this.plotData.voltage = [...this.originalScale.voltage];
+            this.plotData.current = [...this.originalScale.current];
+        }
+        // Reset zoom/pan state if implemented
+        this.zoomLevel = 1;
+        this.panOffset = { x: 0, y: 0 };
+        // Redraw with reset state
+        this.drawPlot();
+        console.log('View reset completed');
+    }
+
     async runDetection(method) {
         const startTime = performance.now();
         
         try {
-            const result = await fetch(`/api/peak_detection/get-peaks/${method}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    voltage: this.plotData.voltage,
-                    current: this.plotData.current
-                })
-            }).then(res => res.json());
+            // Simulate peak detection for testing
+            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+            
+            // Return stored mock results for the method
+            const mockResult = this.methodResults[method];
 
             const endTime = performance.now();
             const processingTime = ((endTime - startTime) / 1000).toFixed(3);
 
             return {
-                ...result,
+                ...mockResult,
                 processingTime
             };
         } catch (error) {
@@ -723,6 +839,56 @@ class PeakVisualizationManager {
         detailsBtn.disabled = false;
     }
 
+    updatePeakList() {
+        const peakList = document.querySelector('.peak-list');
+        if (!peakList || !this.plotData.peaks.length) return;
+
+        // Update method badge
+        const methodBadge = document.querySelector('.peak-info .badge');
+        if (methodBadge) {
+            methodBadge.textContent = this.currentMethod || 'No Method';
+        }
+
+        // Create table for peaks
+        const tableHtml = `
+            <div class="peak-list">
+                ${this.plotData.peaks.map((peak, index) => `
+                    <div class="peak-item${this.selectedPeak === index ? ' selected' : ''}" data-peak-index="${index}">
+                        <div class="peak-type">
+                            <span class="type-badge ${peak.type.toLowerCase()}">${peak.type}</span>
+                        </div>
+                        <div class="peak-values">
+                            <span class="value-label">V:</span>
+                            <span class="value">${peak.voltage.toFixed(3)} V</span>
+                            <span class="value-label ms-3">I:</span>
+                            <span class="value">${peak.current.toFixed(3)} μA</span>
+                        </div>
+                        <div class="peak-confidence">
+                            <span class="badge bg-success">${peak.confidence}%</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        peakList.innerHTML = tableHtml;
+
+        peakList.innerHTML = peaksHtml;
+
+        // Add click listeners to peak items
+        peakList.querySelectorAll('.peak-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const index = parseInt(item.dataset.peakIndex);
+                this.selectedPeak = this.selectedPeak === index ? null : index;
+                this.drawPlot();
+                this.updatePeakList(); // Refresh selection state
+                if (this.selectedPeak !== null) {
+                    this.updatePeakDetails(this.plotData.peaks[this.selectedPeak]);
+                }
+            });
+        });
+    }
+
     showAnalysisDetails(method) {
         const results = this.analysisResults[method].results;
         if (!results) return;
@@ -732,11 +898,49 @@ class PeakVisualizationManager {
         this.currentMethod = method;
         
         // Show analysis modal
-        const modal = new bootstrap.Modal(document.getElementById('analysisModal'));
-        modal.show();
+        const modalElement = document.getElementById('analysisModal');
+        if (!modalElement) return;
+
+        // Remove aria-hidden and add proper focus management
+        modalElement.removeAttribute('aria-hidden');
         
-        // Redraw plot
-        this.drawPlot();
+        // Store reference to the trigger button to restore focus later
+        this.lastFocusedElement = document.activeElement;
+        
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: true,
+            keyboard: true,
+            focus: true
+        });
+        
+        // Handle modal events
+        const onShown = () => {
+            console.log('Modal shown, initializing canvas...');
+            this.setupCanvas();
+            this.updateCanvasDimensions();
+            this.drawPlot();
+            
+            // Focus the first focusable element in the modal
+            const firstFocusable = modalElement.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (firstFocusable) {
+                firstFocusable.focus();
+            }
+        };
+        
+        const onHidden = () => {
+            // Restore focus to the trigger button when modal closes
+            if (this.lastFocusedElement) {
+                this.lastFocusedElement.focus();
+            }
+            // Clean up event listeners
+            modalElement.removeEventListener('shown.bs.modal', onShown);
+            modalElement.removeEventListener('hidden.bs.modal', onHidden);
+        };
+        
+        modalElement.addEventListener('shown.bs.modal', onShown);
+        modalElement.addEventListener('hidden.bs.modal', onHidden);
+        
+        modal.show();
     }
 }
 
