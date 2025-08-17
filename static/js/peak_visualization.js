@@ -46,7 +46,6 @@ class PeakVisualizationManager {
 
     init() {
         console.log('🚀 Peak Visualization Manager Initialized');
-        this.setupCanvas();
         this.setupEventListeners();
         this.loadInitialData();
     }
@@ -303,8 +302,11 @@ class PeakVisualizationManager {
                     this.currentMethod = methods[0];
                 }
 
-                // Draw the plot and update info
-                this.drawPlot();
+                // Only draw if canvas is available
+                if (this.canvas && this.ctx) {
+                    this.drawPlot();
+                }
+                
                 this.updateDataInfo(data.data);
                 this.updatePeakList();
             }
@@ -873,8 +875,6 @@ class PeakVisualizationManager {
 
         peakList.innerHTML = tableHtml;
 
-        peakList.innerHTML = peaksHtml;
-
         // Add click listeners to peak items
         peakList.querySelectorAll('.peak-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -912,11 +912,16 @@ class PeakVisualizationManager {
             keyboard: true,
             focus: true
         });
+
+        // Initialize canvas before showing modal
+        this.setupCanvas();
+        this.updateCanvasDimensions();
         
         // Handle modal events
         const onShown = () => {
-            console.log('Modal shown, initializing canvas...');
-            this.setupCanvas();
+            console.log('Modal shown, rendering plot...');
+            
+            // Re-initialize canvas with correct dimensions after modal shown
             this.updateCanvasDimensions();
             this.drawPlot();
             
@@ -935,6 +940,10 @@ class PeakVisualizationManager {
             // Clean up event listeners
             modalElement.removeEventListener('shown.bs.modal', onShown);
             modalElement.removeEventListener('hidden.bs.modal', onHidden);
+            
+            // Clear the canvas reference when modal is closed
+            this.canvas = null;
+            this.ctx = null;
         };
         
         modalElement.addEventListener('shown.bs.modal', onShown);
