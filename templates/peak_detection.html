@@ -133,7 +133,6 @@
             width: 100vw !important;
             height: 100vh !important;
             z-index: 1050 !important;
-            background-color: rgba(0, 0, 0, 0.5);
         }
         
         .workflow-peak-modal .modal-dialog {
@@ -149,9 +148,23 @@
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
         }
 
-        body.modal-open {
-            overflow: hidden !important;
-            padding-right: 0 !important;
+        .modal-backdrop {
+            z-index: 1040 !important;
+        }
+
+        .modal-open {
+            overflow: auto !important;
+        }
+
+        .modal-open .modal {
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Fix for workflow page */
+        .workflow-container .step-details {
+            position: relative;
+            z-index: auto;
         }
 
         .peak-visualization-container {
@@ -581,18 +594,65 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/peak_visualization.js"></script>
     <script>
+        // Safety check to prevent page locking
+        function checkAndUnlockPage() {
+            // Remove any lingering modal classes from body
+            document.body.classList.remove('modal-open');
+            // Remove any inline overflow styles
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+            // Remove any lingering backdrop
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        }
+
+        // Run check on page load
+        document.addEventListener('DOMContentLoaded', checkAndUnlockPage);
+        // Run check periodically
+        setInterval(checkAndUnlockPage, 2000);
+    </script>
+    <script>
         // Fix modal backdrop scrolling
         document.addEventListener('DOMContentLoaded', function() {
             const analysisModal = document.getElementById('analysisModal');
             if (analysisModal) {
+                let originalOverflow;
+
                 analysisModal.addEventListener('show.bs.modal', function() {
-                    document.body.style.overflow = 'hidden';
-                    document.body.style.paddingRight = '0';
+                    // Store original overflow value
+                    originalOverflow = document.body.style.overflow;
+                    // Only set overflow:hidden on the modal's immediate parent
+                    const modalParent = analysisModal.closest('.step-details');
+                    if (modalParent) {
+                        modalParent.style.overflow = 'hidden';
+                    }
                 });
                 
                 analysisModal.addEventListener('hidden.bs.modal', function() {
-                    document.body.style.overflow = '';
-                    document.body.style.paddingRight = '';
+                    // Restore original overflow value
+                    document.body.style.overflow = originalOverflow || '';
+                    // Reset overflow on modal's parent
+                    const modalParent = analysisModal.closest('.step-details');
+                    if (modalParent) {
+                        modalParent.style.overflow = '';
+                    }
+                    // Force remove any lingering backdrop
+                    const backdrop = document.querySelector('.modal-backdrop');
+                    if (backdrop) {
+                        backdrop.remove();
+                    }
+                });
+
+                // Handle ESC key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        const modal = bootstrap.Modal.getInstance(analysisModal);
+                        if (modal) {
+                            modal.hide();
+                        }
+                    }
                 });
             }
         });
