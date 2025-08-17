@@ -125,6 +125,35 @@
     <title>Peak Detection Visualization</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* Modal Backdrop Fix */
+        .workflow-peak-modal {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 1050 !important;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .workflow-peak-modal .modal-dialog {
+            position: relative !important;
+            margin: 1.75rem auto !important;
+            max-width: 90% !important;
+        }
+
+        .workflow-peak-modal .modal-content {
+            position: relative !important;
+            background: white !important;
+            border-radius: 0.3rem !important;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        body.modal-open {
+            overflow: hidden !important;
+            padding-right: 0 !important;
+        }
+
         .peak-visualization-container {
             width: 100%;
             height: 600px;
@@ -498,9 +527,9 @@
         </div>
 
         <!-- Analysis Modal -->
-        <div class="modal fade" id="analysisModal" tabindex="-1">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
+        <div class="modal fade workflow-peak-modal" id="analysisModal" tabindex="-1" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1050;">
+            <div class="modal-dialog modal-xl" style="position: relative; margin: 1.75rem auto; max-width: 90%;">
+                <div class="modal-content" style="position: relative; background: white;">
                     <div class="modal-header">
                         <h5 class="modal-title">Peak Analysis</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -551,5 +580,22 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/peak_visualization.js"></script>
+    <script>
+        // Fix modal backdrop scrolling
+        document.addEventListener('DOMContentLoaded', function() {
+            const analysisModal = document.getElementById('analysisModal');
+            if (analysisModal) {
+                analysisModal.addEventListener('show.bs.modal', function() {
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.paddingRight = '0';
+                });
+                
+                analysisModal.addEventListener('hidden.bs.modal', function() {
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
