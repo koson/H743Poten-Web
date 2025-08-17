@@ -1191,57 +1191,7 @@
                         </div>
                         
                         <div class="step-details">
-                            <h4>🤖 Detection Method Selection</h4>
-                            <div class="instrument-selector">
-                                <div class="instrument-card selected" onclick="selectMethod('deepcv')">
-                                    <div class="instrument-icon">🧠</div>
-                                    <div><strong>DeepCV</strong></div>
-                                    <div>AI-Enhanced (Best)</div>
-                                </div>
-                                <div class="instrument-card" onclick="selectMethod('traditional')">
-                                    <div class="instrument-icon">📈</div>
-                                    <div><strong>TraditionalCV</strong></div>
-                                    <div>Classical Method</div>
-                                </div>
-                                <div class="instrument-card" onclick="selectMethod('hybrid')">
-                                    <div class="instrument-icon">⚡</div>
-                                    <div><strong>HybridCV</strong></div>
-                                    <div>Combined Approach</div>
-                                </div>
-                            </div>
-
-                            <h4>📊 Detection Progress</h4>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="detectionProgress" style="width: 0%">0%</div>
-                            </div>
-
-                            <div class="action-buttons">
-                                <button class="btn btn-primary" onclick="startDetection()">🎯 Start Detection</button>
-                                <button class="btn btn-info" onclick="compareResults()">⚖️ Compare Methods</button>
-                            </div>
-
-                            <div class="results-grid">
-                                <div class="result-card">
-                                    <div class="result-value" id="peaksDetected">0</div>
-                                    <div class="result-label">Peaks Detected</div>
-                                </div>
-                                <div class="result-card">
-                                    <div class="result-value" id="detectionConfidence">0%</div>
-                                    <div class="result-label">Confidence</div>
-                                </div>
-                                <div class="result-card">
-                                    <div class="result-value" id="processingTime">0.0s</div>
-                                    <div class="result-label">Processing Time</div>
-                                </div>
-                            </div>
-
-                            <div class="confidence-meter">
-                                <span>Confidence Level:</span>
-                                <div class="confidence-bar">
-                                    <div class="confidence-fill confidence-high" id="confidenceBar" style="width: 0%"></div>
-                                </div>
-                                <span id="confidenceText">0%</span>
-                            </div>
+                            {% include 'peak_detection.html' %}
                         </div>
                     </div>
                 </div>
