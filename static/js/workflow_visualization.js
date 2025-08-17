@@ -698,22 +698,55 @@ class H743WorkflowManager {
         if (!canvas) return;
 
         try {
-            // Fetch real or mock data from backend
-            const response = await fetch('/api/workflow/get-preview-data');
-            const data = await response.json();
-            
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to load data');
+            // Try to load real data from CSV first
+            const csvResponse = await fetch('/temp_data/preview_Palmsens_Palmsens_0.5mM_CV_100mVpS_E1_scan_05.csv');
+            if (csvResponse.ok) {
+                const csvText = await csvResponse.text();
+                const lines = csvText.split('\n');
+                const voltage = [];
+                const current = [];
+                
+                // Skip header (first 2 lines)
+                for (let i = 2; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line) {
+                        const [v, ua] = line.split(',').map(Number);
+                        voltage.push(v);
+                        current.push(ua);
+                    }
+                }
+
+                // Plot real data
+                this.drawChart(canvas, {
+                    data_source: 'real',
+                    file_name: 'Palmsens_0.5mM_CV_100mVpS_E1_scan_05.csv',
+                    voltage: voltage,
+                    current: current
+                });
+
+                // Update graph info with real data
+                const graphInfo = document.querySelector('.graph-info');
+                if (graphInfo) {
+                    const vMin = Math.min(...voltage);
+                    const vMax = Math.max(...voltage);
+                    const iMin = Math.min(...current);
+                    const iMax = Math.max(...current);
+
+                    graphInfo.innerHTML = `
+                        <h4>Data Source: Real uploaded data</h4>
+                        <p>Voltage Range: ${vMin.toFixed(2)}V to ${vMax.toFixed(2)}V</p>
+                        <p>Current Range: ${iMin.toFixed(2)}μA to ${iMax.toFixed(2)}μA</p>
+                        <button class="btn btn-primary" id="exportDataBtn">
+                            📥 Export Graph Data (CSV)
+                        </button>
+                    `;
+                }
+            } else {
+                throw new Error('CSV file not found');
             }
-            
-            this.drawChart(canvas, data);
-            
-            // Update graph info with real data details
-            this.updateGraphInfo(data);
-            
         } catch (error) {
-            console.error('Error loading chart data:', error);
-            // Fallback to original mock data
+            console.error('Error loading real data:', error);
+            // Only use mock data if real data is not available
             this.drawMockChart(canvas);
         }
     }
@@ -1849,4 +1882,23 @@ async function checkDataSourceStatus() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Initializing H743Poten Workflow Manager...');
     window.workflowManager = new H743WorkflowManager();
+    
+    // Add global export button click handler
+    const exportHandler = function(e) {
+        if (e.target && e.target.id === 'exportDataBtn') {
+            e.preventDefault();  // Prevent multiple handlers
+            e.stopPropagation(); // Stop event bubbling
+            // Use the exportGraphData function from export_utils.js
+            if (typeof window.exportGraphData === 'function') {
+                window.exportGraphData();
+            } else {
+                console.error('exportGraphData function not found');
+            }
+        }
+    };
+    
+    // Remove any existing handlers
+    document.body.removeEventListener('click', exportHandler);
+    // Add single handler
+    document.body.addEventListener('click', exportHandler);
 });

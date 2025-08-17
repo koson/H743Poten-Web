@@ -2,7 +2,7 @@
 Flask application factory and routes for H743Poten Web Interface
 """
 
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, send_from_directory
 import logging
 import json
 import io
@@ -28,6 +28,8 @@ try:
     from .routes.cv_routes import cv_bp
     from .routes.data_logging_routes import data_logging_bp
     from .routes.workflow_routes import workflow_bp
+    from .routes.preview_data import preview_bp
+    from .routes.workflow_api import workflow_api_bp
 except ImportError:
     # Fall back to absolute imports (when run directly)
     from config.settings import Config
@@ -40,6 +42,8 @@ except ImportError:
     from routes.cv_routes import cv_bp
     from routes.data_logging_routes import data_logging_bp
     from routes.workflow_routes import workflow_bp
+    from routes.preview_data import preview_bp
+    from routes.workflow_api import workflow_api_bp
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +66,14 @@ def create_app():
                 template_folder=str(template_dir),
                 static_folder=str(static_dir),
                 static_url_path='/static')
+    
+    # Additional static folder for temp_data
+    @app.route('/temp_data/<path:filename>')
+    def serve_temp_file(filename):
+        temp_dir = os.path.join(project_root, 'temp_data')
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
+        return send_from_directory(temp_dir, filename)
     
     # Configure file upload limits and security
     app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
@@ -91,6 +103,8 @@ def create_app():
     app.register_blueprint(cv_bp)
     app.register_blueprint(data_logging_bp)
     app.register_blueprint(workflow_bp)
+    app.register_blueprint(preview_bp)
+    app.register_blueprint(workflow_api_bp)
     
     # Error handlers
     @app.errorhandler(413)

@@ -1030,7 +1030,7 @@
                                     <div class="instrument-body">
                                         <input type="file" id="palmsensInput" webkitdirectory multiple class="file-input">
                                         <label for="palmsensInput" class="folder-button">
-                                            � Choose Folder
+                                            📂 Choose Folder
                                         </label>
                                         <div class="instrument-details">
                                             <div class="detail-item">
@@ -1058,7 +1058,7 @@
                                     <div class="instrument-body">
                                         <input type="file" id="stm32Input" webkitdirectory multiple class="file-input">
                                         <label for="stm32Input" class="folder-button">
-                                            � Choose Folder
+                                            📂 Choose Folder
                                         </label>
                                         <div class="instrument-details">
                                             <div class="detail-item">
@@ -1530,5 +1530,17 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/workflow_visualization.js') }}?v={{ range(1,10000)|random }}"></script>
+    <script src="{{ url_for('static', filename='js/export_utils.js') }}?v={{ range(1,10000)|random }}"></script>
+    <script src="{{ url_for('static', filename='js/plot_cv_data.js') }}?v={{ range(1,10000)|random }}"></script>
+    <script src="{{ url_for('static', filename='js/real_data_plotter.js') }}?v={{ range(1,10000)|random }}"></script>
+    <script>
+        // Call loadAndPlotCVData when preview tab is shown
+        document.addEventListener('DOMContentLoaded', function() {
+            const graphsTab = document.querySelector('[onclick="showPreviewTab(\'graphs\')"]');
+            if (graphsTab) {
+                graphsTab.addEventListener('click', loadAndPlotCVData);
+            }
+        });
+    </script>
 </body>
 </html>

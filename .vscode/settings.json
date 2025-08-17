@@ -14,28 +14,38 @@
     "terminal.integrated.shellIntegration.enabled": true,
     "terminal.integrated.shellIntegration.showWelcome": false,
     "terminal.integrated.profiles.windows": {
-        "H743Poten-CMD": {
-            "path": "cmd.exe",
-            "args": ["/k", "python auto_dev.py && echo Ready for development!"]
-        },
         "H743Poten-WSL": {
-            "source": "WSL",
             "path": "wsl.exe",
-            "args": ["--distribution", "Ubuntu", "--exec", "/bin/bash", "-l", "-c", "cd '/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web' && ./dev.sh"]
+            "args": [
+                "bash",
+                "-ic",
+                "source /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/shell_setup.sh && cd /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web && bash"
+            ]
         },
-        "H743Poten-Auto": {
-            "path": "cmd.exe",
-            "args": ["/k", "echo Choose your environment: && echo 1. CMD (type 'dev') && echo 2. WSL (switch to WSL profile) && echo."]
-        },      
+        "H743Poten-Dev": {
+            "path": "wsl.exe",
+            "args": [
+                "bash",
+                "-ic",
+                "source /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/shell_setup.sh && cd /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web && python3 auto_dev.py start"
+            ]
+        },
         "Ubuntu (WSL)": {
             "source": "WSL",
             "path": "wsl.exe",
             "args": ["-d", "Ubuntu"]
-        },
+        }
     },
     "terminal.integrated.defaultProfile.windows": "Ubuntu (WSL)",
     
     // Git settings
     "git.defaultCloneDirectory": "${workspaceFolder}",
-    "git.openRepositoryInParentFolders": "always"
+    "git.openRepositoryInParentFolders": "always",
+    "editor.fontFamily": "Cascadia, monospace",
+    "editor.fontSize": 15,
+    "debug.console.fontSize": 15,
+    "scm.inputFontSize": 14,
+    "terminal.integrated.fontSize": 15,
+    "chat.editor.fontSize": 15,
+    "markdown.preview.fontSize": 15
 }
