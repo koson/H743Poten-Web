@@ -509,6 +509,18 @@ class CVMeasurement {
             console.log('[DEBUG] Fetching data from /api/cv/data/stream...');
             const response = await fetch('/api/cv/data/stream');
             
+            // Store CV data in local storage for peak detection
+            if (this.plotData.x.length > 0) {
+                const cvData = {
+                    x: this.plotData.x,
+                    y: this.plotData.y,
+                    cycle: this.plotData.cycle,
+                    direction: this.plotData.direction,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('lastCVData', JSON.stringify(cvData));
+            }
+            
             console.log('[DEBUG] Response status:', response.status, response.statusText);
             
             if (!response.ok) {
@@ -890,6 +902,13 @@ class CVMeasurement {
                 }
                 this.statusText.textContent = statusStr;
                 console.log('[DEBUG] Updated status text:', statusStr);
+                
+                // Update Peak Detection button visibility based on data
+                const peakDetectionBtn = document.getElementById('peak-detection-btn');
+                if (peakDetectionBtn) {
+                    const hasData = this.plotData.x.length > 0;
+                    peakDetectionBtn.style.display = hasData ? 'block' : 'none';
+                }
             }
             
             // Update progress text with timeout info
@@ -1193,7 +1212,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Update UI state based on connection
+        // Add Peak Detection Analysis link handler
+    const peakDetectionBtn = document.getElementById('peak-detection-btn');
+    if (peakDetectionBtn) {
+        peakDetectionBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Check if we have CV data
+            const cvData = localStorage.getItem('lastCVData');
+            if (!cvData) {
+                if (window.cvMeasurement) {
+                    window.cvMeasurement.showMessage('No CV data available for analysis', 'warning');
+                }
+                return;
+            }
+            
+            // Navigate to peak detection page
+            window.location.href = '/peak-detection';
+        });
+    }
+    
+    // Update UI state based on connection
         // Check if connectionState exists and has addEventListener
         if (typeof connectionState !== 'undefined' && connectionState.addListener) {
             console.log('[CV] Setting up connectionState listener...');
