@@ -950,6 +950,111 @@
             opacity: 0.8;
         }
 
+        /* Method Selector Styles */
+        .method-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .method-card {
+            background: linear-gradient(135deg, #fff 0%, #f8f9ff 100%);
+            border: 2px solid #e1e8f0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .method-card:hover {
+            transform: translateY(-5px);
+            border-color: #4169E1;
+            box-shadow: 0 8px 25px rgba(65,105,225,0.2);
+        }
+
+        .method-card.selected {
+            border-color: #4169E1;
+            background: linear-gradient(135deg, #e8f0ff 0%, #f0f7ff 100%);
+        }
+
+        .method-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .method-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .method-description {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .method-badge {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        /* Step Guide Styles */
+        .step-guide {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .guide-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #4169E1;
+        }
+
+        .guide-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .guide-step .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #4169E1, #6495ED);
+            color: white;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .guide-step .step-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.4;
+            flex: 1;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -1187,60 +1292,110 @@
                     </div>
                     <div class="step-content">
                         <div class="step-description">
-                            Apply advanced peak detection algorithms using our 3-method framework: DeepCV, TraditionalCV, and HybridCV.
+                            <div class="alert alert-success mb-3">
+                                <i class="fas fa-rocket me-2"></i>
+                                <strong>🆕 New v2.0.0 Peak Detection System!</strong> 
+                                Real data integration with multi-method analysis and interactive visualization.
+                            </div>
+                            Apply advanced peak detection algorithms using multiple methods: SciPy Peak Finder, Savitzky-Golay, and Advanced Detection with real instrument data support.
+                            <div class="mt-2">
+                                <span class="badge bg-success me-1">✓ Real CSV Data</span>
+                                <span class="badge bg-success me-1">✓ Multi-Tab Analysis</span>
+                                <span class="badge bg-success me-1">✓ Interactive Charts</span>
+                                <span class="badge bg-success me-1">✓ Export Capabilities</span>
+                            </div>
                         </div>
                         
                         <div class="step-details">
-                            <h4>🤖 Detection Method Selection</h4>
-                            <div class="instrument-selector">
-                                <div class="instrument-card selected" onclick="selectMethod('deepcv')">
-                                    <div class="instrument-icon">🧠</div>
-                                    <div><strong>DeepCV</strong></div>
-                                    <div>AI-Enhanced (Best)</div>
+                            <h4>🎯 Peak Detection Methods</h4>
+                            <div class="method-selector">
+                                <div class="method-card" data-method="scipy">
+                                    <div class="method-icon">🔬</div>
+                                    <div class="method-name">SciPy Peak Finder</div>
+                                    <div class="method-description">Signal processing based detection</div>
+                                    <div class="method-badge">Recommended</div>
                                 </div>
-                                <div class="instrument-card" onclick="selectMethod('traditional')">
-                                    <div class="instrument-icon">📈</div>
-                                    <div><strong>TraditionalCV</strong></div>
-                                    <div>Classical Method</div>
+                                <div class="method-card" data-method="savgol">
+                                    <div class="method-icon">📊</div>
+                                    <div class="method-name">Savitzky-Golay</div>
+                                    <div class="method-description">Smoothing filter with peak detection</div>
+                                    <div class="method-badge">Stable</div>
                                 </div>
-                                <div class="instrument-card" onclick="selectMethod('hybrid')">
-                                    <div class="instrument-icon">⚡</div>
-                                    <div><strong>HybridCV</strong></div>
-                                    <div>Combined Approach</div>
+                                <div class="method-card" data-method="advanced">
+                                    <div class="method-icon">⚡</div>
+                                    <div class="method-name">Advanced Detection</div>
+                                    <div class="method-description">Custom algorithm for CV data</div>
+                                    <div class="method-badge">Experimental</div>
                                 </div>
                             </div>
 
-                            <h4>📊 Detection Progress</h4>
+                            <h4>📋 Step-by-Step Guide</h4>
+                            <div class="step-guide">
+                                <div class="guide-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-text">Select detection method from options above</div>
+                                </div>
+                                <div class="guide-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-text">Click "Launch Peak Detection v2.0.0" below</div>
+                                </div>
+                                <div class="guide-step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-text">Choose data source in new interface</div>
+                                </div>
+                                <div class="guide-step">
+                                    <div class="step-number">4</div>
+                                    <div class="step-text">Configure parameters and run analysis</div>
+                                </div>
+                                <div class="guide-step">
+                                    <div class="step-number">5</div>
+                                    <div class="step-text">Review results and export data</div>
+                                </div>
+                            </div>
+
+                            <h4>📊 Analysis Progress</h4>
                             <div class="progress-bar">
-                                <div class="progress-fill" id="detectionProgress" style="width: 0%">0%</div>
+                                <div class="progress-fill" id="step3Progress" style="width: 0%">Ready to Start</div>
+                            </div>
+
+                            <div class="log-area" id="step3Log">
+                                <div>> Peak Detection v2.0.0 System Ready</div>
+                                <div>> Real data support: ✓ PalmSens ✓ STM32H743 ✓ Generic CSV</div>
+                                <div>> Multi-method analysis: ✓ SciPy ✓ Savitzky-Golay ✓ Advanced</div>
+                                <div>> Interactive visualization: ✓ Chart.js ✓ Zoom/Pan ✓ Export</div>
+                                <div>> Session management: ✓ Multi-tab ✓ Auto-save</div>
+                                <div>> Waiting for method selection...</div>
                             </div>
 
                             <div class="action-buttons">
-                                <button class="btn btn-primary" onclick="startDetection()">🎯 Start Detection</button>
-                                <button class="btn btn-info" onclick="compareResults()">⚖️ Compare Methods</button>
+                                <button class="btn btn-primary" onclick="window.open('/peak_detection', '_blank')" id="launchPeakDetection">
+                                    🚀 Launch Peak Detection v2.0.0
+                                </button>
+                                <button class="btn btn-info" onclick="showPeakDetectionPreview()">
+                                    👁️ Preview Features
+                                </button>
+                                <button class="btn btn-secondary" onclick="loadMethodHelp()">
+                                    ❓ Method Comparison
+                                </button>
                             </div>
 
                             <div class="results-grid">
                                 <div class="result-card">
-                                    <div class="result-value" id="peaksDetected">0</div>
-                                    <div class="result-label">Peaks Detected</div>
+                                    <div class="result-value" id="selectedMethod">None</div>
+                                    <div class="result-label">Selected Method</div>
                                 </div>
                                 <div class="result-card">
-                                    <div class="result-value" id="detectionConfidence">0%</div>
-                                    <div class="result-label">Confidence</div>
+                                    <div class="result-value" id="dataFilesReady">0</div>
+                                    <div class="result-label">Data Files Ready</div>
                                 </div>
                                 <div class="result-card">
-                                    <div class="result-value" id="processingTime">0.0s</div>
-                                    <div class="result-label">Processing Time</div>
+                                    <div class="result-value" id="analysisStatus">Waiting</div>
+                                    <div class="result-label">Analysis Status</div>
                                 </div>
-                            </div>
-
-                            <div class="confidence-meter">
-                                <span>Confidence Level:</span>
-                                <div class="confidence-bar">
-                                    <div class="confidence-fill confidence-high" id="confidenceBar" style="width: 0%"></div>
+                                <div class="result-card">
+                                    <div class="result-value" id="systemVersion">v2.0.0</div>
+                                    <div class="result-label">System Version</div>
                                 </div>
-                                <span id="confidenceText">0%</span>
                             </div>
                         </div>
                     </div>
@@ -1534,13 +1689,142 @@
     <script src="{{ url_for('static', filename='js/plot_cv_data.js') }}?v={{ range(1,10000)|random }}"></script>
     <script src="{{ url_for('static', filename='js/real_data_plotter.js') }}?v={{ range(1,10000)|random }}"></script>
     <script>
-        // Call loadAndPlotCVData when preview tab is shown
+        // Method selection for Step 3
+        let selectedPeakMethod = null;
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize method selection
+            initializeMethodSelection();
+            
+            // Call loadAndPlotCVData when preview tab is shown
             const graphsTab = document.querySelector('[onclick="showPreviewTab(\'graphs\')"]');
             if (graphsTab) {
                 graphsTab.addEventListener('click', loadAndPlotCVData);
             }
         });
+
+        function initializeMethodSelection() {
+            const methodCards = document.querySelectorAll('.method-card');
+            methodCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove selected class from all cards
+                    methodCards.forEach(c => c.classList.remove('selected'));
+                    
+                    // Add selected class to clicked card
+                    this.classList.add('selected');
+                    
+                    // Update selected method
+                    selectedPeakMethod = this.dataset.method;
+                    
+                    // Update UI
+                    updateSelectedMethodDisplay();
+                    updateStep3Progress(25);
+                    logStep3Message(`Selected method: ${getMethodName(selectedPeakMethod)}`);
+                });
+            });
+        }
+
+        function getMethodName(method) {
+            const names = {
+                'scipy': 'SciPy Peak Finder',
+                'savgol': 'Savitzky-Golay',
+                'advanced': 'Advanced Detection'
+            };
+            return names[method] || method;
+        }
+
+        function updateSelectedMethodDisplay() {
+            const element = document.getElementById('selectedMethod');
+            if (element) {
+                element.textContent = selectedPeakMethod ? getMethodName(selectedPeakMethod) : 'None';
+            }
+        }
+
+        function updateStep3Progress(percentage) {
+            const progressBar = document.getElementById('step3Progress');
+            if (progressBar) {
+                progressBar.style.width = percentage + '%';
+                progressBar.textContent = percentage < 100 ? `${percentage}% Complete` : 'Analysis Complete';
+            }
+        }
+
+        function logStep3Message(message) {
+            const logArea = document.getElementById('step3Log');
+            if (logArea) {
+                const newMessage = document.createElement('div');
+                newMessage.textContent = `> ${message}`;
+                logArea.appendChild(newMessage);
+                logArea.scrollTop = logArea.scrollHeight;
+            }
+        }
+
+        function showPeakDetectionPreview() {
+            logStep3Message('Opening feature preview...');
+            alert('🚀 Peak Detection v2.0.0 Features:\n\n' +
+                  '✅ Real CSV Data Support\n' +
+                  '✅ Multi-Tab Analysis Sessions\n' +
+                  '✅ Interactive Chart.js Visualization\n' +
+                  '✅ Export Results (CSV, JSON)\n' +
+                  '✅ Multiple Detection Methods\n' +
+                  '✅ Auto-save & Session Management\n\n' +
+                  'Click "Launch Peak Detection v2.0.0" to start!');
+        }
+
+        function loadMethodHelp() {
+            logStep3Message('Loading method comparison...');
+            alert('🔬 Peak Detection Methods Comparison:\n\n' +
+                  '📊 SciPy Peak Finder:\n' +
+                  '   • Signal processing based\n' +
+                  '   • Best for clear peaks\n' +
+                  '   • Fast processing\n\n' +
+                  '📈 Savitzky-Golay:\n' +
+                  '   • Smoothing filter approach\n' +
+                  '   • Good for noisy data\n' +
+                  '   • Stable results\n\n' +
+                  '⚡ Advanced Detection:\n' +
+                  '   • Custom CV algorithm\n' +
+                  '   • Experimental features\n' +
+                  '   • Research applications');
+        }
+
+        // Update data files ready count
+        function updateDataFilesReady() {
+            const element = document.getElementById('dataFilesReady');
+            if (element) {
+                // Get count from Step 1
+                const validFiles = document.getElementById('validFiles');
+                const count = validFiles ? validFiles.textContent : '0';
+                element.textContent = count;
+            }
+        }
+
+        // Update analysis status
+        function updateAnalysisStatus(status) {
+            const element = document.getElementById('analysisStatus');
+            if (element) {
+                element.textContent = status;
+            }
+        }
+
+        // Override the original launchPeakDetection if needed
+        function launchPeakDetection() {
+            updateStep3Progress(50);
+            logStep3Message('Launching Peak Detection v2.0.0 system...');
+            updateAnalysisStatus('Launching');
+            
+            // Store selected method in sessionStorage
+            if (selectedPeakMethod) {
+                sessionStorage.setItem('selectedPeakMethod', selectedPeakMethod);
+                logStep3Message(`Method stored: ${getMethodName(selectedPeakMethod)}`);
+            }
+            
+            // Open in new tab
+            window.open('/peak_detection', '_blank');
+            
+            updateStep3Progress(75);
+            logStep3Message('Peak Detection v2.0.0 launched successfully!');
+            updateAnalysisStatus('Active');
+        }
     </script>
 </body>
 </html>
