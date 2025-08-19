@@ -32,7 +32,6 @@ try:
     from .routes.workflow_api import workflow_api_bp
     from .routes.peak_detection import peak_detection_bp
     from .routes.peak_analysis import bp as peak_analysis_bp
-    from .routes.peak_analysis import bp as peak_analysis_bp
 except ImportError:
     # Fall back to absolute imports (when run directly)
     from config.settings import Config
@@ -110,8 +109,8 @@ def create_app():
     app.register_blueprint(workflow_bp)
     app.register_blueprint(preview_bp)
     app.register_blueprint(workflow_api_bp)
-    app.register_blueprint(peak_detection_bp, url_prefix='/api/peak-detection')
-    app.register_blueprint(peak_analysis_bp)
+    app.register_blueprint(peak_detection_bp, url_prefix='/peak_detection')
+    app.register_blueprint(peak_analysis_bp, url_prefix='/peak_detection')
     
     # Error handlers
     @app.errorhandler(413)

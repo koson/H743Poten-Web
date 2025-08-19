@@ -1,14 +1,59 @@
-from flask import Blueprint, jsonify, send_file, current_app, request
+from flask import Blueprint, jsonify, send_file, current_app, request, render_template, session
 import os
 import numpy as np
 import pandas as pd
 from scipy.signal import find_peaks
 import logging
+import uuid
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
 peak_detection_bp = Blueprint('peak_detection', __name__)
+
+@peak_detection_bp.route('/create_analysis_session', methods=['POST'])
+def create_analysis_session():
+    """Create a new analysis session and store data"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
+        # Generate session ID
+        session_id = str(uuid.uuid4())
+        
+        # Store data in session
+        session[session_id] = {
+            'peaks': data.get('peaks'),
+            'data': data.get('data'),
+            'method': data.get('method'),
+            'methodName': data.get('methodName')
+        }
+        
+        return jsonify({'session_id': session_id})
+        
+    except Exception as e:
+        logger.error(f"Error creating analysis session: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@peak_detection_bp.route('/peak_analysis/<session_id>')
+def peak_analysis(session_id):
+    """Render peak analysis details page"""
+    try:
+        # Get data from session
+        session_data = session.get(session_id)
+        if not session_data:
+            return "Session not found", 404
+            
+        return render_template('peak_analysis.html',
+                             peaks=session_data['peaks'],
+                             data=session_data['data'],
+                             method=session_data['method'],
+                             methodName=session_data['methodName'])
+                             
+    except Exception as e:
+        logger.error(f"Error rendering peak analysis: {str(e)}")
+        return str(e), 500
 
 @peak_detection_bp.route('/get-peaks/<method>', methods=['POST'])
 def get_peaks(method):

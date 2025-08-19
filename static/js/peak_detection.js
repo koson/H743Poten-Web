@@ -5,21 +5,22 @@ const detectionManager = {
     // Show details in new tab
     showDetails(method, results) {
         // Send POST request to create analysis session
-        fetch('/create_analysis_session', {
+        fetch('/peak_detection/create_analysis_session', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                peaks: results.previewData.peaks,
-                data: results.previewData,
-                method: method
+                peaks: results.peaks,
+                data: results,
+                method: method,
+                methodName: this.getMethodName(method)
             })
         })
         .then(response => response.json())
         .then(data => {
             // Open new tab with session ID
-            window.open(`/peak_analysis/${data.session_id}`, '_blank');
+            window.open(`/peak_detection/peak_analysis/${data.session_id}`, '_blank');
         })
         .catch(error => {
             console.error('Error:', error);
@@ -48,6 +49,15 @@ const detectionManager = {
             'ml': 'ml-analysis',
             'prominence': 'traditional-analysis',
             'derivative': 'hybrid-analysis'
+        }[method];
+    },
+
+    // Get method display name
+    getMethodName(method) {
+        return {
+            'ml': 'DeepCV',
+            'prominence': 'TraditionalCV',
+            'derivative': 'HybridCV'
         }[method];
     },
     
