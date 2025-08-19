@@ -172,7 +172,7 @@ def create_app():
         """Data browser interface"""
         return render_template('data_browser.html')
         
-    @app.route('/peak-detection')
+    @app.route('/peak_detection')
     def peak_detection_view():
         """Peak detection visualization interface"""
         return render_template('peak_detection.html')

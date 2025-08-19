@@ -5,11 +5,262 @@ import pandas as pd
 from scipy.signal import find_peaks
 import logging
 import uuid
+import glob
+import json
+from datetime import datetime
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
 peak_detection_bp = Blueprint('peak_detection', __name__)
+
+# In-memory storage for analysis sessions
+analysis_sessions = {}
+
+@peak_detection_bp.route('/api/get_saved_files')
+def get_saved_files():
+    """Get list of saved CSV files"""
+    try:
+        data_dir = os.path.join(current_app.root_path, '..', 'data_logs', 'csv')
+        data_dir = os.path.abspath(data_dir)  # Resolve to absolute path
+        
+        if not os.path.exists(data_dir):
+            return jsonify([])
+        
+        files = []
+        for file_path in glob.glob(os.path.join(data_dir, '*.csv')):
+            try:
+                stat = os.stat(file_path)
+                filename = os.path.basename(file_path)
+                files.append({
+                    'name': filename,
+                    'filename': filename,  # Use filename instead of full path
+                    'path': os.path.abspath(file_path),  # Keep full path for debugging
+                    'date': datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M'),
+                    'size': stat.st_size
+                })
+            except Exception as e:
+                logger.warning(f"Error reading file {file_path}: {e}")
+        
+        # Sort by modification time (newest first)
+        files.sort(key=lambda x: x['date'], reverse=True)
+        return jsonify(files)
+        
+    except Exception as e:
+        logger.error(f"Error getting saved files: {str(e)}")
+        return jsonify([])
+
+@peak_detection_bp.route('/api/load_saved_file_by_name/<filename>')
+def load_saved_file_by_name(filename):
+    """Load data from a saved CSV file by filename"""
+    try:
+        # Construct the file path
+        data_dir = os.path.join(current_app.root_path, '..', 'data_logs', 'csv')
+        data_dir = os.path.abspath(data_dir)
+        file_path = os.path.join(data_dir, filename)
+        
+        # Security check - ensure the file is within the data directory
+        if not os.path.abspath(file_path).startswith(data_dir):
+            return jsonify({'success': False, 'error': 'Invalid file path'})
+        
+        if not os.path.exists(file_path):
+            return jsonify({'success': False, 'error': f'File not found: {filename}'})
+        
+        return load_csv_file(file_path)
+        
+    except Exception as e:
+        logger.error(f"Error loading saved file by name: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)})
+
+def load_csv_file(file_path):
+    """Helper function to load and parse CSV file"""
+    try:
+        # Read CSV file
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
+        
+        if len(lines) < 2:
+            return jsonify({'success': False, 'error': 'File too short'})
+        
+        # Handle instrument file format (FileName: header)
+        header_line_idx = 0
+        data_start_idx = 1
+        
+        if lines[0].strip().startswith('FileName:'):
+            header_line_idx = 1
+            data_start_idx = 2
+            logger.info("Detected instrument file format with FileName header")
+        
+        # Parse headers
+        headers = [h.strip().lower() for h in lines[header_line_idx].strip().split(',')]
+        logger.info(f"Headers found: {headers}")
+        
+        # Find voltage and current columns
+        voltage_idx = -1
+        current_idx = -1
+        
+        for i, header in enumerate(headers):
+            if header in ['v', 'voltage'] or 'volt' in header or 'potential' in header:
+                voltage_idx = i
+            elif header in ['a', 'ua', 'ma', 'na', 'current'] or 'amp' in header or 'curr' in header:
+                current_idx = i
+        
+        if voltage_idx == -1 or current_idx == -1:
+            return jsonify({'success': False, 'error': f'Could not find voltage or current columns in headers: {headers}'})
+        
+        # Determine current scaling
+        current_unit = headers[current_idx]
+        current_scale = 1.0
+        if current_unit == 'ua':
+            current_scale = 1e-6  # microAmps to Amps
+        elif current_unit == 'ma':
+            current_scale = 1e-3  # milliAmps to Amps
+        elif current_unit == 'na':
+            current_scale = 1e-9  # nanoAmps to Amps
+        
+        logger.info(f"Current unit: {current_unit}, scale: {current_scale}")
+        
+        # Parse data
+        voltage = []
+        current = []
+        
+        for i in range(data_start_idx, len(lines)):
+            line = lines[i].strip()
+            if not line:
+                continue
+                
+            values = line.split(',')
+            if len(values) > max(voltage_idx, current_idx):
+                try:
+                    v = float(values[voltage_idx])
+                    c = float(values[current_idx]) * current_scale
+                    voltage.append(v)
+                    current.append(c)
+                except ValueError:
+                    continue
+        
+        if len(voltage) == 0 or len(current) == 0:
+            return jsonify({'success': False, 'error': 'No valid data points found'})
+        
+        logger.info(f"Loaded {len(voltage)} data points from {file_path}")
+        logger.info(f"Voltage range: {min(voltage):.3f} to {max(voltage):.3f} V")
+        logger.info(f"Current range: {min(current):.6e} to {max(current):.6e} A")
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'voltage': voltage,
+                'current': current
+            },
+            'metadata': {
+                'points': len(voltage),
+                'voltage_range': [min(voltage), max(voltage)],
+                'current_range': [min(current), max(current)],
+                'current_unit': current_unit,
+                'current_scale': current_scale
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Error loading CSV file: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@peak_detection_bp.route('/api/load_saved_file/<path:file_path>')
+def load_saved_file(file_path):
+    """Load data from a saved CSV file"""
+    try:
+        if not os.path.exists(file_path):
+            return jsonify({'success': False, 'error': 'File not found'})
+        
+        # Read CSV file
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
+        
+        if len(lines) < 2:
+            return jsonify({'success': False, 'error': 'File too short'})
+        
+        # Handle instrument file format (FileName: header)
+        header_line_idx = 0
+        data_start_idx = 1
+        
+        if lines[0].strip().startswith('FileName:'):
+            header_line_idx = 1
+            data_start_idx = 2
+            logger.info("Detected instrument file format with FileName header")
+        
+        # Parse headers
+        headers = [h.strip().lower() for h in lines[header_line_idx].strip().split(',')]
+        logger.info(f"Headers found: {headers}")
+        
+        # Find voltage and current columns
+        voltage_idx = -1
+        current_idx = -1
+        
+        for i, header in enumerate(headers):
+            if header in ['v', 'voltage'] or 'volt' in header or 'potential' in header:
+                voltage_idx = i
+            elif header in ['a', 'ua', 'ma', 'na', 'current'] or 'amp' in header or 'curr' in header:
+                current_idx = i
+        
+        if voltage_idx == -1 or current_idx == -1:
+            return jsonify({'success': False, 'error': f'Could not find voltage or current columns in headers: {headers}'})
+        
+        # Determine current scaling
+        current_unit = headers[current_idx]
+        current_scale = 1.0
+        if current_unit == 'ua':
+            current_scale = 1e-6  # microAmps to Amps
+        elif current_unit == 'ma':
+            current_scale = 1e-3  # milliAmps to Amps
+        elif current_unit == 'na':
+            current_scale = 1e-9  # nanoAmps to Amps
+        
+        logger.info(f"Current unit: {current_unit}, scale: {current_scale}")
+        
+        # Parse data
+        voltage = []
+        current = []
+        
+        for i in range(data_start_idx, len(lines)):
+            line = lines[i].strip()
+            if not line:
+                continue
+                
+            values = line.split(',')
+            if len(values) > max(voltage_idx, current_idx):
+                try:
+                    v = float(values[voltage_idx])
+                    c = float(values[current_idx]) * current_scale
+                    voltage.append(v)
+                    current.append(c)
+                except ValueError:
+                    continue
+        
+        if len(voltage) == 0 or len(current) == 0:
+            return jsonify({'success': False, 'error': 'No valid data points found'})
+        
+        logger.info(f"Loaded {len(voltage)} data points from {file_path}")
+        logger.info(f"Voltage range: {min(voltage):.3f} to {max(voltage):.3f} V")
+        logger.info(f"Current range: {min(current):.6e} to {max(current):.6e} A")
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'voltage': voltage,
+                'current': current
+            },
+            'metadata': {
+                'points': len(voltage),
+                'voltage_range': [min(voltage), max(voltage)],
+                'current_range': [min(current), max(current)],
+                'current_unit': current_unit,
+                'current_scale': current_scale
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Error loading saved file: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)})
 
 @peak_detection_bp.route('/create_analysis_session', methods=['POST'])
 def create_analysis_session():
@@ -17,19 +268,24 @@ def create_analysis_session():
     try:
         data = request.get_json()
         if not data:
+            logger.error("No data provided to create_analysis_session")
             return jsonify({'error': 'No data provided'}), 400
+        
+        logger.info(f"Creating analysis session with data keys: {list(data.keys())}")
             
         # Generate session ID
         session_id = str(uuid.uuid4())
         
-        # Store data in session
-        session[session_id] = {
-            'peaks': data.get('peaks'),
-            'data': data.get('data'),
-            'method': data.get('method'),
-            'methodName': data.get('methodName')
+        # Store data in in-memory storage
+        analysis_sessions[session_id] = {
+            'peaks': data.get('peaks', []),
+            'data': data.get('data', {}),
+            'method': data.get('method', ''),
+            'methodName': data.get('methodName', ''),
+            'created_at': datetime.now().isoformat()
         }
         
+        logger.info(f"Created analysis session {session_id} for method {data.get('method')}")
         return jsonify({'session_id': session_id})
         
     except Exception as e:
@@ -40,11 +296,15 @@ def create_analysis_session():
 def peak_analysis(session_id):
     """Render peak analysis details page"""
     try:
-        # Get data from session
-        session_data = session.get(session_id)
+        # Get data from in-memory storage
+        session_data = analysis_sessions.get(session_id)
         if not session_data:
+            logger.error(f"Session {session_id} not found in analysis_sessions")
+            logger.info(f"Available sessions: {list(analysis_sessions.keys())}")
             return "Session not found", 404
-            
+        
+        logger.info(f"Loading analysis session {session_id} for method {session_data.get('method')}")
+        
         return render_template('peak_analysis.html',
                              peaks=session_data['peaks'],
                              data=session_data['data'],
