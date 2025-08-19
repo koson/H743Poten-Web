@@ -507,6 +507,137 @@
                 <h2>Peak Detection Analysis</h2>
             </div>
         </div>
+
+        <!-- Data Source Selection -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-database me-2"></i>Data Source</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Select Data Source</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="dataSource" id="source-upload" autocomplete="off" checked>
+                                        <label class="btn btn-outline-primary" for="source-upload">
+                                            <i class="fas fa-upload me-1"></i>Upload File
+                                        </label>
+                                        
+                                        <input type="radio" class="btn-check" name="dataSource" id="source-saved" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="source-saved">
+                                            <i class="fas fa-folder-open me-1"></i>Saved Data
+                                        </label>
+                                        
+                                        <input type="radio" class="btn-check" name="dataSource" id="source-demo" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="source-demo">
+                                            <i class="fas fa-flask me-1"></i>Demo Data
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Data Status</label>
+                                    <div class="alert alert-info mb-0" id="data-status">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <span id="status-text">Select a data source to begin</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload Section -->
+                        <div id="upload-section" class="mt-3">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input type="file" id="cv-file-input" class="form-control" accept=".csv" onchange="handleFileUpload(this)">
+                                    <div class="form-text">Select a CSV file with voltage and current data</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary w-100" id="load-file-btn" disabled>
+                                        <i class="fas fa-chart-line me-1"></i>Load & Preview
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Saved Files Section -->
+                        <div id="saved-section" class="mt-3" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <select class="form-select" id="saved-files-select">
+                                        <option value="">Loading saved files...</option>
+                                    </select>
+                                    <div class="form-text">Choose from previously saved CV data</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary w-100" id="load-saved-btn" disabled>
+                                        <i class="fas fa-download me-1"></i>Load Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Demo Data Section -->
+                        <div id="demo-section" class="mt-3" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <select class="form-select" id="demo-data-select">
+                                        <option value="cv_standard">Standard CV (Ferrocene)</option>
+                                        <option value="cv_complex">Complex CV (Multi-peak)</option>
+                                        <option value="cv_noisy">Noisy CV (Real conditions)</option>
+                                    </select>
+                                    <div class="form-text">Choose from demonstration datasets</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary w-100" id="load-demo-btn">
+                                        <i class="fas fa-play me-1"></i>Load Demo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data Preview -->
+                        <div id="data-preview" class="mt-4" style="display: none;">
+                            <h6><i class="fas fa-eye me-2"></i>Data Preview</h6>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <canvas id="preview-chart" width="400" height="200"></canvas>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title mb-2">Data Summary</h6>
+                                            <div class="small">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Points:</span>
+                                                    <span id="preview-points">-</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <span>V Range:</span>
+                                                    <span id="preview-voltage">-</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <span>I Range:</span>
+                                                    <span id="preview-current">-</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Quality:</span>
+                                                    <span id="preview-quality" class="badge bg-success">Good</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         
         <!-- Method Selection Cards -->
         <div class="row">
@@ -699,6 +830,469 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Data source management
+        let currentData = null;
+        let previewChart = null;
+
+        // Initialize data source handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDataSourceHandlers();
+            loadSavedFiles();
+            checkUploadedFiles();
+        });
+
+        function checkUploadedFiles() {
+            // Check if files were uploaded from workflow
+            const uploadInfo = sessionStorage.getItem('uploadedFiles');
+            if (uploadInfo) {
+                try {
+                    const info = JSON.parse(uploadInfo);
+                    const statusText = `${info.validFiles} files uploaded from workflow (${new Date(info.uploadedAt).toLocaleString()})`;
+                    updateStatus(statusText, 'success');
+                    
+                    // Auto-select saved data source if files were uploaded
+                    document.getElementById('source-saved').checked = true;
+                    updateDataSourceUI('source-saved');
+                    
+                    // Clear the session storage after use
+                    sessionStorage.removeItem('uploadedFiles');
+                } catch (e) {
+                    console.error('Error parsing upload info:', e);
+                }
+            }
+        }
+
+        function initializeDataSourceHandlers() {
+            // Radio button handlers
+            document.querySelectorAll('input[name="dataSource"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    updateDataSourceUI(this.id);
+                });
+            });
+
+            // Button handlers
+            document.getElementById('load-file-btn').addEventListener('click', loadUploadedFile);
+            document.getElementById('load-saved-btn').addEventListener('click', loadSavedFile);
+            document.getElementById('load-demo-btn').addEventListener('click', loadDemoData);
+        }
+
+        function updateDataSourceUI(sourceId) {
+            // Hide all sections
+            document.getElementById('upload-section').style.display = 'none';
+            document.getElementById('saved-section').style.display = 'none';
+            document.getElementById('demo-section').style.display = 'none';
+
+            // Show selected section
+            if (sourceId === 'source-upload') {
+                document.getElementById('upload-section').style.display = 'block';
+                updateStatus('Select a CSV file to upload', 'info');
+            } else if (sourceId === 'source-saved') {
+                document.getElementById('saved-section').style.display = 'block';
+                updateStatus('Choose from saved files', 'info');
+            } else if (sourceId === 'source-demo') {
+                document.getElementById('demo-section').style.display = 'block';
+                updateStatus('Demo data ready to load', 'success');
+            }
+        }
+
+        function updateStatus(text, type = 'info') {
+            const statusEl = document.getElementById('data-status');
+            const textEl = document.getElementById('status-text');
+            textEl.textContent = text;
+            
+            statusEl.className = `alert alert-${type} mb-0`;
+        }
+
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            const loadBtn = document.getElementById('load-file-btn');
+            
+            if (file) {
+                updateStatus(`File selected: ${file.name}`, 'success');
+                loadBtn.disabled = false;
+            } else {
+                updateStatus('Select a CSV file to upload', 'info');
+                loadBtn.disabled = true;
+            }
+        }
+
+        async function loadUploadedFile() {
+            const fileInput = document.getElementById('cv-file-input');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                updateStatus('No file selected', 'danger');
+                return;
+            }
+
+            try {
+                updateStatus('Loading file...', 'warning');
+                const text = await file.text();
+                const data = parseCSVData(text);
+                
+                if (data) {
+                    currentData = data;
+                    showDataPreview(data, file.name);
+                    updateStatus(`File loaded: ${file.name}`, 'success');
+                    enableDetectionButtons();
+                } else {
+                    updateStatus('Invalid CSV format', 'danger');
+                }
+            } catch (error) {
+                console.error('Error loading file:', error);
+                updateStatus('Error loading file', 'danger');
+            }
+        }
+
+        async function loadSavedFiles() {
+            try {
+                const response = await fetch('/peak_detection/api/get_saved_files');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const files = await response.json();
+                
+                const select = document.getElementById('saved-files-select');
+                select.innerHTML = '<option value="">Select a saved file...</option>';
+                
+                if (Array.isArray(files) && files.length > 0) {
+                    files.forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file.filename || file.name; // Use filename instead of path
+                        option.textContent = `${file.name} (${file.date})`;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">No saved files found</option>';
+                }
+
+                select.addEventListener('change', function() {
+                    document.getElementById('load-saved-btn').disabled = !this.value;
+                });
+                
+            } catch (error) {
+                console.error('Error loading saved files:', error);
+                const select = document.getElementById('saved-files-select');
+                select.innerHTML = '<option value="">Error loading files</option>';
+            }
+        }
+
+        async function loadSavedFile() {
+            const select = document.getElementById('saved-files-select');
+            const filename = select.value;
+            
+            if (!filename) return;
+
+            try {
+                updateStatus('Loading saved file...', 'warning');
+                const response = await fetch(`/peak_detection/api/load_saved_file_by_name/${encodeURIComponent(filename)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentData = data.data;
+                    showDataPreview(data.data, select.options[select.selectedIndex].text);
+                    updateStatus('Saved file loaded', 'success');
+                    enableDetectionButtons();
+                    
+                    // Log metadata if available
+                    if (data.metadata) {
+                        console.log('File metadata:', data.metadata);
+                    }
+                } else {
+                    updateStatus(`Error: ${data.error}`, 'danger');
+                }
+            } catch (error) {
+                console.error('Error loading saved file:', error);
+                updateStatus('Error loading saved file', 'danger');
+            }
+        }
+
+        function loadDemoData() {
+            const select = document.getElementById('demo-data-select');
+            const demoType = select.value;
+            
+            updateStatus('Loading demo data...', 'warning');
+            
+            // Generate demo data based on selection
+            let demoData;
+            switch (demoType) {
+                case 'cv_standard':
+                    demoData = generateStandardCV();
+                    break;
+                case 'cv_complex':
+                    demoData = generateComplexCV();
+                    break;
+                case 'cv_noisy':
+                    demoData = generateNoisyCV();
+                    break;
+                default:
+                    demoData = generateStandardCV();
+            }
+            
+            currentData = demoData;
+            showDataPreview(demoData, select.options[select.selectedIndex].text);
+            updateStatus('Demo data loaded', 'success');
+            enableDetectionButtons();
+        }
+
+        function parseCSVData(csvText) {
+            try {
+                const lines = csvText.trim().split('\n');
+                console.log('Total lines:', lines.length);
+                console.log('First 3 lines:', lines.slice(0, 3));
+                
+                // Handle files with FileName header (PalmSens/STM32 format)
+                let headerLineIndex = 0;
+                let dataStartIndex = 1;
+                
+                // Check if first line is a filename header
+                if (lines[0].startsWith('FileName:')) {
+                    headerLineIndex = 1;
+                    dataStartIndex = 2;
+                    console.log('Detected instrument file format with FileName header');
+                }
+                
+                const headers = lines[headerLineIndex].toLowerCase().split(',');
+                console.log('CSV Headers:', headers);
+                
+                // Find voltage and current columns with more flexible matching
+                let voltageIdx = -1;
+                let currentIdx = -1;
+                
+                for (let i = 0; i < headers.length; i++) {
+                    const header = headers[i].trim();
+                    
+                    // Voltage column detection
+                    if (header === 'v' || header === 'voltage' || header.includes('volt') || header.includes('potential')) {
+                        voltageIdx = i;
+                    }
+                    
+                    // Current column detection - support multiple units
+                    if (header === 'a' || header === 'ua' || header === 'ma' || header === 'na' || 
+                        header === 'current' || header.includes('amp') || header.includes('curr')) {
+                        currentIdx = i;
+                    }
+                }
+                
+                console.log('Voltage column index:', voltageIdx);
+                console.log('Current column index:', currentIdx);
+                
+                if (voltageIdx === -1 || currentIdx === -1) {
+                    console.error('Could not find voltage or current columns');
+                    console.error('Available headers:', headers);
+                    return null;
+                }
+                
+                const voltage = [];
+                const current = [];
+                let currentUnit = headers[currentIdx].trim();
+                
+                // Determine current scaling factor based on unit
+                let currentScale = 1;
+                if (currentUnit === 'ua') {
+                    currentScale = 1e-6; // microAmps to Amps
+                } else if (currentUnit === 'ma') {
+                    currentScale = 1e-3; // milliAmps to Amps
+                } else if (currentUnit === 'na') {
+                    currentScale = 1e-9; // nanoAmps to Amps
+                }
+                // If 'a' or unknown, assume already in Amps (scale = 1)
+                
+                console.log('Current unit detected:', currentUnit, 'Scale factor:', currentScale);
+                
+                for (let i = dataStartIndex; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue; // Skip empty lines
+                    
+                    const values = line.split(',');
+                    if (values.length > Math.max(voltageIdx, currentIdx)) {
+                        const v = parseFloat(values[voltageIdx]);
+                        const c = parseFloat(values[currentIdx]) * currentScale; // Apply scaling
+                        
+                        if (!isNaN(v) && !isNaN(c)) {
+                            voltage.push(v);
+                            current.push(c);
+                        }
+                    }
+                }
+                
+                console.log('Parsed data points:', voltage.length);
+                console.log('Voltage range:', Math.min(...voltage), 'to', Math.max(...voltage));
+                console.log('Current range (scaled to A):', Math.min(...current), 'to', Math.max(...current));
+                console.log('Sample voltage:', voltage.slice(0, 5));
+                console.log('Sample current:', current.slice(0, 5));
+                
+                if (voltage.length === 0 || current.length === 0) {
+                    console.error('No valid data points found');
+                    return null;
+                }
+                
+                return { voltage, current };
+            } catch (error) {
+                console.error('Error parsing CSV:', error);
+                return null;
+            }
+        }
+
+        function showDataPreview(data, filename) {
+            const previewEl = document.getElementById('data-preview');
+            previewEl.style.display = 'block';
+            
+            // Update summary
+            document.getElementById('preview-points').textContent = data.voltage.length;
+            document.getElementById('preview-voltage').textContent = 
+                `${Math.min(...data.voltage).toFixed(3)} to ${Math.max(...data.voltage).toFixed(3)} V`;
+            document.getElementById('preview-current').textContent = 
+                `${Math.min(...data.current).toFixed(6)} to ${Math.max(...data.current).toFixed(6)} A`;
+            
+            // Draw preview chart
+            drawPreviewChart(data);
+        }
+
+        function drawPreviewChart(data) {
+            const canvas = document.getElementById('preview-chart');
+            const ctx = canvas.getContext('2d');
+            
+            console.log('Drawing preview chart with data:', {
+                voltageLength: data.voltage.length,
+                currentLength: data.current.length,
+                voltageRange: [Math.min(...data.voltage), Math.max(...data.voltage)],
+                currentRange: [Math.min(...data.current), Math.max(...data.current)]
+            });
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up drawing area
+            const margin = { top: 10, right: 10, bottom: 30, left: 50 };
+            const width = canvas.width - margin.left - margin.right;
+            const height = canvas.height - margin.top - margin.bottom;
+            
+            // Find data ranges
+            const vMin = Math.min(...data.voltage);
+            const vMax = Math.max(...data.voltage);
+            const cMin = Math.min(...data.current);
+            const cMax = Math.max(...data.current);
+            
+            console.log('Chart ranges:', { vMin, vMax, cMin, cMax });
+            console.log('Canvas dimensions:', { width: canvas.width, height: canvas.height });
+            console.log('Draw area:', { width, height, margin });
+            
+            // Draw CV curve
+            ctx.strokeStyle = '#007bff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i < data.voltage.length; i++) {
+                const x = margin.left + ((data.voltage[i] - vMin) / (vMax - vMin)) * width;
+                const y = margin.top + height - ((data.current[i] - cMin) / (cMax - cMin)) * height;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                    console.log('Starting point:', { x, y, v: data.voltage[i], c: data.current[i] });
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                
+                // Log first few points for debugging
+                if (i < 5) {
+                    console.log(`Point ${i}:`, { 
+                        voltage: data.voltage[i], 
+                        current: data.current[i], 
+                        x, y 
+                    });
+                }
+            }
+            ctx.stroke();
+            
+            // Draw axes
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top + height);
+            ctx.lineTo(margin.left + width, margin.top + height);
+            ctx.moveTo(margin.left, margin.top);
+            ctx.lineTo(margin.left, margin.top + height);
+            ctx.stroke();
+            
+            // Add labels
+            ctx.fillStyle = '#666';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Voltage (V)', margin.left + width/2, canvas.height - 5);
+            ctx.save();
+            ctx.translate(15, margin.top + height/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('Current (A)', 0, 0);
+            ctx.restore();
+        }
+
+        function enableDetectionButtons() {
+            document.querySelectorAll('.start-detection').forEach(btn => {
+                btn.disabled = false;
+            });
+        }
+
+        function generateStandardCV() {
+            const voltage = [];
+            const current = [];
+            
+            for (let v = -0.5; v <= 0.5; v += 0.01) {
+                voltage.push(v);
+                // Standard CV curve with one oxidation and one reduction peak
+                const i = 1e-6 * (Math.exp((v + 0.2) * 38.9) - Math.exp(-(v - 0.2) * 38.9));
+                current.push(i + (Math.random() - 0.5) * 1e-8);
+            }
+            
+            return { voltage, current };
+        }
+
+        function generateComplexCV() {
+            const voltage = [];
+            const current = [];
+            
+            for (let v = -0.8; v <= 0.8; v += 0.01) {
+                voltage.push(v);
+                // Complex CV with multiple peaks
+                let i = 0;
+                i += 2e-6 * Math.exp(-((v + 0.4) * (v + 0.4)) / 0.01); // Peak 1
+                i += 1.5e-6 * Math.exp(-((v - 0.1) * (v - 0.1)) / 0.01); // Peak 2
+                i -= 1.8e-6 * Math.exp(-((v - 0.5) * (v - 0.5)) / 0.01); // Peak 3
+                current.push(i + (Math.random() - 0.5) * 2e-8);
+            }
+            
+            return { voltage, current };
+        }
+
+        function generateNoisyCV() {
+            const voltage = [];
+            const current = [];
+            
+            for (let v = -0.6; v <= 0.6; v += 0.01) {
+                voltage.push(v);
+                // Noisy CV with realistic characteristics
+                const i = 1.2e-6 * (Math.exp((v + 0.15) * 35) - Math.exp(-(v - 0.25) * 35));
+                const noise = (Math.random() - 0.5) * 5e-8;
+                current.push(i + noise);
+            }
+            
+            return { voltage, current };
+        }
+
+        // Export currentData for use by peak detection
+        window.getCurrentData = function() {
+            return currentData;
+        };
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/peak_canvas_manager.js"></script>

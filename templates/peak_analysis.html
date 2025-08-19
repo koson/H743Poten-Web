@@ -258,9 +258,9 @@
                 data: {
                     datasets: [{
                         label: 'CV Data',
-                                                    data: chartData.previewData.voltage.map((v, i) => ({
+                                                    data: chartData.voltage.map((v, i) => ({
                             x: v,
-                            y: chartData.previewData.current[i]
+                            y: chartData.current[i]
                         })),
                         borderColor: '#0d6efd',
                         borderWidth: 2,
@@ -269,7 +269,7 @@
                         pointRadius: 0
                     }, {
                         label: 'Peaks',
-                        data: chartData.previewData.peaks.map(peak => ({
+                        data: peaksData.map(peak => ({
                             x: peak.x,
                             y: peak.y,
                             type: peak.type
@@ -308,7 +308,7 @@
                         annotation: {
                             annotations: {
                                 // Peak labels
-                                ...Object.fromEntries(chartData.previewData.peaks.map((peak, i) => [
+                                ...Object.fromEntries(peaksData.map((peak, i) => [
                                     `peak${i}`, {
                                         type: 'label',
                                         xValue: peak.x,
@@ -326,7 +326,7 @@
                                     }
                                 ])),
                                 // Peak value labels
-                                ...Object.fromEntries(chartData.previewData.peaks.map((peak, i) => [
+                                ...Object.fromEntries(peaksData.map((peak, i) => [
                                     `peakValue${i}`, {
                                         type: 'label',
                                         xValue: peak.x,
@@ -366,8 +366,8 @@
                     scales: {
                         x: {
                             type: 'linear',
-                            min: Math.min(...chartData.previewData.voltage) * 1.1,
-                            max: Math.max(...chartData.previewData.voltage) * 1.1,
+                            min: Math.min(...chartData.voltage) * 1.1,
+                            max: Math.max(...chartData.voltage) * 1.1,
                             title: {
                                 display: true,
                                 text: 'Voltage (V)',
@@ -389,8 +389,8 @@
                         },
                         y: {
                             type: 'linear',
-                            min: Math.min(...chartData.previewData.current) * 1.1,
-                            max: Math.max(...chartData.previewData.current) * 1.1,
+                            min: Math.min(...chartData.current) * 1.1,
+                            max: Math.max(...chartData.current) * 1.1,
                             title: {
                                 display: true,
                                 text: 'Current (µA)',
@@ -418,7 +418,7 @@
                 showGrid: true, // Track grid visibility
                 canvas: canvas,
                 context: canvas.getContext('2d'),
-                data: chartData.previewData,
+                data: chartData,
                 method: methodType,
                 initialize() {
                     return true;
@@ -433,7 +433,7 @@
                 highlightPeak(peak) {
                     if (window.peakChart) {
                         // Update annotation colors and sizes for all peaks
-                        window.peakChart.options.plugins.annotation.annotations = chartData.previewData.peaks.map(p => ({
+                        window.peakChart.options.plugins.annotation.annotations = peaksData.map(p => ({
                             type: 'label',
                             xValue: p.x,
                             yValue: p.y,
@@ -447,8 +447,8 @@
                         }));
 
                         // Update peak point sizes
-                        window.peakChart.data.datasets[1].pointRadius = chartData.previewData.peaks.map(p => p === peak ? 8 : 6);
-                        window.peakChart.data.datasets[1].pointHoverRadius = chartData.previewData.peaks.map(p => p === peak ? 10 : 8);
+                        window.peakChart.data.datasets[1].pointRadius = peaksData.map(p => p === peak ? 8 : 6);
+                        window.peakChart.data.datasets[1].pointHoverRadius = peaksData.map(p => p === peak ? 10 : 8);
 
                         window.peakChart.update();
                     }
@@ -458,7 +458,7 @@
             // Initialize canvas manager
             if (window.peakCanvasManager.initialize()) {
                 // Update peak list
-                updatePeakList(chartData.previewData.peaks);
+                updatePeakList(peaksData);
                 // Update data info
                 updateDataInfo(chartData);
             }
@@ -498,16 +498,16 @@
             dataInfo.innerHTML = `
                 <h6 class="mb-3">Analysis Summary</h6>
                 <div class="mb-2">
-                    <strong>Method:</strong> ${methodType}
+                    <strong>Method:</strong> ${methodNameStr}
                 </div>
                 <div class="mb-2">
-                    <strong>Peaks Detected:</strong> ${chartData.peaks}
+                    <strong>Peaks Detected:</strong> ${peaksData.length}
                 </div>
                 <div class="mb-2">
-                    <strong>Confidence:</strong> ${chartData.confidence}%
+                    <strong>Data Points:</strong> ${chartData.voltage.length}
                 </div>
                 <div>
-                    <strong>Processing Time:</strong> ${chartData.processingTime}s
+                    <strong>Analysis:</strong> Complete
                 </div>
             `;
         }
@@ -576,16 +576,15 @@
 
         function generateCSV(data) {
             const rows = [
-                ['Method', methodType],
-                ['Peaks Detected', chartData.peaks],
-                ['Confidence', chartData.confidence + '%'],
-                ['Processing Time', chartData.processingTime + 's'],
+                ['Method', methodNameStr],
+                ['Peaks Detected', peaksData.length],
+                ['Data Points', chartData.voltage.length],
                 [],
                 ['Peak Analysis Results'],
                 ['Type', 'Voltage (V)', 'Current (µA)']
             ];
 
-            chartData.previewData.peaks.forEach(peak => {
+            peaksData.forEach(peak => {
                 rows.push([peak.type, peak.x.toFixed(3), peak.y.toFixed(3)]);
             });
 

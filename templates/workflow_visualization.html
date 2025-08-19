@@ -950,6 +950,39 @@
             opacity: 0.8;
         }
 
+        /* Step Guide Styles */
+        .step-guide {
+            padding: 0;
+        }
+
+        .guide-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+
+        .guide-step .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: #28a745;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .guide-step .step-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.4;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -984,6 +1017,11 @@
             <div class="workflow-header">
                 <h2>🚀 Interactive Analysis Pipeline</h2>
                 <p>Follow the complete workflow from data import to calibrated results</p>
+                <div class="mt-2">
+                    <span class="badge bg-success">v2.0.0</span>
+                    <span class="badge bg-info">Peak Detection Upgraded</span>
+                    <span class="badge bg-warning">Real Data Support</span>
+                </div>
             </div>
 
             <div class="workflow-steps">
@@ -1109,6 +1147,9 @@
                             <div class="action-buttons">
                                 <button class="btn btn-primary" onclick="scanAllFiles()">🔍 Scan All Selected Files</button>
                                 <button class="btn btn-secondary" onclick="validateFormat()">✅ Validate File Formats</button>
+                                <button class="btn btn-success" onclick="goToPeakDetection()" id="peak-detection-btn" disabled>
+                                    🔬 Peak Detection Analysis
+                                </button>
                             </div>
 
                             <div class="results-grid">
@@ -1187,11 +1228,92 @@
                     </div>
                     <div class="step-content">
                         <div class="step-description">
-                            Apply advanced peak detection algorithms using our 3-method framework: DeepCV, TraditionalCV, and HybridCV.
+                            <div class="alert alert-success mb-3">
+                                <i class="fas fa-rocket me-2"></i>
+                                <strong>🆕 New v2.0.0 Peak Detection System!</strong> 
+                                Real data integration with multi-method analysis and interactive visualization.
+                            </div>
+                            Apply advanced peak detection algorithms using multiple methods: SciPy Peak Finder, Savitzky-Golay, and Advanced Detection with real instrument data support.
+                            <div class="mt-2">
+                                <span class="badge bg-success me-1">✓ Real CSV Data</span>
+                                <span class="badge bg-success me-1">✓ Multi-Tab Analysis</span>
+                                <span class="badge bg-success me-1">✓ Interactive Charts</span>
+                                <span class="badge bg-success me-1">✓ Export Capabilities</span>
+                            </div>
                         </div>
                         
                         <div class="step-details">
-                            {% include 'peak_detection.html' %}
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="card border-primary">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0">🚀 Launch New Peak Detection System</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-info mb-3">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                The new Peak Detection system runs in a dedicated interface with enhanced capabilities.
+                                            </div>
+                                            
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <h6>📂 Data Source Options:</h6>
+                                                    <ul class="list-unstyled">
+                                                        <li>✓ Upload new CSV files</li>
+                                                        <li>✓ Use previously saved data</li>
+                                                        <li>✓ Demo datasets</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6>🔬 Detection Methods:</h6>
+                                                    <ul class="list-unstyled">
+                                                        <li>✓ SciPy Peak Finder</li>
+                                                        <li>✓ Savitzky-Golay</li>
+                                                        <li>✓ Advanced Detection</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="text-center">
+                                                <a href="/peak_detection" class="btn btn-primary btn-lg" target="_blank">
+                                                    <i class="fas fa-external-link-alt me-2"></i>
+                                                    Open Peak Detection v2.0.0
+                                                </a>
+                                                <div class="form-text mt-2">
+                                                    Opens in a new tab for better workflow management
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0">🎯 Quick Start</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="step-guide">
+                                                <div class="guide-step">
+                                                    <span class="step-number">1</span>
+                                                    <span class="step-text">Upload your CSV files if haven't done so</span>
+                                                </div>
+                                                <div class="guide-step">
+                                                    <span class="step-number">2</span>
+                                                    <span class="step-text">Select detection method</span>
+                                                </div>
+                                                <div class="guide-step">
+                                                    <span class="step-number">3</span>
+                                                    <span class="step-text">Run analysis</span>
+                                                </div>
+                                                <div class="guide-step">
+                                                    <span class="step-number">4</span>
+                                                    <span class="step-text">View detailed results</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1474,7 +1596,9 @@
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeDataPreview()">Close</button>
-                <button class="btn-primary" onclick="proceedToNextStep()">Continue to Peak Detection</button>
+                <button class="btn-primary" onclick="window.open('/peak_detection', '_blank')">
+                    <i class="fas fa-external-link-alt me-1"></i>Open Peak Detection v2.0.0
+                </button>
             </div>
         </div>
     </div>
@@ -1490,6 +1614,67 @@
             if (graphsTab) {
                 graphsTab.addEventListener('click', loadAndPlotCVData);
             }
+        });
+
+        // Function to go to peak detection with uploaded files
+        function goToPeakDetection() {
+            // Check if files are uploaded and scanned
+            const totalFiles = parseInt(document.getElementById('totalFiles')?.textContent) || 0;
+            const validFiles = parseInt(document.getElementById('validFiles')?.textContent) || 0;
+            
+            if (totalFiles === 0) {
+                alert('Please upload and scan files first');
+                return;
+            }
+            
+            if (validFiles === 0) {
+                alert('No valid CV files found. Please check file formats.');
+                return;
+            }
+            
+            // Store upload info in sessionStorage for peak detection to access
+            const uploadInfo = {
+                totalFiles: totalFiles,
+                validFiles: validFiles,
+                uploadedAt: new Date().toISOString(),
+                instruments: {
+                    palmsens: parseInt(document.getElementById('palmsensCount')?.textContent) || 0,
+                    stm32: parseInt(document.getElementById('stm32Count')?.textContent) || 0,
+                    generic: parseInt(document.getElementById('genericCount')?.textContent) || 0
+                }
+            };
+            
+            sessionStorage.setItem('uploadedFiles', JSON.stringify(uploadInfo));
+            
+            // Navigate to peak detection
+            window.location.href = '/peak_detection';
+        }
+
+        // Enable peak detection button when files are scanned
+        function enablePeakDetectionButton() {
+            const btn = document.getElementById('peak-detection-btn');
+            const validFiles = parseInt(document.getElementById('validFiles')?.textContent) || 0;
+            
+            if (btn) {
+                btn.disabled = validFiles === 0;
+            }
+        }
+
+        // Monitor file scan results to enable/disable button
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.target.id === 'validFiles' || mutation.target.id === 'totalFiles') {
+                    enablePeakDetectionButton();
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const validFilesEl = document.getElementById('validFiles');
+            const totalFilesEl = document.getElementById('totalFiles');
+            
+            if (validFilesEl) observer.observe(validFilesEl, { childList: true });
+            if (totalFilesEl) observer.observe(totalFilesEl, { childList: true });
         });
     </script>
 </body>
