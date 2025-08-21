@@ -59,22 +59,20 @@ const detectionManager = {
     // Start detection for a method
     startDetection(method) {
         console.log('Starting detection for method:', method);
-        
-        // Check if data is loaded
+        // Debug: log window.getCurrentData and its result
+        console.log('window.getCurrentData:', window.getCurrentData);
         const currentData = window.getCurrentData ? window.getCurrentData() : null;
+        console.log('currentData:', currentData);
         if (!currentData) {
             alert('Please load data first before starting peak detection.');
             return;
         }
-        
         const gridId = this.getGridId(method);
         const grid = document.getElementById(gridId);
-        
         if (!grid) {
             console.error('Grid not found for method:', method);
             return;
         }
-        
         grid.style.display = 'block';
         this.performDetection(grid, method, currentData);
     },

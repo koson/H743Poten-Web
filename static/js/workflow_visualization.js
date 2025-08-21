@@ -1,3 +1,8 @@
+// Make currentData accessible for peak detection integration
+window.getCurrentData = function() {
+    // ใช้ window.currentData หรือเปลี่ยนเป็นตัวแปรที่เก็บข้อมูลจริงหลังโหลดไฟล์
+    return window.currentData || null;
+};
 /**
  * H743Poten Workflow Visualization JavaScript
  * Enhanced Interactive Analysis Pipeline
@@ -92,7 +97,7 @@ class H743WorkflowManager {
     handleInstrumentFileSelection(event, instrumentType) {
         const files = event.target.files;
         console.log(`📂 Selected ${files.length} files for ${instrumentType}`);
-        
+        console.log('ไฟล์ที่เลือก:', Array.from(files).map(f => f.name));
         if (files.length === 0) return;
 
         // Calculate total size
@@ -103,7 +108,7 @@ class H743WorkflowManager {
 
         // Update UI for specific instrument
         this.updateInstrumentFileInfo(instrumentType, files, totalSize);
-        
+
         // Store files data
         if (!this.analysisData.instrumentFiles) {
             this.analysisData.instrumentFiles = {};
@@ -114,10 +119,37 @@ class H743WorkflowManager {
             count: files.length
         };
 
-        this.showNotification(
-            `Selected ${files.length} files for ${instrumentType} (${(totalSize / (1024 * 1024)).toFixed(2)}MB)`, 
-            'success'
-        );
+        // อ่านและรวมข้อมูลจากทุกไฟล์ CSV
+        const allVoltage = [];
+        const allCurrent = [];
+        let filesRead = 0;
+        for (let i = 0; i < files.length; i++) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.trim().split('\n');
+                const headers = lines[0].toLowerCase().split(',');
+                let voltageIdx = headers.findIndex(h => h.includes('volt') || h === 'v');
+                let currentIdx = headers.findIndex(h => h.includes('curr') || h === 'a');
+                for (let j = 1; j < lines.length; j++) {
+                    const vals = lines[j].split(',');
+                    if (vals.length > Math.max(voltageIdx, currentIdx)) {
+                        const v = parseFloat(vals[voltageIdx]);
+                        const c = parseFloat(vals[currentIdx]);
+                        if (!isNaN(v) && !isNaN(c)) {
+                            allVoltage.push(v);
+                            allCurrent.push(c);
+                        }
+                    }
+                }
+                filesRead++;
+                if (filesRead === files.length) {
+                    window.currentData = { voltage: allVoltage, current: allCurrent };
+                    console.log('window.currentData ถูกเซ็ต (multi-file):', window.currentData);
+                }
+            };
+            reader.readAsText(files[i]);
+        }
     }
 
     updateInstrumentFileInfo(instrumentType, files, totalSize) {
