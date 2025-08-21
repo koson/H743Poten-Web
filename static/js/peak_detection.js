@@ -119,7 +119,7 @@ const detectionManager = {
             'prominence': 'traditional-analysis',
             'derivative': 'hybrid-analysis'
         }[method];
-    },
+    }, // Added comma here
 
     // Get method display name
     getMethodName(method) {
@@ -326,74 +326,53 @@ const detectionManager = {
         }
         return {
             voltage,
-            let dataToSend, peaksToSend;
-            if (window.currentDataFiles && Array.isArray(window.currentDataFiles) && window.currentDataFiles.length > 0) {
-                dataToSend = window.currentDataFiles.map((file, idx) => ({
-                    voltage: file.voltage,
-                    current: file.current,
-                    filename: file.filename || file.name || `Trace ${idx+1}`
-                }));
-                // ถ้า results.peaks เป็น array of array (multi-file) ให้ใช้ตรง ๆ
-                if (Array.isArray(results.peaks) && Array.isArray(results.peaks[0])) {
-                    peaksToSend = results.peaks;
-                } else if (Array.isArray(results.peaks)) {
-                    // ถ้าเป็น array of object (single-file) ให้ wrap เป็น array of array
-                    peaksToSend = [results.peaks];
-                } else {
-                    peaksToSend = window.currentDataFiles.map(() => []);
-                }
-            } else {
-                // Single file fallback
-                const currentData = window.getCurrentData ? window.getCurrentData() : null;
-                if (!currentData) {
-                    alert('No data available for analysis');
-                    return;
-                }
-                dataToSend = {
-                    ...results,
-                    voltage: currentData.voltage,
-                    current: currentData.current,
-                    filename: currentData.filename || currentData.name || 'Trace 1',
-                    previewData: results.previewData || {
-                        voltage: currentData.voltage,
-                        current: currentData.current,
-                        peaks: []
+            current,
+            peaks: previewPeaks
+        };
+    },
+
+    // Update results UI
+    updateResultsUI(grid, results, method) {
+        // Use previewData for this card only (not global results)
+        const previewData = results.previewData;
+        // Peak count = จำนวน peak ใน previewData เท่านั้น
+        grid.querySelector('.peaks-count').textContent = previewData.peaks ? previewData.peaks.length : 0;
+        // Confidence = เฉลี่ย confidence ของ peak ใน previewData (หรือ 0)
+        let conf = 0;
+        if (previewData.peaks && previewData.peaks.length > 0) {
+            conf = Math.round(previewData.peaks.reduce((sum, p) => sum + (p.confidence || 50), 0) / previewData.peaks.length);
+        }
+        grid.querySelector('.confidence-value').textContent = conf + '%';
+        // Processing time: ใช้ results.processingTime เดิม
+        grid.querySelector('.processing-time').textContent = results.processingTime + 's';
+        // Update preview graph
+        const previewCanvas = grid.querySelector('.preview-canvas');
+        if (previewCanvas) {
+            const container = previewCanvas.parentElement;
+            if (container) {
+                previewCanvas.width = container.clientWidth;
+                previewCanvas.height = container.clientHeight;
+                const ctx = previewCanvas.getContext('2d');
+                if (ctx) {
+                    if (window.previewGraphUtils) {
+                        window.previewGraphUtils.drawGraph(previewCanvas, previewData);
                     }
-                };
-                peaksToSend = Array.isArray(results.peaks) ? results.peaks : [];
-            }
-
-            console.log('Creating analysis session for method:', method);
-            console.log('Results:', results);
-            console.log('Data to send:', dataToSend);
-            console.log('Peaks to send:', peaksToSend);
-
-            fetch('/peak_detection/create_analysis_session', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    peaks: peaksToSend,
-                    data: dataToSend,
-                    method: method,
-                    methodName: this.getMethodName(method)
-                })
-            })
-            .then(response => {
-                console.log('Session creation response status:', response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log('Session creation response:', data);
-                if (data.session_id) {
-                    // Open new tab with session ID
-                    window.open(`/peak_detection/peak_analysis/${data.session_id}`, '_blank');
-                } else {
-                    alert('Failed to create analysis session: ' + (data.error || 'Unknown error'));
                 }
-            })
-            .catch(error => {
-                console.error('Error creating analysis session:', error);
-                alert('Failed to create analysis session: ' + error.message);
-            });
+            }
+        }
+        
+        // Setup view details button
+        const detailsBtn = grid.querySelector('.view-details-btn');
+        if (detailsBtn) {
+            detailsBtn.disabled = false;
+            detailsBtn.onclick = () => {
+                console.log('View Details clicked for method:', method);
+                this.showDetails(method, results);
+            };
+        }
+        
+        // Log notification
+        const notification = `Detected ${previewData.peaks ? previewData.peaks.length : 0} peaks with ${conf}% confidence`;
+        console.log(notification);
+    }
+};
