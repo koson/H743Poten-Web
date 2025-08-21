@@ -119,37 +119,141 @@ class H743WorkflowManager {
             count: files.length
         };
 
-        // อ่านและรวมข้อมูลจากทุกไฟล์ CSV
-        const allVoltage = [];
-        const allCurrent = [];
+        // อ่านและรวมข้อมูลจากทุกไฟล์ CSV (robust header detection)
+        // เก็บข้อมูลแยกไฟล์สำหรับ Plotly
+        window.currentDataFiles = [];
         let filesRead = 0;
         for (let i = 0; i < files.length; i++) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const text = e.target.result;
-                const lines = text.trim().split('\n');
-                const headers = lines[0].toLowerCase().split(',');
+                let lines = text.trim().split('\n');
+                if (lines[0].toLowerCase().startsWith('filename:')) {
+                    lines = lines.slice(1);
+                }
+                let delimiter = ',';
+                if (lines[0].includes('\t')) delimiter = '\t';
+                let headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase().replace(/\r/g, ''));
                 let voltageIdx = headers.findIndex(h => h.includes('volt') || h === 'v');
                 let currentIdx = headers.findIndex(h => h.includes('curr') || h === 'a');
+                if (currentIdx === -1) {
+                    currentIdx = headers.findIndex(h => h === 'ua' || h === 'µa' || h === 'ua' || h === 'ua\r');
+                }
+                if (voltageIdx === -1 || currentIdx === -1) {
+                    console.warn(`[${files[i].name}] ไม่พบ index ของ voltage/current ใน header, ข้ามไฟล์นี้`);
+                    filesRead++;
+                    if (filesRead === files.length) {
+                        window.currentData = { voltage: [], current: [] };
+                        updateCVFileDropdown();
+                        plotSelectedCVFiles();
+                    }
+                    return;
+                }
+                const voltage = [];
+                const current = [];
                 for (let j = 1; j < lines.length; j++) {
-                    const vals = lines[j].split(',');
+                    const vals = lines[j].split(delimiter).map(v => v.trim().replace(/\r/g, ''));
                     if (vals.length > Math.max(voltageIdx, currentIdx)) {
                         const v = parseFloat(vals[voltageIdx]);
                         const c = parseFloat(vals[currentIdx]);
                         if (!isNaN(v) && !isNaN(c)) {
-                            allVoltage.push(v);
-                            allCurrent.push(c);
+                            voltage.push(v);
+                            current.push(c);
                         }
                     }
                 }
+                window.currentDataFiles[i] = {
+                    name: files[i].name,
+                    voltage,
+                    current
+                };
                 filesRead++;
                 if (filesRead === files.length) {
+                    // รวมข้อมูลทั้งหมด (flatten)
+                    const allVoltage = window.currentDataFiles.flatMap(f => f.voltage);
+                    const allCurrent = window.currentDataFiles.flatMap(f => f.current);
                     window.currentData = { voltage: allVoltage, current: allCurrent };
-                    console.log('window.currentData ถูกเซ็ต (multi-file):', window.currentData);
+                    updateCVFileDropdown();
+                    plotSelectedCVFiles();
                 }
             };
             reader.readAsText(files[i]);
         }
+// === Plotly.js CV Graph + Dropdown ===
+function updateCVFileDropdown() {
+    const dropdown = document.getElementById('cvFileDropdown');
+    if (!dropdown) return;
+    dropdown.innerHTML = '';
+    if (!window.currentDataFiles || window.currentDataFiles.length === 0) return;
+    window.currentDataFiles.forEach((f, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.text = f.name;
+        opt.selected = true; // default: show all
+        dropdown.appendChild(opt);
+    });
+    dropdown.onchange = plotSelectedCVFiles;
+}
+
+function plotSelectedCVFiles() {
+    if (!window.Plotly) {
+        setTimeout(plotSelectedCVFiles, 200);
+        return;
+    }
+    const dropdown = document.getElementById('cvFileDropdown');
+    const plotDiv = document.getElementById('plotly-cv-graph');
+    const infoDiv = document.getElementById('cv-graph-info');
+    if (!dropdown || !plotDiv) return;
+    const selected = Array.from(dropdown.selectedOptions).map(opt => parseInt(opt.value));
+    if (!window.currentDataFiles || window.currentDataFiles.length === 0) {
+        Plotly.purge(plotDiv);
+        if (infoDiv) infoDiv.innerHTML = '';
+        return;
+    }
+    const traces = selected.map(idx => {
+        const f = window.currentDataFiles[idx];
+        return {
+            x: f.voltage,
+            y: f.current,
+            mode: 'lines',
+            name: f.name,
+            line: { width: 2 }
+        };
+    });
+    Plotly.newPlot(plotDiv, traces, {
+        xaxis: { title: 'Voltage (V)' },
+        yaxis: { title: 'Current (μA)' },
+        legend: { orientation: 'h' },
+        margin: { t: 30, r: 20, l: 60, b: 60 },
+        height: 400,
+        width: 700,
+        showlegend: true,
+        plot_bgcolor: '#fff',
+        paper_bgcolor: '#fff',
+    }, {responsive: true});
+    // Info
+    if (infoDiv) {
+        let vAll = [], cAll = [];
+        selected.forEach(idx => {
+            vAll = vAll.concat(window.currentDataFiles[idx].voltage);
+            cAll = cAll.concat(window.currentDataFiles[idx].current);
+        });
+        if (vAll.length && cAll.length) {
+            infoDiv.innerHTML = `<p><strong>Voltage Range:</strong> ${Math.min(...vAll).toFixed(2)}V to ${Math.max(...vAll).toFixed(2)}V</p>
+            <p><strong>Current Range:</strong> ${Math.min(...cAll).toFixed(2)}μA to ${Math.max(...cAll).toFixed(2)}μA</p>`;
+        } else {
+            infoDiv.innerHTML = '';
+        }
+    }
+}
+
+// โหลด Plotly.js อัตโนมัติถ้ายังไม่มี
+if (!window.Plotly) {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.plot.ly/plotly-2.26.0.min.js';
+    s.onload = () => { if (window.currentDataFiles) plotSelectedCVFiles(); };
+    document.head.appendChild(s);
+}
     }
 
     updateInstrumentFileInfo(instrumentType, files, totalSize) {

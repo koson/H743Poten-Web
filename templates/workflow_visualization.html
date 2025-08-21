@@ -1424,14 +1424,12 @@
                 <div id="graphs-tab" class="tab-content">
                     <div class="graph-container">
                         <h3>📈 Sample CV Curves</h3>
-                        <div class="sample-graph">
-                            <canvas id="previewChart" width="600" height="400"></canvas>
+                        <div style="margin-bottom: 1em;">
+                            <label for="cvFileDropdown"><strong>เลือกไฟล์ที่ต้องการแสดงกราฟ:</strong></label>
+                            <select id="cvFileDropdown" multiple style="min-width: 300px; min-height: 2.5em;"></select>
                         </div>
-                        <div class="graph-info">
-                            <p><strong>Sample Data:</strong> Showing representative CV curves from uploaded files</p>
-                            <p><strong>Voltage Range:</strong> -1.0V to +1.0V</p>
-                            <p><strong>Current Range:</strong> -50μA to +50μA</p>
-                        </div>
+                        <div id="plotly-cv-graph" style="width: 100%; max-width: 700px; height: 400px;"></div>
+                        <div class="graph-info" id="cv-graph-info"></div>
                     </div>
                 </div>
 

@@ -59,11 +59,19 @@ const detectionManager = {
     // Start detection for a method
     startDetection(method) {
         console.log('Starting detection for method:', method);
-        // Debug: log window.getCurrentData and its result
-        console.log('window.getCurrentData:', window.getCurrentData);
-        const currentData = window.getCurrentData ? window.getCurrentData() : null;
-        console.log('currentData:', currentData);
-        if (!currentData) {
+        // ใช้ข้อมูลไฟล์ preview (ล่าสุด) เท่านั้น
+        let previewData = null;
+        if (window.currentDataFiles && window.currentDataFiles.length > 0) {
+            const lastIdx = window.currentDataFiles.length - 1;
+            previewData = {
+                voltage: window.currentDataFiles[lastIdx].voltage,
+                current: window.currentDataFiles[lastIdx].current
+            };
+        } else if (window.getCurrentData) {
+            previewData = window.getCurrentData();
+        }
+        console.log('previewData for detection:', previewData);
+        if (!previewData || !previewData.voltage || !previewData.current) {
             alert('Please load data first before starting peak detection.');
             return;
         }
@@ -74,7 +82,7 @@ const detectionManager = {
             return;
         }
         grid.style.display = 'block';
-        this.performDetection(grid, method, currentData);
+        this.performDetection(grid, method, previewData);
     },
     
     // Get grid ID for method
@@ -235,41 +243,49 @@ const detectionManager = {
 
     // Convert API result to preview data format
     convertToPreviewData(apiResult) {
-        const currentData = window.getCurrentData ? window.getCurrentData() : null;
-        
-        if (!currentData) {
-            return {
-                voltage: [-0.5, -0.3, -0.1, 0.1, 0.3, 0.5],
-                current: [-2, 1, 3, 1, -1, -2],
-                peaks: []
-            };
+        // Show only one file for preview (last file selected)
+        let voltage = [], current = [], previewPeaks = [];
+        if (window.currentDataFiles && window.currentDataFiles.length > 0) {
+            const lastIdx = window.currentDataFiles.length - 1;
+            voltage = window.currentDataFiles[lastIdx].voltage;
+            current = window.currentDataFiles[lastIdx].current;
+            // Filter peaks for this file only (if possible)
+            if (apiResult && Array.isArray(apiResult.peaks)) {
+                // สมมุติว่าแต่ละ peak มี fileIdx ถ้า backend ส่งมา (ถ้าไม่มีจะโชว์ทุก peak)
+                previewPeaks = apiResult.peaks.filter(p => (p.fileIdx === undefined || p.fileIdx === lastIdx))
+                    .map(peak => ({ x: peak.voltage, y: peak.current, type: peak.type }));
+            }
+        } else if (window.currentData && window.currentData.voltage && window.currentData.current) {
+            voltage = window.currentData.voltage;
+            current = window.currentData.current;
+            if (apiResult && Array.isArray(apiResult.peaks)) {
+                previewPeaks = apiResult.peaks.map(peak => ({ x: peak.voltage, y: peak.current, type: peak.type }));
+            }
+        } else {
+            voltage = [-0.5, -0.3, -0.1, 0.1, 0.3, 0.5];
+            current = [-2, 1, 3, 1, -1, -2];
         }
-
-        // Use actual data for preview
-        const previewData = {
-            voltage: currentData.voltage,
-            current: currentData.current,
-            peaks: []
+        return {
+            voltage,
+            current,
+            peaks: previewPeaks
         };
-
-        // Convert peaks to preview format
-        if (apiResult.peaks) {
-            previewData.peaks = apiResult.peaks.map(peak => ({
-                x: peak.voltage,
-                y: peak.current,
-                type: peak.type
-            }));
-        }
-
-        return previewData;
     },
 
     // Update results UI
     updateResultsUI(grid, results, method) {
-        grid.querySelector('.peaks-count').textContent = results.peaks;
-        grid.querySelector('.confidence-value').textContent = results.confidence + '%';
+        // Use previewData for this card only (not global results)
+        const previewData = results.previewData;
+        // Peak count = จำนวน peak ใน previewData เท่านั้น
+        grid.querySelector('.peaks-count').textContent = previewData.peaks ? previewData.peaks.length : 0;
+        // Confidence = เฉลี่ย confidence ของ peak ใน previewData (หรือ 0)
+        let conf = 0;
+        if (previewData.peaks && previewData.peaks.length > 0) {
+            conf = Math.round(previewData.peaks.reduce((sum, p) => sum + (p.confidence || 50), 0) / previewData.peaks.length);
+        }
+        grid.querySelector('.confidence-value').textContent = conf + '%';
+        // Processing time: ใช้ results.processingTime เดิม
         grid.querySelector('.processing-time').textContent = results.processingTime + 's';
-        
         // Update preview graph
         const previewCanvas = grid.querySelector('.preview-canvas');
         if (previewCanvas) {
@@ -277,10 +293,9 @@ const detectionManager = {
             if (container) {
                 previewCanvas.width = container.clientWidth;
                 previewCanvas.height = container.clientHeight;
-                
                 const ctx = previewCanvas.getContext('2d');
                 if (ctx) {
-                    previewGraphUtils.drawGraph(previewCanvas, results.previewData);
+                    previewGraphUtils.drawGraph(previewCanvas, previewData);
                 }
             }
         }
