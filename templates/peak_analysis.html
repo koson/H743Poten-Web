@@ -145,8 +145,8 @@
             <div class="col-md-9">
                 <div class="peak-visualization-container">
                     <div class="d-flex align-items-center mb-2">
-                        <label for="traceSelect" class="me-2 mb-0">Select Trace(s):</label>
-                        <select id="traceSelect" class="form-select form-select-sm w-auto" multiple size="4"></select>
+                        <label for="traceSelect" class="me-2 mb-0">Select File:</label>
+                        <select id="traceSelect" class="form-select form-select-sm w-auto"></select>
                     </div>
                     <div id="plotly-peak-graph" style="width:100%;height:100%;min-height:400px;"></div>
                 </div>
@@ -189,41 +189,67 @@
 
         // Helper: detect multi-trace (2D array) or single trace (1D array)
         function isMultiTrace(data) {
-            return Array.isArray(data) && Array.isArray(data[0]);
+            // Support both array of object and object with voltage: [][].
+            if (Array.isArray(data)) {
+                if (data.length > 0 && typeof data[0] === 'object' && data[0].voltage && Array.isArray(data[0].voltage)) {
+                    return true; // array of object
+                }
+            }
+            if (Array.isArray(data) && Array.isArray(data[0])) return true;
+            return false;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             ensurePlotlyReady(function() {
-                // Setup trace selector if multi-trace
+                // Debug: log all incoming data
+                console.log('chartData:', chartData);
+                console.log('peaksData:', peaksData);
                 let nTraces = 1;
-                if (isMultiTrace(chartData.voltage)) {
+                let fileLabels = [];
+                let isArrayObj = false;
+                // Detect array of object format
+                if (Array.isArray(chartData) && chartData.length > 0 && typeof chartData[0] === 'object' && chartData[0].voltage) {
+                    nTraces = chartData.length;
+                    isArrayObj = true;
+                    fileLabels = chartData.map((d, i) => d.filename || d.label || `Trace ${i+1}`);
+                } else if (chartData && chartData.voltage && Array.isArray(chartData.voltage[0])) {
                     nTraces = chartData.voltage.length;
+                    if (Array.isArray(chartData.filenames)) {
+                        fileLabels = chartData.filenames;
+                    } else if (Array.isArray(chartData.file_labels)) {
+                        fileLabels = chartData.file_labels;
+                    } else {
+                        for (let i = 0; i < nTraces; ++i) fileLabels.push(nTraces > 1 ? `Trace ${i+1}` : 'Trace 1');
+                    }
+                } else {
+                    fileLabels = ['Trace 1'];
                 }
+                console.log('fileLabels:', fileLabels);
                 const traceSelect = document.getElementById('traceSelect');
                 traceSelect.innerHTML = '';
                 for (let i = 0; i < nTraces; ++i) {
                     const opt = document.createElement('option');
                     opt.value = i;
-                    opt.textContent = nTraces > 1 ? `Trace ${i+1}` : 'Trace 1';
+                    opt.textContent = fileLabels[i] || `Trace ${i+1}`;
                     traceSelect.appendChild(opt);
                 }
-                // Initial: select only the first trace
+                // Initial: select only the first file
                 if (traceSelect.options.length > 0) {
                     traceSelect.options[0].selected = true;
                 }
-                renderMultiTrace([0]);
+                renderSingleTrace(0);
                 updatePeakList(getPeaksForTrace(0));
                 updateDataInfo(chartData, getPeaksForTrace(0));
                 setupToolbar();
-                // On change: support multi-select
+                // On change: single select
                 traceSelect.addEventListener('change', function() {
-                    const selected = Array.from(this.selectedOptions).map(opt => parseInt(opt.value));
-                    renderMultiTrace(selected);
-                    // For peak list/info, show only the first selected trace (or none)
-                    const firstIdx = selected.length > 0 ? selected[0] : 0;
-                    updatePeakList(getPeaksForTrace(firstIdx));
-                    updateDataInfo(chartData, getPeaksForTrace(firstIdx));
+                    const idx = parseInt(this.value);
+                    renderSingleTrace(idx);
+                    updatePeakList(getPeaksForTrace(idx));
+                    updateDataInfo(chartData, getPeaksForTrace(idx));
                 });
+                // Save for renderSingleTrace
+                window._isArrayObj = isArrayObj;
             });
         });
 
@@ -235,72 +261,31 @@
             return peaksData || [];
         }
 
-        // Render multiple traces and their peaks (all overlays)
-        function renderMultiTrace(indices) {
-            let voltages = chartData.voltage;
-            let currents = chartData.current;
-            if (!isMultiTrace(voltages)) {
-                voltages = [voltages];
-                currents = [currents];
+        // Render only one trace and its peaks
+        function renderSingleTrace(idx) {
+            let voltage, current, label;
+            if (window._isArrayObj) {
+                voltage = chartData[idx]?.voltage || [];
+                current = chartData[idx]?.current || [];
+                label = chartData[idx]?.filename || chartData[idx]?.label || `Trace ${idx+1}`;
+            } else if (chartData && chartData.voltage && Array.isArray(chartData.voltage[0])) {
+                voltage = chartData.voltage[idx] || [];
+                current = chartData.current[idx] || [];
+                label = (chartData.filenames && chartData.filenames[idx]) || (chartData.file_labels && chartData.file_labels[idx]) || `Trace ${idx+1}`;
+            } else {
+                voltage = chartData.voltage || [];
+                current = chartData.current || [];
+                label = 'Trace 1';
             }
-            // Compose traces for Plotly
-            const plotTraces = indices.map(idx => ({
-                x: voltages[idx],
-                y: currents[idx],
-                mode: 'lines',
-                name: `Trace ${idx+1}`,
-                line: { width: 2 },
-                hoverinfo: 'x+y',
-            }));
-            // Compose all peaks for selected traces
-            let allPeaks = [];
-            indices.forEach(idx => {
-                const peaks = getPeaksForTrace(idx);
-                if (Array.isArray(peaks)) {
-                    allPeaks = allPeaks.concat(peaks.map(p => ({...p, traceIdx: idx})));
-                }
-            });
-            // Add peak marker trace (if any)
-            if (allPeaks.length > 0) {
-                plotTraces.push({
-                    x: allPeaks.map(p => p.x !== undefined ? p.x : p.voltage),
-                    y: allPeaks.map(p => p.y !== undefined ? p.y : p.current),
-                    mode: 'markers+text',
-                    name: 'Peaks',
-                    marker: {
-                        size: 12,
-                        color: allPeaks.map(p => p.type === 'oxidation' ? '#dc3545' : '#198754'),
-                        line: { width: 2, color: '#fff' }
-                    },
-                    text: allPeaks.map(p => (p.type === 'oxidation' ? 'Ox' : 'Red') + ` (T${(p.traceIdx||0)+1})`),
-                    textposition: 'top center',
-                    hovertemplate: '%{text} peak<br>V: %{x:.3f} V<br>i: %{y:.3f} µA<extra></extra>',
-                });
+            // Defensive: if no data, show message and skip plot
+            if (!voltage || !current || voltage.length === 0 || current.length === 0) {
+                const plotDiv = document.getElementById('plotly-peak-graph');
+                if (plotDiv) plotDiv.innerHTML = '<div class="text-muted p-4">No data for this file.</div>';
+                return;
             }
-            // Use Plotly directly for flexibility
-            const plotDiv = document.getElementById('plotly-peak-graph');
-            const layout = {
-                title: methodNameStr ? `Peak Analysis: ${methodNameStr}` : 'Peak Analysis',
-                xaxis: {
-                    title: 'Voltage (V)',
-                    tickformat: '.3f',
-                    zeroline: false,
-                    showgrid: true,
-                    gridcolor: '#f0f0f0',
-                },
-                yaxis: {
-                    title: 'Current (µA)',
-                    tickformat: '.3f',
-                    zeroline: false,
-                    showgrid: true,
-                    gridcolor: '#f0f0f0',
-                },
-                margin: { t: 50, l: 60, r: 30, b: 60 },
-                legend: { orientation: 'h', y: -0.2 },
-                hovermode: 'closest',
-                height: 500,
-            };
-            Plotly.newPlot(plotDiv, plotTraces, layout, {responsive: true});
+            let peaks = getPeaksForTrace(idx);
+            if (!Array.isArray(peaks)) peaks = [];
+            renderPeakAnalysisPlot({voltage, current, label}, peaks, methodNameStr);
         }
 
         function updatePeakList(peaks) {

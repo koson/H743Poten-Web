@@ -277,9 +277,35 @@ def create_analysis_session():
         session_id = str(uuid.uuid4())
         
         # Store data in in-memory storage
+        # Ensure peaks is a list of dicts, not an int
+        peaks = data.get('peaks', [])
+        if isinstance(peaks, int):
+            # Try to get from previewData if available
+            peaks = data.get('previewData', {}).get('peaks', [])
+        if not isinstance(peaks, list):
+            peaks = []
+
+        # Handle multi-trace: data['data'] is list of traces, each should have 'filename'
+        traces = data.get('data', {})
+        if isinstance(traces, list):
+            # Add filename if missing
+            for i, trace in enumerate(traces):
+                if 'filename' not in trace:
+                    # Try to get from filenames array if present
+                    filenames = data.get('filenames') or data.get('file_labels')
+                    if filenames and i < len(filenames):
+                        trace['filename'] = filenames[i]
+                    else:
+                        trace['filename'] = f'Trace {i+1}'
+        elif isinstance(traces, dict):
+            # Single trace: add filename if present
+            if 'filename' not in traces:
+                filename = data.get('filename') or (data.get('filenames')[0] if data.get('filenames') else None)
+                if filename:
+                    traces['filename'] = filename
         analysis_sessions[session_id] = {
-            'peaks': data.get('peaks', []),
-            'data': data.get('data', {}),
+            'peaks': peaks,
+            'data': traces,
             'method': data.get('method', ''),
             'methodName': data.get('methodName', ''),
             'created_at': datetime.now().isoformat()
@@ -324,23 +350,71 @@ def get_peaks(method):
     try:
         # Get data from POST request
         data = request.get_json()
-        if not data or 'voltage' not in data or 'current' not in data:
-            return jsonify({
-                'success': False,
-                'error': 'Missing voltage or current data in request'
-            }), 400
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
 
-        voltage = np.array(data['voltage'])
-        current = np.array(data['current'])
-
-        # Find peaks using specified method
-        results = detect_cv_peaks(voltage, current, method=method)
-
-        return jsonify({
-            'success': True,
-            **results
-        })
-
+        # Multi-trace: voltage/current เป็น list of list หรือ dataFiles
+        if 'dataFiles' in data and isinstance(data['dataFiles'], list):
+            # New: explicit dataFiles array
+            nFiles = len(data['dataFiles'])
+            peaks_per_file = [ [] for _ in range(nFiles) ]
+            for i, file in enumerate(data['dataFiles']):
+                voltage = np.array(file.get('voltage', []))
+                current = np.array(file.get('current', []))
+                logger.info(f"[DEBUG] File {i}: voltage len={len(voltage)}, current len={len(current)}")
+                logger.info(f"[DEBUG] File {i}: voltage min={np.min(voltage) if len(voltage)>0 else 'NA'}, max={np.max(voltage) if len(voltage)>0 else 'NA'}, mean={np.mean(voltage) if len(voltage)>0 else 'NA'}")
+                logger.info(f"[DEBUG] File {i}: current min={np.min(current) if len(current)>0 else 'NA'}, max={np.max(current) if len(current)>0 else 'NA'}, mean={np.mean(current) if len(current)>0 else 'NA'}")
+                if np.any(np.isnan(voltage)) or np.any(np.isnan(current)):
+                    logger.warning(f"[DEBUG] File {i}: NaN detected in voltage or current!")
+                if np.any(np.isinf(voltage)) or np.any(np.isinf(current)):
+                    logger.warning(f"[DEBUG] File {i}: Inf detected in voltage or current!")
+                try:
+                    file_peaks = detect_cv_peaks(voltage, current, method=method)['peaks']
+                    logger.info(f"[DEBUG] File {i}: detected {len(file_peaks)} peaks")
+                except Exception as e:
+                    logger.error(f"[DEBUG] File {i}: peak detection error: {str(e)}")
+                    file_peaks = []
+                for p in file_peaks:
+                    p['fileIdx'] = i
+                peaks_per_file[i] = file_peaks
+            logger.info(f"[DEBUG] peaks_per_file lens: {[len(p) for p in peaks_per_file]}")
+            return jsonify({'success': True, 'peaks': peaks_per_file})
+        elif isinstance(data.get('voltage'), list) and len(data['voltage']) > 0 and isinstance(data['voltage'][0], list):
+            # voltage/current เป็น list of list
+            nFiles = len(data['voltage'])
+            peaks_per_file = [ [] for _ in range(nFiles) ]
+            for i, (v, c) in enumerate(zip(data['voltage'], data['current'])):
+                voltage = np.array(v)
+                current = np.array(c)
+                logger.info(f"[DEBUG] File {i}: voltage len={len(voltage)}, current len={len(current)}")
+                logger.info(f"[DEBUG] File {i}: voltage min={np.min(voltage) if len(voltage)>0 else 'NA'}, max={np.max(voltage) if len(voltage)>0 else 'NA'}, mean={np.mean(voltage) if len(voltage)>0 else 'NA'}")
+                logger.info(f"[DEBUG] File {i}: current min={np.min(current) if len(current)>0 else 'NA'}, max={np.max(current) if len(current)>0 else 'NA'}, mean={np.mean(current) if len(current)>0 else 'NA'}")
+                if np.any(np.isnan(voltage)) or np.any(np.isnan(current)):
+                    logger.warning(f"[DEBUG] File {i}: NaN detected in voltage or current!")
+                if np.any(np.isinf(voltage)) or np.any(np.isinf(current)):
+                    logger.warning(f"[DEBUG] File {i}: Inf detected in voltage or current!")
+                try:
+                    file_peaks = detect_cv_peaks(voltage, current, method=method)['peaks']
+                    logger.info(f"[DEBUG] File {i}: detected {len(file_peaks)} peaks")
+                except Exception as e:
+                    logger.error(f"[DEBUG] File {i}: peak detection error: {str(e)}")
+                    file_peaks = []
+                for p in file_peaks:
+                    p['fileIdx'] = i
+                peaks_per_file[i] = file_peaks
+            logger.info(f"[DEBUG] peaks_per_file lens: {[len(p) for p in peaks_per_file]}")
+            return jsonify({'success': True, 'peaks': peaks_per_file})
+        else:
+            # Single trace (default)
+            if 'voltage' not in data or 'current' not in data:
+                return jsonify({
+                    'success': False,
+                    'error': 'Missing voltage or current data in request'
+                }), 400
+            voltage = np.array(data['voltage'])
+            current = np.array(data['current'])
+            results = detect_cv_peaks(voltage, current, method=method)
+            return jsonify({'success': True, **results})
     except Exception as e:
         logger.error(f"Error in peak detection: {str(e)}")
         return jsonify({
