@@ -45,13 +45,17 @@ const previewGraphUtils = {
         }
         ctx.stroke();
         
-        // Draw peaks
-        data.peaks.forEach(peak => {
-            ctx.fillStyle = peak.type === 'oxidation' ? '#dc3545' : '#198754';
-            ctx.beginPath();
-            ctx.arc(toCanvasX(peak.x), toCanvasY(peak.y), 4, 0, 2 * Math.PI);
-            ctx.fill();
-        });
+        // Draw peaks if available
+        if (data.peaks && Array.isArray(data.peaks) && data.peaks.length > 0) {
+            data.peaks.forEach(peak => {
+                const x = peak.x || peak.voltage;
+                const y = peak.y || peak.current;
+                ctx.fillStyle = peak.type === 'oxidation' ? '#dc3545' : '#198754';
+                ctx.beginPath();
+                ctx.arc(toCanvasX(x), toCanvasY(y), 4, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
         
         // Add labels
         ctx.font = '10px Arial';
@@ -65,3 +69,6 @@ const previewGraphUtils = {
         ctx.fillText('i', padding, padding);
     }
 };
+
+// Make available globally
+window.previewGraphUtils = previewGraphUtils;

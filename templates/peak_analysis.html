@@ -89,15 +89,15 @@
         }
 
         .type-badge.oxidation {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .type-badge.reduction {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+        }
+
+        .type-badge.reduction {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         .peak-values {
@@ -179,6 +179,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <script src="/static/js/peak_analysis_plotly.js"></script>
     <script>
         // Get data from template variables passed from Flask
@@ -186,6 +187,15 @@
         const chartData = {{ data|tojson|safe }};
         const methodType = {{ method|tojson|safe }};
         const methodNameStr = {{ methodName|tojson|safe }};
+
+        // Helper: ensure Plotly is ready
+        function ensurePlotlyReady(callback) {
+            if (typeof Plotly !== 'undefined') {
+                callback();
+            } else {
+                setTimeout(() => ensurePlotlyReady(callback), 100);
+            }
+        }
 
         // Helper: detect multi-trace (2D array) or single trace (1D array)
         function isMultiTrace(data) {
@@ -200,10 +210,17 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            ensurePlotlyReady(function() {
-                // Debug: log all incoming data
-                console.log('chartData:', chartData);
-                console.log('peaksData:', peaksData);
+            // Add a small delay to ensure all scripts are loaded
+            setTimeout(function() {
+                ensurePlotlyReady(function() {
+                    // Check if data exists
+                    if (!chartData || (!Array.isArray(chartData) && !chartData.voltage)) {
+                        console.error('No chart data available!');
+                        const plotDiv = document.getElementById('plotly-peak-graph');
+                        if (plotDiv) plotDiv.innerHTML = '<div class="text-danger p-4">No chart data available</div>';
+                        return;
+                    }
+                
                 let nTraces = 1;
                 let fileLabels = [];
                 let isArrayObj = false;
@@ -214,6 +231,7 @@
                     fileLabels = chartData.map((d, i) => d.filename || d.label || `Trace ${i+1}`);
                 } else if (chartData && chartData.voltage && Array.isArray(chartData.voltage[0])) {
                     nTraces = chartData.voltage.length;
+                    isArrayObj = false;
                     if (Array.isArray(chartData.filenames)) {
                         fileLabels = chartData.filenames;
                     } else if (Array.isArray(chartData.file_labels)) {
@@ -222,24 +240,31 @@
                         for (let i = 0; i < nTraces; ++i) fileLabels.push(nTraces > 1 ? `Trace ${i+1}` : 'Trace 1');
                     }
                 } else {
+                    nTraces = 1;
+                    isArrayObj = false;
                     fileLabels = ['Trace 1'];
                 }
-                console.log('fileLabels:', fileLabels);
+                
+                // Save for renderSingleTrace - SET THIS BEFORE CALLING renderSingleTrace
+                window._isArrayObj = isArrayObj;
+                
                 const traceSelect = document.getElementById('traceSelect');
                 traceSelect.innerHTML = '';
                 for (let i = 0; i < nTraces; ++i) {
                     const opt = document.createElement('option');
                     opt.value = i;
-                    opt.textContent = fileLabels[i] || `Trace ${i+1}`;
+                    opt.textContent = fileLabels[i];
                     traceSelect.appendChild(opt);
                 }
-                // Initial: select only the first file
+                
+                // Initial: select only the first file and render
                 if (traceSelect.options.length > 0) {
                     traceSelect.options[0].selected = true;
+                    renderSingleTrace(0);
+                    updatePeakList(getPeaksForTrace(0));
+                    updateDataInfo(chartData, getPeaksForTrace(0));
                 }
-                renderSingleTrace(0);
-                updatePeakList(getPeaksForTrace(0));
-                updateDataInfo(chartData, getPeaksForTrace(0));
+                
                 setupToolbar();
                 // On change: single select
                 traceSelect.addEventListener('change', function() {
@@ -248,10 +273,9 @@
                     updatePeakList(getPeaksForTrace(idx));
                     updateDataInfo(chartData, getPeaksForTrace(idx));
                 });
-                // Save for renderSingleTrace
-                window._isArrayObj = isArrayObj;
             });
-        });
+            }, 200); // End of timeout
+        }); // End of DOMContentLoaded
 
         // Return peaks for selected trace (if multi-trace, peaksData is array of arrays)
         function getPeaksForTrace(idx) {
@@ -277,12 +301,14 @@
                 current = chartData.current || [];
                 label = 'Trace 1';
             }
+            
             // Defensive: if no data, show message and skip plot
             if (!voltage || !current || voltage.length === 0 || current.length === 0) {
                 const plotDiv = document.getElementById('plotly-peak-graph');
                 if (plotDiv) plotDiv.innerHTML = '<div class="text-muted p-4">No data for this file.</div>';
                 return;
             }
+            
             let peaks = getPeaksForTrace(idx);
             if (!Array.isArray(peaks)) peaks = [];
             renderPeakAnalysisPlot({voltage, current, label}, peaks, methodNameStr);
@@ -314,9 +340,22 @@
             let nPeaks = 0;
             if (Array.isArray(peaks)) nPeaks = peaks.length;
             else if (peaks && typeof peaks === 'object') nPeaks = Object.keys(peaks).length;
+            
             let nPoints = 0;
-            if (isMultiTrace(data.voltage)) nPoints = data.voltage[0]?.length || 0;
-            else nPoints = data.voltage?.length || 0;
+            // Get current selected trace index
+            const traceSelect = document.getElementById('traceSelect');
+            const currentIdx = parseInt(traceSelect.value) || 0;
+            
+            if (window._isArrayObj && Array.isArray(data) && data[currentIdx]) {
+                // Array of objects format
+                nPoints = data[currentIdx].voltage?.length || 0;
+            } else if (data && data.voltage && Array.isArray(data.voltage[0])) {
+                // Multi-trace format
+                nPoints = data.voltage[currentIdx]?.length || 0;
+            } else if (data && data.voltage) {
+                // Single trace format
+                nPoints = data.voltage.length || 0;
+            }
             dataInfo.innerHTML = `
                 <h6 class="mb-3">Analysis Summary</h6>
                 <div class="mb-2">

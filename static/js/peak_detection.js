@@ -12,16 +12,15 @@ const detectionManager = {
                 current: file.current,
                 filename: file.filename || file.name || `Trace ${idx+1}`
             }));
-            // แยก peaks ตามไฟล์: ถ้าแต่ละ peak มี fileIdx หรือ filename ให้ filter, ถ้าไม่มีก็ map เป็น []
-            if (Array.isArray(results.peaks) && results.peaks.length > 0) {
-                // ถ้าแต่ละ peak มี fileIdx หรือ filename ให้แยกตามนั้น
-                if (results.peaks[0].fileIdx !== undefined) {
-                    peaksToSend = window.currentDataFiles.map((f, i) => results.peaks.filter(p => p.fileIdx === i));
-                } else if (results.peaks[0].filename) {
-                    peaksToSend = window.currentDataFiles.map((f, i) => results.peaks.filter(p => p.filename === (f.filename || f.name || `Trace ${i+1}`)));
-                } else {
-                    // fallback: ถ้าแยกไม่ได้ ให้ map เป็น [] ยกเว้นไฟล์แรก
-                    peaksToSend = window.currentDataFiles.map((f, i) => i === 0 ? (results.peaks || []) : []);
+            // ถ้า results.peaks เป็น array of array (multi-file) ให้ใช้ตรง ๆ
+            if (Array.isArray(results.peaks) && Array.isArray(results.peaks[0])) {
+                peaksToSend = results.peaks;
+            } else if (Array.isArray(results.peaks)) {
+                // ถ้าเป็น array of object (single-file) ให้ wrap เป็น array of array
+                peaksToSend = [results.peaks];
+                // ถ้ามีไฟล์หลายตัว แต่ peaks เป็น array เดียว ให้กระจายไปไฟล์แรก
+                if (window.currentDataFiles.length > 1) {
+                    peaksToSend = [results.peaks, ...new Array(window.currentDataFiles.length - 1).fill([])];
                 }
             } else {
                 peaksToSend = window.currentDataFiles.map(() => []);
@@ -244,9 +243,12 @@ const detectionManager = {
             // Processing time: ประเมินจากจำนวนไฟล์ (mockup: 0.1s/ไฟล์)
             let processingTime = Math.max(0.5, 0.1 * peaksArr.length);
             // Preview: ใช้ไฟล์แรก (หรือไฟล์ที่เลือก)
+            // Flatten peaks array เพื่อให้ convertToPreviewData ใช้ได้
+            const flatPeaks = peaksArr.flat();
+            
             let previewData = this.convertToPreviewData({
-                peaks: peaksArr[0] || [],
-                ...apiResult
+                ...apiResult,
+                peaks: flatPeaks  // ใส่ peaks หลัง ...apiResult เพื่อ override
             });
             results = {
                 peaks: peaksArr,
@@ -302,17 +304,21 @@ const detectionManager = {
 
     // Convert API result to preview data format
     convertToPreviewData(apiResult) {
-        // Show only one file for preview (last file selected)
+        // Show only one file for preview (first file selected)
         let voltage = [], current = [], previewPeaks = [];
         if (window.currentDataFiles && window.currentDataFiles.length > 0) {
-            const lastIdx = window.currentDataFiles.length - 1;
-            voltage = window.currentDataFiles[lastIdx].voltage;
-            current = window.currentDataFiles[lastIdx].current;
+            const firstIdx = 0; // Show first file instead of last
+            voltage = window.currentDataFiles[firstIdx].voltage;
+            current = window.currentDataFiles[firstIdx].current;
             // Filter peaks for this file only (if possible)
             if (apiResult && Array.isArray(apiResult.peaks)) {
-                // สมมุติว่าแต่ละ peak มี fileIdx ถ้า backend ส่งมา (ถ้าไม่มีจะโชว์ทุก peak)
-                previewPeaks = apiResult.peaks.filter(p => (p.fileIdx === undefined || p.fileIdx === lastIdx))
-                    .map(peak => ({ x: peak.voltage, y: peak.current, type: peak.type }));
+                // Peak object mapping - รองรับหลาย format  
+                previewPeaks = apiResult.peaks.filter(p => (p.fileIdx === undefined || p.fileIdx === firstIdx))
+                    .map(peak => ({ 
+                        x: peak.voltage || peak.x || peak.potential || peak.E, 
+                        y: peak.current || peak.y || peak.I || peak.i, 
+                        type: peak.type || peak.peak_type || 'unknown'
+                    }));
             }
         } else if (window.currentData && window.currentData.voltage && window.currentData.current) {
             voltage = window.currentData.voltage;
@@ -324,6 +330,7 @@ const detectionManager = {
             voltage = [-0.5, -0.3, -0.1, 0.1, 0.3, 0.5];
             current = [-2, 1, 3, 1, -1, -2];
         }
+        
         return {
             voltage,
             current,
@@ -376,3 +383,27 @@ const detectionManager = {
         console.log(notification);
     }
 };
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize preview canvases
+    document.querySelectorAll('.preview-canvas').forEach(canvas => {
+        const container = canvas.parentElement;
+        if (container) {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#6c757d';
+            ctx.textAlign = 'center';
+            ctx.fillText('Waiting for detection...', canvas.width/2, canvas.height/2);
+        }
+    });
+    
+    // Expose global functions
+    window.detectionManager = detectionManager;
+    window.startDetection = (method) => detectionManager.startDetection(method);
+});
