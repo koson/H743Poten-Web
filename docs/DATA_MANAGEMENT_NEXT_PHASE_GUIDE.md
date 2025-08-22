@@ -1,7 +1,7 @@
 # 📊 Data Management & Next Phase Preparation Guide
 
 **วันที่:** 22 สิงหาคม 2025  
-**เวอร์ชัน:** 1.0  
+**เวอร์ชัน:** 1.1  
 **สถานะ:** Production Ready  
 
 ## 🎯 **บทสรุปแผนการจัดการข้อมูล**
@@ -64,6 +64,391 @@ class CalibrationFeatures:
     peak_symmetry: float
     peak_sharpness: float
     redox_reversibility: float
+```
+
+---
+
+## 📄 **Enhanced Metadata Format Design**
+
+### **🎯 รูปแบบไฟล์ใหม่ที่เสนอ**
+
+#### **1. File Extension และการตั้งชื่อ**
+```
+# ตัวอย่างชื่อไฟล์ใหม่:
+20250822_FeCN_1.0mM_100mVs_E1_scan01.ecv  # ElectroChemical Voltammetry
+
+# รูปแบบ: YYYYMMDD_ANALYTE_CONC_SCANRATE_ELECTRODE_SCANNUM.ecv
+# หรือใช้ .csv แบบปกติก็ได้ แต่มี metadata section ต่อท้าย
+```
+
+#### **2. รูปแบบไฟล์ .ecv (แนะนำ)**
+```csv
+# ==================== CV DATA SECTION ====================
+V,A
+-0.5000,-1.234e-05
+-0.4950,-1.156e-05
+-0.4900,-1.089e-05
+...
+0.4950,8.765e-06
+0.5000,9.123e-06
+
+# ==================== METADATA SECTION ====================
+[METADATA]
+file_format_version=1.0
+data_end_marker=METADATA
+created_timestamp=2025-08-22T14:30:15.123Z
+measurement_uuid=550e8400-e29b-41d4-a716-446655440000
+
+[INSTRUMENT]
+type=STM32H743
+model=H743Poten-v2.1
+serial_number=H743-2025-001
+firmware_version=2.1.3
+calibration_date=2025-08-20
+
+[EXPERIMENTAL]
+analyte=Ferrocyanide
+concentration_mM=1.0
+concentration_unit=mM
+electrolyte=0.1M KCl
+ph=7.0
+temperature_C=25.0
+solution_volume_mL=10.0
+electrode_material=Gold
+electrode_type=E1
+electrode_area_cm2=0.071
+
+[MEASUREMENT]
+technique=CV
+initial_potential_V=-0.5
+final_potential_V=0.5
+scan_rate_Vs=0.1
+scan_rate_mVs=100
+cycles=1
+scan_number=1
+data_points=1001
+sampling_rate_Hz=1000
+
+[QUALITY]
+baseline_stability=0.95
+signal_to_noise_dB=28.5
+current_range_A=2.5e-05
+noise_level_A=1.2e-07
+drift_rate_As=-2.3e-09
+
+[ANALYSIS]
+peaks_detected=2
+oxidation_peaks=1
+reduction_peaks=1
+peak_separation_V=0.068
+reversibility_ratio=0.89
+
+[USER]
+operator=Lab_Tech_001
+project=H743Poten_Validation
+notes=Standard ferrocyanide measurement for calibration
+batch_id=BATCH_20250822_01
+```
+
+#### **3. รูปแบบ .csv แบบปรับปรุง (สำหรับ backward compatibility)**
+```csv
+FileName: 20250822_FeCN_1.0mM_100mVs_E1_scan01.csv
+V,A
+-0.5000,-1.234e-05
+-0.4950,-1.156e-05
+...
+0.5000,9.123e-06
+
+# === H743POTEN_METADATA_START ===
+timestamp=2025-08-22T14:30:15.123Z
+instrument=STM32H743
+analyte=Ferrocyanide
+concentration=1.0mM
+scan_rate=100mVs
+electrode=E1
+temperature=25.0C
+ph=7.0
+operator=Lab_Tech_001
+# === H743POTEN_METADATA_END ===
+```
+
+---
+
+## 🔧 **Parser Implementation**
+
+### **Enhanced Metadata Parser**
+```python
+import re
+from dataclasses import dataclass
+from typing import Dict, Any, Optional, List
+from datetime import datetime
+import uuid
+
+@dataclass
+class H743PotenMetadata:
+    """Enhanced metadata structure for H743Poten measurements"""
+    
+    # File Information
+    file_format_version: str = "1.0"
+    measurement_uuid: str = ""
+    created_timestamp: datetime = None
+    
+    # Instrument Information
+    instrument_type: str = ""
+    instrument_model: str = ""
+    serial_number: str = ""
+    firmware_version: str = ""
+    calibration_date: Optional[datetime] = None
+    
+    # Experimental Conditions
+    analyte: str = ""
+    concentration: float = 0.0
+    concentration_unit: str = "mM"
+    electrolyte: str = ""
+    ph: Optional[float] = None
+    temperature: Optional[float] = None
+    solution_volume: Optional[float] = None
+    electrode_material: str = ""
+    electrode_type: str = ""
+    electrode_area: Optional[float] = None
+    
+    # Measurement Parameters
+    technique: str = "CV"
+    initial_potential: float = 0.0
+    final_potential: float = 0.0
+    scan_rate_vs: float = 0.0
+    scan_rate_mvs: float = 0.0
+    cycles: int = 1
+    scan_number: int = 1
+    data_points: int = 0
+    sampling_rate: Optional[float] = None
+    
+    # Quality Metrics
+    baseline_stability: Optional[float] = None
+    signal_to_noise: Optional[float] = None
+    current_range: Optional[float] = None
+    noise_level: Optional[float] = None
+    drift_rate: Optional[float] = None
+    
+    # Analysis Results
+    peaks_detected: Optional[int] = None
+    oxidation_peaks: Optional[int] = None
+    reduction_peaks: Optional[int] = None
+    peak_separation: Optional[float] = None
+    reversibility_ratio: Optional[float] = None
+    
+    # User Information
+    operator: str = ""
+    project: str = ""
+    notes: str = ""
+    batch_id: str = ""
+
+class EnhancedMetadataParser:
+    """Enhanced parser for H743Poten data files with metadata"""
+    
+    @staticmethod
+    def detect_file_format(filepath: str) -> str:
+        """Detect file format and metadata structure"""
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        if '[METADATA]' in content:
+            return 'ecv_format'
+        elif 'H743POTEN_METADATA_START' in content:
+            return 'csv_with_metadata'
+        elif content.startswith('FileName:'):
+            return 'legacy_csv'
+        else:
+            return 'standard_csv'
+    
+    @staticmethod
+    def parse_ecv_format(filepath: str) -> tuple:
+        """Parse .ecv format with structured metadata"""
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Split data and metadata sections
+        data_section, metadata_section = content.split('# ==================== METADATA SECTION ====================')
+        
+        # Parse CSV data
+        import pandas as pd
+        from io import StringIO
+        
+        # Clean data section
+        data_lines = [line for line in data_section.split('\n') 
+                     if line.strip() and not line.startswith('#')]
+        csv_data = '\n'.join(data_lines)
+        df = pd.read_csv(StringIO(csv_data))
+        
+        # Parse metadata
+        metadata = EnhancedMetadataParser._parse_ini_style_metadata(metadata_section)
+        
+        return df, metadata
+    
+    @staticmethod
+    def parse_csv_with_metadata(filepath: str) -> tuple:
+        """Parse CSV with embedded metadata"""
+        with open(filepath, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        
+        # Find metadata boundaries
+        metadata_start = -1
+        metadata_end = -1
+        
+        for i, line in enumerate(lines):
+            if 'H743POTEN_METADATA_START' in line:
+                metadata_start = i
+            elif 'H743POTEN_METADATA_END' in line:
+                metadata_end = i
+                break
+        
+        # Extract data section
+        if metadata_start > 0:
+            data_lines = lines[1:metadata_start]  # Skip FileName line
+        else:
+            data_lines = lines[1:]  # Standard CSV
+        
+        # Parse CSV data
+        import pandas as pd
+        from io import StringIO
+        csv_data = ''.join(data_lines)
+        df = pd.read_csv(StringIO(csv_data))
+        
+        # Parse metadata if exists
+        metadata = H743PotenMetadata()
+        if metadata_start >= 0 and metadata_end > metadata_start:
+            metadata_lines = lines[metadata_start+1:metadata_end]
+            metadata_dict = {}
+            
+            for line in metadata_lines:
+                line = line.strip()
+                if '=' in line and not line.startswith('#'):
+                    key, value = line.split('=', 1)
+                    metadata_dict[key.strip()] = value.strip()
+            
+            metadata = EnhancedMetadataParser._dict_to_metadata(metadata_dict)
+        
+        return df, metadata
+    
+    @staticmethod
+    def _parse_ini_style_metadata(metadata_text: str) -> H743PotenMetadata:
+        """Parse INI-style metadata sections"""
+        metadata_dict = {}
+        current_section = ""
+        
+        for line in metadata_text.split('\n'):
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+                
+            if line.startswith('[') and line.endswith(']'):
+                current_section = line[1:-1].lower()
+                continue
+            
+            if '=' in line:
+                key, value = line.split('=', 1)
+                full_key = f"{current_section}_{key.strip()}" if current_section else key.strip()
+                metadata_dict[full_key] = value.strip()
+        
+        return EnhancedMetadataParser._dict_to_metadata(metadata_dict)
+    
+    @staticmethod
+    def _dict_to_metadata(metadata_dict: Dict[str, str]) -> H743PotenMetadata:
+        """Convert dictionary to metadata object"""
+        metadata = H743PotenMetadata()
+        
+        # Map dictionary keys to metadata fields
+        field_mapping = {
+            'created_timestamp': 'measurement_uuid',
+            'instrument_type': 'instrument_type',
+            'analyte': 'analyte',
+            'concentration': 'concentration',
+            'scan_rate_mvs': 'scan_rate_mvs',
+            'electrode': 'electrode_type',
+            'temperature': 'temperature',
+            'ph': 'ph',
+            'operator': 'operator',
+            # Add more mappings as needed
+        }
+        
+        for dict_key, value in metadata_dict.items():
+            # Try direct mapping first
+            if dict_key in field_mapping:
+                setattr(metadata, field_mapping[dict_key], value)
+            else:
+                # Try to parse complex keys (section_field format)
+                parts = dict_key.split('_', 1)
+                if len(parts) == 2:
+                    section, field = parts
+                    if field in metadata.__dataclass_fields__:
+                        try:
+                            # Type conversion
+                            field_type = metadata.__dataclass_fields__[field].type
+                            if field_type == float:
+                                setattr(metadata, field, float(value))
+                            elif field_type == int:
+                                setattr(metadata, field, int(value))
+                            else:
+                                setattr(metadata, field, value)
+                        except (ValueError, TypeError):
+                            setattr(metadata, field, value)
+        
+        return metadata
+
+# ตัวอย่างการใช้งาน
+def enhanced_metadata_extraction(filepath: str) -> tuple:
+    """
+    Enhanced metadata extraction สำหรับไฟล์ใหม่
+    Returns: (dataframe, metadata_object)
+    """
+    parser = EnhancedMetadataParser()
+    file_format = parser.detect_file_format(filepath)
+    
+    if file_format == 'ecv_format':
+        return parser.parse_ecv_format(filepath)
+    elif file_format == 'csv_with_metadata':
+        return parser.parse_csv_with_metadata(filepath)
+    else:
+        # Fallback to legacy parsing
+        return parse_legacy_format(filepath)
+
+def create_metadata_template(measurement_params: Dict[str, Any]) -> str:
+    """สร้าง metadata template สำหรับการวัดใหม่"""
+    
+    template = f"""# ==================== METADATA SECTION ====================
+[METADATA]
+file_format_version=1.0
+created_timestamp={datetime.now().isoformat()}Z
+measurement_uuid={str(uuid.uuid4())}
+
+[INSTRUMENT]
+type={measurement_params.get('instrument_type', 'STM32H743')}
+model={measurement_params.get('model', 'H743Poten-v2.1')}
+serial_number={measurement_params.get('serial', 'H743-2025-001')}
+firmware_version={measurement_params.get('firmware', '2.1.3')}
+
+[EXPERIMENTAL]
+analyte={measurement_params.get('analyte', '')}
+concentration_mM={measurement_params.get('concentration', 0.0)}
+electrolyte={measurement_params.get('electrolyte', '0.1M KCl')}
+ph={measurement_params.get('ph', 7.0)}
+temperature_C={measurement_params.get('temperature', 25.0)}
+electrode_type={measurement_params.get('electrode', 'E1')}
+
+[MEASUREMENT]
+technique=CV
+scan_rate_mVs={measurement_params.get('scan_rate', 100)}
+initial_potential_V={measurement_params.get('e_initial', -0.5)}
+final_potential_V={measurement_params.get('e_final', 0.5)}
+scan_number={measurement_params.get('scan_number', 1)}
+
+[USER]
+operator={measurement_params.get('operator', 'Unknown')}
+project=H743Poten_Enhanced
+batch_id={measurement_params.get('batch_id', f"BATCH_{datetime.now().strftime('%Y%m%d')}")}
+"""
+    
+    return template
 ```
 
 ---
@@ -240,7 +625,7 @@ class ProductionPipeline:
 ## 💼 **Implementation Priority**
 
 ### **🥇 High Priority (เริ่มทันที)**
-1. **Enhanced metadata extraction** - ปรับปรุงการดึงข้อมูล metadata
+1. **Enhanced metadata format design** - ออกแบบ .ecv format และ parser
 2. **Multi-peak analysis** - รองรับการวิเคราะห์ multiple oxidation peaks
 3. **Advanced QC metrics** - เพิ่มเติมระบบ quality control
 
@@ -256,7 +641,23 @@ class ProductionPipeline:
 
 ---
 
-**📝 Note:** เอกสารนี้จัดทำขึ้นเพื่อเป็นแนวทางในการพัฒนาต่อยอดระบบ H743Poten ให้มีประสิทธิภาพและความแม่นยำสูงขึ้น โดยใช้ประโยชน์จาก infrastructure ที่มีอยู่แล้วอย่างเต็มที่
+## 🔧 **Metadata Implementation Recommendations**
+
+### **ข้อดีของการใส่ metadata ต่อท้าย:**
+1. **🔄 Backward Compatibility**: ไฟล์เดิมยังใช้งานได้
+2. **📊 Self-Contained**: ข้อมูลและ metadata อยู่ไฟล์เดียวกัน
+3. **🔍 Easy Parsing**: มี marker ชัดเจนสำหรับแยกส่วน
+4. **📈 Extensible**: เพิ่ม metadata fields ได้ง่าย
+
+### **แนวทางที่แนะนำ:**
+1. **📄 ใช้ .ecv extension** สำหรับไฟล์ใหม่ (มี structured metadata)
+2. **📊 รองรับ .csv แบบเดิม** ด้วย embedded metadata
+3. **🔧 เขียน universal parser** ที่รองรับทุกรูปแบบ
+4. **📚 จัดทำ documentation** สำหรับ format specification
+
+---
+
+**📝 Note:** เอกสารนี้จัดทำขึ้นเพื่อเป็นแนวทางในการพัฒนาต่อยอดระบบ H743Poten ให้มีประสิทธิภาพและความแม่นยำสูงขึ้น โดยใช้ประโยชน์จาก infrastructure ที่มีอยู่แล้วอย่างเต็มที่ รวมถึงการออกแบบ metadata format ที่ทันสมัยและยืดหยุ่น
 
 **🔄 Last Updated:** 22 สิงหาคม 2025  
 **👨‍💻 Prepared by:** GitHub Copilot  
