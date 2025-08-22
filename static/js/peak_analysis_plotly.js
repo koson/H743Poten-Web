@@ -52,6 +52,13 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
         hovertemplate: '%{text} peak<br>V: %{x:.3f} V<br>i: %{y:.3f} µA<extra></extra>',
     };
 
+    // Add baseline traces using the utility function from cv_measurement.js
+        // Baseline traces (forward/reverse) + vertical lines to peaks
+        let baselineTraces = [];
+        if (typeof getBaselineTraces === 'function') {
+            baselineTraces = getBaselineTraces(chartData.voltage, chartData.current, chartData.direction, peaksArr, 0.1);
+        }
+
     // Layout
     const layout = {
         title: methodNameStr ? `Peak Analysis: ${methodNameStr}` : 'Peak Analysis',
@@ -75,7 +82,53 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
         height: 500,
     };
 
-    Plotly.newPlot(plotDiv, [cvTrace, peakTrace], layout, {responsive: true});
+    // Combine all traces: CV data, peaks, and baseline traces
+        const allTraces = [cvTrace, peakTrace, ...baselineTraces];
+    
+    Plotly.newPlot(plotDiv, allTraces, layout, {responsive: true});
+
+    // Helper function to infer scan direction from voltage pattern (for CV)
+    function inferDirectionFromVoltage(voltage) {
+        if (!voltage || voltage.length < 3) return [];
+        
+        const direction = [];
+        let isIncreasing = true;
+        
+        for (let i = 0; i < voltage.length; i++) {
+            if (i > 0) {
+                const diff = voltage[i] - voltage[i-1];
+                if (Math.abs(diff) > 0.001) { // Threshold to ignore noise
+                    if (diff > 0 && !isIncreasing) {
+                        isIncreasing = true; // Switch to forward
+                    } else if (diff < 0 && isIncreasing) {
+                        isIncreasing = false; // Switch to reverse
+                    }
+                }
+            }
+            direction.push(isIncreasing ? 'forward' : 'reverse');
+        }
+        
+        return direction;
+    }
+    
+    // Helper function to add baseline to existing plot
+    function addBaselineToExistingPlot() {
+        const plotDiv = document.getElementById('plotly-peak-graph');
+        if (!plotDiv || !plotDiv.data) return;
+        
+        let directionData = chartData.direction;
+        if (!directionData && chartData.voltage && chartData.voltage.length > 2) {
+            directionData = inferDirectionFromVoltage(chartData.voltage);
+        }
+        
+        if (directionData && typeof getBaselineTraces === 'function') {
+            const baselineTraces = getBaselineTraces(chartData.voltage, chartData.current, directionData);
+            if (baselineTraces.length > 0) {
+                console.log('[BASELINE] Adding baseline traces to existing plot:', baselineTraces.length);
+                Plotly.addTraces(plotDiv, baselineTraces);
+            }
+        }
+    }
 
     // Add click event for peak selection
     plotDiv.on('plotly_click', function(eventData) {

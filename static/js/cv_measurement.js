@@ -1,3 +1,133 @@
+// --- Utility function: Add baseline traces for forward/reverse scan ---
+// Usage: const baselineTraces = getBaselineTraces(xArr, yArr, directionArr)
+// Returns: [traceFwd, traceRev] (array of Plotly trace objects, may be empty)
+function getBaselineTraces(xArr, yArr, directionArr, peaksArr = [], frac = 0.1) {
+    // Validate input arrays first
+    if (!Array.isArray(xArr) || !Array.isArray(yArr) || !Array.isArray(directionArr)) {
+        console.warn('[BASELINE] Invalid input arrays:', {xArr, yArr, directionArr});
+        return [];
+    }
+    if (xArr.length === 0 || yArr.length === 0 || directionArr.length === 0) {
+        console.warn('[BASELINE] Empty input arrays');
+        return [];
+    }
+    if (xArr.length !== yArr.length || xArr.length !== directionArr.length) {
+        console.warn('[BASELINE] Array length mismatch:', xArr.length, yArr.length, directionArr.length);
+        return [];
+    }
+    
+    // Collect all points by direction
+    const forwardPoints = [];
+    const reversePoints = [];
+    for (let i = 0; i < xArr.length; i++) {
+        const dir = directionArr[i];
+        if (dir === 'forward') {
+            forwardPoints.push({x: xArr[i], y: yArr[i]});
+        } else if (dir === 'reverse') {
+            reversePoints.push({x: xArr[i], y: yArr[i]});
+        }
+    }
+    // Helper to get mean Y in a region (e.g. first/last 10% of X)
+    function baselineRegion(points, region = 'start', frac = 0.1) {
+        if (points.length === 0) return null;
+        const sorted = points.slice().sort((a, b) => a.x - b.x);
+        const n = Math.max(1, Math.floor(points.length * frac));
+        let regionPoints;
+        if (region === 'start') regionPoints = sorted.slice(0, n);
+        else regionPoints = sorted.slice(-n);
+        if (!regionPoints || regionPoints.length === 0) return null;
+        const meanY = regionPoints.reduce((sum, p) => sum + p.y, 0) / regionPoints.length;
+        const minX = regionPoints[0].x;
+        const maxX = regionPoints[regionPoints.length - 1].x;
+        return {meanY, minX, maxX};
+    }
+    // Find main oxidation/reduction peaks (if any)
+    let oxPeak = null, redPeak = null;
+    if (Array.isArray(peaksArr)) {
+        oxPeak = peaksArr.find(p => (p.type === 'oxidation' || p.type === 'Ox') && p.x !== undefined);
+        redPeak = peaksArr.find(p => (p.type === 'reduction' || p.type === 'Red') && p.x !== undefined);
+    }
+    const traces = [];
+    // Forward baseline: เฉพาะช่วงก่อน peak oxidation (หรือทั้งช่วงถ้าไม่มี peak)
+    if (Array.isArray(forwardPoints) && forwardPoints.length > 0) {
+        let xEnd = oxPeak && typeof oxPeak.x === 'number' ? oxPeak.x : (forwardPoints.length > 0 ? forwardPoints[forwardPoints.length-1].x : undefined);
+        let xStart = (forwardPoints.length > 0 ? forwardPoints[0].x : undefined);
+        if (typeof xStart === 'number' && typeof xEnd === 'number') {
+            // เฉลี่ย y เฉพาะช่วงต้น (ก่อน peak)
+            const region = forwardPoints.filter(p => typeof p.x === 'number' && p.x <= xEnd);
+            if (region.length > 0) {
+                const meanY = region.reduce((sum, p) => sum + p.y, 0) / region.length;
+                traces.push({
+                    x: [xStart, xEnd],
+                    y: [meanY, meanY],
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Forward Baseline',
+                    line: {dash: 'dash', color: 'red', width: 2},
+                    showlegend: true,
+                    hoverinfo: 'skip',
+                    legendgroup: 'baseline',
+                    visible: true
+                });
+                // Vertical line to peak
+                if (oxPeak && typeof oxPeak.x === 'number' && typeof oxPeak.y === 'number') {
+                    traces.push({
+                        x: [oxPeak.x, oxPeak.x],
+                        y: [meanY, oxPeak.y],
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Ox Peak Line',
+                        line: {dash: 'dot', color: 'red', width: 1.5},
+                        showlegend: false,
+                        hoverinfo: 'skip',
+                        legendgroup: 'baseline',
+                        visible: true
+                    });
+                }
+            }
+        }
+    }
+    // Reverse baseline: เฉพาะช่วงหลัง peak reduction (หรือทั้งช่วงถ้าไม่มี peak)
+    if (Array.isArray(reversePoints) && reversePoints.length > 0) {
+        let xStart = redPeak && typeof redPeak.x === 'number' ? redPeak.x : (reversePoints.length > 0 ? reversePoints[0].x : undefined);
+        let xEnd = (reversePoints.length > 0 ? reversePoints[reversePoints.length-1].x : undefined);
+        if (typeof xStart === 'number' && typeof xEnd === 'number') {
+            // เฉลี่ย y เฉพาะช่วงปลาย (หลัง peak)
+            const region = reversePoints.filter(p => typeof p.x === 'number' && p.x >= xStart);
+            if (region.length > 0) {
+                const meanY = region.reduce((sum, p) => sum + p.y, 0) / region.length;
+                traces.push({
+                    x: [xStart, xEnd],
+                    y: [meanY, meanY],
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Reverse Baseline',
+                    line: {dash: 'dash', color: 'blue', width: 2},
+                    showlegend: true,
+                    hoverinfo: 'skip',
+                    legendgroup: 'baseline',
+                    visible: true
+                });
+                // Vertical line to peak
+                if (redPeak && typeof redPeak.x === 'number' && typeof redPeak.y === 'number') {
+                    traces.push({
+                        x: [redPeak.x, redPeak.x],
+                        y: [meanY, redPeak.y],
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Red Peak Line',
+                        line: {dash: 'dot', color: 'blue', width: 1.5},
+                        showlegend: false,
+                        hoverinfo: 'skip',
+                        legendgroup: 'baseline',
+                        visible: true
+                    });
+                }
+            }
+        }
+    }
+    return traces;
+}
 /**
  * CV Measurement JavaScript for H743Poten Web Interface
  * Handles Cyclic Voltammetry measurement controls and real-time plotting
@@ -660,6 +790,50 @@ class CVMeasurement {
         console.log(`[DEBUG] Voltage range check - Min: ${Math.min(...this.plotData.x).toFixed(4)}, Max: ${Math.max(...this.plotData.x).toFixed(4)}`);
         
         let lastCycleEndPoint = null;
+
+        // --- Baseline calculation for forward and reverse scan ---
+        // Collect all points by direction
+        const forwardPoints = [];
+        const reversePoints = [];
+        let forwardCount = 0, reverseCount = 0, otherCount = 0;
+        for (let i = 0; i < this.plotData.x.length; i++) {
+            const dir = this.plotData.direction[i];
+            if (dir === 'forward') {
+                forwardPoints.push({x: this.plotData.x[i], y: this.plotData.y[i]});
+                forwardCount++;
+            } else if (dir === 'reverse') {
+                reversePoints.push({x: this.plotData.x[i], y: this.plotData.y[i]});
+                reverseCount++;
+            } else {
+                otherCount++;
+            }
+        }
+        console.log('[BASELINE DEBUG] direction counts:', {forwardCount, reverseCount, otherCount});
+        console.log('[BASELINE DEBUG] forwardPoints:', forwardPoints.length > 0 ? forwardPoints.slice(0,3) : 'none');
+        console.log('[BASELINE DEBUG] reversePoints:', reversePoints.length > 0 ? reversePoints.slice(0,3) : 'none');
+
+        // Helper to get mean Y in a region (e.g. first/last 10% of X)
+        function baselineRegion(points, region = 'start', frac = 0.1) {
+            if (points.length === 0) return null;
+            const sorted = points.slice().sort((a, b) => a.x - b.x);
+            const n = Math.max(1, Math.floor(points.length * frac));
+            let regionPoints;
+            if (region === 'start') regionPoints = sorted.slice(0, n);
+            else regionPoints = sorted.slice(-n);
+            const meanY = regionPoints.reduce((sum, p) => sum + p.y, 0) / regionPoints.length;
+            const minX = regionPoints[0].x;
+            const maxX = regionPoints[regionPoints.length - 1].x;
+            return {meanY, minX, maxX};
+        }
+
+        // Forward: baseline = เฉลี่ย y ช่วงต้น (ศักย์ต่ำ)
+        const fwdBase = baselineRegion(forwardPoints, 'start', 0.1);
+        // Reverse: baseline = เฉลี่ย y ช่วงปลาย (ศักย์สูง)
+        const revBase = baselineRegion(reversePoints, 'end', 0.1);
+        console.log('[BASELINE DEBUG] fwdBase:', fwdBase);
+        console.log('[BASELINE DEBUG] revBase:', revBase);
+
+        // --- สร้าง trace หลักก่อน แล้วค่อยเพิ่ม baseline trace ---
         
         cycles.forEach((cycle, cycleIndex) => {
             // Get all points for this cycle
