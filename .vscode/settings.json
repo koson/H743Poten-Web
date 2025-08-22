@@ -41,11 +41,23 @@
     // Git settings
     "git.defaultCloneDirectory": "${workspaceFolder}",
     "git.openRepositoryInParentFolders": "always",
-    "editor.fontFamily": "Cascadia, monospace",
+    "editor.fontFamily": "Cascadia code, monospace",
     "editor.fontSize": 15,
     "debug.console.fontSize": 15,
     "scm.inputFontSize": 14,
     "terminal.integrated.fontSize": 15,
     "chat.editor.fontSize": 16,
-    "markdown.preview.fontSize": 15
+    "markdown.preview.fontSize": 15,
+
+    // Copilot settings
+    "github.copilot.enable": true,
+    "github.copilot.autocomplete.enable": true,
+    
+    // ถ้าต้องการปิด Copilot ในบางไฟล์
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false
+    }
 }
