@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Poten2501.Pages.CVPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:cc="clr-namespace:Poten2501.CustomControls"
+    xmlns:converters="clr-namespace:Poten2501.Converters"
+    xmlns:local="clr-namespace:Poten2501"
+    xmlns:models="clr-namespace:Poten2501.Models"
+    xmlns:skia="clr-namespace:SkiaSharp.Views.Maui.Controls;assembly=SkiaSharp.Views.Maui.Controls"
+    xmlns:sp="clr-namespace:ScottPlot.Maui;assembly=ScottPlot.Maui"
+    xmlns:styles="clr-namespace:Poten2501.Styles"
+    xmlns:viewModels="clr-namespace:Poten2501.ViewModels"
+    Title="Cyclic Voltammetry"
+    x:DataType="viewModels:CVViewModel">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <styles:PageStyles />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:VoltageConverter x:Key="VoltageConverter" />
+            <converters:CurrentConverter x:Key="CurrentConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid>
+        <Grid Style="{StaticResource GridStyles}">
+            <Frame
+                x:Name="FileOperationView"
+                Grid.RowSpan="3"
+                Style="{StaticResource ListViewStyle}">
+                <VerticalStackLayout>
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="Subtitle"
+                        HorizontalTextAlignment="Center"
+                        Text="Project Manager"
+                        TextColor="#0055ff" />
+
+                    <Label Text="Project Location" />
+                    <HorizontalStackLayout>
+                        <Entry
+                            MaximumWidthRequest="180"
+                            MinimumWidthRequest="180"
+                            Text="{Binding WorkingFolderPath}" />
+                        <Button
+                            Margin="5"
+                            Command="{Binding SelectProjectFolderCommand}"
+                            Text="..." />
+
+                    </HorizontalStackLayout>
+                    <Label Padding="0,10,0,0" Text="Project Name" />
+                    <Entry
+                        Margin="0,5,0,0"
+                        Placeholder="Enter project name"
+                        Text="{Binding ProjectName}"
+                        WidthRequest="220" />
+                    <Label Padding="0,10,0,0" Text="Electrode No" />
+                    <Picker
+                        Margin="0,5,0,0"
+                        MaximumWidthRequest="220"
+                        ItemsSource="{Binding ElectrodeOptions}"
+                        SelectedItem="{Binding ElectrodeNo}" />
+                    <Label Padding="0,10,0,0" Text="File Name" />
+                    <Entry
+                        Margin="0,5,0,0"
+                        IsReadOnly="True"
+                        MaximumWidthRequest="220"
+                        Placeholder="Generated file name"
+                        Text="{Binding FileName}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Style="{StaticResource MeasureParamsStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+                    <Label
+                        Grid.Column="0"
+                        FontSize="Medium"
+                        HorizontalTextAlignment="Center"
+                        Text="Cycle : "
+                        TextColor="#0055cc"
+                        VerticalTextAlignment="Center" />
+                    <Label
+                        Grid.Column="1"
+                        Grid.ColumnSpan="3"
+                        FontAttributes="Bold"
+                        FontSize="Large"
+                        HorizontalTextAlignment="Start"
+                        Text="{Binding CycleCount}"
+                        TextColor="#008800" />
+
+                    <Label
+                        Grid.Column="2"
+                        FontSize="Medium"
+                        HorizontalTextAlignment="Center"
+                        Text="Current : "
+                        TextColor="#0055cc"
+                        VerticalTextAlignment="Center" />
+
+                    <Label
+                        Grid.Column="3"
+                        Grid.ColumnSpan="3"
+                        FontAttributes="Bold"
+                        FontSize="Large"
+                        HorizontalTextAlignment="Start"
+                        Text="{Binding CurrentRange}"
+                        TextColor="#008800" />
+
+
+                    <Label
+                        Grid.Column="4"
+                        FontSize="Medium"
+                        HorizontalTextAlignment="Center"
+                        Text="Potential : "
+                        TextColor="#0055cc"
+                        VerticalTextAlignment="Center" />
+                    <Label
+                        Grid.Column="5"
+                        Grid.ColumnSpan="3"
+                        FontAttributes="Bold"
+                        FontSize="Large"
+                        HorizontalTextAlignment="Start"
+                        Text="{Binding CvVoltage, Converter={StaticResource VoltageConverter}}"
+                        TextColor="#008800" />
+                    <Label
+                        Grid.Column="6"
+                        FontSize="Medium"
+                        HorizontalTextAlignment="Center"
+                        Text="Current :  "
+                        TextColor="#0055cc"
+                        VerticalTextAlignment="Center" />
+                    <Label
+                        Grid.Column="7"
+                        Grid.ColumnSpan="3"
+                        FontAttributes="Bold"
+                        FontSize="Large"
+                        HorizontalTextAlignment="Start"
+                        Text="{Binding CvCurrent, Converter={StaticResource CurrentConverter}}"
+                        TextColor="#008800" />
+                </Grid>
+            </Frame>
+
+            <Frame Style="{StaticResource ScottplotStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <cc:PlotView
+                        x:Name="CVPlot"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Margin="5"
+                        DataX="{Binding DataX}"
+                        DataY="{Binding DataY}" />
+                    <VerticalStackLayout
+                        Grid.Column="1"
+                        Margin="0,5"
+                        HorizontalOptions="Center">
+                        <Button
+                            Margin="0,5"
+                            Command="{Binding StartCVScanCommand}"
+                            Text="Start scan" />
+                        <Button
+                            Margin="0,5"
+                            Command="{Binding AbortCVScanCommand}"
+                            Text="Stop scan" />
+                        <Button
+                            Margin="0,5"
+                            Command="{Binding ClearChartCommand}"
+                            Text="Clear Chart"
+                            WidthRequest="100" />
+                        <Button Margin="0,5" Text="Export CSV" />
+                        <Label Text="Point Size" />
+                        <Slider Minimum="1" Maximum="20" Value="{Binding PointSize}" />
+
+                    </VerticalStackLayout>
+                </Grid>
+            </Frame>
+
+            <Frame IsVisible="Hidden" Style="{StaticResource TerminalStyle}">
+                <VerticalStackLayout>
+                    <Grid ColumnSpacing="3" RowSpacing="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="85*" />
+                            <ColumnDefinition Width="15*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="10*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="Subtitle"
+                            Text="Messages" />
+                        <Editor
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Margin="5"
+                            HeightRequest="180"
+                            IsReadOnly="True"
+                            Text="{Binding ReceivedData}" />
+                        <Button
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="3"
+                            Command="{Binding ClearReceivedDataCommand}"
+                            HeightRequest="15"
+                            Text="Clear Message"
+                            VerticalOptions="Start"
+                            WidthRequest="150" />
+
+                    </Grid>
+                    <Label Text="Received Data:" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Style="{StaticResource CVParamStyle}">
+                <ScrollView>
+                    <VerticalStackLayout Spacing="10">
+                        <!--<Button Command="{Binding StartCVScanCommand}" Text="Start scan" />
+                        <Button Command="{Binding AbortCVScanCommand}" Text="Stop scan" />-->
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="Subtitle"
+                            HorizontalOptions="Center"
+                            Text="CV Parameters"
+                            TextColor="#0055ff" />
+
+                        <Grid ColumnSpacing="10" RowSpacing="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Label
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Text="No. of cycle"
+                                VerticalTextAlignment="Center" />
+                            <Entry
+                                x:Name="entNoOfCycle"
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                IsEnabled="{Binding IsEntryNumberOfCVCycleEnabled}"
+                                Placeholder="3"
+                                ReturnCommand="{Binding UpdateNoOfCycleCommand}"
+                                ReturnCommandParameter="{Binding Text, Source={x:Reference entNoOfCycle}}"
+                                ReturnType="Done"
+                                Text="{Binding NumberOfCVCycle}" />
+                            <Label
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Text="Sweep rate(mV/sec)"
+                                VerticalTextAlignment="Center" />
+                            <!--<Entry
+                                x:Name="entSWeepRateMilliVoltPerSec"
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                IsEnabled="{Binding IsEntrySweepRatemVPerSecondEnabled}"
+                                Placeholder="10 (mV/s)"
+                                ReturnCommand="{Binding UpdateSweepRateCommand}"
+                                ReturnCommandParameter="{Binding Text, Source={x:Reference entSWeepRateMilliVoltPerSec}}"
+                                ReturnType="Done"
+                                Text="{Binding SweepRatemVPerSecond}" />-->
+
+                            <Picker
+                                x:Name="pickerSweepRate"
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                ItemsSource="{Binding SweepRateOptions}"
+                                SelectedItem="{Binding SweepRatemVPerSecond}"
+                                WidthRequest="150" />
+
+                            <Label
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Text="Point per sec"
+                                VerticalTextAlignment="Center" />
+                            <Entry
+                                x:Name="entPointPerSecond"
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                IsEnabled="{Binding IsEntryPointPerSecondEnabled}"
+                                Placeholder="10 pps"
+                                ReturnCommand="{Binding UpdatePointPerSecCommand}"
+                                ReturnCommandParameter="{Binding Text, Source={x:Reference entPointPerSecond}}"
+                                ReturnType="Done"
+                                Text="{Binding PointPerSecond}" />
+                            <Label
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                Text="Current range (A)"
+                                VerticalTextAlignment="Center" />
+
+                            <Picker
+                                x:Name="entCurrentGain"
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                ItemsSource="{Binding PickerItems}"
+                                SelectedIndex="0"
+                                SelectedIndexChanged="entCurrentGain_SelectedIndexChanged"
+                                SelectedItem="{Binding SelectedPickerItem}" />
+
+
+                            <!--  New Label and Entry  -->
+                            <Label
+                                Grid.Row="4"
+                                Grid.Column="0"
+                                Text="Begin Potential (V)"
+                                VerticalTextAlignment="Center" />
+                            <Entry
+                                x:Name="entBeginPotentialVolt"
+                                Grid.Row="4"
+                                Grid.Column="1"
+                                IsEnabled="{Binding IsEntryBeginPotentialVoltEnabled}"
+                                Placeholder="-1.2V"
+                                ReturnCommand="{Binding UpdateBeginVoltageCommand}"
+                                ReturnCommandParameter="{Binding Text, Source={x:Reference entBeginPotentialVolt}}"
+                                ReturnType="Done"
+                                Text="{Binding BeginPotentialVolt}" />
+
+                            <!--  Adjust existing content to new rows  -->
+                            <Label
+                                Grid.Row="5"
+                                Grid.Column="0"
+                                Text="Lower Potential (V)"
+                                VerticalTextAlignment="Center" />
+                            <Entry
+                                x:Name="entLowerPotentialVolt"
+                                Grid.Row="5"
+                                Grid.Column="1"
+                                IsEnabled="{Binding IsEntryLowerPotentialVoltEnabled}"
+                                Placeholder="-1.2V"
+                                ReturnCommand="{Binding UpdateLowerVoltageCommand}"
+                                ReturnCommandParameter="{Binding Text, Source={x:Reference entLowerPotentialVolt}}"
+                                ReturnType="Done"
+                                Text="{Binding LowerPotentialVolt}" />
+                            <Label
+                                Grid.Row="6"
+                                Grid.Column="0"
+                                Text="Upper Potential (V)"
+                                VerticalTextAlignment="Center" />
+                            <Entry
+                                x:Name="entUpperPotentialVolt"
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                IsEnabled="{Binding IsEntryUpperPotentialVoltEnabled}"
+                                Placeholder="+1.2 V"
+                                ReturnCommand="{Binding UpdateUpperVoltageCommand}"
+                                ReturnCommandParameter="{Binding Text, Source={x:Reference entUpperPotentialVolt}}"
+                                ReturnType="Done"
+                                Text="{Binding UpperPotentialVolt}" />
+                            <Label
+                                Grid.Row="7"
+                                Grid.Column="0"
+                                Text="Idle Potential (V)"
+                                VerticalTextAlignment="Center" />
+                            <Entry
+                                x:Name="entIdlePotentialVolt"
+                                Grid.Row="7"
+                                Grid.Column="1"
+                                IsEnabled="{Binding IsEntryIdlePotentialVoltEnabled}"
+                                Placeholder="+1.2 V"
+                                ReturnCommand="{Binding UpdateIdleVoltageCommand}"
+                                ReturnCommandParameter="{Binding Text, Source={x:Reference entIdlePotentialVolt}}"
+                                ReturnType="Done"
+                                Text="{Binding IdlePotentialVolt}" />
+                            <Label
+                                Grid.Row="8"
+                                Grid.Column="0"
+                                Text="Idle Time (sec)"
+                                VerticalTextAlignment="Center" />
+                            <Entry
+                                x:Name="entIdleTimeSecond"
+                                Grid.Row="8"
+                                Grid.Column="1"
+                                IsEnabled="{Binding IsEntryIdleTimeSecondEnabled}"
+                                Placeholder="+1.2 V"
+                                ReturnCommand="{Binding UpdateIdleTimeCommand}"
+                                ReturnCommandParameter="{Binding Text, Source={x:Reference entIdleTimeSecond}}"
+                                ReturnType="Done"
+                                Text="{Binding IdleTimeSecond}" />
+                        </Grid>
+
+
+                        <!--  ฝากไว้ก่อน  -->
+                        <Label IsVisible="True" Text="Data to Send:" />
+                        <Entry
+                            x:Name="entDataToSend"
+                            IsVisible="True"
+                            ReturnCommand="{Binding SendDataCommand}"
+                            Text="{Binding DataToSend}" />
+                        <Button
+                            Command="{Binding SendDataCommand}"
+                            IsVisible="True"
+                            Text="Send Data" />
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Frame>
+
+            <Frame Style="{StaticResource CommConnectStyle}">
+                <ScrollView>
+                    <VerticalStackLayout>
+                        <Label
+                            Margin="0,0,0,10"
+                            FontAttributes="Bold"
+                            FontSize="Subtitle"
+                            HorizontalTextAlignment="Center"
+                            Text="Serial port connection"
+                            TextColor="#0055ff" />
+                        <Button Command="{Binding ConnectCommand}" Text="{Binding ConnectButtonText}" />
+                        <Grid Margin="0,10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Text="Available Ports:"
+                                VerticalTextAlignment="Center" />
+                            <Picker
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                ItemsSource="{Binding AvailablePorts}"
+                                SelectedItem="{Binding SelectedPort}" />
+                            <Label
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Text="Baud Rate:"
+                                VerticalTextAlignment="Center" />
+                            <Picker
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                ItemsSource="{Binding BaudRates}"
+                                SelectedItem="{Binding SelectedBaudRate}" />
+                        </Grid>
+                        <Button Command="{Binding RefreshPortsCommand}" Text="Refresh Ports" />
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Frame>
+        </Grid>
+    </Grid>
+</ContentPage>

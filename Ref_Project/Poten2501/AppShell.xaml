@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Poten2501.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Poten2501"
+    xmlns:pages="clr-namespace:Poten2501.Pages"
+    Shell.FlyoutBehavior="Disabled"
+    Title="Poten2501">
+
+    <TabBar>
+        <Tab Title="CV">
+            <ShellContent
+                Title="CV"
+                ContentTemplate="{DataTemplate pages:CVPage}"
+                Route="CVPage"
+                />
+        </Tab>
+        <Tab Title="DPV" IsVisible="True">
+            <ShellContent
+                Title="DPV"
+                ContentTemplate="{DataTemplate pages:DPVPage}"
+                Route="DPVPage"
+                />
+        </Tab>
+        <Tab Title="SWV">
+            <ShellContent
+                Title="SWV"
+                ContentTemplate="{DataTemplate pages:SWVPage}"
+                Route="SWVPage"
+                />
+        </Tab>
+
+        <Tab Title="CA" >
+            <ShellContent
+                Title="CA"
+                ContentTemplate="{DataTemplate pages:CAPage}"
+                Route="CAPage"
+                />
+        </Tab>
+
+        <Tab Title="CV Analyze">
+            <ShellContent
+                Title="CAAnalyze"
+                ContentTemplate="{DataTemplate pages:CVAnalysePage}"
+                Route="CVAnalysePage"
+                />
+        </Tab>
+
+        <Tab Title="SWV Analyze">
+            <ShellContent
+                Title="SWVAnalyze"
+                ContentTemplate="{DataTemplate pages:SWVAnalysePage}"
+                Route="SWVAnalysePage"
+                />
+        </Tab>
+
+
+    </TabBar>
+    
+</Shell>
