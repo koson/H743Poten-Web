@@ -7,6 +7,7 @@ This script handles imports correctly and uses mock hardware
 import os
 import sys
 import logging
+import socket
 
 # Ensure the src directory is in the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -49,11 +50,30 @@ def create_dev_app():
         logger.error(f"Failed to create development app: {e}")
         raise
 
+def find_free_port(start_port=8080, max_attempts=10):
+    """หา port ว่างเริ่มจาก start_port"""
+    for port in range(start_port, start_port + max_attempts):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('', port))
+                return port
+        except OSError:
+            continue
+    return None
+
 def main():
     """Main entry point for development"""
     try:
         logger.info("Starting H743Poten Web Interface (Development Mode)")
         logger.info("Using mock SCPI handler for testing")
+        
+        # Find a free port
+        port = find_free_port(8080, 10)
+        if port is None:
+            logger.error("No free ports available (tried 8080-8090)")
+            sys.exit(1)
+        
+        logger.info(f"Using port {port}")
         
         # Create the Flask app with mock hardware
         app = create_dev_app()
@@ -61,7 +81,7 @@ def main():
         # Run the app
         app.run(
             host='0.0.0.0',
-            port=8080,
+            port=port,
             debug=True
         )
         

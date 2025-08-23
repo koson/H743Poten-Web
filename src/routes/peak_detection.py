@@ -137,209 +137,136 @@ def detect_improved_baseline_2step(voltage, current, max_iterations=None, adapti
         
         logger.info(f"Found {len(all_peak_indices)} peaks for baseline guidance: {all_peak_indices}")
         
-        # Find the turning point and scan direction
+        # SIMPLIFIED APPROACH: Fix baseline segment selection
+        # For CV data: 
+        # - Forward scan = first half of data (high voltage to low voltage)
+        # - Reverse scan = second half of data (low voltage to high voltage)
+        
+        n = len(voltage)
+        mid_point = n // 2
+        
+        # Find the turning point (minimum voltage)
         min_voltage_idx = np.argmin(voltage)
         min_voltage = voltage[min_voltage_idx]
         max_voltage = np.max(voltage)
-        voltage_range = max_voltage - min_voltage
         
-        logger.info(f"Voltage range: {min_voltage:.3f} to {max_voltage:.3f}V, turning point at index {min_voltage_idx}")
+        logger.info(f"Data length: {n}, mid-point: {mid_point}, turning point at index {min_voltage_idx}")
+        logger.info(f"Voltage range: {min_voltage:.3f}V to {max_voltage:.3f}V")
         
-        # Step 3: Select baseline segments intelligently based on voltage values and scan direction
-        # For CV: forward scan typically goes from high to low voltage, reverse goes from low to high
-        mid_point = len(voltage) // 2
+        # CORRECTED LOGIC FOR CV BASELINE DETECTION:
+        # CV scan: Start voltage (max) → End voltage (min) → Start voltage (max)
+        # Forward scan: high voltage → low voltage (first half of data)
+        # Reverse scan: low voltage → high voltage (second half of data)
         
-        # Find voltage-based boundaries instead of just index-based quarters
-        voltage_min = np.min(voltage)
-        voltage_max = np.max(voltage)
-        voltage_range = voltage_max - voltage_min
+        # Find voltage extremes
+        min_voltage_idx = np.argmin(voltage)
+        max_voltage_idx = np.argmax(voltage)
         
-        # Find the actual turning point (minimum voltage)
-        turning_point_idx = np.argmin(voltage)
+        logger.info(f"Voltage analysis: min at index {min_voltage_idx} ({voltage[min_voltage_idx]:.3f}V), max at index {max_voltage_idx} ({voltage[max_voltage_idx]:.3f}V)")
         
-        # More intelligent segment selection:
-        # Forward segments: from start until before first major peak
-        # Reverse segments: from after turning point and after last major peak
+        # CRITICAL FIX: Reverse baseline must be IMMEDIATELY after turning point, BEFORE reverse redox peak
+        # Forward baseline: first 25% of data (before forward redox peak)
+        forward_region_end = min(mid_point // 3, mid_point - 20)  # First third of forward scan
+        forward_segments = [s for s in segments 
+                          if s['start_idx'] >= 0 and s['end_idx'] <= forward_region_end and s['end_idx'] <= mid_point]
         
-        forward_quarter = len(voltage) // 4
+        # Reverse baseline: BEGINNING of reverse scan (right after turning point, before reverse redox peak)
+        # Look for stable segments immediately after the voltage minimum (turning point)
+        reverse_region_start = max(min_voltage_idx + 5, mid_point)  # Start just after turning point
+        reverse_region_end = min(reverse_region_start + (n - mid_point) // 3, n - 20)  # First third of reverse scan
         
-        # For reverse, we want segments after the turning point AND after the last peak
-        if all_peak_indices:
-            # Find peaks in the reverse scan (after turning point)
-            reverse_peaks = [p for p in all_peak_indices if p > turning_point_idx]
-            if reverse_peaks:
-                # Take segments AFTER the last peak in reverse scan
-                last_reverse_peak = max(reverse_peaks)
-                reverse_start_region = min(last_reverse_peak + 10, len(voltage) - 20)  # At least 10 points after last peak
-                logger.info(f"Last reverse peak at {last_reverse_peak}, reverse region starts at {reverse_start_region}")
-            else:
-                # No peaks in reverse scan, use region after turning point
-                reverse_start_region = turning_point_idx + 20
-        else:
-            # No peaks found, fall back to 3/4 point
-            reverse_start_region = 3 * len(voltage) // 4
+        reverse_segments = [s for s in segments 
+                          if s['start_idx'] >= reverse_region_start 
+                          and s['end_idx'] <= reverse_region_end 
+                          and s['start_idx'] >= mid_point]
         
-        # Forward segments: should be in the beginning of scan (before first peak)
-        forward_segments = [s for s in segments if s['end_idx'] <= forward_quarter]
+        logger.info(f"CORRECTED regions:")
+        logger.info(f"Forward baseline region: [0:{forward_region_end}] (before forward peak)")
+        logger.info(f"Reverse baseline region: [{reverse_region_start}:{reverse_region_end}] (after turning point, before reverse peak)")
+        logger.info(f"Found {len(forward_segments)} forward segments, {len(reverse_segments)} reverse segments")
         
-        # Reverse segments: should be AFTER the last peak in reverse scan
-        reverse_segments = [s for s in segments if s['start_idx'] >= reverse_start_region and s['start_idx'] > turning_point_idx]
-        
-        logger.info(f"Turning point at index {turning_point_idx}, reverse region starts at {reverse_start_region}")
-        
-        # Fallback: if we don't find enough segments, expand search
+        # Fallback if no segments found
         if len(forward_segments) == 0:
-            # Try first half
+            # Expand forward search to first half
             forward_segments = [s for s in segments if s['end_idx'] <= mid_point]
-            logger.info(f"Forward fallback: expanded to first half, found {len(forward_segments)} segments")
+            logger.warning(f"Forward fallback: expanded to first half, found {len(forward_segments)} segments")
             
         if len(reverse_segments) == 0:
-            # Try after turning point
-            reverse_segments = [s for s in segments if s['start_idx'] >= turning_point_idx + 10]
-            logger.info(f"Reverse fallback: expanded to post-turning point, found {len(reverse_segments)} segments")
+            # Expand reverse search to early part of second half (NOT the end!)
+            reverse_early_region_end = mid_point + (n - mid_point) // 2  # First half of reverse scan
+            reverse_segments = [s for s in segments 
+                              if s['start_idx'] >= mid_point and s['end_idx'] <= reverse_early_region_end]
+            logger.warning(f"Reverse fallback: expanded to early reverse region, found {len(reverse_segments)} segments")
             
-            # Final fallback: use second half
+            # Final fallback: use segments just after turning point
             if len(reverse_segments) == 0:
-                reverse_segments = [s for s in segments if s['start_idx'] >= mid_point]
-                logger.info(f"Reverse final fallback: expanded to second half, found {len(reverse_segments)} segments")
-        
-        logger.info(f"Forward segments (first quarter): {len(forward_segments)}, Reverse segments (post-last-peak): {len(reverse_segments)}")
-        logger.info(f"Forward quarter: 0-{forward_quarter}, Reverse region starts at: {reverse_start_region}")
-        
-        # Debug: Show first few segments
-        if forward_segments:
-            logger.info(f"Forward segment examples: {[(s['start_idx'], s['end_idx']) for s in forward_segments[:3]]}")
-        if reverse_segments:
-            logger.info(f"Reverse segment examples: {[(s['start_idx'], s['end_idx']) for s in reverse_segments[:3]]}")
-        else:
-            logger.warning(f"No reverse segments found! Available segments: {[(s['start_idx'], s['end_idx']) for s in segments]}")
-        
-        # Additional safeguard: Ensure forward and reverse don't use same segments
-        if forward_segments and reverse_segments:
-            # Remove any overlapping segments
-            safe_reverse_segments = []
-            for rs in reverse_segments:
-                overlap = False
-                for fs in forward_segments:
-                    # Check for overlap
-                    if not (rs['end_idx'] < fs['start_idx'] or rs['start_idx'] > fs['end_idx']):
-                        overlap = True
-                        break
-                if not overlap:
-                    safe_reverse_segments.append(rs)
+                reverse_segments = [s for s in segments if s['start_idx'] >= mid_point][:3]  # Take first 3 segments
+                logger.warning(f"Reverse final fallback: using first 3 segments after mid-point, found {len(reverse_segments)} segments")
             
-            if len(safe_reverse_segments) < len(reverse_segments):
-                logger.info(f"Removed {len(reverse_segments) - len(safe_reverse_segments)} overlapping reverse segments")
-                reverse_segments = safe_reverse_segments
-                
-            # If no safe reverse segments, force a different region
-            if not reverse_segments:
-                logger.warning("No non-overlapping reverse segments found, forcing separation")
-                # Take segments from the last third that don't overlap with forward
-                last_third_start = 2 * len(voltage) // 3
-                reverse_segments = [s for s in segments if s['start_idx'] >= last_third_start]
-                # Remove overlaps again
-                safe_reverse_segments = []
-                for rs in reverse_segments:
-                    overlap = False
-                    for fs in forward_segments:
-                        if not (rs['end_idx'] < fs['start_idx'] or rs['start_idx'] > fs['end_idx']):
-                            overlap = True
-                            break
-                    if not overlap:
-                        safe_reverse_segments.append(rs)
-                reverse_segments = safe_reverse_segments
-                logger.info(f"Forced separation: found {len(reverse_segments)} reverse segments in last third")
+        # Final fallback: ensure we have at least one segment for each
+        if len(forward_segments) == 0 and len(segments) > 0:
+            forward_segments = [segments[0]]  # Use first available segment
+            logger.warning("Emergency fallback: using first segment for forward")
+            
+        if len(reverse_segments) == 0 and len(segments) > 0:
+            reverse_segments = [segments[-1]]  # Use last available segment  
+            logger.warning("Emergency fallback: using last segment for reverse")
+        # Debug: Show selected segments
+        if forward_segments:
+            logger.info(f"Forward segments: {[(s['start_idx'], s['end_idx'], s['r2']) for s in forward_segments[:3]]}")
+        if reverse_segments:
+            logger.info(f"Reverse segments: {[(s['start_idx'], s['end_idx'], s['r2']) for s in reverse_segments[:3]]}")
         
         def score_baseline_segment(segment, scan_direction='forward'):
-            """Score a segment for baseline suitability with voltage-based approach"""
+            """Score segments for baseline selection - CORRECTED FOR CV SCANS"""
             logger.info(f"[BASELINE] Scoring segment {segment['start_idx']}-{segment['end_idx']} for {scan_direction} baseline")
-            score = 0.0
+            score = 0
             
-            # Linearity (R²) - higher is better
-            r2_score = segment['r2'] * 60  # Increased weight for linearity
-            score += r2_score
-            logger.debug(f"[BASELINE] R² score: {r2_score:.2f} (R²={segment['r2']:.3f})")
+            # Base score from R² quality
+            score += segment['r2'] * 100
             
-            # Voltage span - prefer reasonable voltage coverage (10-50mV as suggested)
-            voltage_span_mv = abs(segment['voltage_span']) * 1000  # Convert to mV
-            if 10 <= voltage_span_mv <= 50:
-                span_score = 20  # Good voltage window
-            elif 5 <= voltage_span_mv < 10:
-                span_score = 10  # Acceptable but small
-            elif 50 < voltage_span_mv <= 100:
-                span_score = 15  # Acceptable but large
-            else:
-                span_score = -10  # Too small or too large
-            score += span_score
-            logger.debug(f"[BASELINE] Voltage span score: {span_score} ({voltage_span_mv:.1f}mV)")
-            
-            # Low slope - more horizontal is better for baseline
-            slope_abs = abs(segment['slope'])
-            if slope_abs > 100:  # Very steep slopes (adjusted for mV scale)
-                slope_penalty = 50
-            elif slope_abs > 50:
-                slope_penalty = 25  
-            else:
-                slope_penalty = slope_abs * 0.5  # Gentle penalty for small slopes
-            score -= slope_penalty
-            logger.debug(f"[BASELINE] Slope penalty: {slope_penalty:.2f} (slope: {segment['slope']:.2e})")
-            
-            # Position preference - avoid very beginning and end of scan
-            total_points = len(voltage)
-            segment_position = segment['start_idx'] / total_points
-            if 0.1 <= segment_position <= 0.9:  # Middle 80% of scan
-                position_score = 10
-            else:
-                position_score = -5  # Penalize extreme positions
-            score += position_score
-            logger.debug(f"[BASELINE] Position score: {position_score} (position: {segment_position:.2f})")
-            
-            # Low current standard deviation - more stable is better
+            # Stability (low standard deviation is better)
             if segment['std_current'] > 0:
-                stability_score = max(0, 15 - (segment['std_current'] * 1e6))  # Adjusted for typical current scales
+                stability_score = max(0, 20 - (segment['std_current'] * 1e6))
                 score += stability_score
-                logger.debug(f"[BASELINE] Stability score: {stability_score:.2f}")
             
-            # Peak awareness - prefer segments that are NOT in peak regions
-            segment_mid = (segment['start_idx'] + segment['end_idx']) // 2
-            min_distance_to_peak = float('inf')
+            # CRITICAL: Position-based scoring for CV scans
+            total_points = len(voltage)
+            mid_point = total_points // 2
+            segment_start_position = segment['start_idx'] / total_points
+            segment_end_position = segment['end_idx'] / total_points
             
-            for peak_idx in all_peak_indices:
-                distance = abs(segment_mid - peak_idx)
-                min_distance_to_peak = min(min_distance_to_peak, distance)
-            
-            # Bonus for being far from peaks (baseline should be in non-peak regions)
-            if min_distance_to_peak > 20:
-                score += 20
-            elif min_distance_to_peak > 10:
-                score += 10
-            else:
-                score -= 5  # Penalty for being too close to peaks
-            
-            # NEW: Position preference for forward scan
             if scan_direction == 'forward':
-                # For forward scan, prefer segments that are BEFORE major peaks
-                # Find the first significant peak in forward scan
-                forward_peaks = [p for p in all_peak_indices if p < min_voltage_idx]
-                if forward_peaks:
-                    first_peak = min(forward_peaks)
-                    logger.debug(f"[BASELINE] Forward scan first peak at index {first_peak}")
-                    if segment['end_idx'] < first_peak - 5:  # Must be well before first peak
-                        score += 25  # Strong bonus for pre-peak segments
-                        logger.debug(f"[BASELINE] Pre-peak bonus applied: +25")
-                    elif segment['start_idx'] > first_peak:  # Penalty for post-peak segments
-                        score -= 15
-                        logger.debug(f"[BASELINE] Post-peak penalty applied: -15")
-                        
-                # Additional preference for earlier segments in forward scan
-                segment_position = segment['start_idx'] / len(voltage)
-                if segment_position < 0.3:  # First 30% of scan
-                    score += 15
-                    logger.debug(f"[BASELINE] Early position bonus: +15")
-                elif segment_position > 0.7:  # Last 30% of forward scan
-                    score -= 10
-                    logger.debug(f"[BASELINE] Late position penalty: -10")
+                # Forward baseline should be in the BEGINNING (first 30% of data)
+                if segment_end_position <= 0.3:
+                    score += 50  # Strong bonus for early forward segments
+                elif segment_end_position <= 0.5:  
+                    score += 20  # Moderate bonus for reasonably early segments
+                elif segment_start_position > 0.5:  # In second half - wrong area
+                    score -= 100  # Heavy penalty for late forward segments
+                    
+                logger.info(f"[BASELINE] Forward segment position: {segment_start_position:.2f}-{segment_end_position:.2f}")
+                
+            elif scan_direction == 'reverse':
+                # CORRECTED: Reverse baseline should be at BEGINNING of reverse scan (after turning point, before peak)
+                # Look for segments between 50%-75% of data (early reverse scan)
+                if 0.5 <= segment_start_position <= 0.75 and segment_end_position <= 0.8:
+                    score += 50  # Strong bonus for early reverse segments (after turning point, before peak)
+                elif 0.5 <= segment_start_position <= 0.8:
+                    score += 20  # Moderate bonus for reasonably early reverse segments
+                elif segment_start_position > 0.8:  # Too late in reverse scan (after peak)
+                    score -= 100  # Heavy penalty for late reverse segments (after redox peak)
+                elif segment_end_position < 0.5:  # Before turning point
+                    score -= 50  # Penalty for segments before reverse scan starts
+                    
+                logger.info(f"[BASELINE] Reverse segment position: {segment_start_position:.2f}-{segment_end_position:.2f}")
+            
+            # Small slope preference (baseline should be relatively flat)
+            slope_abs = abs(segment['slope'])
+            if slope_abs < 10:
+                score += 10
+            elif slope_abs > 100:
+                score -= 30
             
             logger.info(f"[BASELINE] Final segment score: {score:.2f}")
             return score
@@ -396,6 +323,7 @@ def detect_improved_baseline_2step(voltage, current, max_iterations=None, adapti
             v_forward = voltage[:n//2]
             baseline_forward = forward_segment['slope'] * v_forward + forward_segment['intercept']
             logger.info(f"Forward baseline: slope={forward_segment['slope']:.2e}, R²={forward_segment['r2']:.3f}, segment=[{forward_segment['start_idx']}:{forward_segment['end_idx']}]")
+            logger.info(f"Forward baseline range: [{baseline_forward.min():.3f}, {baseline_forward.max():.3f}] μA, mean={baseline_forward.mean():.3f}")
         else:
             # Use simple linear fit if no good segment found
             v_forward = voltage[:n//2]
@@ -403,6 +331,8 @@ def detect_improved_baseline_2step(voltage, current, max_iterations=None, adapti
             try:
                 coeffs = np.polyfit(v_forward, i_forward, 1)
                 baseline_forward = np.polyval(coeffs, v_forward)
+                logger.info(f"Forward baseline (fallback): slope={coeffs[0]:.2e}, intercept={coeffs[1]:.3f}")
+                logger.info(f"Forward baseline range: [{baseline_forward.min():.3f}, {baseline_forward.max():.3f}] μA, mean={baseline_forward.mean():.3f}")
             except:
                 baseline_forward = np.full(n//2, np.mean(i_forward))
         
@@ -410,6 +340,7 @@ def detect_improved_baseline_2step(voltage, current, max_iterations=None, adapti
             v_reverse = voltage[n//2:]
             baseline_reverse = reverse_segment['slope'] * v_reverse + reverse_segment['intercept']
             logger.info(f"Reverse baseline: slope={reverse_segment['slope']:.2e}, R²={reverse_segment['r2']:.3f}, segment=[{reverse_segment['start_idx']}:{reverse_segment['end_idx']}]")
+            logger.info(f"Reverse baseline range: [{baseline_reverse.min():.3f}, {baseline_reverse.max():.3f}] μA, mean={baseline_reverse.mean():.3f}")
         else:
             # Use simple linear fit if no good segment found
             v_reverse = voltage[n//2:]
@@ -417,6 +348,8 @@ def detect_improved_baseline_2step(voltage, current, max_iterations=None, adapti
             try:
                 coeffs = np.polyfit(v_reverse, i_reverse, 1)
                 baseline_reverse = np.polyval(coeffs, v_reverse)
+                logger.info(f"Reverse baseline (fallback): slope={coeffs[0]:.2e}, intercept={coeffs[1]:.3f}")
+                logger.info(f"Reverse baseline range: [{baseline_reverse.min():.3f}, {baseline_reverse.max():.3f}] μA, mean={baseline_reverse.mean():.3f}")
             except:
                 baseline_reverse = np.full(n - n//2, np.mean(i_reverse))
         
@@ -1085,11 +1018,29 @@ def detect_peaks_prominence(voltage, current):
             peak_voltage = float(voltage[peak_idx])
             peak_current = float(current[peak_idx])
             
-            # Calculate baseline current at peak voltage
-            baseline_at_peak = float(baseline_full[peak_idx])
+            # Calculate baseline current at peak voltage - use appropriate baseline section
+            n_forward = len(baseline_forward)  # n//2
+            n_reverse = len(baseline_reverse)  # n - n//2
+            
+            if peak_idx < n_forward:
+                # Peak is in forward scan, use forward baseline
+                baseline_at_peak = float(baseline_forward[peak_idx])
+                scan_section = "forward"
+            else:
+                # Peak is in reverse scan, use reverse baseline
+                reverse_idx = peak_idx - n_forward
+                if reverse_idx >= 0 and reverse_idx < n_reverse:
+                    baseline_at_peak = float(baseline_reverse[reverse_idx])
+                    scan_section = "reverse"
+                else:
+                    # Fallback to baseline_full if index is out of range
+                    baseline_at_peak = float(baseline_full[peak_idx])
+                    scan_section = "fallback"
             
             # Calculate peak height from baseline
             peak_height = peak_current - baseline_at_peak
+            
+            logger.info(f"Oxidation peak {i}: idx={peak_idx}, voltage={peak_voltage:.3f}V, current={peak_current:.3f}μA, baseline={baseline_at_peak:.3f}μA, height={peak_height:.3f}μA, section={scan_section}")
             
             peaks.append({
                 'voltage': peak_voltage,
@@ -1106,11 +1057,29 @@ def detect_peaks_prominence(voltage, current):
             peak_voltage = float(voltage[peak_idx])
             peak_current = float(current[peak_idx])
             
-            # Calculate baseline current at peak voltage
-            baseline_at_peak = float(baseline_full[peak_idx])
+            # Calculate baseline current at peak voltage - use appropriate baseline section
+            n_forward = len(baseline_forward)  # n//2
+            n_reverse = len(baseline_reverse)  # n - n//2
+            
+            if peak_idx < n_forward:
+                # Peak is in forward scan, use forward baseline
+                baseline_at_peak = float(baseline_forward[peak_idx])
+                scan_section = "forward"
+            else:
+                # Peak is in reverse scan, use reverse baseline
+                reverse_idx = peak_idx - n_forward
+                if reverse_idx >= 0 and reverse_idx < n_reverse:
+                    baseline_at_peak = float(baseline_reverse[reverse_idx])
+                    scan_section = "reverse"
+                else:
+                    # Fallback to baseline_full if index is out of range
+                    baseline_at_peak = float(baseline_full[peak_idx])
+                    scan_section = "fallback"
             
             # Calculate peak height from baseline (absolute value for reduction peaks)
             peak_height = abs(peak_current - baseline_at_peak)
+            
+            logger.info(f"Reduction peak {i}: idx={peak_idx}, voltage={peak_voltage:.3f}V, current={peak_current:.3f}μA, baseline={baseline_at_peak:.3f}μA, height={peak_height:.3f}μA, section={scan_section}")
             
             peaks.append({
                 'voltage': peak_voltage,

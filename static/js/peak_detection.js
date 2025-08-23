@@ -155,8 +155,8 @@ const detectionManager = {
             // Multi-file: ถ้ามี currentDataFiles หลายไฟล์ ให้ส่ง dataFiles array ไป backend
             let payload;
             if (window.currentDataFiles && Array.isArray(window.currentDataFiles) && window.currentDataFiles.length > 0) {
-                // Limit to first 10 files for testing to avoid timeout
-                const filesToProcess = window.currentDataFiles.slice(0, Math.min(10, window.currentDataFiles.length));
+                // Process all files - baseline detection is now fast with progress tracking
+                const filesToProcess = window.currentDataFiles;
                 payload = {
                     dataFiles: filesToProcess.map(f => ({
                         voltage: f.voltage,

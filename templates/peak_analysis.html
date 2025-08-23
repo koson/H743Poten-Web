@@ -226,6 +226,40 @@
                 <div class="data-info mb-3">
                     <!-- Data information will be populated here -->
                 </div>
+                
+                <!-- Parameter Logging Section -->
+                <div class="parameter-logging card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="bi bi-save"></i> Parameter Logging
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <label for="sampleId" class="form-label form-label-sm">Sample ID</label>
+                            <input type="text" class="form-control form-control-sm" id="sampleId" 
+                                   placeholder="e.g., Sample_001" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="instrumentType" class="form-label form-label-sm">Instrument</label>
+                            <select class="form-select form-select-sm" id="instrumentType" required>
+                                <option value="">Select instrument</option>
+                                <option value="palmsens">Palmsens (Reference)</option>
+                                <option value="stm32">STM32 (Target)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userNotes" class="form-label form-label-sm">Notes</label>
+                            <textarea class="form-control form-control-sm" id="userNotes" rows="2" 
+                                      placeholder="Measurement conditions, observations..."></textarea>
+                        </div>
+                        <button id="saveParametersBtn" class="btn btn-success btn-sm w-100" disabled>
+                            <i class="bi bi-cloud-upload"></i> Save Analysis Parameters
+                        </button>
+                        <div id="saveStatus" class="mt-2 small"></div>
+                    </div>
+                </div>
+                
                 <div class="peak-info card mb-3">
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-start">
@@ -609,6 +643,195 @@
 
             return rows.map(row => row.join(',')).join('\n');
         }
+
+        // Parameter Logging Functions
+        function initializeParameterLogging() {
+            const sampleIdInput = document.getElementById('sampleId');
+            const instrumentSelect = document.getElementById('instrumentType');
+            const saveBtn = document.getElementById('saveParametersBtn');
+            
+            // Enable save button when required fields are filled
+            function checkFormValidity() {
+                const isValid = sampleIdInput.value.trim() && instrumentSelect.value;
+                saveBtn.disabled = !isValid;
+            }
+            
+            sampleIdInput.addEventListener('input', checkFormValidity);
+            instrumentSelect.addEventListener('change', checkFormValidity);
+            
+            // Save parameters event
+            saveBtn.addEventListener('click', saveAnalysisParameters);
+            
+            // Try to detect file source for auto-suggestion
+            autoDetectInstrument();
+        }
+        
+        function autoDetectInstrument() {
+            // Auto-detect instrument type based on file name or data characteristics
+            const filenameElement = document.querySelector('[data-filename]');
+            const instrumentSelect = document.getElementById('instrumentType');
+            
+            if (filenameElement) {
+                const filename = filenameElement.dataset.filename.toLowerCase();
+                if (filename.includes('palmsens') || filename.includes('ps')) {
+                    instrumentSelect.value = 'palmsens';
+                } else if (filename.includes('stm32') || filename.includes('h743')) {
+                    instrumentSelect.value = 'stm32';
+                }
+            }
+            
+            // Check form validity after auto-detection
+            const saveBtn = document.getElementById('saveParametersBtn');
+            const sampleIdInput = document.getElementById('sampleId');
+            const isValid = sampleIdInput.value.trim() && instrumentSelect.value;
+            saveBtn.disabled = !isValid;
+        }
+        
+        async function saveAnalysisParameters() {
+            try {
+                const saveBtn = document.getElementById('saveParametersBtn');
+                const statusDiv = document.getElementById('saveStatus');
+                
+                // Disable button and show loading
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+                statusDiv.innerHTML = '<div class="text-info">Preparing data...</div>';
+                
+                // Collect form data
+                const sampleId = document.getElementById('sampleId').value.trim();
+                const instrumentType = document.getElementById('instrumentType').value;
+                const userNotes = document.getElementById('userNotes').value.trim();
+                
+                // Prepare measurement data
+                const measurementData = {
+                    sample_id: sampleId,
+                    instrument_type: instrumentType,
+                    user_notes: userNotes,
+                    original_filename: getCurrentFilename(),
+                    data_points: chartData.voltage ? chartData.voltage.length : 0
+                };
+                
+                // Add method parameters if available
+                if (methodNameStr) {
+                    measurementData.method_name = methodNameStr;
+                }
+                
+                // Detect scan parameters from data
+                if (chartData.voltage && chartData.voltage.length > 1) {
+                    measurementData.voltage_start = Math.min(...chartData.voltage);
+                    measurementData.voltage_end = Math.max(...chartData.voltage);
+                    
+                    // Estimate scan rate (rough calculation)
+                    const voltageRange = measurementData.voltage_end - measurementData.voltage_start;
+                    const estimatedScanRate = Math.round(voltageRange * 1000 / chartData.voltage.length); // Rough estimate
+                    measurementData.scan_rate = estimatedScanRate;
+                }
+                
+                // Prepare peak data with baseline info
+                const enabledPeaks = window.currentPeaks ? 
+                    window.currentPeaks.filter(p => p.enabled !== false) : 
+                    peaksData.filter(p => p.enabled !== false);
+                
+                const peakParameters = enabledPeaks.map((peak, index) => ({
+                    type: peak.type,
+                    voltage: peak.x || peak.voltage,
+                    current: peak.y || peak.current,
+                    height: peak.height,
+                    enabled: peak.enabled !== false,
+                    baseline_current: peak.baseline_current,
+                    peak_index: index,
+                    // Add any additional peak characteristics
+                    area: peak.area,
+                    prominence: peak.prominence,
+                    width_half_max: peak.width_half_max
+                }));
+                
+                // Prepare request payload
+                const payload = {
+                    measurement: measurementData,
+                    peaks: peakParameters
+                };
+                
+                // Add raw data for STM32
+                if (instrumentType === 'stm32') {
+                    payload.raw_data = {
+                        voltage: chartData.voltage,
+                        current: chartData.current,
+                        label: chartData.label
+                    };
+                }
+                
+                statusDiv.innerHTML = '<div class="text-info">Uploading to database...</div>';
+                
+                // Send to API
+                const response = await fetch('/api/parameters/save_analysis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    statusDiv.innerHTML = `
+                        <div class="text-success">
+                            <i class="bi bi-check-circle"></i> 
+                            Saved successfully! ID: ${result.measurement_id}
+                            <br><small>${result.peaks_saved} peaks saved</small>
+                        </div>
+                    `;
+                    
+                    // Reset form after successful save
+                    setTimeout(() => {
+                        statusDiv.innerHTML = '';
+                        document.getElementById('userNotes').value = '';
+                    }, 3000);
+                    
+                } else {
+                    throw new Error(result.error || 'Unknown error occurred');
+                }
+                
+            } catch (error) {
+                console.error('Error saving parameters:', error);
+                const statusDiv = document.getElementById('saveStatus');
+                statusDiv.innerHTML = `
+                    <div class="text-danger">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        Error: ${error.message}
+                    </div>
+                `;
+            } finally {
+                // Re-enable button
+                const saveBtn = document.getElementById('saveParametersBtn');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="bi bi-cloud-upload"></i> Save Analysis Parameters';
+            }
+        }
+        
+        function getCurrentFilename() {
+            // Try to get current filename from various sources
+            const filenameElement = document.querySelector('[data-filename]');
+            if (filenameElement) {
+                return filenameElement.dataset.filename;
+            }
+            
+            // Try from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const filename = urlParams.get('file') || urlParams.get('filename');
+            if (filename) {
+                return filename;
+            }
+            
+            // Default fallback
+            return `analysis_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`;
+        }
+        
+        // Initialize parameter logging when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeParameterLogging();
+        });
     </script>
     {% block scripts %}
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>

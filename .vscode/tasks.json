@@ -4,7 +4,7 @@
         {
             "label": "H743Poten: Start Development Server",
             "type": "shell",
-            "command": "python",
+            "command": "python3",
             "args": ["auto_dev.py", "start"],
             "group": "build",
             "presentation": {
@@ -23,7 +23,7 @@
         {
             "label": "H743Poten: Stop Development Server",
             "type": "shell",
-            "command": "python",
+            "command": "python3",
             "args": ["auto_dev.py", "stop"],
             "group": "build",
             "presentation": {
@@ -37,7 +37,7 @@
         {
             "label": "H743Poten: Server Status",
             "type": "shell",
-            "command": "python",
+            "command": "python3",
             "args": ["auto_dev.py", "status"],
             "group": "test",
             "presentation": {
@@ -51,7 +51,7 @@
         {
             "label": "H743Poten: Show Logs",
             "type": "shell",
-            "command": "python",
+            "command": "python3",
             "args": ["auto_dev.py", "logs"],
             "group": "test",
             "presentation": {

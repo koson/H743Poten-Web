@@ -266,13 +266,28 @@ function selectBaselineSegment(segments, peakVoltage, direction = 'forward') {
                 positionScore = 1.0 / (1.0 + Math.abs(distanceFromPeak - 0.10)); // Optimal ~100mV
             }
         } else {
-            // For reverse baseline: segment should be after the reduction peak
-            const segmentStartVoltage = segment.startVoltage;
-            distanceFromPeak = segmentStartVoltage - peakVoltage;
+            // For reverse baseline: segment should be after the reduction peak 
+            // In reverse scan, "after peak" means lower voltage (more negative)
+            const segmentEndVoltage = segment.endVoltage;
+            distanceFromPeak = peakVoltage - segmentEndVoltage;
             
-            if (distanceFromPeak > 0.02) { // >=20mV after peak
+            // Adaptive distance criteria based on voltage range
+            const minDistance = 0.015; // Minimum 15mV separation
+            const optimalDistance = 0.06; // Optimal ~60mV after peak
+            
+            if (distanceFromPeak > minDistance) {
                 isValidPosition = true;
-                positionScore = 1.0 / (1.0 + Math.abs(distanceFromPeak - 0.08)); // Optimal around 80mV after peak
+                // Calculate position score with adaptive weighting
+                positionScore = 1.0 / (1.0 + Math.abs(distanceFromPeak - optimalDistance));
+                
+                // Progressive bonuses for different distance ranges
+                if (distanceFromPeak > 0.08) {
+                    positionScore *= 2.0; // 2x bonus for segments >80mV after peak
+                } else if (distanceFromPeak > 0.05) {
+                    positionScore *= 1.5; // 1.5x bonus for segments >50mV after peak
+                } else if (distanceFromPeak > 0.03) {
+                    positionScore *= 1.2; // 1.2x bonus for segments >30mV after peak
+                }
             }
         }
         

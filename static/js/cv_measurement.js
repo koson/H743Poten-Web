@@ -303,71 +303,109 @@ function getBaselineTraces(xArr, yArr, directionArr, peaksArr = [], frac = 0.1) 
 
     // Reverse baseline: look for linear region after reduction peak
     if (Array.isArray(reversePoints) && reversePoints.length >= 2 && redPeak) {
-        // Find linear region by looking forwards from peak
-        const findLinearRegionFromPeak = (points, peakX) => {
-            const minSize = 20; // Increased minimum points
-            const maxSlopeDiff = 1e-4; // Relaxed slope tolerance
+        // Enhanced multi-strategy algorithm for finding reverse baseline
+        const findOptimalReverseBaseline = (points, peakX) => {
+            const minSize = 15; // Minimum points for baseline
             
-            // Find peak index - use nearest point if exact match not found
-            let peakIndex = points.findIndex(p => Math.abs(p.x - peakX) < 0.01);
-            if (peakIndex === -1) {
-                // Find nearest point to peak
-                peakIndex = points.reduce((closest, point, index) => {
-                    const currentDiff = Math.abs(point.x - peakX);
-                    const closestDiff = Math.abs(points[closest].x - peakX);
-                    return currentDiff < closestDiff ? index : closest;
-                }, 0);
-            }
-            console.log('[BASELINE] Reverse peak search:', {
-                targetX: peakX,
-                foundIndex: peakIndex,
-                foundX: points[peakIndex]?.x,
-                totalPoints: points.length
+            console.log('[BASELINE] Reverse baseline search:', {
+                peakVoltage: peakX,
+                totalReversePoints: points.length,
+                voltageRange: [Math.min(...points.map(p => p.x)), Math.max(...points.map(p => p.x))]
             });
             
-            // Look forwards from peak for consistent slope
-            let currentIndex = peakIndex;
-            let slopeWindow = [];
-            let baselinePoints = [];
+            // Get voltage span for adaptive thresholds
+            const voltageSpan = Math.max(...points.map(p => p.x)) - Math.min(...points.map(p => p.x));
+            const adaptiveThreshold = Math.max(0.02, voltageSpan * 0.1); // At least 20mV or 10% of span
             
-            while (currentIndex < points.length - minSize) {
-                // Calculate slope over a small window
-                const slope = (points[currentIndex+5].y - points[currentIndex].y) / 
-                            (points[currentIndex+5].x - points[currentIndex].x);
+            // Strategy 1: Find points significantly more negative than peak (adaptive threshold)
+            const afterPeakPoints_50mV = points.filter(p => p.x < peakX - 0.05);
+            const afterPeakPoints_adaptive = points.filter(p => p.x < peakX - adaptiveThreshold);
+            
+            // Strategy 2: Take the most negative 1/4 of reverse points
+            const sortedByVoltage = [...points].sort((a, b) => a.x - b.x);
+            const negativeQuarter = sortedByVoltage.slice(0, Math.floor(points.length / 4));
+            const negativeThird = sortedByVoltage.slice(0, Math.floor(points.length / 3));
+            
+            // Strategy 3: Take the last portions of reverse scan chronologically
+            const endQuarter = points.slice(-Math.floor(points.length / 4));
+            const endThird = points.slice(-Math.floor(points.length / 3));
+            const endHalf = points.slice(-Math.floor(points.length / 2));
+            
+            // Strategy 4: Find the flattest region (lowest slope variance)
+            const findFlattestRegion = (candidatePoints) => {
+                if (candidatePoints.length < minSize * 2) return candidatePoints.slice(-minSize);
                 
-                // Keep track of recent slopes
-                slopeWindow.push(slope);
-                if (slopeWindow.length > 3) slopeWindow.shift();
+                let bestRegion = null;
+                let lowestVariance = Infinity;
                 
-                // Check if slopes are consistent
-                if (slopeWindow.length === 3) {
-                    const variations = Math.max(...slopeWindow) - Math.min(...slopeWindow);
-                    if (variations < maxSlopeDiff) {
-                        baselinePoints = points.slice(currentIndex, currentIndex+10);
-                        break;
+                for (let i = 0; i <= candidatePoints.length - minSize; i += 3) {
+                    const region = candidatePoints.slice(i, i + minSize);
+                    if (region.length < minSize) continue;
+                    
+                    // Calculate slope variance in this region
+                    const slopes = [];
+                    for (let j = 0; j < region.length - 1; j++) {
+                        const slope = (region[j+1].y - region[j].y) / (region[j+1].x - region[j].x);
+                        slopes.push(slope);
+                    }
+                    const meanSlope = slopes.reduce((a, b) => a + b, 0) / slopes.length;
+                    const slopeVariance = slopes.reduce((a, b) => a + Math.pow(b - meanSlope, 2), 0) / slopes.length;
+                    
+                    if (slopeVariance < lowestVariance) {
+                        lowestVariance = slopeVariance;
+                        bestRegion = region;
                     }
                 }
                 
-                currentIndex++;
-            }
+                return bestRegion || candidatePoints.slice(-minSize);
+            };
             
-            // If no good region found, use default end points
-            if (baselinePoints.length === 0) {
-                baselinePoints = points.slice(-minSize);
-            }
+            // Evaluate all strategies
+            const strategies = [
+                { name: 'afterPeak_50mV', points: afterPeakPoints_50mV, priority: 1 },
+                { name: 'afterPeak_adaptive', points: afterPeakPoints_adaptive, priority: 2 },
+                { name: 'negativeQuarter', points: negativeQuarter, priority: 3 },
+                { name: 'negativeThird', points: negativeThird, priority: 4 },
+                { name: 'endQuarter', points: endQuarter, priority: 5 },
+                { name: 'endThird', points: endThird, priority: 6 },
+                { name: 'endHalf', points: endHalf, priority: 7 }
+            ];
             
-            console.log('[BASELINE] Reverse region found:', {
-                peakX,
-                peakIndex,
-                baselineStart: baselinePoints[0]?.x,
-                baselineEnd: baselinePoints[baselinePoints.length-1]?.x,
-                pointsCount: baselinePoints.length
+            console.log('[BASELINE] Strategy evaluation:', {
+                adaptiveThreshold: adaptiveThreshold.toFixed(3),
+                strategies: strategies.map(s => ({ name: s.name, count: s.points.length, priority: s.priority }))
             });
             
-            return baselinePoints;
+            // Select best available strategy
+            let selectedStrategy = null;
+            for (const strategy of strategies) {
+                if (strategy.points.length >= minSize) {
+                    selectedStrategy = strategy;
+                    break;
+                }
+            }
+            
+            if (!selectedStrategy) {
+                // Ultimate fallback: use whatever we have
+                selectedStrategy = { name: 'fallback', points: points.slice(-minSize), priority: 99 };
+            }
+            
+            // Apply flattest region optimization
+            let baselineRegion = findFlattestRegion(selectedStrategy.points);
+            
+            console.log('[BASELINE] Selected strategy and result:', {
+                strategy: selectedStrategy.name,
+                priority: selectedStrategy.priority,
+                candidateCount: selectedStrategy.points.length,
+                finalCount: baselineRegion.length,
+                voltageRange: [baselineRegion[0]?.x, baselineRegion[baselineRegion.length-1]?.x],
+                avgCurrent: baselineRegion.reduce((sum, p) => sum + p.y, 0) / baselineRegion.length
+            });
+            
+            return baselineRegion;
         };
         
-        const postPeakPoints = findLinearRegionFromPeak(reversePoints, redPeak.x);
+        const postPeakPoints = findOptimalReverseBaseline(reversePoints, redPeak.x);
         
         console.log('[BASELINE] Reverse baseline points:', {
             total: reversePoints.length,

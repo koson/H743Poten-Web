@@ -32,6 +32,7 @@ try:
     from .routes.workflow_api import workflow_api_bp
     from .routes.peak_detection import peak_detection_bp
     from .routes.peak_analysis import bp as peak_analysis_bp
+    from .routes.parameter_api import parameter_bp
 except ImportError:
     # Fall back to absolute imports (when run directly)
     from config.settings import Config
@@ -48,6 +49,7 @@ except ImportError:
     from routes.workflow_api import workflow_api_bp
     from routes.peak_detection import peak_detection_bp
     from routes.peak_analysis import bp as peak_analysis_bp
+    from routes.parameter_api import parameter_bp
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +113,7 @@ def create_app():
     app.register_blueprint(workflow_api_bp)
     app.register_blueprint(peak_detection_bp, url_prefix='/peak_detection')
     app.register_blueprint(peak_analysis_bp, url_prefix='/peak_detection')
+    app.register_blueprint(parameter_bp)
     
     # Error handlers
     @app.errorhandler(413)
