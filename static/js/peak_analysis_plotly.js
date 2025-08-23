@@ -852,22 +852,52 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
         hoverinfo: 'x+y',
     };
 
-    // Peak markers
-    const peakTrace = {
-        x: peaksArr.map(p => p.x !== undefined ? p.x : p.voltage),
-        y: peaksArr.map(p => p.y !== undefined ? p.y : p.current),
-        mode: 'markers+text',
-        name: 'Peaks',
-        marker: {
-            size: 12,
-            color: peaksArr.map(p => p.type === 'oxidation' ? '#dc3545' : '#198754'),
-            line: { width: 2, color: '#fff' }
-        },
-        text: peaksArr.map(p => p.type === 'oxidation' ? 'Ox' : 'Red'),
-        textposition: 'top center',
-        customdata: peaksArr.map(p => [p.height || 0, p.baseline_current || 0, p.enabled !== false]),
-        hovertemplate: '%{text} peak<br>V: %{x:.3f} V<br>Current: %{y:.3f} µA<br>Height: %{customdata[0]:.3f} µA<br>Baseline: %{customdata[1]:.3f} µA<extra></extra>',
-    };
+    // Peak markers - separate enabled and disabled peaks
+    const enabledPeaks = peaksArr.filter(p => p.enabled !== false);
+    const disabledPeaks = peaksArr.filter(p => p.enabled === false);
+    
+    const peakTraces = [];
+    
+    // Enabled peaks trace
+    if (enabledPeaks.length > 0) {
+        const enabledPeakTrace = {
+            x: enabledPeaks.map(p => p.x !== undefined ? p.x : p.voltage),
+            y: enabledPeaks.map(p => p.y !== undefined ? p.y : p.current),
+            mode: 'markers+text',
+            name: 'Active Peaks',
+            marker: {
+                size: 12,
+                color: enabledPeaks.map(p => p.type === 'oxidation' ? '#dc3545' : '#198754'),
+                line: { width: 2, color: '#fff' }
+            },
+            text: enabledPeaks.map(p => p.type === 'oxidation' ? 'Ox' : 'Red'),
+            textposition: 'top center',
+            customdata: enabledPeaks.map(p => [p.height || 0, p.baseline_current || 0, true]),
+            hovertemplate: '%{text} peak (Active)<br>V: %{x:.3f} V<br>Current: %{y:.3f} µA<br>Height: %{customdata[0]:.3f} µA<br>Baseline: %{customdata[1]:.3f} µA<extra></extra>',
+        };
+        peakTraces.push(enabledPeakTrace);
+    }
+    
+    // Disabled peaks trace (grayed out)
+    if (disabledPeaks.length > 0) {
+        const disabledPeakTrace = {
+            x: disabledPeaks.map(p => p.x !== undefined ? p.x : p.voltage),
+            y: disabledPeaks.map(p => p.y !== undefined ? p.y : p.current),
+            mode: 'markers+text',
+            name: 'Disabled Peaks',
+            marker: {
+                size: 10,
+                color: '#6c757d',
+                line: { width: 1, color: '#fff' },
+                opacity: 0.5
+            },
+            text: disabledPeaks.map(p => p.type === 'oxidation' ? 'Ox' : 'Red'),
+            textposition: 'top center',
+            customdata: disabledPeaks.map(p => [p.height || 0, p.baseline_current || 0, false]),
+            hovertemplate: '%{text} peak (Disabled)<br>V: %{x:.3f} V<br>Current: %{y:.3f} µA<br>Height: %{customdata[0]:.3f} µA<br>Baseline: %{customdata[1]:.3f} µA<extra></extra>',
+        };
+        peakTraces.push(disabledPeakTrace);
+    }
 
     // Layout
     const layout = {
@@ -919,10 +949,11 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
         }
     }
 
-    // Combine all traces: CV data, peaks, baseline traces, and drop lines
-    const allTraces = [cvTrace, peakTrace, ...baselineTraces, ...peakDropLines];
+    // Combine all traces: CV data, peak traces (enabled & disabled), baseline traces, and drop lines
+    const allTraces = [cvTrace, ...peakTraces, ...baselineTraces, ...peakDropLines];
     
     console.log('[RENDER] About to call Plotly.newPlot with', allTraces.length, 'traces');
+    console.log('[RENDER] Peak traces:', peakTraces.length, 'Enabled peaks:', enabledPeaks.length, 'Disabled peaks:', disabledPeaks.length);
     console.log('[RENDER] Traces:', allTraces);
     
     ensurePlotlyReady(function() {
@@ -934,16 +965,71 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
     // Store baseline info globally for export and further analysis
     window.currentBaselineInfo = baselineInfo;
 
-    // Add click event for peak selection
+    // Add click event for peak selection and toggle
     plotDiv.on('plotly_click', function(eventData) {
         if (!eventData || !eventData.points || eventData.points.length === 0) return;
         const pt = eventData.points[0];
-        // Only respond to peak marker clicks (trace 1)
-        if (pt.curveNumber === 1) {
-            // Find peak index
-            const peakIndex = pt.pointIndex;
-            const peak = peaksArr[peakIndex];
-            showPeakDetails(peak);
+        
+        // Respond to peak marker clicks (peak traces come after CV data trace)
+        // CV data is trace 0, peak traces start from trace 1
+        const peakTraceStart = 1;
+        const peakTraceEnd = peakTraceStart + peakTraces.length;
+        
+        if (pt.curveNumber >= peakTraceStart && pt.curveNumber < peakTraceEnd) {
+            const traceIndex = pt.curveNumber - peakTraceStart;
+            const pointIndex = pt.pointIndex;
+            
+            // Find the corresponding peak in the original array
+            let peak;
+            let peakOriginalIndex = -1;
+            
+            if (traceIndex === 0 && enabledPeaks.length > 0) {
+                // First peak trace is enabled peaks
+                peak = enabledPeaks[pointIndex];
+                // Find original index in peaksArr
+                peakOriginalIndex = peaksArr.findIndex(p => 
+                    p.voltage === peak.voltage && p.current === peak.current && p.type === peak.type
+                );
+            } else if (traceIndex === 1 && disabledPeaks.length > 0) {
+                // Second peak trace is disabled peaks (if exists)
+                peak = disabledPeaks[pointIndex];
+                peakOriginalIndex = peaksArr.findIndex(p => 
+                    p.voltage === peak.voltage && p.current === peak.current && p.type === peak.type
+                );
+            } else if (enabledPeaks.length === 0 && traceIndex === 0) {
+                // Only disabled peaks exist
+                peak = disabledPeaks[pointIndex];
+                peakOriginalIndex = peaksArr.findIndex(p => 
+                    p.voltage === peak.voltage && p.current === peak.current && p.type === peak.type
+                );
+            }
+            
+            if (peak) {
+                // Check if Ctrl key is held down for toggle functionality
+                if (eventData.event && (eventData.event.ctrlKey || eventData.event.metaKey)) {
+                    // Toggle peak enabled state
+                    const newState = !peak.enabled;
+                    peak.enabled = newState;
+                    
+                    // Update global peaks array
+                    if (peakOriginalIndex >= 0 && window.currentPeaks) {
+                        window.currentPeaks[peakOriginalIndex].enabled = newState;
+                    }
+                    
+                    // Update checkbox in UI
+                    const checkbox = document.querySelector(`input[data-peak-index="${peakOriginalIndex}"]`);
+                    if (checkbox) {
+                        checkbox.checked = newState;
+                        // Trigger the change event to update visual state
+                        checkbox.dispatchEvent(new Event('change'));
+                    }
+                    
+                    console.log(`[PEAK TOGGLE] ${peak.type} peak at ${peak.voltage.toFixed(3)}V ${newState ? 'enabled' : 'disabled'} via Ctrl+Click`);
+                } else {
+                    // Normal click - show peak details
+                    showPeakDetails(peak);
+                }
+            }
         }
     });
 } // End of renderPeakAnalysisPlot function

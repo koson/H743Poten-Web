@@ -56,7 +56,10 @@
             background: white;
             border-bottom: 1px solid #dee2e6;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
         .peak-item:last-child {
@@ -69,6 +72,32 @@
 
         .peak-item.selected {
             background-color: #e9ecef;
+        }
+
+        .peak-item.disabled {
+            opacity: 0.5;
+            background-color: #f8f9fa;
+        }
+
+        .peak-item.disabled .peak-values {
+            color: #6c757d;
+        }
+
+        .peak-selection {
+            flex-shrink: 0;
+        }
+
+        .peak-selection .form-check {
+            margin-bottom: 0;
+        }
+
+        .peak-selection .form-check-input {
+            margin-top: 0;
+        }
+
+        .peak-values {
+            flex: 1;
+            min-width: 0;
         }
 
         .peak-type {
@@ -198,9 +227,17 @@
                     <!-- Data information will be populated here -->
                 </div>
                 <div class="peak-info card mb-3">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">Peak Information</h6>
-                        <span class="badge bg-success">Active Method</span>
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">Peak Information</h6>
+                                <div class="small text-muted">
+                                    <i class="bi bi-info-circle"></i> 
+                                    <strong>Ctrl+Click</strong> peak on graph to toggle, or use checkboxes
+                                </div>
+                            </div>
+                            <span class="badge bg-success">Active Method</span>
+                        </div>
                     </div>
                     <div class="card-body p-0">
                         <div class="peak-list">
@@ -224,6 +261,11 @@
         const chartData = {{ data|tojson|safe }};
         const methodType = {{ method|tojson|safe }};
         const methodNameStr = {{ methodName|tojson|safe }};
+        
+        // Store global references for peak management
+        window.chartData = chartData;
+        window.methodNameStr = methodNameStr;
+        window._isArrayObj = false;
         
         // Debug: Check what data we received
         console.log('[DEBUG] peaksData:', peaksData);
@@ -390,15 +432,32 @@
             } else if (peaks && typeof peaks === 'object') {
                 peaksArr = Object.values(peaks);
             }
+            
+            // Store global reference for peak management
+            window.currentPeaks = peaksArr;
+            
             peakList.innerHTML = peaksArr.length ? peaksArr.map((peak, index) => {
                 let heightInfo = '';
                 if (peak.height !== undefined) {
                     heightInfo = `<div><span class="value-label">Height:</span> <span class="value">${peak.height.toFixed(3)} µA</span></div>`;
                 }
+                
+                // Set initial enabled state (default: true)
+                if (peak.enabled === undefined) {
+                    peak.enabled = true;
+                }
+                
                 return `
-                <div class="peak-item" data-index="${index}">
-                    <div class="peak-type">
-                        <span class="type-badge ${peak.type}">${peak.type}</span>
+                <div class="peak-item ${peak.enabled ? '' : 'disabled'}" data-index="${index}">
+                    <div class="peak-selection">
+                        <div class="form-check">
+                            <input class="form-check-input peak-checkbox" type="checkbox" 
+                                   id="peak-${index}" ${peak.enabled ? 'checked' : ''} 
+                                   data-peak-index="${index}">
+                            <label class="form-check-label" for="peak-${index}">
+                                <span class="type-badge ${peak.type}">${peak.type}</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="peak-values">
                         <div><span class="value-label">V:</span> <span class="value">${(peak.x !== undefined ? peak.x : peak.voltage).toFixed(3)}</span></div>
@@ -407,6 +466,58 @@
                     </div>
                 </div>
             `}).join('') : '<div class="text-muted p-2">No peaks detected</div>';
+            
+            // Add event listeners for peak checkboxes
+            const checkboxes = peakList.querySelectorAll('.peak-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', handlePeakToggle);
+            });
+        }
+
+        function handlePeakToggle(event) {
+            const checkbox = event.target;
+            const peakIndex = parseInt(checkbox.dataset.peakIndex);
+            const isEnabled = checkbox.checked;
+            
+            // Update peak enabled state
+            if (window.currentPeaks && window.currentPeaks[peakIndex]) {
+                window.currentPeaks[peakIndex].enabled = isEnabled;
+            }
+            
+            // Update visual state of peak item
+            const peakItem = checkbox.closest('.peak-item');
+            if (isEnabled) {
+                peakItem.classList.remove('disabled');
+            } else {
+                peakItem.classList.add('disabled');
+            }
+            
+            // Re-render the plot with updated peak states
+            if (window.chartData && window.currentPeaks) {
+                const data = window.chartData;
+                const peaks = window.currentPeaks;
+                const methodNameStr = window.methodNameStr;
+                
+                // Prepare data for plotting
+                let voltage, current, label;
+                if (window._isArrayObj && Array.isArray(data)) {
+                    const traceSelect = document.getElementById('traceSelect');
+                    const currentIdx = parseInt(traceSelect.value) || 0;
+                    const currentData = data[currentIdx];
+                    voltage = currentData.voltage;
+                    current = currentData.current;
+                    label = currentData.label || `Trace ${currentIdx + 1}`;
+                } else {
+                    voltage = data.voltage;
+                    current = data.current;
+                    label = data.label;
+                }
+                
+                // Re-render plot
+                renderPeakAnalysisPlot({voltage, current, label}, peaks, methodNameStr);
+            }
+            
+            console.log(`[PEAK TOGGLE] Peak ${peakIndex} (${window.currentPeaks[peakIndex].type}) ${isEnabled ? 'enabled' : 'disabled'}`);
         }
 
         function updateDataInfo(data, peaks) {
