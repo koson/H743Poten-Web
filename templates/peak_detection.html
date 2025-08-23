@@ -330,6 +330,11 @@
         .progress-container .progress-bar {
             position: relative;
             overflow: visible;
+            height: 20px !important;
+            min-height: 20px !important;
+            line-height: 20px !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
         
         .progress-container .row {
@@ -540,19 +545,6 @@
         <div class="row mb-4">
             <div class="col-12">
                 <h2>Peak Detection Analysis</h2>
-                <div class="text-center mt-2">
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-outline-success btn-sm" onclick="showInlineProgress('ml')">
-                            <i class="fas fa-brain"></i> Test ML
-                        </button>
-                        <button class="btn btn-outline-info btn-sm" onclick="showInlineProgress('prominence')">
-                            <i class="fas fa-chart-line"></i> Test Traditional
-                        </button>
-                        <button class="btn btn-outline-warning btn-sm" onclick="showInlineProgress('derivative')">
-                            <i class="fas fa-layer-group"></i> Test Hybrid
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
         
