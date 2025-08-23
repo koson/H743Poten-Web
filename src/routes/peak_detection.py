@@ -17,19 +17,57 @@ logger = logging.getLogger(__name__)
 
 peak_detection_bp = Blueprint('peak_detection', __name__)
 
-def detect_linear_segments(voltage, current, min_length=5, r2_threshold=0.95):
-    """Find all linear segments that could be baseline candidates"""
+def detect_linear_segments(voltage, current, min_length=5, r2_threshold=0.95, max_iterations=None, adaptive_step=False):
+    """Find all linear segments that could be baseline candidates using voltage windows"""
     segments = []
     n = len(voltage)
     
-    for start in range(n - min_length + 1):
-        for length in range(min_length, min(50, n - start + 1)):
-            end = start + length - 1
-            if end >= n:
+    # Set default max_iterations based on input
+    if max_iterations is None:
+        max_iterations = 1000  # Much reduced for voltage-based windowing
+    
+    iteration_count = 0
+    
+    # Calculate voltage step and range
+    voltage_range = np.max(voltage) - np.min(voltage)
+    avg_voltage_step = voltage_range / (n - 1) if n > 1 else 0.001
+    
+    logger.info(f"Voltage range: {voltage_range:.3f}V, avg step: {avg_voltage_step*1000:.2f}mV, n_points: {n}")
+    
+    # Define voltage window sizes (10-50 mV as suggested)
+    voltage_windows = [0.010, 0.020, 0.030, 0.050]  # 10, 20, 30, 50 mV windows
+    
+    # Skip initial steep region (first 10% of data typically has high slope)
+    start_skip = max(10, n // 10)  # Skip first 10% or at least 10 points
+    end_skip = max(10, n // 20)   # Skip last 5% for symmetry
+    
+    logger.info(f"Skipping initial {start_skip} points and final {end_skip} points to avoid steep regions")
+    
+    for voltage_window in voltage_windows:
+        # Convert voltage window to approximate number of points
+        window_points = max(min_length, int(voltage_window / avg_voltage_step)) if avg_voltage_step > 0 else min_length
+        
+        logger.info(f"Testing voltage window: {voltage_window*1000:.0f}mV (~{window_points} points)")
+        
+        # Use larger steps to reduce computation
+        step_size = max(1, window_points // 4)  # Step by quarter of window size
+        
+        for start in range(start_skip, n - end_skip - window_points, step_size):
+            iteration_count += 1
+            if iteration_count > max_iterations:
+                logger.warning(f"Reached maximum iterations ({max_iterations}) in segment detection")
                 break
                 
-            v_seg = voltage[start:end+1]
-            i_seg = current[start:end+1]
+            # Try different segment lengths around the voltage window
+            for length_factor in [0.8, 1.0, 1.2, 1.5]:  # 80%, 100%, 120%, 150% of window
+                segment_length = max(min_length, int(window_points * length_factor))
+                end = min(start + segment_length, n - end_skip)
+                
+                if end - start < min_length:
+                    continue
+                    
+                v_seg = voltage[start:end]
+                i_seg = current[start:end]
             
             if not (np.all(np.isfinite(v_seg)) and np.all(np.isfinite(i_seg))):
                 continue
@@ -43,10 +81,11 @@ def detect_linear_segments(voltage, current, min_length=5, r2_threshold=0.95):
                 r2 = r_value ** 2
                 
                 if r2 >= r2_threshold:
+                    segment_len = end - start
                     segments.append({
                         'start_idx': start,
                         'end_idx': end,
-                        'length': length,
+                        'length': segment_len,
                         'slope': slope,
                         'intercept': intercept,
                         'r2': r2,
@@ -79,24 +118,15 @@ def detect_linear_segments(voltage, current, min_length=5, r2_threshold=0.95):
     
     return filtered
 
-def detect_improved_baseline_2step(voltage, current):
+def detect_improved_baseline_2step(voltage, current, max_iterations=None, adaptive_step=False):
     """2-step baseline detection: find segments, then select best ones"""
     try:
-        # Step 1: Find linear segments
-        segments = detect_linear_segments(voltage, current)
+        # Step 1: Find linear segments with optional parameters
+        segments = detect_linear_segments(voltage, current, max_iterations=max_iterations, adaptive_step=adaptive_step)
         
         if not segments:
             logger.warning("No linear segments found, using simple baseline")
-            n = len(voltage)
-            mid = n // 2
-            
-            def simple_fit(v, i):
-                if len(v) < 2:
-                    return np.full_like(v, np.nan)
-                coeffs = np.polyfit(v, i, 1)
-                return np.polyval(coeffs, v)
-            
-            return simple_fit(voltage[:mid], current[:mid]), simple_fit(voltage[mid:], current[mid:])
+            return None  # Return None to trigger fallback
         
         # Step 2: Find peaks first to guide baseline selection
         # Use simple prominence-based peak detection to identify peak regions
@@ -107,57 +137,171 @@ def detect_improved_baseline_2step(voltage, current):
         
         logger.info(f"Found {len(all_peak_indices)} peaks for baseline guidance: {all_peak_indices}")
         
-        # Find the turning point (minimum voltage typically)
+        # Find the turning point and scan direction
         min_voltage_idx = np.argmin(voltage)
+        min_voltage = voltage[min_voltage_idx]
+        max_voltage = np.max(voltage)
+        voltage_range = max_voltage - min_voltage
         
-        # Step 3: Select baseline segments intelligently
-        forward_segments = [s for s in segments if s['end_idx'] <= min_voltage_idx + 10]
-        reverse_segments = [s for s in segments if s['start_idx'] >= min_voltage_idx - 10]
+        logger.info(f"Voltage range: {min_voltage:.3f} to {max_voltage:.3f}V, turning point at index {min_voltage_idx}")
         
-        logger.info(f"Forward segments: {len(forward_segments)}, Reverse segments: {len(reverse_segments)}")
+        # Step 3: Select baseline segments intelligently based on voltage values and scan direction
+        # For CV: forward scan typically goes from high to low voltage, reverse goes from low to high
+        mid_point = len(voltage) // 2
+        
+        # Find voltage-based boundaries instead of just index-based quarters
+        voltage_min = np.min(voltage)
+        voltage_max = np.max(voltage)
+        voltage_range = voltage_max - voltage_min
+        
+        # Find the actual turning point (minimum voltage)
+        turning_point_idx = np.argmin(voltage)
+        
+        # More intelligent segment selection:
+        # Forward segments: from start until before first major peak
+        # Reverse segments: from after turning point and after last major peak
+        
+        forward_quarter = len(voltage) // 4
+        
+        # For reverse, we want segments after the turning point AND after the last peak
+        if all_peak_indices:
+            # Find peaks in the reverse scan (after turning point)
+            reverse_peaks = [p for p in all_peak_indices if p > turning_point_idx]
+            if reverse_peaks:
+                # Take segments AFTER the last peak in reverse scan
+                last_reverse_peak = max(reverse_peaks)
+                reverse_start_region = min(last_reverse_peak + 10, len(voltage) - 20)  # At least 10 points after last peak
+                logger.info(f"Last reverse peak at {last_reverse_peak}, reverse region starts at {reverse_start_region}")
+            else:
+                # No peaks in reverse scan, use region after turning point
+                reverse_start_region = turning_point_idx + 20
+        else:
+            # No peaks found, fall back to 3/4 point
+            reverse_start_region = 3 * len(voltage) // 4
+        
+        # Forward segments: should be in the beginning of scan (before first peak)
+        forward_segments = [s for s in segments if s['end_idx'] <= forward_quarter]
+        
+        # Reverse segments: should be AFTER the last peak in reverse scan
+        reverse_segments = [s for s in segments if s['start_idx'] >= reverse_start_region and s['start_idx'] > turning_point_idx]
+        
+        logger.info(f"Turning point at index {turning_point_idx}, reverse region starts at {reverse_start_region}")
+        
+        # Fallback: if we don't find enough segments, expand search
+        if len(forward_segments) == 0:
+            # Try first half
+            forward_segments = [s for s in segments if s['end_idx'] <= mid_point]
+            logger.info(f"Forward fallback: expanded to first half, found {len(forward_segments)} segments")
+            
+        if len(reverse_segments) == 0:
+            # Try after turning point
+            reverse_segments = [s for s in segments if s['start_idx'] >= turning_point_idx + 10]
+            logger.info(f"Reverse fallback: expanded to post-turning point, found {len(reverse_segments)} segments")
+            
+            # Final fallback: use second half
+            if len(reverse_segments) == 0:
+                reverse_segments = [s for s in segments if s['start_idx'] >= mid_point]
+                logger.info(f"Reverse final fallback: expanded to second half, found {len(reverse_segments)} segments")
+        
+        logger.info(f"Forward segments (first quarter): {len(forward_segments)}, Reverse segments (post-last-peak): {len(reverse_segments)}")
+        logger.info(f"Forward quarter: 0-{forward_quarter}, Reverse region starts at: {reverse_start_region}")
+        
+        # Debug: Show first few segments
+        if forward_segments:
+            logger.info(f"Forward segment examples: {[(s['start_idx'], s['end_idx']) for s in forward_segments[:3]]}")
+        if reverse_segments:
+            logger.info(f"Reverse segment examples: {[(s['start_idx'], s['end_idx']) for s in reverse_segments[:3]]}")
+        else:
+            logger.warning(f"No reverse segments found! Available segments: {[(s['start_idx'], s['end_idx']) for s in segments]}")
+        
+        # Additional safeguard: Ensure forward and reverse don't use same segments
+        if forward_segments and reverse_segments:
+            # Remove any overlapping segments
+            safe_reverse_segments = []
+            for rs in reverse_segments:
+                overlap = False
+                for fs in forward_segments:
+                    # Check for overlap
+                    if not (rs['end_idx'] < fs['start_idx'] or rs['start_idx'] > fs['end_idx']):
+                        overlap = True
+                        break
+                if not overlap:
+                    safe_reverse_segments.append(rs)
+            
+            if len(safe_reverse_segments) < len(reverse_segments):
+                logger.info(f"Removed {len(reverse_segments) - len(safe_reverse_segments)} overlapping reverse segments")
+                reverse_segments = safe_reverse_segments
+                
+            # If no safe reverse segments, force a different region
+            if not reverse_segments:
+                logger.warning("No non-overlapping reverse segments found, forcing separation")
+                # Take segments from the last third that don't overlap with forward
+                last_third_start = 2 * len(voltage) // 3
+                reverse_segments = [s for s in segments if s['start_idx'] >= last_third_start]
+                # Remove overlaps again
+                safe_reverse_segments = []
+                for rs in reverse_segments:
+                    overlap = False
+                    for fs in forward_segments:
+                        if not (rs['end_idx'] < fs['start_idx'] or rs['start_idx'] > fs['end_idx']):
+                            overlap = True
+                            break
+                    if not overlap:
+                        safe_reverse_segments.append(rs)
+                reverse_segments = safe_reverse_segments
+                logger.info(f"Forced separation: found {len(reverse_segments)} reverse segments in last third")
         
         def score_baseline_segment(segment, scan_direction='forward'):
-            """Score a segment for baseline suitability with peak awareness"""
+            """Score a segment for baseline suitability with voltage-based approach"""
             logger.info(f"[BASELINE] Scoring segment {segment['start_idx']}-{segment['end_idx']} for {scan_direction} baseline")
             score = 0.0
             
-            # Linearity (R²) - higher is better (stricter requirement)
-            if segment['r2'] < 0.8:  # Poor linearity penalty
-                score -= 30
-                logger.debug(f"[BASELINE] Poor linearity penalty: -30")
-            
-            r2_score = segment['r2'] * 50
+            # Linearity (R²) - higher is better
+            r2_score = segment['r2'] * 60  # Increased weight for linearity
             score += r2_score
-            logger.debug(f"[BASELINE] R² score: {r2_score:.2f}")
+            logger.debug(f"[BASELINE] R² score: {r2_score:.2f} (R²={segment['r2']:.3f})")
             
-            # Length - longer is better (minimum 8 points for good baseline)
-            if segment['length'] < 8:
-                score -= 50  # Heavy penalty for too short segments
-                logger.debug(f"[BASELINE] Short segment penalty: -50")
-            
-            length_score = min(segment['length'] / 20, 1) * 30
-            score += length_score
-            logger.debug(f"[BASELINE] Length score: {length_score:.2f}")
-            
-            # Low slope - more horizontal is better for baseline (stricter penalty)
-            slope_abs = abs(segment['slope'])
-            if slope_abs > 50:  # Very steep slopes are bad for baseline
-                slope_penalty = 100  # Maximum penalty
+            # Voltage span - prefer reasonable voltage coverage (10-50mV as suggested)
+            voltage_span_mv = abs(segment['voltage_span']) * 1000  # Convert to mV
+            if 10 <= voltage_span_mv <= 50:
+                span_score = 20  # Good voltage window
+            elif 5 <= voltage_span_mv < 10:
+                span_score = 10  # Acceptable but small
+            elif 50 < voltage_span_mv <= 100:
+                span_score = 15  # Acceptable but large
             else:
-                slope_penalty = slope_abs * 2  # Increased penalty factor
+                span_score = -10  # Too small or too large
+            score += span_score
+            logger.debug(f"[BASELINE] Voltage span score: {span_score} ({voltage_span_mv:.1f}mV)")
+            
+            # Low slope - more horizontal is better for baseline
+            slope_abs = abs(segment['slope'])
+            if slope_abs > 100:  # Very steep slopes (adjusted for mV scale)
+                slope_penalty = 50
+            elif slope_abs > 50:
+                slope_penalty = 25  
+            else:
+                slope_penalty = slope_abs * 0.5  # Gentle penalty for small slopes
             score -= slope_penalty
             logger.debug(f"[BASELINE] Slope penalty: {slope_penalty:.2f} (slope: {segment['slope']:.2e})")
             
-            # Voltage span - reasonable span is better
-            voltage_span = abs(segment['voltage_span'])
-            if 0.05 <= voltage_span <= 0.3:
-                score += 10
+            # Position preference - avoid very beginning and end of scan
+            total_points = len(voltage)
+            segment_position = segment['start_idx'] / total_points
+            if 0.1 <= segment_position <= 0.9:  # Middle 80% of scan
+                position_score = 10
+            else:
+                position_score = -5  # Penalize extreme positions
+            score += position_score
+            logger.debug(f"[BASELINE] Position score: {position_score} (position: {segment_position:.2f})")
             
             # Low current standard deviation - more stable is better
             if segment['std_current'] > 0:
-                score += max(0, 10 - (segment['std_current'] * 1e6))
+                stability_score = max(0, 15 - (segment['std_current'] * 1e6))  # Adjusted for typical current scales
+                score += stability_score
+                logger.debug(f"[BASELINE] Stability score: {stability_score:.2f}")
             
-            # NEW: Peak awareness - prefer segments that are NOT in peak regions
+            # Peak awareness - prefer segments that are NOT in peak regions
             segment_mid = (segment['start_idx'] + segment['end_idx']) // 2
             min_distance_to_peak = float('inf')
             
@@ -218,34 +362,88 @@ def detect_improved_baseline_2step(voltage, current):
         forward_segment = select_best_segment(forward_segments, 'forward')
         reverse_segment = select_best_segment(reverse_segments, 'reverse')
         
-        # Step 4: Generate baseline arrays
+        # CRITICAL: Verify segments are different
+        if forward_segment and reverse_segment:
+            if (forward_segment['start_idx'] == reverse_segment['start_idx'] and 
+                forward_segment['end_idx'] == reverse_segment['end_idx']):
+                logger.error("ERROR: Forward and reverse segments are identical! Forcing different segments")
+                
+                # Force different segments by taking alternative reverse
+                if len(reverse_segments) > 1:
+                    # Try second-best reverse segment
+                    reverse_segment = select_best_segment(reverse_segments[1:], 'reverse')
+                    logger.info(f"[BASELINE] Using second-best reverse segment [{reverse_segment['start_idx']}:{reverse_segment['end_idx']}]")
+                else:
+                    # Create a different reverse segment from the latter portion
+                    mid_point = len(voltage) // 2
+                    alternative_reverse = [s for s in segments if s['start_idx'] >= mid_point 
+                                         and not (s['start_idx'] == forward_segment['start_idx'] and s['end_idx'] == forward_segment['end_idx'])]
+                    if alternative_reverse:
+                        reverse_segment = select_best_segment(alternative_reverse, 'reverse')
+                        logger.info(f"[BASELINE] Using alternative reverse segment [{reverse_segment['start_idx']}:{reverse_segment['end_idx']}]")
+                    else:
+                        logger.error("Cannot find alternative reverse segment! Using fallback")
+                        reverse_segment = None
+        
+        # Step 4: Generate baseline arrays - avoid NaN values
         n = len(voltage)
-        baseline_forward = np.full(n//2, np.nan)
-        baseline_reverse = np.full(n - n//2, np.nan)
+        
+        # Initialize with zero instead of NaN for JSON compatibility
+        baseline_forward = np.zeros(n//2)
+        baseline_reverse = np.zeros(n - n//2)
         
         if forward_segment:
             v_forward = voltage[:n//2]
             baseline_forward = forward_segment['slope'] * v_forward + forward_segment['intercept']
             logger.info(f"Forward baseline: slope={forward_segment['slope']:.2e}, R²={forward_segment['r2']:.3f}, segment=[{forward_segment['start_idx']}:{forward_segment['end_idx']}]")
+        else:
+            # Use simple linear fit if no good segment found
+            v_forward = voltage[:n//2]
+            i_forward = current[:n//2]
+            try:
+                coeffs = np.polyfit(v_forward, i_forward, 1)
+                baseline_forward = np.polyval(coeffs, v_forward)
+            except:
+                baseline_forward = np.full(n//2, np.mean(i_forward))
         
         if reverse_segment:
             v_reverse = voltage[n//2:]
             baseline_reverse = reverse_segment['slope'] * v_reverse + reverse_segment['intercept']
             logger.info(f"Reverse baseline: slope={reverse_segment['slope']:.2e}, R²={reverse_segment['r2']:.3f}, segment=[{reverse_segment['start_idx']}:{reverse_segment['end_idx']}]")
+        else:
+            # Use simple linear fit if no good segment found
+            v_reverse = voltage[n//2:]
+            i_reverse = current[n//2:]
+            try:
+                coeffs = np.polyfit(v_reverse, i_reverse, 1)
+                baseline_reverse = np.polyval(coeffs, v_reverse)
+            except:
+                baseline_reverse = np.full(n - n//2, np.mean(i_reverse))
         
-        return baseline_forward, baseline_reverse
+        return baseline_forward, baseline_reverse, {
+            'forward_segment': forward_segment,
+            'reverse_segment': reverse_segment
+        }
         
     except Exception as e:
         logger.error(f"Error in improved baseline detection: {e}")
-        # Fallback
+        # Fallback - avoid NaN values
         n = len(voltage)
         mid = n // 2
         def simple_fit(v, i):
             if len(v) < 2:
-                return np.full_like(v, np.nan)
+                return np.full_like(v, np.mean(i) if len(i) > 0 else 0.0)
+            try:
+                coeffs = np.polyfit(v, i, 1)
+                return np.polyval(coeffs, v)
+            except:
+                return np.full_like(v, np.mean(i))
             coeffs = np.polyfit(v, i, 1)
             return np.polyval(coeffs, v)
-        return simple_fit(voltage[:mid], current[:mid]), simple_fit(voltage[mid:], current[mid:])
+        return simple_fit(voltage[:mid], current[:mid]), simple_fit(voltage[mid:], current[mid:]), {
+            'forward_segment': None,
+            'reverse_segment': None
+        }
 
 # In-memory storage for analysis sessions
 # Global variable for tracking peak detection progress
@@ -642,8 +840,8 @@ def get_peaks(method):
             
             peaks_per_file = [ [] for _ in range(nFiles) ]
             for i, file in enumerate(data['dataFiles']):
-                    # Update progress
-                    progress_percent = int((i / nFiles) * 100)
+                    # Update progress only once per file
+                    progress_percent = int(((i + 1) / nFiles) * 100)
                     peak_detection_progress.update({
                         'current_file': i + 1,
                         'percent': progress_percent,
@@ -799,7 +997,7 @@ def detect_cv_peaks(voltage, current, method='prominence'):
         raise
 
 def detect_peaks_prominence(voltage, current):
-    """Detect peaks using prominence method"""
+    """Detect peaks using prominence method with simplified baseline"""
     try:
         # Get settings from config or use defaults
         prominence = current_app.config.get('PEAK_PROMINENCE', 0.1)
@@ -843,11 +1041,62 @@ def detect_peaks_prominence(voltage, current):
                 'confidence': float(neg_properties['prominences'][i] * 100)
             })
 
-        # --- Improved Baseline fitting แยกฝั่ง (2-step process) ---
-        baseline_forward, baseline_reverse = detect_improved_baseline_2step(voltage, current)
+        # Use improved baseline detection but with limited iterations for speed
+        logger.info("Using improved baseline for traditional method with speed optimization")
         
-        # Combine for full baseline
-        baseline_full = np.concatenate([baseline_forward, baseline_reverse])
+        # Detect baseline with peak-aware segmentation but limit iterations
+        try:
+            # First, get a quick baseline estimate for peak detection
+            baseline_result = detect_improved_baseline_2step(
+                voltage, current, 
+                max_iterations=3000,  # Limit iterations for speed
+                adaptive_step=True  # Use adaptive step size
+            )
+            
+            if baseline_result is None:
+                logger.warning("Baseline detection failed, using simple fallback")
+                # Simple fallback if advanced method fails
+                n = len(voltage)
+                mid = n // 2
+                
+                def simple_linear_fit(v, c):
+                    if len(v) < 2:
+                        return np.full_like(v, np.mean(c) if len(c) > 0 else 0)
+                    try:
+                        coeffs = np.polyfit(v, c, 1)
+                        return np.polyval(coeffs, v)
+                    except:
+                        return np.full_like(v, np.mean(c))
+                
+                baseline_forward = simple_linear_fit(voltage[:mid], current[:mid])
+                baseline_reverse = simple_linear_fit(voltage[mid:], current[mid:])
+                baseline_full = np.concatenate([baseline_forward, baseline_reverse])
+                segment_info = {'forward_segment': None, 'reverse_segment': None}
+            else:
+                # baseline_result is a tuple (baseline_forward, baseline_reverse, segment_info)
+                baseline_forward, baseline_reverse, segment_info = baseline_result
+                baseline_full = np.concatenate([baseline_forward, baseline_reverse])
+                logger.info(f"Successfully detected improved baseline with {len(baseline_forward)} forward and {len(baseline_reverse)} reverse points")
+                
+        except Exception as e:
+            logger.error(f"Baseline detection error: {str(e)}, using simple fallback")
+            # Simple fallback if any error occurs
+            n = len(voltage)
+            mid = n // 2
+            
+            def simple_linear_fit(v, c):
+                if len(v) < 2:
+                    return np.full_like(v, np.mean(c) if len(c) > 0 else 0)
+                try:
+                    coeffs = np.polyfit(v, c, 1)
+                    return np.polyval(coeffs, v)
+                except:
+                    return np.full_like(v, np.mean(c))
+            
+            baseline_forward = simple_linear_fit(voltage[:mid], current[:mid])
+            baseline_reverse = simple_linear_fit(voltage[mid:], current[mid:])
+            baseline_full = np.concatenate([baseline_forward, baseline_reverse])
+            segment_info = {'forward_segment': None, 'reverse_segment': None}
 
         return {
             'peaks': peaks,
@@ -859,13 +1108,39 @@ def detect_peaks_prominence(voltage, current):
             'baseline': {
                 'forward': baseline_forward.tolist(),
                 'reverse': baseline_reverse.tolist(),
-                'full': baseline_full.tolist()
+                'full': baseline_full.tolist(),
+                'markers': {
+                    'forward_segment': {
+                        'start_idx': segment_info['forward_segment']['start_idx'] if segment_info['forward_segment'] else None,
+                        'end_idx': segment_info['forward_segment']['end_idx'] if segment_info['forward_segment'] else None,
+                        'voltage_range': segment_info['forward_segment']['voltage_range'] if segment_info['forward_segment'] else None,
+                        'r2': segment_info['forward_segment']['r2'] if segment_info['forward_segment'] else None,
+                        'slope': segment_info['forward_segment']['slope'] if segment_info['forward_segment'] else None
+                    },
+                    'reverse_segment': {
+                        'start_idx': segment_info['reverse_segment']['start_idx'] if segment_info['reverse_segment'] else None,
+                        'end_idx': segment_info['reverse_segment']['end_idx'] if segment_info['reverse_segment'] else None,
+                        'voltage_range': segment_info['reverse_segment']['voltage_range'] if segment_info['reverse_segment'] else None,
+                        'r2': segment_info['reverse_segment']['r2'] if segment_info['reverse_segment'] else None,
+                        'slope': segment_info['reverse_segment']['slope'] if segment_info['reverse_segment'] else None
+                    }
+                }
             }
         }
 
     except Exception as e:
         logger.error(f"Error in prominence peak detection: {str(e)}")
-        raise
+        # Simple fallback
+        return {
+            'peaks': [],
+            'method': 'prominence_error',
+            'params': {'error': str(e)},
+            'baseline': {
+                'forward': np.zeros(len(voltage)//2).tolist(),
+                'reverse': np.zeros(len(voltage) - len(voltage)//2).tolist(),
+                'full': np.zeros(len(voltage)).tolist()
+            }
+        }
 
 def detect_peaks_derivative(voltage, current):
     """Detect peaks using derivative method with improved filtering"""

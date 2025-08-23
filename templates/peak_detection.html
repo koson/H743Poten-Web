@@ -559,7 +559,7 @@
                     </div>
                     <div class="method-content text-center">
                         <p class="text-muted mb-3">AI-Enhanced (Best)</p>
-                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="ml" onclick="window.startDetection('ml')" id="ml-start-btn">
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="ml" onclick="showInlineProgress('ml'); window.startDetection && window.startDetection('ml')" id="ml-start-btn">
                             Start Detection
                         </button>
                         
@@ -632,7 +632,7 @@
                     </div>
                     <div class="method-content text-center">
                         <p class="text-muted mb-3">Classical Method</p>
-                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="prominence" onclick="window.startDetection('prominence')" id="prominence-start-btn">
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="prominence" onclick="showInlineProgress('prominence'); window.startDetection && window.startDetection('prominence')" id="prominence-start-btn">
                             Start Detection
                         </button>
                         
@@ -705,7 +705,7 @@
                     </div>
                     <div class="method-content text-center">
                         <p class="text-muted mb-3">Combined Approach</p>
-                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="derivative" onclick="window.startDetection('derivative')" id="derivative-start-btn">
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="derivative" onclick="showInlineProgress('derivative'); window.startDetection && window.startDetection('derivative')" id="derivative-start-btn">
                             Start Detection
                         </button>
                         
@@ -833,10 +833,19 @@
         // Progress tracking functionality
         let progressInterval;
         let currentMethod = null;
+        let lastProgress = 0; // Track last progress to prevent going backwards
+        let hideTimeout = null; // Debounce hide calls
         
         function showInlineProgress(method) {
             console.log('[PROGRESS] Showing inline progress for method:', method);
             currentMethod = method;
+            lastProgress = 0; // Reset progress tracking
+            
+            // Clear any pending hide timeout
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
             
             // Hide button and show progress
             const startBtn = document.getElementById(method + '-start-btn');
@@ -853,15 +862,43 @@
         function hideInlineProgress(method) {
             console.log('[PROGRESS] Hiding inline progress for method:', method);
             
-            // Show button and hide progress
-            const startBtn = document.getElementById(method + '-start-btn');
-            const progressContainer = document.getElementById(method + '-progress');
+            // Debounce multiple hide calls
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+            }
             
-            if (startBtn) startBtn.style.display = 'block';
-            if (progressContainer) progressContainer.style.display = 'none';
-            
-            stopProgressPolling();
-            currentMethod = null;
+            hideTimeout = setTimeout(() => {
+                // Show button and hide progress with proper selectors
+                const startBtn = document.getElementById(method + '-start-btn');
+                const progressContainer = document.getElementById(method + '-progress');
+                
+                // Also try traditional button selectors - check method is not null
+                const startButtonTraditional = method ? document.getElementById(`start-${method.toLowerCase()}`) : null;
+                
+                if (startBtn) {
+                    startBtn.style.display = 'block';
+                    startBtn.textContent = 'Start Detection';
+                    startBtn.disabled = false;
+                    startBtn.classList.remove('btn-secondary');
+                    startBtn.classList.add('btn-success');
+                }
+                
+                if (startButtonTraditional) {
+                    startButtonTraditional.textContent = 'Start Detection';
+                    startButtonTraditional.disabled = false;
+                    startButtonTraditional.classList.remove('btn-secondary');
+                    startButtonTraditional.classList.add('btn-success');
+                }
+                
+                if (progressContainer) progressContainer.style.display = 'none';
+                
+                stopProgressPolling();
+                if (currentMethod === method) {
+                    currentMethod = null;
+                    lastProgress = 0; // Reset progress tracking
+                }
+                hideTimeout = null;
+            }, 100); // Small delay to prevent rapid calls
         }
         
         function resetProgress(method) {
@@ -881,7 +918,9 @@
         }
         
         function startProgressPolling() {
-            progressInterval = setInterval(updateProgress, 500); // Poll every 500ms
+            // Stop any existing polling first
+            stopProgressPolling();
+            progressInterval = setInterval(updateProgress, 1000); // Reduced frequency to 1 second
         }
         
         function stopProgressPolling() {
@@ -904,44 +943,53 @@
                     const progress = data.progress;
                     const method = currentMethod;
                     
-                    // Update progress bar
-                    const progressBar = document.getElementById(method + '-progressBar');
-                    const progressPercent = document.getElementById(method + '-progressPercent');
-                    if (progressBar && progressPercent) {
-                        progressBar.style.width = progress.percent + '%';
-                        progressPercent.textContent = progress.percent + '%';
-                        console.log('[PROGRESS] Updated progress bar to:', progress.percent + '%');
+                    // Only update if progress is moving forward or is complete
+                    if (progress.percent >= lastProgress || progress.percent === 100) {
+                        lastProgress = progress.percent;
+                        
+                        // Update progress bar
+                        const progressBar = document.getElementById(method + '-progressBar');
+                        const progressPercent = document.getElementById(method + '-progressPercent');
+                        if (progressBar && progressPercent) {
+                            progressBar.style.width = progress.percent + '%';
+                            progressPercent.textContent = progress.percent + '%';
+                            console.log('[PROGRESS] Updated progress bar to:', progress.percent + '%');
+                        }
+                        
+                        // Update counters
+                        const currentFileEl = document.getElementById(method + '-currentFile');
+                        const totalFilesEl = document.getElementById(method + '-totalFiles');
+                        const elapsedTimeEl = document.getElementById(method + '-elapsedTime');
+                        
+                        if (currentFileEl && progress.current_file >= 0) {
+                            currentFileEl.textContent = progress.current_file;
+                            console.log('[PROGRESS] Updated current file to:', progress.current_file);
+                        }
+                        if (totalFilesEl && progress.total_files > 0) {
+                            totalFilesEl.textContent = progress.total_files;
+                            console.log('[PROGRESS] Updated total files to:', progress.total_files);
+                        }
+                        if (elapsedTimeEl) {
+                            elapsedTimeEl.textContent = progress.elapsed_time ? progress.elapsed_time + 's' : '0s';
+                        }
+                        
+                        // Update message
+                        const messageEl = document.getElementById(method + '-progressMessage');
+                        if (messageEl) {
+                            messageEl.textContent = progress.message;
+                            console.log('[PROGRESS] Updated message to:', progress.message);
+                        }
+                    } else {
+                        console.log('[PROGRESS] Skipping backwards progress:', progress.percent, 'last:', lastProgress);
                     }
                     
-                    // Update counters
-                    const currentFileEl = document.getElementById(method + '-currentFile');
-                    const totalFilesEl = document.getElementById(method + '-totalFiles');
-                    const elapsedTimeEl = document.getElementById(method + '-elapsedTime');
-                    
-                    if (currentFileEl) {
-                        currentFileEl.textContent = progress.current_file;
-                        console.log('[PROGRESS] Updated current file to:', progress.current_file);
-                    }
-                    if (totalFilesEl) {
-                        totalFilesEl.textContent = progress.total_files;
-                        console.log('[PROGRESS] Updated total files to:', progress.total_files);
-                    }
-                    if (elapsedTimeEl) {
-                        elapsedTimeEl.textContent = progress.elapsed_time ? progress.elapsed_time + 's' : '0s';
-                    }
-                    
-                    // Update message
-                    const messageEl = document.getElementById(method + '-progressMessage');
-                    if (messageEl) {
-                        messageEl.textContent = progress.message;
-                        console.log('[PROGRESS] Updated message to:', progress.message);
-                    }
-                    
-                    // Hide progress when complete
-                    if (!progress.active && progress.percent === 100) {
+                    // Hide progress when complete - multiple conditions
+                    if (progress.percent === 100 || (!progress.active && progress.percent >= 100) || progress.message.includes('Completed')) {
                         console.log('[PROGRESS] Processing complete, hiding progress in 2 seconds');
                         setTimeout(() => {
-                            hideInlineProgress(method);
+                            if (currentMethod === method) { // Only hide if still the current method
+                                hideInlineProgress(method);
+                            }
                         }, 2000); // Show complete state for 2 seconds
                     }
                 }
@@ -973,9 +1021,27 @@
             
             return originalFetch.apply(this, arguments).then(response => {
                 // Check if peak detection is complete
-                if (url && url.includes('/get-peaks/')) {
-                    console.log('[PROGRESS] Peak detection response received');
-                    // Let the polling handle completion
+                if (url && url.includes('/get-peaks/') && response.ok) {
+                    console.log('[PROGRESS] Peak detection response received successfully');
+                    
+                    // Force reset button state after successful response
+                    setTimeout(() => {
+                        if (currentMethod) {
+                            console.log('[PROGRESS] Force resetting button for:', currentMethod);
+                            const buttonMethod = currentMethod === 'prominence' ? 'Traditional' : currentMethod;
+                            const startBtn = document.getElementById(currentMethod + '-start-btn');
+                            
+                            if (startBtn) {
+                                startBtn.textContent = 'Start Detection';
+                                startBtn.disabled = false;
+                                startBtn.classList.remove('btn-secondary');
+                                startBtn.classList.add('btn-success');
+                            }
+                            
+                            // Hide progress and stop polling
+                            hideInlineProgress(currentMethod);
+                        }
+                    }, 2000); // Give time for final polling
                 }
                 return response;
             }).catch(error => {

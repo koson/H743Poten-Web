@@ -790,6 +790,41 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                     hovertemplate: 'Reverse Baseline<br>V: %{x:.3f}<br>I: %{y:.3f}<extra></extra>',
                 });
                 
+                // Add baseline segment markers if available
+                if (baseline.markers) {
+                    if (baseline.markers.forward_segment && baseline.markers.forward_segment.start_idx !== null) {
+                        const startIdx = baseline.markers.forward_segment.start_idx;
+                        const endIdx = baseline.markers.forward_segment.end_idx;
+                        const segmentVoltage = chartData.voltage.slice(startIdx, endIdx + 1);
+                        const segmentCurrent = chartData.current.slice(startIdx, endIdx + 1);
+                        
+                        baselineTraces.push({
+                            x: segmentVoltage,
+                            y: segmentCurrent,
+                            mode: 'markers',
+                            name: `Forward Segment (R²=${baseline.markers.forward_segment.r2?.toFixed(3) || 'N/A'})`,
+                            marker: { color: '#ff6b6b', size: 6, symbol: 'circle' },
+                            hovertemplate: 'Forward Segment<br>V: %{x:.3f}<br>I: %{y:.3f}<br>R²: ' + (baseline.markers.forward_segment.r2?.toFixed(3) || 'N/A') + '<extra></extra>',
+                        });
+                    }
+                    
+                    if (baseline.markers.reverse_segment && baseline.markers.reverse_segment.start_idx !== null) {
+                        const startIdx = baseline.markers.reverse_segment.start_idx;
+                        const endIdx = baseline.markers.reverse_segment.end_idx;
+                        const segmentVoltage = chartData.voltage.slice(startIdx, endIdx + 1);
+                        const segmentCurrent = chartData.current.slice(startIdx, endIdx + 1);
+                        
+                        baselineTraces.push({
+                            x: segmentVoltage,
+                            y: segmentCurrent,
+                            mode: 'markers',
+                            name: `Reverse Segment (R²=${baseline.markers.reverse_segment.r2?.toFixed(3) || 'N/A'})`,
+                            marker: { color: '#4ecdc4', size: 6, symbol: 'circle' },
+                            hovertemplate: 'Reverse Segment<br>V: %{x:.3f}<br>I: %{y:.3f}<br>R²: ' + (baseline.markers.reverse_segment.r2?.toFixed(3) || 'N/A') + '<extra></extra>',
+                        });
+                    }
+                }
+                
                 baselineInfo = {
                     forward: baseline.forward,
                     reverse: baseline.reverse,
