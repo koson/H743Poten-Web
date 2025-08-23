@@ -1,23 +1,26 @@
 // --- Utility function: Add baseline traces for forward/reverse scan ---
 // Usage: const baselineTraces = getBaselineTraces(xArr, yArr, directionArr)
 // Returns: [traceFwd, traceRev] (array of Plotly trace objects, may be empty)
-function linearRegression(points) {
-    if (!points || points.length < 2) return null;
-    
-    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-    const n = points.length;
 
-    for (const point of points) {
-        sumX += point.x;
-        sumY += point.y;
-        sumXY += point.x * point.y;
-        sumX2 += point.x * point.x;
+// --- OOP Helper for Baseline and Regression ---
+class CVBaselineHelper {
+    static linearRegression(points) {
+        console.log('[CV] CVBaselineHelper.linearRegression called', { points });
+        if (!points || points.length < 2) return null;
+        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+        const n = points.length;
+        for (const point of points) {
+            sumX += point.x;
+            sumY += point.y;
+            sumXY += point.x * point.y;
+            sumX2 += point.x * point.x;
+        }
+        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / n;
+        return {slope, intercept};
     }
 
-    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-    const intercept = (sumY - slope * sumX) / n;
-    
-    return {slope, intercept};
+    // Optionally, you can move more helpers here in the future
 }
 
 function inferDirectionFromVoltage(voltageArr) {
@@ -237,7 +240,7 @@ function getBaselineTraces(xArr, yArr, directionArr, peaksArr = [], frac = 0.1) 
         });
         
         if (prePeakPoints.length >= 2) {
-            const regression = linearRegression(prePeakPoints);
+            const regression = CVBaselineHelper.linearRegression(prePeakPoints);
             if (regression) {
                 const {slope, intercept} = regression;
                 console.log('[BASELINE] Forward regression:', {slope, intercept});
@@ -374,7 +377,7 @@ function getBaselineTraces(xArr, yArr, directionArr, peaksArr = [], frac = 0.1) 
         });
         
         if (postPeakPoints.length >= 2) {
-            const regression = linearRegression(postPeakPoints);
+            const regression = CVBaselineHelper.linearRegression(postPeakPoints);
             if (regression) {
                 const {slope, intercept} = regression;
                 console.log('[BASELINE] Reverse regression:', {slope, intercept});

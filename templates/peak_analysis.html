@@ -224,6 +224,24 @@
         const chartData = {{ data|tojson|safe }};
         const methodType = {{ method|tojson|safe }};
         const methodNameStr = {{ methodName|tojson|safe }};
+        
+        // Debug: Check what data we received
+        console.log('[DEBUG] peaksData:', peaksData);
+        console.log('[DEBUG] chartData:', chartData);
+        console.log('[DEBUG] methodType:', methodType);
+        console.log('[DEBUG] methodNameStr:', methodNameStr);
+        
+        // Debug: Check first peak data for baseline info
+        if (peaksData && peaksData.length > 0) {
+            console.log('[DEBUG] First peaksData item:', peaksData[0]);
+            console.log('[DEBUG] Peak data keys:', Object.keys(peaksData[0]));
+            
+            // Check individual peaks for baseline
+            if (peaksData[0].length > 0) {
+                console.log('[DEBUG] First peak in first trace:', peaksData[0][0]);
+                console.log('[DEBUG] First peak keys:', Object.keys(peaksData[0][0]));
+            }
+        }
 
         // Helper: ensure Plotly is ready
         function ensurePlotlyReady(callback) {
@@ -257,6 +275,10 @@
                         if (plotDiv) plotDiv.innerHTML = '<div class="text-danger p-4">No chart data available</div>';
                         return;
                     }
+                    
+                    console.log('[DEBUG] About to process chart data...');
+                    console.log('[DEBUG] chartData.length:', chartData.length);
+                    console.log('[DEBUG] First item:', chartData[0]);
                 
                 let nTraces = 1;
                 let fileLabels = [];
@@ -349,6 +371,14 @@
             
             let peaks = getPeaksForTrace(idx);
             if (!Array.isArray(peaks)) peaks = [];
+            
+            console.log('[DEBUG] About to call renderPeakAnalysisPlot with:');
+            console.log('[DEBUG] - voltage.length:', voltage.length);
+            console.log('[DEBUG] - current.length:', current.length);
+            console.log('[DEBUG] - label:', label);
+            console.log('[DEBUG] - peaks.length:', peaks.length);
+            console.log('[DEBUG] - methodNameStr:', methodNameStr);
+            
             renderPeakAnalysisPlot({voltage, current, label}, peaks, methodNameStr);
         }
 

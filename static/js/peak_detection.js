@@ -149,45 +149,70 @@ const detectionManager = {
 
     // Execute actual peak detection
     async executeDetection(method, data) {
+        const startTime = performance.now(); // Track actual time
         try {
+            console.log(`[${method}] Starting API call...`);
             // Multi-file: ถ้ามี currentDataFiles หลายไฟล์ ให้ส่ง dataFiles array ไป backend
             let payload;
             if (window.currentDataFiles && Array.isArray(window.currentDataFiles) && window.currentDataFiles.length > 0) {
+                // Limit to first 10 files for testing to avoid timeout
+                const filesToProcess = window.currentDataFiles.slice(0, Math.min(10, window.currentDataFiles.length));
                 payload = {
-                    dataFiles: window.currentDataFiles.map(f => ({
+                    dataFiles: filesToProcess.map(f => ({
                         voltage: f.voltage,
                         current: f.current,
                         filename: f.filename || f.name || ''
                     }))
                 };
+                console.log(`[${method}] Sending multi-file payload with ${payload.dataFiles.length} files (limited from ${window.currentDataFiles.length})`);
             } else {
                 payload = {
                     voltage: data.voltage,
                     current: data.current
                 };
+                console.log(`[${method}] Sending single-file payload`);
             }
             // Call backend peak detection API
+            console.log(`[${method}] Making API call to /peak_detection/get-peaks/${method}`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout for large datasets
+            
             const response = await fetch(`/peak_detection/get-peaks/${method}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                signal: controller.signal
             });
+            
+            clearTimeout(timeoutId);
+
+            console.log(`[${method}] API response status:`, response.status);
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorText = await response.text();
+                console.error(`[${method}] API error response:`, errorText);
+                throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
             }
 
             const result = await response.json();
+            console.log(`[${method}] API result:`, result);
+            
+            // Calculate actual processing time
+            const endTime = performance.now();
+            const actualProcessingTime = ((endTime - startTime) / 1000).toFixed(1); // Convert to seconds
+            console.log(`[${method}] Actual processing time: ${actualProcessingTime}s`);
             
             if (result.success) {
+                // Add actual processing time to result
+                result.actualProcessingTime = parseFloat(actualProcessingTime);
                 this.completeDetection(method, result);
             } else {
                 throw new Error(result.error || 'Detection failed');
             }
         } catch (error) {
-            console.error('Detection error:', error);
+            console.error(`[${method}] Detection error:`, error);
             this.showDetectionError(method, error.message);
         }
     },
@@ -240,8 +265,8 @@ const detectionManager = {
             // Confidence: เฉลี่ยทุกไฟล์
             let allPeaks = peaksArr.flat();
             let confidence = this.calculateAverageConfidence(allPeaks);
-            // Processing time: ประเมินจากจำนวนไฟล์ (mockup: 0.1s/ไฟล์)
-            let processingTime = Math.max(0.5, 0.1 * peaksArr.length);
+            // Processing time: ใช้เวลาจริงจาก API call
+            let processingTime = apiResult.actualProcessingTime || 0.5;
             // Preview: ใช้ไฟล์แรก (หรือไฟล์ที่เลือก)
             // Flatten peaks array เพื่อให้ convertToPreviewData ใช้ได้
             const flatPeaks = peaksArr.flat();
@@ -304,21 +329,40 @@ const detectionManager = {
 
     // Convert API result to preview data format
     convertToPreviewData(apiResult) {
+        console.log('[convertToPreviewData] Input apiResult:', apiResult);
+        
         // Show only one file for preview (first file selected)
         let voltage = [], current = [], previewPeaks = [];
         if (window.currentDataFiles && window.currentDataFiles.length > 0) {
             const firstIdx = 0; // Show first file instead of last
             voltage = window.currentDataFiles[firstIdx].voltage;
             current = window.currentDataFiles[firstIdx].current;
-            // Filter peaks for this file only (if possible)
-            if (apiResult && Array.isArray(apiResult.peaks)) {
-                // Peak object mapping - รองรับหลาย format  
-                previewPeaks = apiResult.peaks.filter(p => (p.fileIdx === undefined || p.fileIdx === firstIdx))
-                    .map(peak => ({ 
-                        x: peak.voltage || peak.x || peak.potential || peak.E, 
-                        y: peak.current || peak.y || peak.I || peak.i, 
-                        type: peak.type || peak.peak_type || 'unknown'
-                    }));
+            console.log('[convertToPreviewData] Using currentDataFiles[0], voltage length:', voltage?.length, 'current length:', current?.length);
+            
+            // Handle multi-file peak results (peaks is array of arrays)
+            if (apiResult && apiResult.peaks) {
+                let peaksToProcess = [];
+                
+                if (Array.isArray(apiResult.peaks)) {
+                    // If peaks is array of arrays (multi-file), take first file
+                    if (apiResult.peaks.length > 0 && Array.isArray(apiResult.peaks[0])) {
+                        peaksToProcess = apiResult.peaks[0] || []; // First file's peaks
+                        console.log('[convertToPreviewData] Multi-file detected, using first file peaks:', peaksToProcess.length);
+                    } 
+                    // If peaks is flat array (single file or flattened), filter by fileIdx
+                    else {
+                        peaksToProcess = apiResult.peaks.filter(p => (p.fileIdx === undefined || p.fileIdx === firstIdx));
+                        console.log('[convertToPreviewData] Flat array detected, filtered peaks:', peaksToProcess.length);
+                    }
+                }
+                
+                // Map peaks to preview format
+                previewPeaks = peaksToProcess.map(peak => ({ 
+                    x: peak.voltage || peak.x || peak.potential || peak.E, 
+                    y: peak.current || peak.y || peak.I || peak.i, 
+                    type: peak.type || peak.peak_type || 'unknown'
+                }));
+                console.log('[convertToPreviewData] Mapped peaks:', previewPeaks);
             }
         } else if (window.currentData && window.currentData.voltage && window.currentData.current) {
             voltage = window.currentData.voltage;
@@ -355,17 +399,33 @@ const detectionManager = {
         // Update preview graph
         const previewCanvas = grid.querySelector('.preview-canvas');
         if (previewCanvas) {
+            console.log(`[${method}] Found preview canvas, data:`, previewData);
             const container = previewCanvas.parentElement;
             if (container) {
                 previewCanvas.width = container.clientWidth;
                 previewCanvas.height = container.clientHeight;
+                console.log(`[${method}] Canvas dimensions: ${previewCanvas.width}x${previewCanvas.height}`);
                 const ctx = previewCanvas.getContext('2d');
                 if (ctx) {
                     if (window.previewGraphUtils) {
+                        console.log(`[${method}] Drawing graph with data:`, {
+                            voltage_length: previewData.voltage?.length,
+                            current_length: previewData.current?.length,
+                            peaks_count: previewData.peaks?.length
+                        });
                         window.previewGraphUtils.drawGraph(previewCanvas, previewData);
+                        console.log(`[${method}] Graph drawing completed`);
+                    } else {
+                        console.error(`[${method}] previewGraphUtils not available`);
                     }
+                } else {
+                    console.error(`[${method}] Canvas context not available`);
                 }
+            } else {
+                console.error(`[${method}] Canvas container not found`);
             }
+        } else {
+            console.error(`[${method}] Preview canvas not found in grid`);
         }
         
         // Setup view details button

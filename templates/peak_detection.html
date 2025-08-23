@@ -308,6 +308,39 @@
             margin-bottom: 20px;
         }
 
+        .progress-container {
+            margin-top: 2px;
+            padding: 4px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-container .progress {
+            margin: 0 !important;
+            background-color: #e9ecef;
+            width: 100% !important;
+            position: relative;
+        }
+        
+        .progress-container .progress-bar {
+            position: relative;
+            overflow: visible;
+        }
+        
+        .progress-container .row {
+            margin: 0 !important;
+            width: 100%;
+        }
+        
+        .progress-container .col-4 {
+            padding: 0 2px !important;
+        }
+
         .controls {
             padding: 10px 0;
             border-bottom: 1px solid #dee2e6;
@@ -442,6 +475,8 @@
         .method-content {
             border-bottom: none;
             margin-bottom: 0;
+            overflow: hidden;
+            position: relative;
         }
 
         .start-detection {
@@ -505,6 +540,19 @@
         <div class="row mb-4">
             <div class="col-12">
                 <h2>Peak Detection Analysis</h2>
+                <div class="text-center mt-2">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-success btn-sm" onclick="showInlineProgress('ml')">
+                            <i class="fas fa-brain"></i> Test ML
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="showInlineProgress('prominence')">
+                            <i class="fas fa-chart-line"></i> Test Traditional
+                        </button>
+                        <button class="btn btn-outline-warning btn-sm" onclick="showInlineProgress('derivative')">
+                            <i class="fas fa-layer-group"></i> Test Hybrid
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -519,9 +567,37 @@
                     </div>
                     <div class="method-content text-center">
                         <p class="text-muted mb-3">AI-Enhanced (Best)</p>
-                        <button class="btn btn-success w-100 mb-3 start-detection" data-method="ml" onclick="window.startDetection('ml')">
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="ml" onclick="window.startDetection('ml')" id="ml-start-btn">
                             Start Detection
                         </button>
+                        
+                        <!-- Inline Progress Bar -->
+                        <div class="progress-container" id="ml-progress" style="display: none;">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                     role="progressbar" style="width: 0%" id="ml-progressBar">
+                                    <small id="ml-progressPercent">0%</small>
+                                </div>
+                            </div>
+                            <div class="row text-center" style="margin: 2px 0 0 0;">
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <strong id="ml-currentFile">0</strong>/<span id="ml-totalFiles">0</span> files
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> <span id="ml-elapsedTime">0s</span>
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-success">
+                                        <i class="fas fa-brain"></i> AI Processing
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-center" id="ml-progressMessage" style="margin-top: 2px;">Initializing...</small>
+                        </div>
                     </div>
                     <!-- Analysis Results Grid -->
                     <div class="analysis-grid mt-4" id="ml-analysis" style="display: none;">
@@ -564,9 +640,37 @@
                     </div>
                     <div class="method-content text-center">
                         <p class="text-muted mb-3">Classical Method</p>
-                        <button class="btn btn-success w-100 mb-3 start-detection" data-method="prominence" onclick="window.startDetection('prominence')">
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="prominence" onclick="window.startDetection('prominence')" id="prominence-start-btn">
                             Start Detection
                         </button>
+                        
+                        <!-- Inline Progress Bar -->
+                        <div class="progress-container" id="prominence-progress" style="display: none;">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
+                                     role="progressbar" style="width: 0%" id="prominence-progressBar">
+                                    <small id="prominence-progressPercent">0%</small>
+                                </div>
+                            </div>
+                            <div class="row text-center" style="margin: 2px 0 0 0;">
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <strong id="prominence-currentFile">0</strong>/<span id="prominence-totalFiles">0</span> files
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> <span id="prominence-elapsedTime">0s</span>
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-info">
+                                        <i class="fas fa-chart-line"></i> Traditional
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-center" id="prominence-progressMessage" style="margin-top: 2px;">Initializing...</small>
+                        </div>
                     </div>
                     <!-- Analysis Results Grid -->
                     <div class="analysis-grid mt-4" id="traditional-analysis" style="display: none;">
@@ -609,9 +713,37 @@
                     </div>
                     <div class="method-content text-center">
                         <p class="text-muted mb-3">Combined Approach</p>
-                        <button class="btn btn-success w-100 mb-3 start-detection" data-method="derivative" onclick="window.startDetection('derivative')">
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="derivative" onclick="window.startDetection('derivative')" id="derivative-start-btn">
                             Start Detection
                         </button>
+                        
+                        <!-- Inline Progress Bar -->
+                        <div class="progress-container" id="derivative-progress" style="display: none;">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
+                                     role="progressbar" style="width: 0%" id="derivative-progressBar">
+                                    <small id="derivative-progressPercent">0%</small>
+                                </div>
+                            </div>
+                            <div class="row text-center" style="margin: 2px 0 0 0;">
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <strong id="derivative-currentFile">0</strong>/<span id="derivative-totalFiles">0</span> files
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> <span id="derivative-elapsedTime">0s</span>
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-warning">
+                                        <i class="fas fa-layer-group"></i> Hybrid
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-center" id="derivative-progressMessage" style="margin-top: 2px;">Initializing...</small>
+                        </div>
                     </div>
                     <!-- Analysis Results Grid -->
                     <div class="analysis-grid mt-4" id="hybrid-analysis" style="display: none;">
@@ -704,5 +836,170 @@
     <script src="/static/js/peak_canvas_manager.js"></script>
     <script src="/static/js/peak_graph_utils.js"></script>
     <script src="/static/js/peak_detection.js"></script>
+    
+    <script>
+        // Progress tracking functionality
+        let progressInterval;
+        let currentMethod = null;
+        
+        function showInlineProgress(method) {
+            console.log('[PROGRESS] Showing inline progress for method:', method);
+            currentMethod = method;
+            
+            // Hide button and show progress
+            const startBtn = document.getElementById(method + '-start-btn');
+            const progressContainer = document.getElementById(method + '-progress');
+            
+            if (startBtn) startBtn.style.display = 'none';
+            if (progressContainer) progressContainer.style.display = 'block';
+            
+            // Reset progress display
+            resetProgress(method);
+            startProgressPolling();
+        }
+        
+        function hideInlineProgress(method) {
+            console.log('[PROGRESS] Hiding inline progress for method:', method);
+            
+            // Show button and hide progress
+            const startBtn = document.getElementById(method + '-start-btn');
+            const progressContainer = document.getElementById(method + '-progress');
+            
+            if (startBtn) startBtn.style.display = 'block';
+            if (progressContainer) progressContainer.style.display = 'none';
+            
+            stopProgressPolling();
+            currentMethod = null;
+        }
+        
+        function resetProgress(method) {
+            const progressBar = document.getElementById(method + '-progressBar');
+            const progressPercent = document.getElementById(method + '-progressPercent');
+            const currentFile = document.getElementById(method + '-currentFile');
+            const totalFiles = document.getElementById(method + '-totalFiles');
+            const elapsedTime = document.getElementById(method + '-elapsedTime');
+            const message = document.getElementById(method + '-progressMessage');
+            
+            if (progressBar) progressBar.style.width = '0%';
+            if (progressPercent) progressPercent.textContent = '0%';
+            if (currentFile) currentFile.textContent = '0';
+            if (totalFiles) totalFiles.textContent = '0';
+            if (elapsedTime) elapsedTime.textContent = '0s';
+            if (message) message.textContent = 'Initializing...';
+        }
+        
+        function startProgressPolling() {
+            progressInterval = setInterval(updateProgress, 500); // Poll every 500ms
+        }
+        
+        function stopProgressPolling() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+        
+        async function updateProgress() {
+            if (!currentMethod) return;
+            
+            try {
+                const response = await fetch('/peak_detection/get-progress');
+                const data = await response.json();
+                
+                console.log('[PROGRESS] Update received:', data);
+                
+                if (data.success && data.progress) {
+                    const progress = data.progress;
+                    const method = currentMethod;
+                    
+                    // Update progress bar
+                    const progressBar = document.getElementById(method + '-progressBar');
+                    const progressPercent = document.getElementById(method + '-progressPercent');
+                    if (progressBar && progressPercent) {
+                        progressBar.style.width = progress.percent + '%';
+                        progressPercent.textContent = progress.percent + '%';
+                        console.log('[PROGRESS] Updated progress bar to:', progress.percent + '%');
+                    }
+                    
+                    // Update counters
+                    const currentFileEl = document.getElementById(method + '-currentFile');
+                    const totalFilesEl = document.getElementById(method + '-totalFiles');
+                    const elapsedTimeEl = document.getElementById(method + '-elapsedTime');
+                    
+                    if (currentFileEl) {
+                        currentFileEl.textContent = progress.current_file;
+                        console.log('[PROGRESS] Updated current file to:', progress.current_file);
+                    }
+                    if (totalFilesEl) {
+                        totalFilesEl.textContent = progress.total_files;
+                        console.log('[PROGRESS] Updated total files to:', progress.total_files);
+                    }
+                    if (elapsedTimeEl) {
+                        elapsedTimeEl.textContent = progress.elapsed_time ? progress.elapsed_time + 's' : '0s';
+                    }
+                    
+                    // Update message
+                    const messageEl = document.getElementById(method + '-progressMessage');
+                    if (messageEl) {
+                        messageEl.textContent = progress.message;
+                        console.log('[PROGRESS] Updated message to:', progress.message);
+                    }
+                    
+                    // Hide progress when complete
+                    if (!progress.active && progress.percent === 100) {
+                        console.log('[PROGRESS] Processing complete, hiding progress in 2 seconds');
+                        setTimeout(() => {
+                            hideInlineProgress(method);
+                        }, 2000); // Show complete state for 2 seconds
+                    }
+                }
+            } catch (error) {
+                console.error('[PROGRESS] Error updating progress:', error);
+            }
+        }
+        
+        // Intercept peak detection start to show progress
+        const originalStartDetection = window.startDetection;
+        window.startDetection = function(method) {
+            console.log('[PROGRESS] Starting detection with method:', method);
+            showInlineProgress(method);
+            
+            // Call original function
+            if (originalStartDetection) {
+                return originalStartDetection(method);
+            }
+        };
+        
+        // Also intercept fetch calls to detect when analysis starts
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options) {
+            // Check if this is a peak detection request
+            if (url && url.includes('/get-peaks/')) {
+                console.log('[PROGRESS] Peak detection request detected:', url);
+                // Progress already shown by startDetection
+            }
+            
+            return originalFetch.apply(this, arguments).then(response => {
+                // Check if peak detection is complete
+                if (url && url.includes('/get-peaks/')) {
+                    console.log('[PROGRESS] Peak detection response received');
+                    // Let the polling handle completion
+                }
+                return response;
+            }).catch(error => {
+                if (url && url.includes('/get-peaks/') && currentMethod) {
+                    console.error('[PROGRESS] Peak detection error:', error);
+                    hideInlineProgress(currentMethod);
+                }
+                throw error;
+            });
+        };
+        
+        // Remove modal-related functions since we're not using them anymore
+        function showProgressModal() {
+            console.log('[PROGRESS] Modal test - showing inline progress for ml method');
+            showInlineProgress('ml');
+        }
+    </script>
 </body>
 </html>

@@ -549,9 +549,18 @@ if __name__ == "__main__":
     """Allow direct execution of app.py for development"""
     
     # Configure logging
+    import os
+    log_dir = 'logs'
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('logs/h743poten_dev.log'),
+            logging.StreamHandler()
+        ]
     )
     
     logger = logging.getLogger(__name__)
