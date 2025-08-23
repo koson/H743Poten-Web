@@ -1003,44 +1003,6 @@ def detect_peaks_prominence(voltage, current):
         prominence = current_app.config.get('PEAK_PROMINENCE', 0.1)
         width = current_app.config.get('PEAK_WIDTH', 5)
 
-        # Normalize current for peak detection
-        current_norm = current / np.abs(current).max()
-
-        # Find positive peaks (oxidation)
-        pos_peaks, pos_properties = find_peaks(
-            current_norm,
-            prominence=prominence,
-            width=width
-        )
-
-        # Find negative peaks (reduction)
-        neg_peaks, neg_properties = find_peaks(
-            -current_norm,
-            prominence=prominence,
-            width=width
-        )
-
-        # Format peak data
-        peaks = []
-
-        # Add oxidation peaks
-        for i, peak_idx in enumerate(pos_peaks):
-            peaks.append({
-                'voltage': float(voltage[peak_idx]),
-                'current': float(current[peak_idx]),
-                'type': 'oxidation',
-                'confidence': float(pos_properties['prominences'][i] * 100)
-            })
-
-        # Add reduction peaks
-        for i, peak_idx in enumerate(neg_peaks):
-            peaks.append({
-                'voltage': float(voltage[peak_idx]),
-                'current': float(current[peak_idx]),
-                'type': 'reduction',
-                'confidence': float(neg_properties['prominences'][i] * 100)
-            })
-
         # Use improved baseline detection but with limited iterations for speed
         logger.info("Using improved baseline for traditional method with speed optimization")
         
@@ -1097,6 +1059,68 @@ def detect_peaks_prominence(voltage, current):
             baseline_reverse = simple_linear_fit(voltage[mid:], current[mid:])
             baseline_full = np.concatenate([baseline_forward, baseline_reverse])
             segment_info = {'forward_segment': None, 'reverse_segment': None}
+
+        # Normalize current for peak detection
+        current_norm = current / np.abs(current).max()
+
+        # Find positive peaks (oxidation)
+        pos_peaks, pos_properties = find_peaks(
+            current_norm,
+            prominence=prominence,
+            width=width
+        )
+
+        # Find negative peaks (reduction)
+        neg_peaks, neg_properties = find_peaks(
+            -current_norm,
+            prominence=prominence,
+            width=width
+        )
+
+        # Format peak data with baseline-corrected heights
+        peaks = []
+
+        # Add oxidation peaks
+        for i, peak_idx in enumerate(pos_peaks):
+            peak_voltage = float(voltage[peak_idx])
+            peak_current = float(current[peak_idx])
+            
+            # Calculate baseline current at peak voltage
+            baseline_at_peak = float(baseline_full[peak_idx])
+            
+            # Calculate peak height from baseline
+            peak_height = peak_current - baseline_at_peak
+            
+            peaks.append({
+                'voltage': peak_voltage,
+                'current': peak_current,
+                'type': 'oxidation',
+                'confidence': float(pos_properties['prominences'][i] * 100),
+                'height': float(peak_height),
+                'baseline_current': baseline_at_peak,
+                'enabled': True  # Default enabled for user selection
+            })
+
+        # Add reduction peaks
+        for i, peak_idx in enumerate(neg_peaks):
+            peak_voltage = float(voltage[peak_idx])
+            peak_current = float(current[peak_idx])
+            
+            # Calculate baseline current at peak voltage
+            baseline_at_peak = float(baseline_full[peak_idx])
+            
+            # Calculate peak height from baseline (absolute value for reduction peaks)
+            peak_height = abs(peak_current - baseline_at_peak)
+            
+            peaks.append({
+                'voltage': peak_voltage,
+                'current': peak_current,
+                'type': 'reduction',
+                'confidence': float(neg_properties['prominences'][i] * 100),
+                'height': float(peak_height),
+                'baseline_current': baseline_at_peak,
+                'enabled': True  # Default enabled for user selection
+            })
 
         return {
             'peaks': peaks,

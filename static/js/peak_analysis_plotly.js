@@ -865,7 +865,8 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
         },
         text: peaksArr.map(p => p.type === 'oxidation' ? 'Ox' : 'Red'),
         textposition: 'top center',
-        hovertemplate: '%{text} peak<br>V: %{x:.3f} V<br>i: %{y:.3f} µA<extra></extra>',
+        customdata: peaksArr.map(p => [p.height || 0, p.baseline_current || 0, p.enabled !== false]),
+        hovertemplate: '%{text} peak<br>V: %{x:.3f} V<br>Current: %{y:.3f} µA<br>Height: %{customdata[0]:.3f} µA<br>Baseline: %{customdata[1]:.3f} µA<extra></extra>',
     };
 
     // Layout
@@ -891,8 +892,35 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
         height: 500
     };
 
-    // Combine all traces: CV data, peaks, and baseline traces
-    const allTraces = [cvTrace, peakTrace, ...baselineTraces];
+    // Create vertical drop lines from peaks to baseline
+    const peakDropLines = [];
+    for (let i = 0; i < peaksArr.length; i++) {
+        const peak = peaksArr[i];
+        const peakVoltage = peak.x !== undefined ? peak.x : peak.voltage;
+        const peakCurrent = peak.y !== undefined ? peak.y : peak.current;
+        const baselineCurrent = peak.baseline_current || 0;
+        
+        // Only show drop line if peak is enabled
+        if (peak.enabled !== false) {
+            const dropLineTrace = {
+                x: [peakVoltage, peakVoltage],
+                y: [peakCurrent, baselineCurrent],
+                mode: 'lines',
+                line: {
+                    color: peak.type === 'oxidation' ? '#dc3545' : '#198754',
+                    width: 2,
+                    dash: 'dot'
+                },
+                name: `${peak.type === 'oxidation' ? 'Ox' : 'Red'} Height`,
+                showlegend: false,
+                hoverinfo: 'skip'
+            };
+            peakDropLines.push(dropLineTrace);
+        }
+    }
+
+    // Combine all traces: CV data, peaks, baseline traces, and drop lines
+    const allTraces = [cvTrace, peakTrace, ...baselineTraces, ...peakDropLines];
     
     console.log('[RENDER] About to call Plotly.newPlot with', allTraces.length, 'traces');
     console.log('[RENDER] Traces:', allTraces);
