@@ -1,21 +1,127 @@
 // --- Utility function: Add baseline traces for forward/reverse scan ---
 // Usage: const baselineTraces = getBaselineTraces(xArr, yArr, directionArr)
 // Returns: [traceFwd, traceRev] (array of Plotly trace objects, may be empty)
-function getBaselineTraces(xArr, yArr, directionArr, peaksArr = [], frac = 0.1) {
-    // Validate input arrays first
-    if (!Array.isArray(xArr) || !Array.isArray(yArr) || !Array.isArray(directionArr)) {
-        console.warn('[BASELINE] Invalid input arrays:', {xArr, yArr, directionArr});
-        return [];
+function linearRegression(points) {
+    if (!points || points.length < 2) return null;
+    
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    const n = points.length;
+
+    for (const point of points) {
+        sumX += point.x;
+        sumY += point.y;
+        sumXY += point.x * point.y;
+        sumX2 += point.x * point.x;
     }
-    if (xArr.length === 0 || yArr.length === 0 || directionArr.length === 0) {
-        console.warn('[BASELINE] Empty input arrays');
-        return [];
-    }
-    if (xArr.length !== yArr.length || xArr.length !== directionArr.length) {
-        console.warn('[BASELINE] Array length mismatch:', xArr.length, yArr.length, directionArr.length);
+
+    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    
+    return {slope, intercept};
+}
+
+function inferDirectionFromVoltage(voltageArr) {
+    // Check if we're on a CV measurement page
+    const isCVPage = document.getElementById('cv-controls') || document.getElementById('start-btn');
+    if (!isCVPage) {
+        console.log('[DIRECTION] Not on CV measurement page, skipping direction inference');
         return [];
     }
     
+    if (!Array.isArray(voltageArr) || voltageArr.length < 2) return [];
+    
+    const directions = new Array(voltageArr.length);
+    
+    // Calculate voltage differences between consecutive points
+    const dV = [];
+    for (let i = 1; i < voltageArr.length; i++) {
+        dV.push(voltageArr[i] - voltageArr[i-1]);
+    }
+    
+    // Find turning points where direction changes
+    const turningPoints = [];
+    for (let i = 1; i < dV.length; i++) {
+        if (Math.sign(dV[i]) !== Math.sign(dV[i-1])) {
+            turningPoints.push(i);
+        }
+    }
+    
+    console.log('[DIRECTION] Turning points found at indices:', turningPoints);
+    
+    // If no turning points found, use simple max point method
+    if (turningPoints.length === 0) {
+        let maxV = Math.max(...voltageArr);
+        let maxIndex = voltageArr.indexOf(maxV);
+        
+        for (let i = 0; i < voltageArr.length; i++) {
+            directions[i] = i <= maxIndex ? 'forward' : 'reverse';
+        }
+    } else {
+        // Use turning points to determine direction segments
+        let currentDirection = dV[0] > 0 ? 'forward' : 'reverse';
+        let currentSegStart = 0;
+        
+        turningPoints.forEach(point => {
+            // Fill direction for current segment
+            for (let i = currentSegStart; i <= point; i++) {
+                directions[i] = currentDirection;
+            }
+            // Switch direction for next segment
+            currentDirection = currentDirection === 'forward' ? 'reverse' : 'forward';
+            currentSegStart = point + 1;
+        });
+        
+        // Fill remaining points after last turning point
+        for (let i = currentSegStart; i < voltageArr.length; i++) {
+            directions[i] = currentDirection;
+        }
+    }
+    
+    // Add debug logging
+    const forwardCount = directions.filter(d => d === 'forward').length;
+    const reverseCount = directions.filter(d => d === 'reverse').length;
+    
+    console.log('[DIRECTION] Analysis:', {
+        totalPoints: voltageArr.length,
+        forwardPoints: forwardCount,
+        reversePoints: reverseCount,
+        voltageRange: [Math.min(...voltageArr), Math.max(...voltageArr)].map(v => v.toFixed(4)),
+        firstDirection: directions[0],
+        lastDirection: directions[directions.length - 1]
+    });
+    
+    return directions;
+}
+
+function getBaselineTraces(xArr, yArr, directionArr, peaksArr = [], frac = 0.1) {
+    // Check if we're on a CV measurement page
+    const isCVPage = document.getElementById('cv-controls') || document.getElementById('start-btn');
+    if (!isCVPage) {
+        console.log('[BASELINE] Not on CV measurement page, skipping baseline calculation');
+        return [];
+    }
+    
+    // Validate input arrays first
+    if (!Array.isArray(xArr) || !Array.isArray(yArr)) {
+        console.warn('[BASELINE] Invalid input arrays:', {xArr, yArr});
+        return [];
+    }
+    if (xArr.length === 0 || yArr.length === 0) {
+        console.warn('[BASELINE] Empty input arrays');
+        return [];
+    }
+    if (xArr.length !== yArr.length) {
+        console.warn('[BASELINE] Array length mismatch:', xArr.length, yArr.length);
+        return [];
+    }
+
+    // ถ้าไม่มี directionArr ให้สร้างจาก voltage pattern
+    if (!Array.isArray(directionArr)) {
+        console.log('[BASELINE] Direction array not provided, inferring from voltage pattern...');
+        directionArr = inferDirectionFromVoltage(xArr);
+        console.log('[BASELINE] Inferred directions:', directionArr.slice(0, 5), '... (total:', directionArr.length, ')');
+    }
+
     // Collect all points by direction
     const forwardPoints = [];
     const reversePoints = [];
@@ -27,20 +133,7 @@ function getBaselineTraces(xArr, yArr, directionArr, peaksArr = [], frac = 0.1) 
             reversePoints.push({x: xArr[i], y: yArr[i]});
         }
     }
-    // Helper to get mean Y in a region (e.g. first/last 10% of X)
-    function baselineRegion(points, region = 'start', frac = 0.1) {
-        if (points.length === 0) return null;
-        const sorted = points.slice().sort((a, b) => a.x - b.x);
-        const n = Math.max(1, Math.floor(points.length * frac));
-        let regionPoints;
-        if (region === 'start') regionPoints = sorted.slice(0, n);
-        else regionPoints = sorted.slice(-n);
-        if (!regionPoints || regionPoints.length === 0) return null;
-        const meanY = regionPoints.reduce((sum, p) => sum + p.y, 0) / regionPoints.length;
-        const minX = regionPoints[0].x;
-        const maxX = regionPoints[regionPoints.length - 1].x;
-        return {meanY, minX, maxX};
-    }
+
     // Find main oxidation/reduction peaks (if any)
     let oxPeak = null, redPeak = null;
     if (Array.isArray(peaksArr)) {
@@ -48,79 +141,292 @@ function getBaselineTraces(xArr, yArr, directionArr, peaksArr = [], frac = 0.1) 
         redPeak = peaksArr.find(p => (p.type === 'reduction' || p.type === 'Red') && p.x !== undefined);
     }
     const traces = [];
-    // Forward baseline: เฉพาะช่วงก่อน peak oxidation (หรือทั้งช่วงถ้าไม่มี peak)
-    if (Array.isArray(forwardPoints) && forwardPoints.length > 0) {
-        let xEnd = oxPeak && typeof oxPeak.x === 'number' ? oxPeak.x : (forwardPoints.length > 0 ? forwardPoints[forwardPoints.length-1].x : undefined);
-        let xStart = (forwardPoints.length > 0 ? forwardPoints[0].x : undefined);
-        if (typeof xStart === 'number' && typeof xEnd === 'number') {
-            // เฉลี่ย y เฉพาะช่วงต้น (ก่อน peak)
-            const region = forwardPoints.filter(p => typeof p.x === 'number' && p.x <= xEnd);
-            if (region.length > 0) {
-                const meanY = region.reduce((sum, p) => sum + p.y, 0) / region.length;
+    // Helper function to find linear regions near peaks
+    const findLinearRegion = (points, peakX, direction = 'forward') => {
+        const minSize = 20; // Minimum region size
+        const maxSlopeDiff = 1e-4; // Maximum slope variation allowed
+        
+        // Find nearest point to peak
+        const peakIndex = points.reduce((closest, point, index) => {
+            const currentDiff = Math.abs(point.x - peakX);
+            const closestDiff = Math.abs(points[closest].x - peakX);
+            return currentDiff < closestDiff ? index : closest;
+        }, 0);
+        
+        console.log(`[BASELINE] ${direction} peak search:`, {
+            targetX: peakX,
+            foundIndex: peakIndex,
+            foundX: points[peakIndex]?.x,
+            totalPoints: points.length
+        });
+        
+        // Search for most linear region
+        let bestPoints = [];
+        let bestVariation = Infinity;
+        
+        const searchRange = direction === 'forward' ? 
+            // For forward scan, search before peak
+            {start: 0, end: peakIndex} :
+            // For reverse scan, search after peak
+            {start: peakIndex, end: points.length};
+            
+        // Try windows of different sizes
+        for (let size = minSize; size <= Math.min(40, Math.abs(searchRange.end - searchRange.start)); size += 5) {
+            const windowStarts = direction === 'forward' ?
+                // Forward: try windows ending near peak
+                Array.from({length: 30}, (_, i) => Math.max(0, peakIndex - size - i)) :
+                // Reverse: try windows starting near peak
+                Array.from({length: 30}, (_, i) => Math.min(points.length - size, peakIndex + i));
+                
+            for (const start of windowStarts) {
+                const window = points.slice(start, start + size);
+                if (window.length < minSize) continue;
+                
+                // Calculate slopes between consecutive points
+                const slopes = [];
+                for (let i = 1; i < window.length; i++) {
+                    const slope = (window[i].y - window[i-1].y) / 
+                                (window[i].x - window[i-1].x);
+                    slopes.push(slope);
+                }
+                
+                // Calculate slope variation in this window
+                const avgSlope = slopes.reduce((a, b) => a + b) / slopes.length;
+                const variation = slopes.reduce((acc, slope) => 
+                    acc + Math.abs(slope - avgSlope), 0) / slopes.length;
+                
+                // Update if this is the most linear region found
+                if (variation < bestVariation && variation < maxSlopeDiff) {
+                    bestVariation = variation;
+                    bestPoints = window;
+                    console.log(`[BASELINE] Found better ${direction} region:`, {
+                        start,
+                        size,
+                        variation: variation.toExponential(3),
+                        avgSlope: avgSlope.toExponential(3),
+                        xRange: [window[0].x, window[window.length-1].x]
+                    });
+                }
+            }
+        }
+        
+        console.log(`[BASELINE] ${direction} region analysis:`, {
+            bestVariation: bestVariation.toExponential(3),
+            pointsFound: bestPoints.length,
+            searchRange
+        });
+        
+        // Return found points or fallback to default
+        if (bestPoints.length >= minSize) return bestPoints;
+        
+        // Fallback: use points near peak
+        return direction === 'forward' ?
+            points.slice(Math.max(0, peakIndex - minSize), peakIndex) :
+            points.slice(peakIndex, Math.min(points.length, peakIndex + minSize));
+    };
+    
+    // Forward baseline: look for linear region before oxidation peak
+    if (Array.isArray(forwardPoints) && forwardPoints.length >= 2 && oxPeak) {
+        const prePeakPoints = findLinearRegion(forwardPoints, oxPeak.x, 'forward');
+        
+        console.log('[BASELINE] Forward baseline points:', {
+            total: forwardPoints.length,
+            used: prePeakPoints.length,
+            first: prePeakPoints[0],
+            last: prePeakPoints[prePeakPoints.length - 1]
+        });
+        
+        if (prePeakPoints.length >= 2) {
+            const regression = linearRegression(prePeakPoints);
+            if (regression) {
+                const {slope, intercept} = regression;
+                console.log('[BASELINE] Forward regression:', {slope, intercept});
+                
+                // หาจุดเริ่มและจุดสิ้นสุดของ baseline
+                const xStart = Math.min(...forwardPoints.map(p => p.x));
+                const xEnd = oxPeak ? oxPeak.x : Math.max(...forwardPoints.map(p => p.x));
+                
+                // สร้างเส้น baseline
+                const y1 = slope * xStart + intercept;
+                const y2 = slope * xEnd + intercept;
+                
+                // แสดงจุดที่ใช้คำนวณ baseline
+                traces.push({
+                    x: prePeakPoints.map(p => p.x),
+                    y: prePeakPoints.map(p => p.y),
+                    type: 'scatter',
+                    mode: 'markers',
+                    name: 'Forward Base Points',
+                    marker: {
+                        color: 'red',
+                        size: 8,
+                        symbol: 'circle-open'
+                    },
+                    showlegend: true,
+                    hovertemplate: 'Base point<br>V: %{x:.3f}<br>I: %{y:.3f}<extra></extra>'
+                });
+
+                // สร้างเส้น baseline
                 traces.push({
                     x: [xStart, xEnd],
-                    y: [meanY, meanY],
+                    y: [y1, y2],
                     type: 'scatter',
                     mode: 'lines',
                     name: 'Forward Baseline',
                     line: {dash: 'dash', color: 'red', width: 2},
                     showlegend: true,
                     hoverinfo: 'skip',
-                    legendgroup: 'baseline',
-                    visible: true
+                    legendgroup: 'baseline'
                 });
-                // Vertical line to peak
-                if (oxPeak && typeof oxPeak.x === 'number' && typeof oxPeak.y === 'number') {
+
+                // สร้างเส้นตั้งฉากไปยัง peak
+                if (oxPeak) {
+                    const baselineY = slope * oxPeak.x + intercept;
                     traces.push({
                         x: [oxPeak.x, oxPeak.x],
-                        y: [meanY, oxPeak.y],
+                        y: [baselineY, oxPeak.y],
                         type: 'scatter',
                         mode: 'lines',
-                        name: 'Ox Peak Line',
+                        name: 'Forward Peak Height',
                         line: {dash: 'dot', color: 'red', width: 1.5},
                         showlegend: false,
                         hoverinfo: 'skip',
-                        legendgroup: 'baseline',
-                        visible: true
+                        legendgroup: 'baseline'
                     });
                 }
             }
         }
     }
-    // Reverse baseline: เฉพาะช่วงหลัง peak reduction (หรือทั้งช่วงถ้าไม่มี peak)
-    if (Array.isArray(reversePoints) && reversePoints.length > 0) {
-        let xStart = redPeak && typeof redPeak.x === 'number' ? redPeak.x : (reversePoints.length > 0 ? reversePoints[0].x : undefined);
-        let xEnd = (reversePoints.length > 0 ? reversePoints[reversePoints.length-1].x : undefined);
-        if (typeof xStart === 'number' && typeof xEnd === 'number') {
-            // เฉลี่ย y เฉพาะช่วงปลาย (หลัง peak)
-            const region = reversePoints.filter(p => typeof p.x === 'number' && p.x >= xStart);
-            if (region.length > 0) {
-                const meanY = region.reduce((sum, p) => sum + p.y, 0) / region.length;
+
+    // Reverse baseline: look for linear region after reduction peak
+    if (Array.isArray(reversePoints) && reversePoints.length >= 2 && redPeak) {
+        // Find linear region by looking forwards from peak
+        const findLinearRegionFromPeak = (points, peakX) => {
+            const minSize = 20; // Increased minimum points
+            const maxSlopeDiff = 1e-4; // Relaxed slope tolerance
+            
+            // Find peak index - use nearest point if exact match not found
+            let peakIndex = points.findIndex(p => Math.abs(p.x - peakX) < 0.01);
+            if (peakIndex === -1) {
+                // Find nearest point to peak
+                peakIndex = points.reduce((closest, point, index) => {
+                    const currentDiff = Math.abs(point.x - peakX);
+                    const closestDiff = Math.abs(points[closest].x - peakX);
+                    return currentDiff < closestDiff ? index : closest;
+                }, 0);
+            }
+            console.log('[BASELINE] Reverse peak search:', {
+                targetX: peakX,
+                foundIndex: peakIndex,
+                foundX: points[peakIndex]?.x,
+                totalPoints: points.length
+            });
+            
+            // Look forwards from peak for consistent slope
+            let currentIndex = peakIndex;
+            let slopeWindow = [];
+            let baselinePoints = [];
+            
+            while (currentIndex < points.length - minSize) {
+                // Calculate slope over a small window
+                const slope = (points[currentIndex+5].y - points[currentIndex].y) / 
+                            (points[currentIndex+5].x - points[currentIndex].x);
+                
+                // Keep track of recent slopes
+                slopeWindow.push(slope);
+                if (slopeWindow.length > 3) slopeWindow.shift();
+                
+                // Check if slopes are consistent
+                if (slopeWindow.length === 3) {
+                    const variations = Math.max(...slopeWindow) - Math.min(...slopeWindow);
+                    if (variations < maxSlopeDiff) {
+                        baselinePoints = points.slice(currentIndex, currentIndex+10);
+                        break;
+                    }
+                }
+                
+                currentIndex++;
+            }
+            
+            // If no good region found, use default end points
+            if (baselinePoints.length === 0) {
+                baselinePoints = points.slice(-minSize);
+            }
+            
+            console.log('[BASELINE] Reverse region found:', {
+                peakX,
+                peakIndex,
+                baselineStart: baselinePoints[0]?.x,
+                baselineEnd: baselinePoints[baselinePoints.length-1]?.x,
+                pointsCount: baselinePoints.length
+            });
+            
+            return baselinePoints;
+        };
+        
+        const postPeakPoints = findLinearRegionFromPeak(reversePoints, redPeak.x);
+        
+        console.log('[BASELINE] Reverse baseline points:', {
+            total: reversePoints.length,
+            used: postPeakPoints.length,
+            first: postPeakPoints[0],
+            last: postPeakPoints[postPeakPoints.length - 1]
+        });
+        
+        if (postPeakPoints.length >= 2) {
+            const regression = linearRegression(postPeakPoints);
+            if (regression) {
+                const {slope, intercept} = regression;
+                console.log('[BASELINE] Reverse regression:', {slope, intercept});
+                
+                // หาจุดเริ่มและจุดสิ้นสุดของ baseline
+                const xStart = redPeak ? redPeak.x : Math.min(...reversePoints.map(p => p.x));
+                const xEnd = Math.max(...reversePoints.map(p => p.x));
+                
+                // แสดงจุดที่ใช้คำนวณ baseline
+                traces.push({
+                    x: postPeakPoints.map(p => p.x),
+                    y: postPeakPoints.map(p => p.y),
+                    type: 'scatter',
+                    mode: 'markers',
+                    name: 'Reverse Base Points',
+                    marker: {
+                        color: 'blue',
+                        size: 8,
+                        symbol: 'circle-open'
+                    },
+                    showlegend: true,
+                    hovertemplate: 'Base point<br>V: %{x:.3f}<br>I: %{y:.3f}<extra></extra>'
+                });
+                
+                // สร้างเส้น baseline
+                const y1 = slope * xStart + intercept;
+                const y2 = slope * xEnd + intercept;
                 traces.push({
                     x: [xStart, xEnd],
-                    y: [meanY, meanY],
+                    y: [y1, y2],
                     type: 'scatter',
                     mode: 'lines',
                     name: 'Reverse Baseline',
                     line: {dash: 'dash', color: 'blue', width: 2},
                     showlegend: true,
                     hoverinfo: 'skip',
-                    legendgroup: 'baseline',
-                    visible: true
+                    legendgroup: 'baseline'
                 });
-                // Vertical line to peak
-                if (redPeak && typeof redPeak.x === 'number' && typeof redPeak.y === 'number') {
+
+                // สร้างเส้นตั้งฉากไปยัง peak
+                if (redPeak) {
+                    const baselineY = slope * redPeak.x + intercept;
                     traces.push({
                         x: [redPeak.x, redPeak.x],
-                        y: [meanY, redPeak.y],
+                        y: [baselineY, redPeak.y],
                         type: 'scatter',
                         mode: 'lines',
-                        name: 'Red Peak Line',
+                        name: 'Reverse Peak Height',
                         line: {dash: 'dot', color: 'blue', width: 1.5},
                         showlegend: false,
                         hoverinfo: 'skip',
-                        legendgroup: 'baseline',
-                        visible: true
+                        legendgroup: 'baseline'
                     });
                 }
             }
@@ -135,6 +441,13 @@ function getBaselineTraces(xArr, yArr, directionArr, peaksArr = [], frac = 0.1) 
 
 class CVMeasurement {
     constructor() {
+        // Check if we're on a CV measurement page
+        const isCVPage = document.getElementById('cv-controls') || document.getElementById('start-btn');
+        if (!isCVPage) {
+            console.log('[CV] Not on a CV measurement page, skipping initialization');
+            return;
+        }
+        
         this.isRunning = false;
         this.isPaused = false;
         this.currentParams = null;
@@ -152,8 +465,11 @@ class CVMeasurement {
         this.lastPlotUpdate = 0;
         this.plotUpdateThrottle = 500; // Update plot max every 500ms
         
-        this.initializeUI();
-        this.initializePlot();
+        // Initialize components with retry
+        setTimeout(() => {
+            this.initializeUI();
+            this.initializePlot();
+        }, 100); // Small delay to ensure DOM is ready
     }
     
     initializeUI() {
@@ -1358,55 +1674,63 @@ class CVMeasurement {
 
 // Initialize CV measurement when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('[CV] DOM loaded, checking for cv-controls...');
+    console.log('[CV] DOM loaded, checking page...');
     
-    // Wait a bit for other scripts to initialize
+    // Check if this is a CV measurement page
+    const isCVPage = document.getElementById('cv-controls') || document.getElementById('start-btn');
+    
+    if (!isCVPage) {
+        console.log('[CV] Not a CV measurement page, skipping initialization');
+        return;
+    }
+    
+    console.log('[CV] CV measurement page detected, initializing...');
+    
+    // Wait a bit longer for other scripts to initialize
     setTimeout(() => {
-        if (document.getElementById('cv-controls')) {
-            console.log('[CV] Found cv-controls, initializing CV measurement...');
+        // Initialize CV measurement if needed
+        if (!window.cvMeasurement) {
+            console.log('[CV] Creating CV measurement instance...');
             window.cvMeasurement = new CVMeasurement();
             
-            // Load defaults on page load
-            window.cvMeasurement.loadDefaults();
-        } else {
-            console.log('[CV] cv-controls not found, looking for start-btn...');
-            if (document.getElementById('start-btn')) {
-                console.log('[CV] Found start-btn, initializing CV measurement for measurement page...');
-                window.cvMeasurement = new CVMeasurement();
-                
-                // Force check connection state every second
-                setInterval(() => {
-                    if (window.cvMeasurement) {
-                        console.log('[CV] Periodic UI update check...');
-                        window.cvMeasurement.updateUIState();
-                    }
-                }, 1000);
-            } else {
-                console.log('[CV] Neither cv-controls nor start-btn found, skipping CV initialization');
+            // Load defaults if available
+            if (typeof window.cvMeasurement.loadDefaults === 'function') {
+                window.cvMeasurement.loadDefaults();
             }
+            
+            // Setup periodic UI updates
+            setInterval(() => {
+                if (window.cvMeasurement && typeof window.cvMeasurement.updateUIState === 'function') {
+                    window.cvMeasurement.updateUIState();
+                }
+            }, 1000);
+            
+            console.log('[CV] Initialization complete');
+        } else {
+            console.log('[CV] CV measurement already initialized');
         }
         
         // Add Peak Detection Analysis link handler
-    const peakDetectionBtn = document.getElementById('peak-detection-btn');
-    if (peakDetectionBtn) {
-        peakDetectionBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Check if we have CV data
-            const cvData = localStorage.getItem('lastCVData');
-            if (!cvData) {
-                if (window.cvMeasurement) {
-                    window.cvMeasurement.showMessage('No CV data available for analysis', 'warning');
+        const peakDetectionBtn = document.getElementById('peak-detection-btn');
+        if (peakDetectionBtn) {
+            peakDetectionBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Check if we have CV data
+                const cvData = localStorage.getItem('lastCVData');
+                if (!cvData) {
+                    if (window.cvMeasurement) {
+                        window.cvMeasurement.showMessage('No CV data available for analysis', 'warning');
+                    }
+                    return;
                 }
-                return;
-            }
-            
-            // Navigate to peak detection page
-            window.location.href = '/peak-detection';
-        });
-    }
-    
-    // Update UI state based on connection
+                
+                // Navigate to peak detection page
+                window.location.href = '/peak-detection';
+            });
+        }
+        
+            // Update UI state based on connection
         // Check if connectionState exists and has addEventListener
         if (typeof connectionState !== 'undefined' && connectionState.addListener) {
             console.log('[CV] Setting up connectionState listener...');

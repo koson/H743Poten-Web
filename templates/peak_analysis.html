@@ -131,6 +131,34 @@
         .toolbar button {
             margin-right: 10px;
         }
+
+        .baseline-control-group {
+            border-top: 1px solid #dee2e6;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .baseline-info {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .value-label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .value {
+            color: #212529;
+            font-family: 'Consolas', monospace;
+        }
+
+        .badge.bg-success, .badge.bg-danger {
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 <body>
@@ -154,7 +182,16 @@
             <div class="col-md-3">
                 <div class="controls mb-3">
                     <button id="exportPeakDataBtn" class="btn btn-primary btn-sm w-100 mb-2">
-                        <i class="bi bi-download"></i> Export Data
+                        <i class="bi bi-download"></i> Export Peak Data
+                    </button>
+                    <button id="exportBaselineBtn" class="btn btn-outline-primary btn-sm w-100 mb-2">
+                        <i class="bi bi-file-earmark-spreadsheet"></i> Export Baseline
+                    </button>
+                    <button id="toggleBaselineBtn" class="btn btn-outline-secondary btn-sm w-100 mb-2">
+                        <i class="bi bi-graph-up"></i> Show/Hide Baseline
+                    </button>
+                    <button id="recalculateBaselineBtn" class="btn btn-outline-info btn-sm w-100 mb-2">
+                        <i class="bi bi-arrow-clockwise"></i> Recalculate Baseline
                     </button>
                 </div>
                 <div class="data-info mb-3">
@@ -266,6 +303,7 @@
                 }
                 
                 setupToolbar();
+                setupBaselineControls(); // Setup baseline control buttons
                 // On change: single select
                 traceSelect.addEventListener('change', function() {
                     const idx = parseInt(this.value);
@@ -322,7 +360,12 @@
             } else if (peaks && typeof peaks === 'object') {
                 peaksArr = Object.values(peaks);
             }
-            peakList.innerHTML = peaksArr.length ? peaksArr.map((peak, index) => `
+            peakList.innerHTML = peaksArr.length ? peaksArr.map((peak, index) => {
+                let heightInfo = '';
+                if (peak.height !== undefined) {
+                    heightInfo = `<div><span class="value-label">Height:</span> <span class="value">${peak.height.toFixed(3)} µA</span></div>`;
+                }
+                return `
                 <div class="peak-item" data-index="${index}">
                     <div class="peak-type">
                         <span class="type-badge ${peak.type}">${peak.type}</span>
@@ -330,9 +373,10 @@
                     <div class="peak-values">
                         <div><span class="value-label">V:</span> <span class="value">${(peak.x !== undefined ? peak.x : peak.voltage).toFixed(3)}</span></div>
                         <div><span class="value-label">i:</span> <span class="value">${(peak.y !== undefined ? peak.y : peak.current).toFixed(3)}</span></div>
+                        ${heightInfo}
                     </div>
                 </div>
-            `).join('') : '<div class="text-muted p-2">No peaks detected</div>';
+            `}).join('') : '<div class="text-muted p-2">No peaks detected</div>';
         }
 
         function updateDataInfo(data, peaks) {
@@ -356,6 +400,19 @@
                 // Single trace format
                 nPoints = data.voltage.length || 0;
             }
+            
+            // Calculate peak heights with baseline
+            let peaksWithHeight = 0;
+            if (Array.isArray(peaks)) {
+                peaksWithHeight = peaks.filter(p => p.height !== undefined).length;
+            }
+            
+            // Baseline info
+            let baselineStatus = 'Not calculated';
+            if (window.currentBaselineInfo) {
+                baselineStatus = 'Available';
+            }
+            
             dataInfo.innerHTML = `
                 <h6 class="mb-3">Analysis Summary</h6>
                 <div class="mb-2">
@@ -363,6 +420,12 @@
                 </div>
                 <div class="mb-2">
                     <strong>Peaks Detected:</strong> ${nPeaks}
+                </div>
+                <div class="mb-2">
+                    <strong>Peak Heights:</strong> ${peaksWithHeight}/${nPeaks}
+                </div>
+                <div class="mb-2">
+                    <strong>Baseline Status:</strong> <span class="badge ${baselineStatus === 'Available' ? 'bg-success' : 'bg-secondary'}">${baselineStatus}</span>
                 </div>
                 <div class="mb-2">
                     <strong>Data Points:</strong> ${nPoints}
