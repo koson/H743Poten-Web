@@ -1,0 +1,110 @@
+{
+  "measurements": {
+    "999": {
+      "filename": "measurement_999.csv",
+      "file_path": "cv_data/measurement_999.csv",
+      "data_points": 5,
+      "scan_rate": null,
+      "timestamp": null,
+      "original_filename": null,
+      "exported_at": "2025-08-24T14:24:41.928209",
+      "source": "auto_export"
+    },
+    "45": {
+      "filename": "measurement_45_100.0mVs_2025-08-24T14-30-41.789029.csv",
+      "file_path": "cv_data/measurement_45_100.0mVs_2025-08-24T14-30-41.789029.csv",
+      "data_points": 5,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-24 14:30:41.789029",
+      "original_filename": "test_auto_export.csv",
+      "exported_at": "2025-08-24T14:30:42.113421",
+      "source": "auto_export"
+    },
+    "49": {
+      "filename": "measurement_49_50.0mVs_2025-08-24T14-52-14.085440.csv",
+      "file_path": "cv_data/measurement_49_50.0mVs_2025-08-24T14-52-14.085440.csv",
+      "data_points": 6,
+      "scan_rate": 50.0,
+      "timestamp": "2025-08-24 14:52:14.085440",
+      "original_filename": "test_peak_analysis.csv",
+      "exported_at": "2025-08-24T14:52:14.507129",
+      "source": "auto_export"
+    },
+    "50": {
+      "filename": "measurement_50_200.0mVs_2025-08-24T14-54-29.110361.csv",
+      "file_path": "cv_data/measurement_50_200.0mVs_2025-08-24T14-54-29.110361.csv",
+      "data_points": 8,
+      "scan_rate": 200.0,
+      "timestamp": "2025-08-24 14:54:29.110361",
+      "original_filename": "final_test.csv",
+      "exported_at": "2025-08-24T14:54:29.527049",
+      "source": "auto_export"
+    },
+    "54": {
+      "filename": "measurement_54_100.0mVs_2025-08-24T14-57-55.731711.csv",
+      "file_path": "cv_data/measurement_54_100.0mVs_2025-08-24T14-57-55.731711.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-24 14:57:55.731711",
+      "original_filename": "analysis_2025-08-24T07-57-56.csv",
+      "exported_at": "2025-08-24T14:57:56.130643",
+      "source": "auto_export"
+    },
+    "55": {
+      "filename": "measurement_55_100.0mVs_2025-08-24T14-58-04.897627.csv",
+      "file_path": "cv_data/measurement_55_100.0mVs_2025-08-24T14-58-04.897627.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-24 14:58:04.897627",
+      "original_filename": "analysis_2025-08-24T07-58-04.csv",
+      "exported_at": "2025-08-24T14:58:05.257605",
+      "source": "auto_export"
+    },
+    "56": {
+      "filename": "measurement_56_100.0mVs_2025-08-24T15-05-08.794961.csv",
+      "file_path": "cv_data/measurement_56_100.0mVs_2025-08-24T15-05-08.794961.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-24 15:05:08.794961",
+      "original_filename": "analysis_2025-08-24T08-05-09.csv",
+      "exported_at": "2025-08-24T15:05:09.148263",
+      "source": "auto_export"
+    },
+    "57": {
+      "filename": "measurement_57_100.0mVs_2025-08-24T15-05-52.417042.csv",
+      "file_path": "cv_data/measurement_57_100.0mVs_2025-08-24T15-05-52.417042.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-24 15:05:52.417042",
+      "original_filename": "analysis_2025-08-24T08-05-52.csv",
+      "exported_at": "2025-08-24T15:05:52.853229",
+      "source": "auto_export"
+    },
+    "58": {
+      "filename": "measurement_58_100.0mVs_2025-08-24T15-24-35.437150.csv",
+      "file_path": "cv_data/measurement_58_100.0mVs_2025-08-24T15-24-35.437150.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-24 15:24:35.437150",
+      "original_filename": "analysis_2025-08-24T08-24-36.csv",
+      "exported_at": "2025-08-24T15:24:35.764022",
+      "source": "auto_export"
+    },
+    "59": {
+      "filename": "measurement_59_100.0mVs_2025-08-24T15-24-50.186700.csv",
+      "file_path": "cv_data/measurement_59_100.0mVs_2025-08-24T15-24-50.186700.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-24 15:24:50.186700",
+      "original_filename": "analysis_2025-08-24T08-24-50.csv",
+      "exported_at": "2025-08-24T15:24:50.570764",
+      "source": "auto_export"
+    }
+  },
+  "metadata": {
+    "version": "1.0",
+    "description": "Hybrid CV data mapping system",
+    "last_updated": "2025-08-24T15:24:50.570814",
+    "total_measurements": 10
+  }
+}

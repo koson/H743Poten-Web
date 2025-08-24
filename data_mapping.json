@@ -1,0 +1,37 @@
+{
+  "measurements": {
+    "41": {
+      "scan_rate": 100,
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_05.csv",
+      "timestamp": "2025-08-24T12:15:37",
+      "file_path": "sample_data/Palmsens_0.5mM_CV_100mVpS_E1_scan_05.csv",
+      "notes": "100 mV/s measurement"
+    },
+    "42": {
+      "scan_rate": 100,
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_05.csv",
+      "timestamp": "2025-08-24T12:15:54",
+      "file_path": "sample_data/Palmsens_0.5mM_CV_100mVpS_E1_scan_05.csv",
+      "notes": "100 mV/s measurement - replicate"
+    },
+    "23": {
+      "scan_rate": 400,
+      "filename": "Pipot_Ferro_0_5mM_50mVpS_E4_scan_05.csv",
+      "timestamp": "2025-08-24T09:44:07",
+      "file_path": "sample_data/Pipot_Ferro_0_5mM_50mVpS_E4_scan_05.csv",
+      "notes": "400 mV/s measurement"
+    },
+    "24": {
+      "scan_rate": 400,
+      "filename": "Pipot_Ferro_0_5mM_50mVpS_E4_scan_05.csv",
+      "timestamp": "2025-08-24T10:05:07",
+      "file_path": "sample_data/Pipot_Ferro_0_5mM_50mVpS_E4_scan_05.csv",
+      "notes": "400 mV/s measurement - replicate"
+    }
+  },
+  "metadata": {
+    "created": "2025-08-24",
+    "version": "1.0",
+    "description": "Mapping between measurement IDs and actual CV data files"
+  }
+}

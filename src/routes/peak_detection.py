@@ -12,10 +12,199 @@ import glob
 import json
 from datetime import datetime
 
+# Import parameter logging
+try:
+    from ..services.parameter_logging import parameter_logger
+except ImportError:
+    from services.parameter_logging import parameter_logger
+
 # Set up logging
 logger = logging.getLogger(__name__)
 
 peak_detection_bp = Blueprint('peak_detection', __name__)
+
+def extract_sample_info_from_filename(filename):
+    """Extract sample information from filename with improved normalization"""
+    if not filename:
+        return {
+            'sample_id': f'sample_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
+            'instrument_type': 'unknown',
+            'scan_rate': None,
+            'concentration': None
+        }
+    
+    filename_lower = filename.lower()
+    import re
+    
+    # Determine instrument type
+    if 'palmsens' in filename_lower:
+        instrument_type = 'palmsens'
+    elif any(x in filename_lower for x in ['pipot', 'ferro', 'stm32']):
+        instrument_type = 'stm32'
+    else:
+        instrument_type = 'unknown'
+    
+    # Extract scan rate with comprehensive patterns
+    scan_rate = None
+    scan_patterns = [
+        r'(\d+)mvps',      # 100mvps
+        r'(\d+)mv_?ps',    # 100mvpS, 100mv_ps  
+        r'(\d+)mv[/_]?s',  # 100mvs, 100mv_s, 100mv/s
+    ]
+    
+    for pattern in scan_patterns:
+        scan_match = re.search(pattern, filename_lower)
+        if scan_match:
+            scan_rate = int(scan_match.group(1))
+            break
+    
+    # Extract concentration with comprehensive patterns
+    concentration = None
+    
+    # Pattern 1: Decimal format (5.0mm, 0.5mm)
+    decimal_match = re.search(r'(\d+\.\d+)mm', filename_lower)
+    if decimal_match:
+        concentration = float(decimal_match.group(1))
+    
+    # Pattern 2: Underscore format (5_0mm -> 5.0, 0_5mm -> 0.5)
+    elif re.search(r'(\d+)_(\d+)mm', filename_lower):
+        underscore_match = re.search(r'(\d+)_(\d+)mm', filename_lower)
+        whole = int(underscore_match.group(1))
+        decimal = int(underscore_match.group(2))
+        
+        # Special handling for different formats
+        if whole == 0 and decimal == 5:
+            # 0_5mm -> 0.5mm
+            concentration = 0.5
+        elif whole > 0 and decimal == 0:
+            # 5_0mm -> 5.0mm
+            concentration = float(whole)
+        else:
+            # General case: treat as decimal
+            concentration = float(f"{whole}.{decimal}")
+    
+    # Pattern 3: Simple integer format (5mm)
+    elif re.search(r'(\d+)mm', filename_lower):
+        simple_match = re.search(r'(\d+)mm', filename_lower)
+        concentration = float(simple_match.group(1))
+    
+    # Generate highly standardized sample_id for consistent pairing
+    if concentration is not None and scan_rate is not None:
+        # Always use the same format regardless of input format
+        # Convert concentration to consistent integer representation when possible
+        if concentration == int(concentration):
+            # Whole numbers: 5mM, 1mM
+            conc_str = f"{int(concentration)}mM"
+        else:
+            # Decimals: always use underscore format for consistency
+            # 0.5 -> 0_5mM, 2.5 -> 2_5mM
+            whole_part = int(concentration)
+            decimal_part = int((concentration - whole_part) * 10)
+            conc_str = f"{whole_part}_{decimal_part}mM"
+        
+        # Standardized sample_id format
+        sample_id = f"sample_{conc_str}_{scan_rate}mVpS"
+    else:
+        # Fallback: create meaningful ID from filename
+        base_name = re.sub(r'\.(csv|txt)$', '', filename, flags=re.IGNORECASE)
+        base_name = re.sub(r'[^a-zA-Z0-9_]', '_', base_name)
+        
+        # Remove common instrument-specific prefixes
+        for prefix in ['palmsens_', 'pipot_ferro_', 'pipot_']:
+            if base_name.lower().startswith(prefix):
+                base_name = base_name[len(prefix):]
+                break
+        
+        sample_id = f"sample_{base_name}"
+    
+    return {
+        'sample_id': sample_id,
+        'instrument_type': instrument_type,
+        'scan_rate': scan_rate,
+        'concentration': concentration
+    }
+
+def save_analysis_to_log(voltage, current, peaks, metadata=None):
+    """Save analysis results to parameter log"""
+    try:
+        if not metadata:
+            metadata = {}
+        
+        # Extract info from filename if provided
+        filename = metadata.get('filename', '')
+        sample_info = extract_sample_info_from_filename(filename)
+        
+        # Prepare measurement data
+        measurement_data = {
+            'sample_id': sample_info['sample_id'],
+            'instrument_type': sample_info['instrument_type'],
+            'timestamp': datetime.now(),
+            'scan_rate': sample_info['scan_rate'],
+            'voltage_start': float(np.min(voltage)) if len(voltage) > 0 else None,
+            'voltage_end': float(np.max(voltage)) if len(voltage) > 0 else None,
+            'data_points': len(voltage),
+            'original_filename': filename,
+            'user_notes': metadata.get('user_notes', ''),
+        }
+        
+        # For STM32, store raw data if available
+        if sample_info['instrument_type'] == 'stm32' and 'raw_data' in metadata:
+            measurement_data['raw_data'] = metadata['raw_data']
+        
+        # Process peaks for logging
+        processed_peaks = []
+        for i, peak in enumerate(peaks):
+            peak_data = {
+                'type': peak.get('type', 'unknown'),
+                'voltage': peak.get('x', peak.get('voltage')),
+                'current': peak.get('y', peak.get('current')),
+                'height': peak.get('height', 0),
+                'enabled': peak.get('enabled', True),
+                'peak_index': i
+            }
+            
+            # Add baseline information if available
+            if 'baseline' in peak:
+                baseline = peak['baseline']
+                if isinstance(baseline, dict):
+                    peak_data.update({
+                        'baseline_current': baseline.get('current'),
+                        'baseline_slope': baseline.get('slope'),
+                        'baseline_r2': baseline.get('r2'),
+                        'baseline_voltage_start': baseline.get('voltage_start'),
+                        'baseline_voltage_end': baseline.get('voltage_end')
+                    })
+            
+            # Add raw data for STM32 peaks
+            if sample_info['instrument_type'] == 'stm32' and 'raw' in peak:
+                raw = peak['raw']
+                peak_data.update({
+                    'raw_dac_ch1': raw.get('dac_ch1'),
+                    'raw_dac_ch2': raw.get('dac_ch2'),
+                    'raw_timestamp_us': raw.get('timestamp_us'),
+                    'raw_counter': raw.get('counter'),
+                    'raw_lut_data': raw.get('lut_data')
+                })
+            
+            processed_peaks.append(peak_data)
+        
+        # Save to database
+        measurement_id = parameter_logger.save_measurement(measurement_data)
+        saved_peaks = parameter_logger.save_peak_parameters(measurement_id, processed_peaks)
+        
+        logger.info(f"Saved analysis: measurement_id={measurement_id}, peaks={saved_peaks}")
+        return {
+            'success': True,
+            'measurement_id': measurement_id,
+            'peaks_saved': saved_peaks
+        }
+        
+    except Exception as e:
+        logger.error(f"Error saving analysis to log: {str(e)}")
+        return {
+            'success': False,
+            'error': str(e)
+        }
 
 def detect_linear_segments(voltage, current, min_length=5, r2_threshold=0.95, max_iterations=None, adaptive_step=False):
     """Find all linear segments that could be baseline candidates using voltage windows"""
@@ -852,9 +1041,34 @@ def get_peaks(method):
                     'success': False,
                     'error': 'Missing voltage or current data in request'
                 }), 400
+            
             voltage = np.array(data['voltage'])
             current = np.array(data['current'])
             results = detect_cv_peaks(voltage, current, method=method)
+            
+            # Save analysis to parameter log if requested
+            if data.get('save_to_log', False):
+                metadata = {
+                    'filename': data.get('filename', ''),
+                    'user_notes': data.get('user_notes', ''),
+                    'raw_data': data.get('raw_data', {})
+                }
+                
+                log_result = save_analysis_to_log(voltage, current, results['peaks'], metadata)
+                results['log_result'] = log_result
+                
+                if log_result['success']:
+                    logger.info(f"Analysis saved to log: {log_result.get('measurement_id')}")
+                else:
+                    logger.warning(f"Failed to save analysis: {log_result.get('error')}")
+            
+            # Mark completion
+            peak_detection_progress.update({
+                'percent': 100,
+                'message': 'Peak detection completed',
+                'active': False
+            })
+            
             return jsonify({'success': True, **results})
     except Exception as e:
         logger.error(f"Error in peak detection: {str(e)}")
@@ -1202,7 +1416,10 @@ def detect_peaks_derivative(voltage, current):
                 'voltage': float(voltage[idx]),
                 'current': float(current[idx]),
                 'type': peak_type,
-                'confidence': float(confidence)
+                'confidence': float(confidence),
+                'height': float(peak_height),
+                'baseline_current': float(local_baseline),
+                'enabled': True
             })
         
         # Less restrictive peak limit
@@ -1222,19 +1439,33 @@ def detect_peaks_derivative(voltage, current):
             neg_peaks, _ = find_peaks(-current_norm, prominence=0.1, width=3)
             
             for peak_idx in pos_peaks:
+                peak_current = float(current[peak_idx])
+                local_baseline = np.mean(current[max(0, peak_idx-10):min(len(current), peak_idx+10)])
+                peak_height = abs(peak_current - local_baseline)
+                
                 peaks.append({
                     'voltage': float(voltage[peak_idx]),
-                    'current': float(current[peak_idx]),
+                    'current': peak_current,
                     'type': 'oxidation',
-                    'confidence': 75.0
+                    'confidence': 75.0,
+                    'height': float(peak_height),
+                    'baseline_current': float(local_baseline),
+                    'enabled': True
                 })
             
             for peak_idx in neg_peaks:
+                peak_current = float(current[peak_idx])
+                local_baseline = np.mean(current[max(0, peak_idx-10):min(len(current), peak_idx+10)])
+                peak_height = abs(peak_current - local_baseline)
+                
                 peaks.append({
                     'voltage': float(voltage[peak_idx]),
-                    'current': float(current[peak_idx]),
+                    'current': peak_current,
                     'type': 'reduction', 
-                    'confidence': 75.0
+                    'confidence': 75.0,
+                    'height': float(peak_height),
+                    'baseline_current': float(local_baseline),
+                    'enabled': True
                 })
             
             logger.info(f"Fallback method found {len(peaks)} peaks")
@@ -1286,6 +1517,9 @@ def detect_peaks_ml(voltage, current):
                 'current': peak['current'],
                 'type': peak['type'],
                 'confidence': min(100.0, peak['confidence'] * 1.1),  # ML confidence boost
+                'height': peak.get('height', 0.0),  # Pass through height from base method
+                'baseline_current': peak.get('baseline_current', 0.0),  # Pass through baseline_current
+                'enabled': peak.get('enabled', True),  # Pass through enabled state
                 'width': float(width),
                 'area': float(area)
             })

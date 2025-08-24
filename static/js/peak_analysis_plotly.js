@@ -746,7 +746,15 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
         return;
     }
     
-    console.log('[RENDER] plotDiv found:', plotDiv);
+    console.log('[RENDER] plotDiv found, clearing existing plot...');
+    
+    // Clear existing plot first to ensure clean rendering
+    try {
+        Plotly.purge(plotDiv);
+        console.log('[RENDER] Plot cleared successfully');
+    } catch (error) {
+        console.log('[RENDER] No existing plot to clear or error clearing:', error);
+    }
 
     // Defensive: ensure peaksData is always an array
     let peaksArr = [];
@@ -973,80 +981,121 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
     
     ensurePlotlyReady(function() {
         console.log('[RENDER] Plotly ready, creating plot...');
-        Plotly.newPlot(plotDiv, allTraces, layout, {responsive: true});
-        console.log('[RENDER] Plot created successfully');
+        
+        Plotly.newPlot(plotDiv, allTraces, layout, {responsive: true}).then(function() {
+            console.log('[RENDER] Plot created successfully, setting up event handlers...');
+            
+            // 🎯 ADD CTRL+CLICK EVENT HANDLER AFTER PLOT IS READY
+            plotDiv.on('plotly_click', function(eventData) {
+                console.log('[EVENT] plotly_click triggered:', eventData);
+                
+                if (!eventData || !eventData.points || eventData.points.length === 0) return;
+                const pt = eventData.points[0];
+                
+                // Respond to peak marker clicks (peak traces come after CV data trace)
+                // CV data is trace 0, peak traces start from trace 1
+                const peakTraceStart = 1;
+                const peakTraceEnd = peakTraceStart + peakTraces.length;
+                
+                console.log('[EVENT] Click on trace:', pt.curveNumber, 'point:', pt.pointIndex);
+                console.log('[EVENT] Peak trace range:', peakTraceStart, 'to', peakTraceEnd);
+                
+                if (pt.curveNumber >= peakTraceStart && pt.curveNumber < peakTraceEnd) {
+                    const traceIndex = pt.curveNumber - peakTraceStart;
+                    const pointIndex = pt.pointIndex;
+                    
+                    console.log('[EVENT] Peak click detected - trace index:', traceIndex, 'point index:', pointIndex);
+                    
+                    // Find the corresponding peak in the original array
+                    let peak;
+                    let peakOriginalIndex = -1;
+                    
+                    if (traceIndex === 0 && enabledPeaks.length > 0) {
+                        // First peak trace is enabled peaks
+                        peak = enabledPeaks[pointIndex];
+                        // Find original index in peaksArr
+                        peakOriginalIndex = peaksArr.findIndex(p => 
+                            p.voltage === peak.voltage && p.current === peak.current && p.type === peak.type
+                        );
+                    } else if (traceIndex === 1 && disabledPeaks.length > 0) {
+                        // Second peak trace is disabled peaks (if exists)
+                        peak = disabledPeaks[pointIndex];
+                        peakOriginalIndex = peaksArr.findIndex(p => 
+                            p.voltage === peak.voltage && p.current === peak.current && p.type === peak.type
+                        );
+                    } else if (enabledPeaks.length === 0 && traceIndex === 0) {
+                        // Only disabled peaks exist
+                        peak = disabledPeaks[pointIndex];
+                        peakOriginalIndex = peaksArr.findIndex(p => 
+                            p.voltage === peak.voltage && p.current === peak.current && p.type === peak.type
+                        );
+                    }
+                    
+                    if (peak) {
+                        console.log('[EVENT] Found peak:', peak, 'original index:', peakOriginalIndex);
+                        
+                        // Check if Ctrl key is held down for toggle functionality
+                        if (eventData.event && (eventData.event.ctrlKey || eventData.event.metaKey)) {
+                            console.log('[EVENT] Ctrl+Click detected - toggling peak');
+                            
+                            // Toggle peak enabled state
+                            const newState = !peak.enabled;
+                            peak.enabled = newState;
+                            
+                            console.log(`[PEAK TOGGLE] ${peak.type} peak at ${peak.voltage.toFixed(3)}V ${newState ? 'enabled' : 'disabled'} via Ctrl+Click`);
+                            
+                            // Update global peaks array
+                            if (peakOriginalIndex >= 0 && window.currentPeaks) {
+                                window.currentPeaks[peakOriginalIndex].enabled = newState;
+                                console.log('[EVENT] Updated window.currentPeaks');
+                            }
+                            
+                            // Update checkbox in UI if exists
+                            const checkbox = document.querySelector(`input[data-peak-index="${peakOriginalIndex}"]`);
+                            if (checkbox) {
+                                checkbox.checked = newState;
+                                // Trigger the change event to update visual state
+                                checkbox.dispatchEvent(new Event('change'));
+                                console.log('[EVENT] Updated checkbox');
+                            }
+                            
+                            // Re-render plot to show the toggle
+                            console.log('[EVENT] Re-rendering plot...');
+                            const traceSelect = document.getElementById('traceSelect');
+                            const currentIdx = traceSelect ? parseInt(traceSelect.value) : 0;
+                            
+                            // Get updated peaks and re-render
+                            setTimeout(() => {
+                                const updatedPeaks = getPeaksForTrace(currentIdx);
+                                renderPeakAnalysisPlot(chartData, updatedPeaks, methodNameStr);
+                            }, 50);
+                            
+                        } else {
+                            console.log('[EVENT] Normal click - showing peak details');
+                            // Normal click - show peak details
+                            if (typeof showPeakDetails === 'function') {
+                                showPeakDetails(peak);
+                            } else {
+                                console.log('[EVENT] Peak details:', peak);
+                            }
+                        }
+                    } else {
+                        console.log('[EVENT] No peak found for this click');
+                    }
+                } else {
+                    console.log('[EVENT] Click not on peak trace');
+                }
+            });
+            
+            console.log('[RENDER] Event handlers set up successfully');
+        }).catch(function(error) {
+            console.error('[RENDER] Error creating plot:', error);
+        });
     });
 
     // Store baseline info globally for export and further analysis
     window.currentBaselineInfo = baselineInfo;
-
-    // Add click event for peak selection and toggle
-    plotDiv.on('plotly_click', function(eventData) {
-        if (!eventData || !eventData.points || eventData.points.length === 0) return;
-        const pt = eventData.points[0];
-        
-        // Respond to peak marker clicks (peak traces come after CV data trace)
-        // CV data is trace 0, peak traces start from trace 1
-        const peakTraceStart = 1;
-        const peakTraceEnd = peakTraceStart + peakTraces.length;
-        
-        if (pt.curveNumber >= peakTraceStart && pt.curveNumber < peakTraceEnd) {
-            const traceIndex = pt.curveNumber - peakTraceStart;
-            const pointIndex = pt.pointIndex;
-            
-            // Find the corresponding peak in the original array
-            let peak;
-            let peakOriginalIndex = -1;
-            
-            if (traceIndex === 0 && enabledPeaks.length > 0) {
-                // First peak trace is enabled peaks
-                peak = enabledPeaks[pointIndex];
-                // Find original index in peaksArr
-                peakOriginalIndex = peaksArr.findIndex(p => 
-                    p.voltage === peak.voltage && p.current === peak.current && p.type === peak.type
-                );
-            } else if (traceIndex === 1 && disabledPeaks.length > 0) {
-                // Second peak trace is disabled peaks (if exists)
-                peak = disabledPeaks[pointIndex];
-                peakOriginalIndex = peaksArr.findIndex(p => 
-                    p.voltage === peak.voltage && p.current === peak.current && p.type === peak.type
-                );
-            } else if (enabledPeaks.length === 0 && traceIndex === 0) {
-                // Only disabled peaks exist
-                peak = disabledPeaks[pointIndex];
-                peakOriginalIndex = peaksArr.findIndex(p => 
-                    p.voltage === peak.voltage && p.current === peak.current && p.type === peak.type
-                );
-            }
-            
-            if (peak) {
-                // Check if Ctrl key is held down for toggle functionality
-                if (eventData.event && (eventData.event.ctrlKey || eventData.event.metaKey)) {
-                    // Toggle peak enabled state
-                    const newState = !peak.enabled;
-                    peak.enabled = newState;
-                    
-                    // Update global peaks array
-                    if (peakOriginalIndex >= 0 && window.currentPeaks) {
-                        window.currentPeaks[peakOriginalIndex].enabled = newState;
-                    }
-                    
-                    // Update checkbox in UI
-                    const checkbox = document.querySelector(`input[data-peak-index="${peakOriginalIndex}"]`);
-                    if (checkbox) {
-                        checkbox.checked = newState;
-                        // Trigger the change event to update visual state
-                        checkbox.dispatchEvent(new Event('change'));
-                    }
-                    
-                    console.log(`[PEAK TOGGLE] ${peak.type} peak at ${peak.voltage.toFixed(3)}V ${newState ? 'enabled' : 'disabled'} via Ctrl+Click`);
-                } else {
-                    // Normal click - show peak details
-                    showPeakDetails(peak);
-                }
-            }
-        }
-    });
+    
 } // End of renderPeakAnalysisPlot function
 
 // Export for global usage
@@ -1120,25 +1169,9 @@ window.showPeakDetails = function(peak) {
 // ===== BASELINE PARAMETER CONTROL UI =====
 // Add parameter controls to the DOM if not present
 function addBaselineParamControls() {
-    if (document.getElementById('baselineParamControls')) return;
-    const container = document.createElement('div');
-    container.id = 'baselineParamControls';
-    container.style.margin = '10px 0 20px 0';
-    container.innerHTML = `
-        <div style="display:flex;gap:1.5em;align-items:center;flex-wrap:wrap;">
-            <label>r² threshold: <input id="r2ThresholdInput" type="number" min="0.5" max="1" step="0.01" value="0.85" style="width:4em;"></label>
-            <label>max |slope|: <input id="maxAbsSlopeInput" type="number" min="0" max="100" step="0.1" value="10" style="width:4em;"></label>
-            <label>window size: <input id="windowSizeInput" type="number" min="3" max="50" step="1" value="9" style="width:4em;"></label>
-            <button id="recalcBaselineParamsBtn" class="btn btn-sm btn-primary">Recalculate</button>
-        </div>
-    `;
-    // Insert above the plot
-    const plotDiv = document.getElementById('plotly-peak-graph');
-    if (plotDiv && plotDiv.parentNode) {
-        plotDiv.parentNode.insertBefore(container, plotDiv);
-    } else {
-        document.body.insertBefore(container, document.body.firstChild);
-    }
+    // Skip creating baseline parameter controls for cleaner UI
+    console.log('[DEBUG] Skipping baseline parameter controls for simplified UI');
+    return;
 }
 
 // Store baseline params globally
@@ -1419,11 +1452,50 @@ function setupBaselineControls() {
     }
 }
 
+// Update Analysis Summary with current data
+function updateAnalysisSummary(peaksData, chartData, methodName) {
+    const methodElement = document.getElementById('analysisMethod');
+    const peaksDetectedElement = document.getElementById('peaksDetected');
+    const peakHeightsElement = document.getElementById('peakHeights');
+    const baselineStatusElement = document.getElementById('baselineStatus');
+    const dataPointsElement = document.getElementById('dataPoints');
+    const analysisStatusElement = document.getElementById('analysisStatus');
+    
+    if (methodElement) methodElement.textContent = methodName || 'TraditionalCV';
+    
+    if (peaksData && peaksData.length > 0) {
+        const totalPeaks = Array.isArray(peaksData[0]) ? peaksData[0].length : peaksData.length;
+        if (peaksDetectedElement) peaksDetectedElement.textContent = totalPeaks;
+        
+        // Count valid peak heights
+        const validPeaks = Array.isArray(peaksData[0]) ? 
+            peaksData[0].filter(p => p.peak_height_baseline != null).length :
+            peaksData.filter(p => p.peak_height_baseline != null).length;
+        if (peakHeightsElement) peakHeightsElement.textContent = `${validPeaks}/${totalPeaks}`;
+    } else {
+        if (peaksDetectedElement) peaksDetectedElement.textContent = '0';
+        if (peakHeightsElement) peakHeightsElement.textContent = '0/0';
+    }
+    
+    if (chartData && chartData.length > 0) {
+        const dataLength = Array.isArray(chartData[0]) ? chartData[0].length : chartData.length;
+        if (dataPointsElement) dataPointsElement.textContent = dataLength;
+    }
+    
+    if (baselineStatusElement) {
+        baselineStatusElement.textContent = 'Available';
+        baselineStatusElement.className = 'badge bg-success';
+    }
+    
+    if (analysisStatusElement) analysisStatusElement.textContent = 'Complete';
+}
+
 // Expose baseline control functions
 window.toggleBaselineVisibility = toggleBaselineVisibility;
 window.recalculateBaseline = recalculateBaseline;
 window.exportBaselineData = exportBaselineData;
 window.setupBaselineControls = setupBaselineControls;
 window.ensurePlotlyReady = ensurePlotlyReady;
+window.updateAnalysisSummary = updateAnalysisSummary;
 
 // End of file

@@ -199,36 +199,19 @@
         </div>
 
         <div class="row">
-            <div class="col-md-9">
+            <!-- Graph with Parameter Logging on the side -->
+            <div class="col-md-8">
                 <div class="peak-visualization-container">
                     <div class="d-flex align-items-center mb-2">
                         <label for="traceSelect" class="me-2 mb-0">Select File:</label>
                         <select id="traceSelect" class="form-select form-select-sm w-auto"></select>
                     </div>
-                    <div id="plotly-peak-graph" style="width:100%;height:100%;min-height:400px;"></div>
+                    <div id="plotly-peak-graph" style="width:100%;height:100%;min-height:500px;"></div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="controls mb-3">
-                    <button id="exportPeakDataBtn" class="btn btn-primary btn-sm w-100 mb-2">
-                        <i class="bi bi-download"></i> Export Peak Data
-                    </button>
-                    <button id="exportBaselineBtn" class="btn btn-outline-primary btn-sm w-100 mb-2">
-                        <i class="bi bi-file-earmark-spreadsheet"></i> Export Baseline
-                    </button>
-                    <button id="toggleBaselineBtn" class="btn btn-outline-secondary btn-sm w-100 mb-2">
-                        <i class="bi bi-graph-up"></i> Show/Hide Baseline
-                    </button>
-                    <button id="recalculateBaselineBtn" class="btn btn-outline-info btn-sm w-100 mb-2">
-                        <i class="bi bi-arrow-clockwise"></i> Recalculate Baseline
-                    </button>
-                </div>
-                <div class="data-info mb-3">
-                    <!-- Data information will be populated here -->
-                </div>
-                
+            <div class="col-md-4">
                 <!-- Parameter Logging Section -->
-                <div class="parameter-logging card mb-3">
+                <div class="parameter-logging card">
                     <div class="card-header">
                         <h6 class="mb-0">
                             <i class="bi bi-save"></i> Parameter Logging
@@ -248,9 +231,26 @@
                                 <option value="stm32">STM32 (Target)</option>
                             </select>
                         </div>
+                        <div class="mb-2">
+                            <label for="scanRate" class="form-label form-label-sm">Scan Rate (mV/s)</label>
+                            <input type="number" class="form-control form-control-sm" id="scanRate" 
+                                   placeholder="e.g., 100" step="1" min="1">
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <label for="voltageStart" class="form-label form-label-sm">V Start</label>
+                                <input type="number" class="form-control form-control-sm" id="voltageStart" 
+                                       placeholder="-0.5" step="0.01">
+                            </div>
+                            <div class="col-6">
+                                <label for="voltageEnd" class="form-label form-label-sm">V End</label>
+                                <input type="number" class="form-control form-control-sm" id="voltageEnd" 
+                                       placeholder="0.5" step="0.01">
+                            </div>
+                        </div>
                         <div class="mb-3">
                             <label for="userNotes" class="form-label form-label-sm">Notes</label>
-                            <textarea class="form-control form-control-sm" id="userNotes" rows="2" 
+                            <textarea class="form-control form-control-sm" id="userNotes" rows="4" 
                                       placeholder="Measurement conditions, observations..."></textarea>
                         </div>
                         <button id="saveParametersBtn" class="btn btn-success btn-sm w-100" disabled>
@@ -258,29 +258,6 @@
                         </button>
                         <div id="saveStatus" class="mt-2 small"></div>
                     </div>
-                </div>
-                
-                <div class="peak-info card mb-3">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="mb-1">Peak Information</h6>
-                                <div class="small text-muted">
-                                    <i class="bi bi-info-circle"></i> 
-                                    <strong>Ctrl+Click</strong> peak on graph to toggle, or use checkboxes
-                                </div>
-                            </div>
-                            <span class="badge bg-success">Active Method</span>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="peak-list">
-                            <!-- Peak list will be populated here -->
-                        </div>
-                    </div>
-                </div>
-                <div class="peak-details">
-                    <!-- Peak details will be populated here -->
                 </div>
             </div>
         </div>
@@ -298,6 +275,7 @@
         
         // Store global references for peak management
         window.chartData = chartData;
+        window.peaksData = peaksData;  // Add this line!
         window.methodNameStr = methodNameStr;
         window._isArrayObj = false;
         
@@ -404,7 +382,18 @@
                 setupBaselineControls(); // Setup baseline control buttons
                 // On change: single select
                 traceSelect.addEventListener('change', function() {
+                    console.log('[DEBUG] traceSelect changed to:', this.value);
                     const idx = parseInt(this.value);
+                    console.log('[DEBUG] Parsed index:', idx);
+                    
+                    // Clear existing plot first
+                    const plotDiv = document.getElementById('plotly-peak-graph');
+                    if (plotDiv) {
+                        console.log('[DEBUG] Clearing existing plot...');
+                        Plotly.purge(plotDiv);
+                    }
+                    
+                    // Then render new trace
                     renderSingleTrace(idx);
                     updatePeakList(getPeaksForTrace(idx));
                     updateDataInfo(chartData, getPeaksForTrace(idx));
@@ -423,23 +412,42 @@
 
         // Render only one trace and its peaks
         function renderSingleTrace(idx) {
+            console.log('[DEBUG] ===== renderSingleTrace START =====');
+            console.log('[DEBUG] renderSingleTrace called with idx:', idx);
+            console.log('[DEBUG] window._isArrayObj:', window._isArrayObj);
+            console.log('[DEBUG] chartData structure:', chartData);
+            console.log('[DEBUG] window.chartData:', !!window.chartData);
+            console.log('[DEBUG] window.peaksData:', !!window.peaksData);
+            
             let voltage, current, label;
             if (window._isArrayObj) {
+                console.log('[DEBUG] Using array object format');
                 voltage = chartData[idx]?.voltage || [];
                 current = chartData[idx]?.current || [];
                 label = chartData[idx]?.filename || chartData[idx]?.label || `Trace ${idx+1}`;
+                console.log('[DEBUG] Array obj - voltage length:', voltage.length, 'current length:', current.length);
             } else if (chartData && chartData.voltage && Array.isArray(chartData.voltage[0])) {
+                console.log('[DEBUG] Using nested array format');
                 voltage = chartData.voltage[idx] || [];
                 current = chartData.current[idx] || [];
                 label = (chartData.filenames && chartData.filenames[idx]) || (chartData.file_labels && chartData.file_labels[idx]) || `Trace ${idx+1}`;
+                console.log('[DEBUG] Nested array - voltage length:', voltage.length, 'current length:', current.length);
             } else {
+                console.log('[DEBUG] Using single trace format');
                 voltage = chartData.voltage || [];
                 current = chartData.current || [];
                 label = 'Trace 1';
+                console.log('[DEBUG] Single trace - voltage length:', voltage.length, 'current length:', current.length);
             }
+            
+            console.log('[DEBUG] Final data for rendering:');
+            console.log('[DEBUG] - voltage length:', voltage.length);
+            console.log('[DEBUG] - current length:', current.length);
+            console.log('[DEBUG] - label:', label);
             
             // Defensive: if no data, show message and skip plot
             if (!voltage || !current || voltage.length === 0 || current.length === 0) {
+                console.log('[DEBUG] No data available, showing message');
                 const plotDiv = document.getElementById('plotly-peak-graph');
                 if (plotDiv) plotDiv.innerHTML = '<div class="text-muted p-4">No data for this file.</div>';
                 return;
@@ -459,7 +467,10 @@
         }
 
         function updatePeakList(peaks) {
-            const peakList = document.querySelector('.peak-list');
+            // Skip peak list update since we removed the Peak Information section
+            console.log('[DEBUG] updatePeakList called with', peaks.length, 'peaks - skipping UI update');
+            
+            // Just store the peaks data globally for other functions
             let peaksArr = [];
             if (Array.isArray(peaks)) {
                 peaksArr = peaks;
@@ -469,93 +480,12 @@
             
             // Store global reference for peak management
             window.currentPeaks = peaksArr;
-            
-            peakList.innerHTML = peaksArr.length ? peaksArr.map((peak, index) => {
-                let heightInfo = '';
-                if (peak.height !== undefined) {
-                    heightInfo = `<div><span class="value-label">Height:</span> <span class="value">${peak.height.toFixed(3)} µA</span></div>`;
-                }
-                
-                // Set initial enabled state (default: true)
-                if (peak.enabled === undefined) {
-                    peak.enabled = true;
-                }
-                
-                return `
-                <div class="peak-item ${peak.enabled ? '' : 'disabled'}" data-index="${index}">
-                    <div class="peak-selection">
-                        <div class="form-check">
-                            <input class="form-check-input peak-checkbox" type="checkbox" 
-                                   id="peak-${index}" ${peak.enabled ? 'checked' : ''} 
-                                   data-peak-index="${index}">
-                            <label class="form-check-label" for="peak-${index}">
-                                <span class="type-badge ${peak.type}">${peak.type}</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="peak-values">
-                        <div><span class="value-label">V:</span> <span class="value">${(peak.x !== undefined ? peak.x : peak.voltage).toFixed(3)}</span></div>
-                        <div><span class="value-label">i:</span> <span class="value">${(peak.y !== undefined ? peak.y : peak.current).toFixed(3)}</span></div>
-                        ${heightInfo}
-                    </div>
-                </div>
-            `}).join('') : '<div class="text-muted p-2">No peaks detected</div>';
-            
-            // Add event listeners for peak checkboxes
-            const checkboxes = peakList.querySelectorAll('.peak-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', handlePeakToggle);
-            });
-        }
-
-        function handlePeakToggle(event) {
-            const checkbox = event.target;
-            const peakIndex = parseInt(checkbox.dataset.peakIndex);
-            const isEnabled = checkbox.checked;
-            
-            // Update peak enabled state
-            if (window.currentPeaks && window.currentPeaks[peakIndex]) {
-                window.currentPeaks[peakIndex].enabled = isEnabled;
-            }
-            
-            // Update visual state of peak item
-            const peakItem = checkbox.closest('.peak-item');
-            if (isEnabled) {
-                peakItem.classList.remove('disabled');
-            } else {
-                peakItem.classList.add('disabled');
-            }
-            
-            // Re-render the plot with updated peak states
-            if (window.chartData && window.currentPeaks) {
-                const data = window.chartData;
-                const peaks = window.currentPeaks;
-                const methodNameStr = window.methodNameStr;
-                
-                // Prepare data for plotting
-                let voltage, current, label;
-                if (window._isArrayObj && Array.isArray(data)) {
-                    const traceSelect = document.getElementById('traceSelect');
-                    const currentIdx = parseInt(traceSelect.value) || 0;
-                    const currentData = data[currentIdx];
-                    voltage = currentData.voltage;
-                    current = currentData.current;
-                    label = currentData.label || `Trace ${currentIdx + 1}`;
-                } else {
-                    voltage = data.voltage;
-                    current = data.current;
-                    label = data.label;
-                }
-                
-                // Re-render plot
-                renderPeakAnalysisPlot({voltage, current, label}, peaks, methodNameStr);
-            }
-            
-            console.log(`[PEAK TOGGLE] Peak ${peakIndex} (${window.currentPeaks[peakIndex].type}) ${isEnabled ? 'enabled' : 'disabled'}`);
         }
 
         function updateDataInfo(data, peaks) {
-            const dataInfo = document.querySelector('.data-info');
+            // Skip data info update since we removed the Analysis Summary section
+            console.log('[DEBUG] updateDataInfo called - skipping UI update');
+            
             let nPeaks = 0;
             if (Array.isArray(peaks)) nPeaks = peaks.length;
             else if (peaks && typeof peaks === 'object') nPeaks = Object.keys(peaks).length;
@@ -576,39 +506,13 @@
                 nPoints = data.voltage.length || 0;
             }
             
-            // Calculate peak heights with baseline
-            let peaksWithHeight = 0;
-            if (Array.isArray(peaks)) {
-                peaksWithHeight = peaks.filter(p => p.height !== undefined).length;
-            }
-            
-            // Baseline info
-            let baselineStatus = 'Not calculated';
-            if (window.currentBaselineInfo) {
-                baselineStatus = 'Available';
-            }
-            
-            dataInfo.innerHTML = `
-                <h6 class="mb-3">Analysis Summary</h6>
-                <div class="mb-2">
-                    <strong>Method:</strong> ${methodNameStr}
-                </div>
-                <div class="mb-2">
-                    <strong>Peaks Detected:</strong> ${nPeaks}
-                </div>
-                <div class="mb-2">
-                    <strong>Peak Heights:</strong> ${peaksWithHeight}/${nPeaks}
-                </div>
-                <div class="mb-2">
-                    <strong>Baseline Status:</strong> <span class="badge ${baselineStatus === 'Available' ? 'bg-success' : 'bg-secondary'}">${baselineStatus}</span>
-                </div>
-                <div class="mb-2">
-                    <strong>Data Points:</strong> ${nPoints}
-                </div>
-                <div>
-                    <strong>Analysis:</strong> Complete
-                </div>
-            `;
+            // Just log the analysis info for debugging
+            console.log('[DEBUG] Analysis info:', {
+                nPeaks,
+                nPoints,
+                peaksWithHeight: Array.isArray(peaks) ? peaks.filter(p => p.height !== undefined).length : 0,
+                baselineStatus: window.currentBaselineInfo ? 'Available' : 'Not calculated'
+            });
         }
 
         function highlightPeak(peak) {
@@ -616,15 +520,8 @@
         }
 
         function setupToolbar() {
-            // Export Data
-            document.getElementById('exportPeakDataBtn').addEventListener('click', function() {
-                const csvContent = generateCSV(chartData);
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `peak_analysis_${methodType}_${new Date().toISOString().slice(0,10)}.csv`;
-                link.click();
-            });
+            // Skip toolbar setup since we removed the export button
+            console.log('[DEBUG] setupToolbar called - skipping since buttons were removed');
         }
 
         function generateCSV(data) {
@@ -645,25 +542,34 @@
         }
 
         // Parameter Logging Functions
+        function checkFormValidity() {
+            const sampleIdInput = document.getElementById('sampleId');
+            const instrumentSelect = document.getElementById('instrumentType');
+            const saveBtn = document.getElementById('saveParametersBtn');
+            
+            const isValid = sampleIdInput.value.trim() && instrumentSelect.value;
+            saveBtn.disabled = !isValid;
+        }
+        
         function initializeParameterLogging() {
             const sampleIdInput = document.getElementById('sampleId');
             const instrumentSelect = document.getElementById('instrumentType');
             const saveBtn = document.getElementById('saveParametersBtn');
             
-            // Enable save button when required fields are filled
-            function checkFormValidity() {
-                const isValid = sampleIdInput.value.trim() && instrumentSelect.value;
-                saveBtn.disabled = !isValid;
-            }
-            
             sampleIdInput.addEventListener('input', checkFormValidity);
             instrumentSelect.addEventListener('change', checkFormValidity);
+            
+            // Optional field change listeners for immediate feedback
+            document.getElementById('scanRate').addEventListener('input', checkFormValidity);
+            document.getElementById('voltageStart').addEventListener('input', checkFormValidity);
+            document.getElementById('voltageEnd').addEventListener('input', checkFormValidity);
             
             // Save parameters event
             saveBtn.addEventListener('click', saveAnalysisParameters);
             
             // Try to detect file source for auto-suggestion
             autoDetectInstrument();
+            autoFillMeasurementParams();
         }
         
         function autoDetectInstrument() {
@@ -680,11 +586,54 @@
                 }
             }
             
+            checkFormValidity();
+        }
+        
+        function autoFillMeasurementParams() {
+            // Auto-fill voltage range and estimate scan rate from data
+            console.log('[DEBUG] autoFillMeasurementParams called');
+            console.log('[DEBUG] chartData available:', typeof chartData, chartData);
+            
+            // Try to find current chart data from the trace selector or use global chartData
+            let currentData = chartData;
+            const traceSelect = document.getElementById('traceSelect');
+            if (traceSelect && traceSelect.value) {
+                const selectedIndex = parseInt(traceSelect.value);
+                if (selectedIndex >= 0 && chartData[selectedIndex]) {
+                    currentData = chartData[selectedIndex];
+                }
+            } else if (Array.isArray(chartData) && chartData.length > 0) {
+                currentData = chartData[0]; // Use first trace as default
+            }
+            
+            console.log('[DEBUG] currentData:', currentData);
+            
+            if (currentData && currentData.voltage && currentData.voltage.length > 1) {
+                const voltageStart = Math.min(...currentData.voltage);
+                const voltageEnd = Math.max(...currentData.voltage);
+                
+                console.log('[DEBUG] Setting voltage range:', voltageStart, 'to', voltageEnd);
+                
+                document.getElementById('voltageStart').value = voltageStart.toFixed(3);
+                document.getElementById('voltageEnd').value = voltageEnd.toFixed(3);
+                
+                // Try to extract scan rate from filename
+                const filenameElement = document.querySelector('[data-filename]');
+                if (filenameElement) {
+                    const filename = filenameElement.dataset.filename;
+                    console.log('[DEBUG] Checking filename for scan rate:', filename);
+                    const scanRateMatch = filename.match(/(\d+)mv[ps]/i) || filename.match(/(\d+)_mv/i) || filename.match(/(\d+)mVpS/i);
+                    if (scanRateMatch) {
+                        console.log('[DEBUG] Found scan rate in filename:', scanRateMatch[1]);
+                        document.getElementById('scanRate').value = scanRateMatch[1];
+                    }
+                }
+            } else {
+                console.log('[DEBUG] No valid voltage data found for auto-fill');
+            }
+            
             // Check form validity after auto-detection
-            const saveBtn = document.getElementById('saveParametersBtn');
-            const sampleIdInput = document.getElementById('sampleId');
-            const isValid = sampleIdInput.value.trim() && instrumentSelect.value;
-            saveBtn.disabled = !isValid;
+            checkFormValidity();
         }
         
         async function saveAnalysisParameters() {
@@ -701,6 +650,9 @@
                 const sampleId = document.getElementById('sampleId').value.trim();
                 const instrumentType = document.getElementById('instrumentType').value;
                 const userNotes = document.getElementById('userNotes').value.trim();
+                const scanRate = document.getElementById('scanRate').value;
+                const voltageStart = document.getElementById('voltageStart').value;
+                const voltageEnd = document.getElementById('voltageEnd').value;
                 
                 // Prepare measurement data
                 const measurementData = {
@@ -708,23 +660,65 @@
                     instrument_type: instrumentType,
                     user_notes: userNotes,
                     original_filename: getCurrentFilename(),
-                    data_points: chartData.voltage ? chartData.voltage.length : 0
+                    data_points: 0
                 };
+                
+                // Get current chart data for data_points count
+                let currentData = chartData;
+                const traceSelect = document.getElementById('traceSelect');
+                if (traceSelect && traceSelect.value) {
+                    const selectedIndex = parseInt(traceSelect.value);
+                    if (selectedIndex >= 0 && chartData[selectedIndex]) {
+                        currentData = chartData[selectedIndex];
+                    }
+                } else if (Array.isArray(chartData) && chartData.length > 0) {
+                    currentData = chartData[0]; // Use first trace as default
+                }
+                
+                if (currentData && currentData.voltage) {
+                    measurementData.data_points = currentData.voltage.length;
+                }
                 
                 // Add method parameters if available
                 if (methodNameStr) {
                     measurementData.method_name = methodNameStr;
                 }
                 
-                // Detect scan parameters from data
-                if (chartData.voltage && chartData.voltage.length > 1) {
-                    measurementData.voltage_start = Math.min(...chartData.voltage);
-                    measurementData.voltage_end = Math.max(...chartData.voltage);
+                // Use user-provided values or auto-detect from data
+                if (currentData && currentData.voltage && currentData.voltage.length > 1) {
+                    // Use user input if provided, otherwise auto-detect
+                    if (voltageStart && !isNaN(parseFloat(voltageStart))) {
+                        measurementData.voltage_start = parseFloat(voltageStart);
+                    } else {
+                        measurementData.voltage_start = Math.min(...currentData.voltage);
+                    }
                     
-                    // Estimate scan rate (rough calculation)
-                    const voltageRange = measurementData.voltage_end - measurementData.voltage_start;
-                    const estimatedScanRate = Math.round(voltageRange * 1000 / chartData.voltage.length); // Rough estimate
-                    measurementData.scan_rate = estimatedScanRate;
+                    if (voltageEnd && !isNaN(parseFloat(voltageEnd))) {
+                        measurementData.voltage_end = parseFloat(voltageEnd);
+                    } else {
+                        measurementData.voltage_end = Math.max(...currentData.voltage);
+                    }
+                    
+                    // Use user-provided scan rate or estimate from data
+                    if (scanRate && !isNaN(parseFloat(scanRate))) {
+                        measurementData.scan_rate = parseFloat(scanRate);
+                    } else {
+                        // Fallback to rough estimation
+                        const voltageRange = measurementData.voltage_end - measurementData.voltage_start;
+                        const estimatedScanRate = Math.round(Math.abs(voltageRange) * 1000 / currentData.voltage.length);
+                        measurementData.scan_rate = estimatedScanRate;
+                    }
+                } else {
+                    // Fallback when no chart data available
+                    if (voltageStart && !isNaN(parseFloat(voltageStart))) {
+                        measurementData.voltage_start = parseFloat(voltageStart);
+                    }
+                    if (voltageEnd && !isNaN(parseFloat(voltageEnd))) {
+                        measurementData.voltage_end = parseFloat(voltageEnd);
+                    }
+                    if (scanRate && !isNaN(parseFloat(scanRate))) {
+                        measurementData.scan_rate = parseFloat(scanRate);
+                    }
                 }
                 
                 // Prepare peak data with baseline info
@@ -752,12 +746,26 @@
                     peaks: peakParameters
                 };
                 
+                // Add CV data for auto-export
+                if (currentData && currentData.voltage && currentData.current) {
+                    payload.cv_data = currentData.voltage.map((v, i) => [v, currentData.current[i]]);
+                    console.log(`Added ${payload.cv_data.length} CV data points for auto-export`);
+                }
+                
+                // Debug logging
+                console.log('Measurement data being sent:', measurementData);
+                console.log('Form values:', {
+                    scanRate: document.getElementById('scanRate').value,
+                    voltageStart: document.getElementById('voltageStart').value,
+                    voltageEnd: document.getElementById('voltageEnd').value
+                });
+                
                 // Add raw data for STM32
                 if (instrumentType === 'stm32') {
                     payload.raw_data = {
-                        voltage: chartData.voltage,
-                        current: chartData.current,
-                        label: chartData.label
+                        voltage: currentData.voltage || [],
+                        current: currentData.current || [],
+                        label: currentData.label || getCurrentFilename()
                     };
                 }
                 
@@ -775,11 +783,21 @@
                 const result = await response.json();
                 
                 if (result.success) {
+                    const exportInfo = result.export_info || {};
+                    const fileExported = exportInfo.file_exported ? '✅' : '❌';
+                    const fileStatus = exportInfo.file_exported ? 
+                        `File exported: ${exportInfo.file_path}` : 
+                        'No file exported';
+                    
                     statusDiv.innerHTML = `
                         <div class="text-success">
                             <i class="bi bi-check-circle"></i> 
                             Saved successfully! ID: ${result.measurement_id}
-                            <br><small>${result.peaks_saved} peaks saved</small>
+                            <br><small>
+                                📊 ${result.peaks_saved || 0} peaks saved
+                                <br>${fileExported} ${fileStatus}
+                                <br>💾 ${result.total_cv_points || 0} CV data points processed
+                            </small>
                         </div>
                     `;
                     
@@ -831,6 +849,29 @@
         // Initialize parameter logging when page loads
         document.addEventListener('DOMContentLoaded', function() {
             initializeParameterLogging();
+            
+            // Add event listener for trace selection dropdown
+            const traceSelect = document.getElementById('traceSelect');
+            if (traceSelect) {
+                console.log('[DEBUG] Adding change listener to traceSelect');
+                traceSelect.addEventListener('change', function(event) {
+                    const selectedIdx = parseInt(event.target.value);
+                    console.log('[DEBUG] Trace selection changed to index:', selectedIdx);
+                    console.log('[DEBUG] About to call renderSingleTrace with:', selectedIdx);
+                    console.log('[DEBUG] chartData available:', !!window.chartData);
+                    console.log('[DEBUG] peaksData available:', !!window.peaksData);
+                    
+                    // Re-render the chart with the selected trace
+                    if (window.chartData && window.peaksData) {
+                        console.log('[DEBUG] Calling renderSingleTrace...');
+                        renderSingleTrace(selectedIdx);
+                    } else {
+                        console.warn('[DEBUG] Missing required data - chartData:', !!window.chartData, 'peaksData:', !!window.peaksData);
+                    }
+                });
+            } else {
+                console.warn('[DEBUG] traceSelect element not found');
+            }
         });
     </script>
     {% block scripts %}

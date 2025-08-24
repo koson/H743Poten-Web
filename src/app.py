@@ -32,7 +32,7 @@ try:
     from .routes.workflow_api import workflow_api_bp
     from .routes.peak_detection import peak_detection_bp
     from .routes.peak_analysis import bp as peak_analysis_bp
-    from .routes.parameter_api import parameter_bp
+    from .routes.parameter_api import parameter_bp, parameter_api_bp
 except ImportError:
     # Fall back to absolute imports (when run directly)
     from config.settings import Config
@@ -49,7 +49,7 @@ except ImportError:
     from routes.workflow_api import workflow_api_bp
     from routes.peak_detection import peak_detection_bp
     from routes.peak_analysis import bp as peak_analysis_bp
-    from routes.parameter_api import parameter_bp
+    from routes.parameter_api import parameter_bp, parameter_api_bp
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +80,12 @@ def create_app():
         if not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
         return send_from_directory(temp_dir, filename)
+    
+    # Additional static folder for sample_data
+    @app.route('/sample_data/<path:filename>')
+    def serve_sample_file(filename):
+        sample_dir = os.path.join(project_root, 'sample_data')
+        return send_from_directory(sample_dir, filename)
     
     # Configure file upload limits and security
     app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
@@ -114,6 +120,7 @@ def create_app():
     app.register_blueprint(peak_detection_bp, url_prefix='/peak_detection')
     app.register_blueprint(peak_analysis_bp, url_prefix='/peak_detection')
     app.register_blueprint(parameter_bp)
+    app.register_blueprint(parameter_api_bp)
     
     # Error handlers
     @app.errorhandler(413)

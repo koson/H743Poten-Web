@@ -16,6 +16,7 @@ class ParameterLogger:
     def __init__(self, db_path: str = "data_logs/parameter_log.db"):
         """Initialize parameter logger with SQLite database"""
         self.db_path = db_path
+        self.conn = None
         self._ensure_db_directory()
         self._init_database()
     
@@ -27,8 +28,9 @@ class ParameterLogger:
     
     def _init_database(self):
         """Initialize database tables"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.executescript("""
+        self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
+        self.conn.row_factory = sqlite3.Row
+        self.conn.executescript("""
                 CREATE TABLE IF NOT EXISTS measurements (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     sample_id TEXT NOT NULL,
@@ -123,7 +125,14 @@ class ParameterLogger:
                 CREATE INDEX IF NOT EXISTS idx_calibration_reference 
                 ON calibration_sessions(reference_measurement_id);
             """)
-            logger.info("Database initialized successfully")
+        logger.info("Database initialized successfully")
+    
+    def get_connection(self):
+        """Get database connection, creating new one if needed"""
+        if self.conn is None:
+            self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
+            self.conn.row_factory = sqlite3.Row
+        return self.conn
     
     def save_measurement(self, measurement_data: Dict[str, Any]) -> int:
         """
@@ -184,6 +193,31 @@ class ParameterLogger:
             saved_count = 0
             for i, peak in enumerate(peaks):
                 if peak.get('enabled', True):  # Only save enabled peaks
+                    # Ensure required fields have values
+                    peak_voltage = peak.get('voltage') or peak.get('x') or 0.0
+                    peak_current = peak.get('current') or peak.get('y') or 0.0
+                    peak_type = peak.get('type', 'unknown')
+                    peak_height = peak.get('height')
+                    baseline_current = peak.get('baseline_current')
+                    
+                    # Calculate height if not provided using correct CV peak height calculation
+                    if peak_height is None and baseline_current is not None:
+                        if peak_type == 'reduction':
+                            # For reduction peaks, use absolute value (negative peaks below baseline)
+                            peak_height = abs(peak_current - baseline_current)
+                        else:
+                            # For oxidation peaks, use direct difference (positive peaks above baseline)
+                            peak_height = peak_current - baseline_current
+                    elif peak_height is None:
+                        # Fallback: if no baseline info, estimate height as absolute current
+                        peak_height = abs(peak_current) if peak_current else 0.0
+                    
+                    # Ensure peak_height is not None and is positive
+                    if peak_height is None or peak_height < 0:
+                        peak_height = abs(peak_current) if peak_current else 0.0
+                    
+                    logger.debug(f"Peak {i}: type={peak_type}, voltage={peak_voltage:.3f}V, current={peak_current:.3f}μA, baseline={baseline_current}μA, height={peak_height:.3f}μA")
+                    
                     cursor.execute("""
                         INSERT INTO peak_parameters (
                             measurement_id, peak_index, peak_type, enabled,
@@ -194,15 +228,15 @@ class ParameterLogger:
                             raw_dac_ch1, raw_dac_ch2, raw_timestamp_us, raw_counter, raw_lut_data
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
-                        measurement_id, i, peak.get('type'),
+                        measurement_id, i, peak_type,
                         peak.get('enabled', True),
-                        peak.get('voltage') or peak.get('x'),
-                        peak.get('current') or peak.get('y'),
-                        peak.get('height'),
+                        peak_voltage,
+                        peak_current,
+                        peak_height,
                         peak.get('area'),
                         peak.get('width_half_max'),
                         peak.get('prominence'),
-                        peak.get('baseline_current'),
+                        baseline_current,
                         peak.get('baseline_slope'),
                         peak.get('baseline_r2'),
                         peak.get('baseline_voltage_start'),
@@ -255,6 +289,179 @@ class ParameterLogger:
             
             return [dict(row) for row in cursor.fetchall()]
     
+    def get_measurement_cv_data(self, measurement_id: int) -> List[Dict[str, Any]]:
+        """Get CV data for a measurement from raw_data_json"""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT raw_data_json FROM measurements 
+                WHERE id = ?
+            """, (measurement_id,))
+            
+            row = cursor.fetchone()
+            if not row or not row['raw_data_json']:
+                return []
+            
+            try:
+                raw_data = json.loads(row['raw_data_json'])
+                
+                # Extract CV data from raw data
+                # Check for new structure first (from update_measurement_cv_data)
+                if isinstance(raw_data, dict) and 'cv_data' in raw_data:
+                    cv_data = raw_data['cv_data']
+                    if isinstance(cv_data, list) and len(cv_data) > 0:
+                        logger.info(f"✅ Found {len(cv_data)} CV data points in database for measurement {measurement_id}")
+                        return cv_data
+                
+                # Legacy structure support
+                if isinstance(raw_data, dict):
+                    voltage_data = raw_data.get('voltage', [])
+                    current_data = raw_data.get('current', [])
+                    
+                    if len(voltage_data) == len(current_data) and len(voltage_data) > 0:
+                        return [{'voltage': v, 'current': c} for v, c in zip(voltage_data, current_data)]
+                    
+                    # Alternative legacy structure
+                    data_points = raw_data.get('data_points', [])
+                    if data_points and isinstance(data_points, list):
+                        cv_data = []
+                        for point in data_points:
+                            if isinstance(point, dict) and 'voltage' in point and 'current' in point:
+                                cv_data.append({
+                                    'voltage': point['voltage'],
+                                    'current': point['current']
+                                })
+                        return cv_data
+                
+                return []
+                
+            except (json.JSONDecodeError, KeyError, TypeError) as e:
+                logger.error(f"Error parsing CV data for measurement {measurement_id}: {e}")
+                return []
+    
+    def update_measurement_cv_data(self, measurement_id: int, cv_data: List[Dict[str, float]]) -> bool:
+        """
+        Update measurement with raw CV data
+        
+        Args:
+            measurement_id: ID of the measurement to update
+            cv_data: List of dictionaries with 'voltage' and 'current' keys
+            
+        Returns:
+            bool: Success status
+        """
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Store CV data as JSON
+                raw_data_json = json.dumps({
+                    'cv_data': cv_data,
+                    'data_points': len(cv_data),
+                    'updated_timestamp': datetime.now().isoformat()
+                })
+                
+                cursor.execute("""
+                    UPDATE measurements 
+                    SET raw_data_json = ?, data_points = ?
+                    WHERE id = ?
+                """, (raw_data_json, len(cv_data), measurement_id))
+                
+                conn.commit()
+                
+                if cursor.rowcount > 0:
+                    logger.info(f"✅ Updated measurement {measurement_id} with {len(cv_data)} CV data points")
+                    return True
+                else:
+                    logger.warning(f"❌ No measurement found with ID {measurement_id}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"Error updating CV data for measurement {measurement_id}: {e}")
+            return False
+    
+    def import_cv_data_from_file(self, measurement_id: int, file_path: str) -> bool:
+        """
+        Import CV data from a CSV file and store in database
+        
+        Args:
+            measurement_id: ID of the measurement to update
+            file_path: Path to the CSV file containing CV data
+            
+        Returns:
+            bool: Success status
+        """
+        try:
+            import pandas as pd
+            
+            if not os.path.exists(file_path):
+                logger.error(f"File not found: {file_path}")
+                return False
+            
+            # Read CSV file
+            df = pd.read_csv(file_path, skiprows=1)  # Skip filename header
+            
+            # Try different column name variations
+            voltage_col = None
+            current_col = None
+            
+            for col in df.columns:
+                col_lower = col.lower().strip()
+                if col_lower in ['v', 'voltage', 'voltage(v)']:
+                    voltage_col = col
+                elif col_lower in ['ua', 'µa', 'current', 'current(ua)', 'i', 'a', 'current(a)']:
+                    current_col = col
+            
+            if not voltage_col or not current_col:
+                logger.error(f"Could not find voltage/current columns in {file_path}")
+                logger.error(f"Available columns: {list(df.columns)}")
+                return False
+            
+            # Extract CV data
+            cv_data = []
+            for _, row in df.iterrows():
+                try:
+                    voltage = float(row[voltage_col])
+                    current = float(row[current_col])
+                    
+                    # Convert units if necessary
+                    current_col_lower = current_col.lower().strip()
+                    if current_col_lower in ['a', 'current(a)']:
+                        # Convert Amps to microAmps
+                        current = current * 1_000_000
+                    
+                    cv_data.append({'voltage': voltage, 'current': current})
+                except (ValueError, TypeError):
+                    continue
+            
+            if not cv_data:
+                logger.error(f"No valid CV data found in {file_path}")
+                return False
+            
+            # Update measurement with CV data
+            success = self.update_measurement_cv_data(measurement_id, cv_data)
+            
+            if success:
+                logger.info(f"✅ Successfully imported {len(cv_data)} CV data points from {file_path}")
+                
+                # Also update filename if it's empty
+                with sqlite3.connect(self.db_path) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        UPDATE measurements 
+                        SET original_filename = ?
+                        WHERE id = ? AND (original_filename IS NULL OR original_filename = '')
+                    """, (os.path.basename(file_path), measurement_id))
+                    conn.commit()
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"Error importing CV data from {file_path}: {e}")
+            return False
+    
     def create_calibration_session(self, session_data: Dict[str, Any]) -> int:
         """Create a new calibration session"""
         with sqlite3.connect(self.db_path) as conn:
@@ -303,6 +510,46 @@ class ParameterLogger:
             """, (sample_id,))
             
             return [dict(row) for row in cursor.fetchall()]
+    
+    def get_measurement_by_id(self, measurement_id: int) -> Optional[Dict[str, Any]]:
+        """Get a single measurement by ID"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM measurements WHERE id = ?
+        """, (measurement_id,))
+        
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    
+    def delete_measurement(self, measurement_id: int) -> bool:
+        """Delete a measurement and all associated data"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            # First delete associated peak parameters (foreign key constraint)
+            cursor.execute("DELETE FROM peak_parameters WHERE measurement_id = ?", (measurement_id,))
+            deleted_peaks = cursor.rowcount
+            
+            # Delete the measurement itself
+            cursor.execute("DELETE FROM measurements WHERE id = ?", (measurement_id,))
+            deleted_measurement = cursor.rowcount
+            
+            if deleted_measurement > 0:
+                conn.commit()
+                logger.info(f"Deleted measurement {measurement_id}: "
+                           f"{deleted_peaks} peak parameters, "
+                           f"1 measurement record")
+                return True
+            else:
+                logger.warning(f"No measurement found with ID {measurement_id}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error deleting measurement {measurement_id}: {e}")
+            conn.rollback()
+            return False
 
 # Global instance
 parameter_logger = ParameterLogger()
