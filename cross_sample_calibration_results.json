@@ -1,0 +1,122 @@
+{
+  "5.0mM_20.0mVs": {
+    "success": true,
+    "concentration_mM": 5.0,
+    "scan_rate_mVs": 20.0,
+    "stm32_id": 71,
+    "palmsens_id": 84,
+    "gain_factor": 648188.343733273,
+    "offset": -1.1022024818952838,
+    "r_squared": 0.3756367203791778,
+    "correlation": 0.61289209521675,
+    "p_value": 8.99666448133453e-24,
+    "std_error": 56992.36031661989,
+    "rmse": 19.463649326114897,
+    "data_points_used": 217,
+    "stm32_current_range": [
+      -6.4487e-05,
+      4.2536e-05
+    ],
+    "palmsens_current_range": [
+      -58.414432,
+      51.4156
+    ],
+    "calibration_equation": "I_palmsens = 648188.343733 * I_stm32 + -1.10e+00"
+  },
+  "5.0mM_50.0mVs": {
+    "success": true,
+    "concentration_mM": 5.0,
+    "scan_rate_mVs": 50.0,
+    "stm32_id": 75,
+    "palmsens_id": 90,
+    "gain_factor": 612842.2082627554,
+    "offset": -0.6867728989827171,
+    "r_squared": 0.4134133069152065,
+    "correlation": 0.6429722442805805,
+    "p_value": 8.000443690553561e-27,
+    "std_error": 49670.17278712495,
+    "rmse": 31.138629406680934,
+    "data_points_used": 218,
+    "stm32_current_range": [
+      -0.00011064,
+      8.5048e-05
+    ],
+    "palmsens_current_range": [
+      -94.48896,
+      91.379416
+    ],
+    "calibration_equation": "I_palmsens = 612842.208263 * I_stm32 + -6.87e-01"
+  },
+  "5.0mM_100.0mVs": {
+    "success": true,
+    "concentration_mM": 5.0,
+    "scan_rate_mVs": 100.0,
+    "stm32_id": 67,
+    "palmsens_id": 78,
+    "gain_factor": 597336.6517301361,
+    "offset": -2.804949682133215,
+    "r_squared": 0.4620152818637356,
+    "correlation": 0.6797170601535139,
+    "p_value": 4.865646560360289e-31,
+    "std_error": 43756.854584816974,
+    "rmse": 43.4908088579922,
+    "data_points_used": 219,
+    "stm32_current_range": [
+      -0.0001613,
+      0.00013557
+    ],
+    "palmsens_current_range": [
+      -136.425,
+      131.540504
+    ],
+    "calibration_equation": "I_palmsens = 597336.651730 * I_stm32 + -2.80e+00"
+  },
+  "5.0mM_200.0mVs": {
+    "success": true,
+    "concentration_mM": 5.0,
+    "scan_rate_mVs": 200.0,
+    "stm32_id": 69,
+    "palmsens_id": 81,
+    "gain_factor": 617955.1408848919,
+    "offset": -1.2752696417617793,
+    "r_squared": 0.5328948589783059,
+    "correlation": 0.7299964787437717,
+    "p_value": 2.148980940239964e-37,
+    "std_error": 39457.01963759606,
+    "rmse": 59.527994575914235,
+    "data_points_used": 217,
+    "stm32_current_range": [
+      -0.00023266,
+      0.00019479
+    ],
+    "palmsens_current_range": [
+      -194.689,
+      188.884
+    ],
+    "calibration_equation": "I_palmsens = 617955.140885 * I_stm32 + -1.28e+00"
+  },
+  "5.0mM_400.0mVs": {
+    "success": true,
+    "concentration_mM": 5.0,
+    "scan_rate_mVs": 400.0,
+    "stm32_id": 73,
+    "palmsens_id": 87,
+    "gain_factor": 651595.0056520626,
+    "offset": -4.795318068937652,
+    "r_squared": 0.6022167033179078,
+    "correlation": 0.7760262259214619,
+    "p_value": 1.6158336810275605e-44,
+    "std_error": 36285.64254439919,
+    "rmse": 82.91045225652557,
+    "data_points_used": 215,
+    "stm32_current_range": [
+      -0.00032592,
+      0.00027513
+    ],
+    "palmsens_current_range": [
+      -277.471,
+      268.75
+    ],
+    "calibration_equation": "I_palmsens = 651595.005652 * I_stm32 + -4.80e+00"
+  }
+}

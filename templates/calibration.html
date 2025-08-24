@@ -1,0 +1,1002 @@
+{% extends "base.html" %}
+
+{% block title %}Cross-Instrument Calibration | H743Poten{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Cross-instrument calibration between STM32 and PalmSens electrochemical measurements">
+<meta name="keywords" content="electrochemistry, calibration, STM32, PalmSens, KEYSIGHT, potentiostat, CV">
+{% endblock %}
+
+{% block styles %}
+<!-- Plotly.js for calibration plots -->
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<style>
+.calibration-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.calibration-section {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.calibration-header {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.calibration-header h2 {
+    margin: 0;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.calibration-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.measurement-pair {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    background: #f8f9fa;
+}
+
+.measurement-pair.selected {
+    border-color: #007bff;
+    background: #e7f1ff;
+}
+
+.measurement-pair h4 {
+    margin: 0 0 10px 0;
+    color: #495057;
+}
+
+.measurement-info {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 5px 15px;
+    font-size: 0.9em;
+}
+
+.measurement-info .label {
+    font-weight: 600;
+    color: #6c757d;
+}
+
+.calibration-controls {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.calibration-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.calibration-btn.primary {
+    background: #007bff;
+    color: white;
+}
+
+.calibration-btn.primary:hover {
+    background: #0056b3;
+}
+
+.calibration-btn.secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.calibration-btn.secondary:hover {
+    background: #545b62;
+}
+
+.calibration-btn.success {
+    background: #28a745;
+    color: white;
+}
+
+.calibration-btn.success:hover {
+    background: #1e7e34;
+}
+
+.calibration-btn:disabled {
+    background: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.calibration-results {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f8f9fa;
+    margin-top: 20px;
+}
+
+.calibration-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+}
+
+.stat-card .value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+.stat-card .label {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.calibration-plot {
+    height: 400px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.quality-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.quality-excellent {
+    background: #d4edda;
+    color: #155724;
+}
+
+.quality-good {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.quality-fair {
+    background: #ffeaa7;
+    color: #856404;
+}
+
+.quality-poor {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.measurement-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.measurement-table th,
+.measurement-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.measurement-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.measurement-table tr:hover {
+    background: #f8f9fa;
+}
+
+.status-message {
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin: 10px 0;
+    font-weight: 500;
+}
+
+.status-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.tabs {
+    border-bottom: 2px solid #e9ecef;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    font-weight: 500;
+    color: #6c757d;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+}
+
+.tab-btn:hover {
+    color: #495057;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.upload-area:hover {
+    border-color: #007bff;
+    background: #e7f1ff;
+}
+
+.upload-area.dragover {
+    border-color: #007bff;
+    background: #e7f1ff;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.help-text {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 5px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calibration-container">
+    <!-- Header -->
+    <div class="calibration-section">
+        <div class="calibration-header">
+            <h2>
+                <i class="fas fa-balance-scale"></i>
+                Cross-Instrument Calibration
+            </h2>
+            <p>Calibrate STM32 measurements using PalmSens reference data and KEYSIGHT-calibrated parameters</p>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('pairs')">
+                <i class="fas fa-link"></i> Measurement Pairs
+            </button>
+            <button class="tab-btn" onclick="switchTab('upload')">
+                <i class="fas fa-upload"></i> Upload STM32 Data
+            </button>
+            <button class="tab-btn" onclick="switchTab('models')">
+                <i class="fas fa-cogs"></i> Calibration Models
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab: Measurement Pairs -->
+    <div id="tab-pairs" class="tab-content active">
+        <div class="calibration-section">
+            <div class="calibration-header">
+                <h3>
+                    <i class="fas fa-search"></i>
+                    Available Measurement Pairs
+                </h3>
+                <p>Select STM32 and PalmSens measurements of the same sample for calibration</p>
+            </div>
+            
+            <div class="calibration-controls">
+                <button class="calibration-btn secondary" onclick="loadMeasurementPairs()">
+                    <i class="fas fa-refresh"></i> Refresh Pairs
+                </button>
+                <button class="calibration-btn primary" onclick="calibrateSelectedPair()" disabled id="calibrateBtn">
+                    <i class="fas fa-balance-scale"></i> Calibrate Selected Pair
+                </button>
+            </div>
+            
+            <div id="measurementPairs" class="calibration-grid">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Calibration Results -->
+        <div id="calibrationResults" class="calibration-section" style="display: none;">
+            <div class="calibration-header">
+                <h3>
+                    <i class="fas fa-chart-line"></i>
+                    Calibration Results
+                </h3>
+            </div>
+            
+            <div id="calibrationStats" class="calibration-stats">
+                <!-- Will be populated dynamically -->
+            </div>
+            
+            <div class="calibration-grid">
+                <div>
+                    <h4>Original Data Comparison</h4>
+                    <div id="originalPlot" class="calibration-plot"></div>
+                </div>
+                <div>
+                    <h4>Calibrated Data Overlay</h4>
+                    <div id="calibratedPlot" class="calibration-plot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: Upload STM32 Data -->
+    <div id="tab-upload" class="tab-content">
+        <div class="calibration-section">
+            <div class="calibration-header">
+                <h3>
+                    <i class="fas fa-upload"></i>
+                    Upload STM32 CSV Data
+                </h3>
+                <p>Upload STM32 measurement CSV file for calibration against existing PalmSens data</p>
+            </div>
+            
+            <div class="upload-area" onclick="document.getElementById('csvFileInput').click()">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3em; color: #6c757d; margin-bottom: 15px;"></i>
+                <h4>Drop CSV file here or click to browse</h4>
+                <p>Supports STM32 CSV format with KEYSIGHT-calibrated voltages and currents</p>
+                <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCsvUpload(event)">
+            </div>
+            
+            <div class="form-group">
+                <label for="referenceSelect">Select PalmSens Reference Measurement:</label>
+                <select class="form-control" id="referenceSelect">
+                    <option value="">Loading measurements...</option>
+                </select>
+                <div class="help-text">Choose the PalmSens measurement to use as calibration reference</div>
+            </div>
+            
+            <div class="calibration-controls">
+                <button class="calibration-btn success" onclick="calibrateUploadedData()" disabled id="uploadCalibrateBtn">
+                    <i class="fas fa-balance-scale"></i> Calibrate Uploaded Data
+                </button>
+            </div>
+            
+            <div id="uploadPreview" style="display: none;">
+                <h4>Uploaded Data Preview</h4>
+                <div id="uploadPlot" class="calibration-plot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: Calibration Models -->
+    <div id="tab-models" class="tab-content">
+        <div class="calibration-section">
+            <div class="calibration-header">
+                <h3>
+                    <i class="fas fa-cogs"></i>
+                    Saved Calibration Models
+                </h3>
+                <p>View and manage stored calibration parameters</p>
+            </div>
+            
+            <div class="calibration-controls">
+                <button class="calibration-btn secondary" onclick="loadCalibrationModels()">
+                    <i class="fas fa-refresh"></i> Refresh Models
+                </button>
+            </div>
+            
+            <div id="calibrationModels">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Messages -->
+    <div id="statusMessages"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Global variables
+let selectedPair = null;
+let uploadedCsvData = null;
+let calibrationResult = null;
+
+// Tab switching
+function switchTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab content
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+    event.target.classList.add('active');
+    
+    // Load data for the selected tab
+    if (tabName === 'pairs') {
+        loadMeasurementPairs();
+    } else if (tabName === 'models') {
+        loadCalibrationModels();
+    }
+}
+
+// Status message display
+function showStatusMessage(message, type = 'success') {
+    const container = document.getElementById('statusMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `status-message status-${type}`;
+    messageDiv.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'times-circle'}"></i>
+        ${message}
+    `;
+    
+    container.appendChild(messageDiv);
+    
+    // Remove message after 5 seconds
+    setTimeout(() => {
+        messageDiv.remove();
+    }, 5000);
+}
+
+// Load measurement pairs
+async function loadMeasurementPairs() {
+    try {
+        const response = await fetch('/api/calibration/measurement-pairs');
+        const data = await response.json();
+        
+        if (data.success) {
+            displayMeasurementPairs(data.pairs);
+        } else {
+            showStatusMessage(`Error loading measurement pairs: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showStatusMessage(`Error loading measurement pairs: ${error.message}`, 'error');
+    }
+}
+
+// Display measurement pairs
+function displayMeasurementPairs(pairs) {
+    const container = document.getElementById('measurementPairs');
+    
+    if (pairs.length === 0) {
+        container.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6c757d;">
+                <i class="fas fa-search" style="font-size: 3em; margin-bottom: 15px;"></i>
+                <h4>No Measurement Pairs Found</h4>
+                <p>You need both STM32 and PalmSens measurements of the same sample to perform calibration.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = pairs.map((pair, index) => `
+        <div class="measurement-pair" onclick="selectPair(${index})" data-pair-index="${index}">
+            <h4>Sample: ${pair.sample_id}</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <h5 style="color: #007bff; margin: 0 0 8px 0;">
+                        <i class="fas fa-microchip"></i> STM32
+                    </h5>
+                    <div class="measurement-info">
+                        <span class="label">ID:</span>
+                        <span>${pair.stm32_measurement.id}</span>
+                        <span class="label">Time:</span>
+                        <span>${new Date(pair.stm32_measurement.timestamp).toLocaleString()}</span>
+                        <span class="label">Scan Rate:</span>
+                        <span>${pair.stm32_measurement.scan_rate || 'N/A'} mV/s</span>
+                    </div>
+                </div>
+                <div>
+                    <h5 style="color: #28a745; margin: 0 0 8px 0;">
+                        <i class="fas fa-desktop"></i> PalmSens
+                    </h5>
+                    <div class="measurement-info">
+                        <span class="label">ID:</span>
+                        <span>${pair.palmsens_measurement.id}</span>
+                        <span class="label">Time:</span>
+                        <span>${new Date(pair.palmsens_measurement.timestamp).toLocaleString()}</span>
+                        <span class="label">Scan Rate:</span>
+                        <span>${pair.palmsens_measurement.scan_rate || 'N/A'} mV/s</span>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 10px; font-size: 0.85em; color: #6c757d;">
+                <i class="fas fa-clock"></i> Time difference: ${pair.time_difference_hours.toFixed(1)} hours
+            </div>
+        </div>
+    `).join('');
+    
+    // Store pairs data globally
+    window.measurementPairs = pairs;
+}
+
+// Select measurement pair
+function selectPair(index) {
+    // Remove previous selection
+    document.querySelectorAll('.measurement-pair').forEach(pair => {
+        pair.classList.remove('selected');
+    });
+    
+    // Select new pair
+    const pairElement = document.querySelector(`[data-pair-index="${index}"]`);
+    pairElement.classList.add('selected');
+    
+    selectedPair = window.measurementPairs[index];
+    document.getElementById('calibrateBtn').disabled = false;
+}
+
+// Calibrate selected pair
+async function calibrateSelectedPair() {
+    if (!selectedPair) {
+        showStatusMessage('Please select a measurement pair first', 'warning');
+        return;
+    }
+    
+    const button = document.getElementById('calibrateBtn');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="loading-spinner"></span> Calibrating...';
+    button.disabled = true;
+    
+    try {
+        const response = await fetch('/api/calibration/calibrate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                stm32_measurement_id: selectedPair.stm32_measurement.id,
+                palmsens_measurement_id: selectedPair.palmsens_measurement.id
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            calibrationResult = data.calibration_result;
+            displayCalibrationResults(calibrationResult);
+            showStatusMessage('Calibration completed successfully!', 'success');
+        } else {
+            showStatusMessage(`Calibration failed: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showStatusMessage(`Calibration error: ${error.message}`, 'error');
+    } finally {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }
+}
+
+// Display calibration results
+function displayCalibrationResults(result) {
+    const resultsSection = document.getElementById('calibrationResults');
+    const statsContainer = document.getElementById('calibrationStats');
+    
+    // Show results section
+    resultsSection.style.display = 'block';
+    
+    // Display statistics
+    const quality = result.r_squared > 0.95 ? 'excellent' : 
+                   result.r_squared > 0.8 ? 'good' : 
+                   result.r_squared > 0.6 ? 'fair' : 'poor';
+    
+    statsContainer.innerHTML = `
+        <div class="stat-card">
+            <div class="value">${result.r_squared.toFixed(4)}</div>
+            <div class="label">R² (Correlation)</div>
+            <div class="quality-indicator quality-${quality}">
+                <i class="fas fa-${quality === 'excellent' ? 'star' : quality === 'good' ? 'thumbs-up' : quality === 'fair' ? 'meh' : 'thumbs-down'}"></i>
+                ${quality.toUpperCase()}
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="value">${result.current_slope.toFixed(6)}</div>
+            <div class="label">Current Slope</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">${result.current_offset.toExponential(3)}</div>
+            <div class="label">Current Offset</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">${result.voltage_slope.toFixed(6)}</div>
+            <div class="label">Voltage Slope</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">${result.voltage_offset.toFixed(6)}</div>
+            <div class="label">Voltage Offset</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">${result.data_points}</div>
+            <div class="label">Data Points Compared</div>
+        </div>
+    `;
+    
+    // Plot original data comparison
+    plotCalibrationData(result, 'original');
+    
+    // Plot calibrated overlay
+    plotCalibrationData(result, 'calibrated');
+}
+
+// Plot calibration data
+function plotCalibrationData(result, type) {
+    const plotId = type === 'original' ? 'originalPlot' : 'calibratedPlot';
+    
+    let traces = [];
+    
+    if (type === 'original') {
+        // Original STM32 vs PalmSens comparison
+        traces = [
+            {
+                x: result.stm32_voltages,
+                y: result.stm32_currents,
+                mode: 'lines',
+                name: 'STM32 (Original)',
+                line: { color: '#007bff', width: 2 }
+            },
+            {
+                x: result.palmsens_voltages,
+                y: result.palmsens_currents,
+                mode: 'lines',
+                name: 'PalmSens (Reference)',
+                line: { color: '#28a745', width: 2 }
+            }
+        ];
+    } else {
+        // Calibrated STM32 vs PalmSens overlay
+        traces = [
+            {
+                x: result.palmsens_voltages,
+                y: result.palmsens_currents,
+                mode: 'lines',
+                name: 'PalmSens (Reference)',
+                line: { color: '#28a745', width: 2 }
+            },
+            {
+                x: result.calibrated_voltages,
+                y: result.calibrated_currents,
+                mode: 'lines',
+                name: 'STM32 (Calibrated)',
+                line: { color: '#dc3545', width: 2, dash: 'dash' }
+            }
+        ];
+    }
+    
+    const layout = {
+        title: type === 'original' ? 'Original Data Comparison' : 'Calibrated Data Overlay',
+        xaxis: { title: 'Voltage (V)' },
+        yaxis: { title: 'Current (A)' },
+        margin: { t: 50, r: 50, b: 50, l: 80 },
+        legend: { x: 0.02, y: 0.98 }
+    };
+    
+    Plotly.newPlot(plotId, traces, layout, { responsive: true });
+}
+
+// Handle CSV upload
+function handleCsvUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        uploadedCsvData = e.target.result;
+        parseUploadedData(uploadedCsvData);
+    };
+    reader.readAsText(file);
+}
+
+// Parse uploaded CSV data
+async function parseUploadedData(csvData) {
+    try {
+        const response = await fetch('/api/calibration/parse-stm32', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                csv_data: csvData,
+                sample_id: 'uploaded_sample'
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayUploadPreview(data.dataset, data.cv_data);
+            document.getElementById('uploadCalibrateBtn').disabled = false;
+            showStatusMessage('CSV data parsed successfully!', 'success');
+        } else {
+            showStatusMessage(`Error parsing CSV: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showStatusMessage(`Error parsing CSV: ${error.message}`, 'error');
+    }
+}
+
+// Display upload preview
+function displayUploadPreview(dataset, cvData) {
+    const previewSection = document.getElementById('uploadPreview');
+    previewSection.style.display = 'block';
+    
+    // Plot uploaded data
+    const trace = {
+        x: cvData.map(point => point.voltage),
+        y: cvData.map(point => point.current),
+        mode: 'lines',
+        name: 'Uploaded STM32 Data',
+        line: { color: '#007bff', width: 2 }
+    };
+    
+    const layout = {
+        title: 'Uploaded STM32 Data Preview',
+        xaxis: { title: 'Voltage (V)' },
+        yaxis: { title: 'Current (A)' },
+        margin: { t: 50, r: 50, b: 50, l: 80 }
+    };
+    
+    Plotly.newPlot('uploadPlot', [trace], layout, { responsive: true });
+}
+
+// Calibrate uploaded data
+async function calibrateUploadedData() {
+    const referenceId = document.getElementById('referenceSelect').value;
+    if (!referenceId || !uploadedCsvData) {
+        showStatusMessage('Please select a reference measurement and upload CSV data', 'warning');
+        return;
+    }
+    
+    const button = document.getElementById('uploadCalibrateBtn');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="loading-spinner"></span> Calibrating...';
+    button.disabled = true;
+    
+    try {
+        const response = await fetch('/api/calibration/calibrate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                stm32_csv_data: uploadedCsvData,
+                palmsens_measurement_id: parseInt(referenceId)
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            calibrationResult = data.calibration_result;
+            displayCalibrationResults(calibrationResult);
+            showStatusMessage('Calibration completed successfully!', 'success');
+        } else {
+            showStatusMessage(`Calibration failed: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showStatusMessage(`Calibration error: ${error.message}`, 'error');
+    } finally {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }
+}
+
+// Load calibration models
+async function loadCalibrationModels() {
+    try {
+        const response = await fetch('/api/calibration/models');
+        const data = await response.json();
+        
+        if (data.success) {
+            displayCalibrationModels(data.models);
+        } else {
+            showStatusMessage(`Error loading calibration models: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showStatusMessage(`Error loading calibration models: ${error.message}`, 'error');
+    }
+}
+
+// Display calibration models
+function displayCalibrationModels(models) {
+    const container = document.getElementById('calibrationModels');
+    
+    if (Object.keys(models).length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #6c757d;">
+                <i class="fas fa-cogs" style="font-size: 3em; margin-bottom: 15px;"></i>
+                <h4>No Calibration Models Found</h4>
+                <p>Create calibration models by performing calibrations between STM32 and PalmSens measurements.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const modelsHtml = Object.entries(models).map(([key, model]) => `
+        <div class="measurement-pair">
+            <h4>${key}</h4>
+            <div class="measurement-info">
+                <span class="label">R² Value:</span>
+                <span>${model.r_squared.toFixed(4)} 
+                    <span class="quality-indicator quality-${model.quality}">
+                        <i class="fas fa-${model.quality === 'excellent' ? 'star' : model.quality === 'good' ? 'thumbs-up' : 'meh'}"></i>
+                        ${model.quality.toUpperCase()}
+                    </span>
+                </span>
+                <span class="label">Current Slope:</span>
+                <span>${model.current_slope.toFixed(6)}</span>
+                <span class="label">Current Offset:</span>
+                <span>${model.current_offset.toExponential(3)}</span>
+                <span class="label">Voltage Slope:</span>
+                <span>${model.voltage_slope.toFixed(6)}</span>
+                <span class="label">Voltage Offset:</span>
+                <span>${model.voltage_offset.toFixed(6)}</span>
+                <span class="label">Created:</span>
+                <span>${new Date(model.timestamp).toLocaleString()}</span>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = modelsHtml;
+}
+
+// Load PalmSens measurements for reference selection
+async function loadPalmSensReferences() {
+    try {
+        const response = await fetch('/api/parameter/measurements');
+        const data = await response.json();
+        
+        if (data.success) {
+            const palmsensOnly = data.measurements.filter(m => 
+                m.instrument_type === 'palmsens' || 
+                (!m.instrument_type && m.id < 1000) // Assume older measurements without instrument_type are PalmSens
+            );
+            
+            const select = document.getElementById('referenceSelect');
+            select.innerHTML = palmsensOnly.map(m => `
+                <option value="${m.id}">
+                    ${m.sample_id} - ${new Date(m.timestamp).toLocaleString()} 
+                    ${m.scan_rate ? `(${m.scan_rate} mV/s)` : ''}
+                </option>
+            `).join('');
+            
+            if (palmsensOnly.length === 0) {
+                select.innerHTML = '<option value="">No PalmSens measurements found</option>';
+            }
+        }
+    } catch (error) {
+        document.getElementById('referenceSelect').innerHTML = '<option value="">Error loading measurements</option>';
+    }
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    loadMeasurementPairs();
+    loadPalmSensReferences();
+    
+    // Set up drag and drop for CSV upload
+    const uploadArea = document.querySelector('.upload-area');
+    
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            document.getElementById('csvFileInput').files = files;
+            handleCsvUpload({ target: { files: files } });
+        }
+    });
+});
+</script>
+{% endblock %}

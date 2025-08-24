@@ -51,6 +51,12 @@ class HybridDataManager:
         logger.warning(f"❌ No CV data found for measurement {measurement_id}")
         return []
     
+    def get_measurement_data(self, measurement_id: int) -> List[Dict[str, float]]:
+        """
+        Alias for get_cv_data() - for compatibility with calibration system
+        """
+        return self.get_cv_data(measurement_id)
+    
     def _get_cv_data_from_mapping(self, measurement_id: int) -> List[Dict[str, float]]:
         """Load CV data using file mapping"""
         try:

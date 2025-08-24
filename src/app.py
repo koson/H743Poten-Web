@@ -33,6 +33,8 @@ try:
     from .routes.peak_detection import peak_detection_bp
     from .routes.peak_analysis import bp as peak_analysis_bp
     from .routes.parameter_api import parameter_bp, parameter_api_bp
+    from .routes.calibration_api import calibration_api_bp
+    from .routes.production_calibration_api import calibration_bp as production_calibration_bp
 except ImportError:
     # Fall back to absolute imports (when run directly)
     from config.settings import Config
@@ -50,6 +52,8 @@ except ImportError:
     from routes.peak_detection import peak_detection_bp
     from routes.peak_analysis import bp as peak_analysis_bp
     from routes.parameter_api import parameter_bp, parameter_api_bp
+    from routes.calibration_api import calibration_api_bp
+    from routes.production_calibration_api import calibration_bp as production_calibration_bp
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +125,8 @@ def create_app():
     app.register_blueprint(peak_analysis_bp, url_prefix='/peak_detection')
     app.register_blueprint(parameter_bp)
     app.register_blueprint(parameter_api_bp)
+    app.register_blueprint(calibration_api_bp)
+    app.register_blueprint(production_calibration_bp)  # Production cross-sample calibration
     
     # Error handlers
     @app.errorhandler(413)
@@ -186,6 +192,11 @@ def create_app():
     def peak_detection_view():
         """Peak detection visualization interface"""
         return render_template('peak_detection.html')
+    
+    @app.route('/calibration')
+    def calibration_view():
+        """Cross-instrument calibration interface"""
+        return render_template('calibration.html')
     
     @app.route('/favicon.ico')
     def favicon():
