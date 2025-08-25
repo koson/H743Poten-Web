@@ -254,8 +254,27 @@ const detectionManager = {
     
     // Complete detection process
     completeDetection(method, apiResult = null) {
+        console.log(`🔍 [DEBUG] CompleteDetection called for ${method}`);
+        console.log(`🔍 [DEBUG] API Result:`, apiResult);
+        
         let results;
         if (apiResult) {
+            console.log(`🔍 [DEBUG] Processing API result for ${method}`);
+            console.log(`🔍 [DEBUG] API Result keys:`, Object.keys(apiResult));
+            console.log(`🔍 [DEBUG] API Result full object:`, apiResult);
+            
+            // Debug baseline information
+            if (apiResult.baseline) {
+                console.log(`📊 [DEBUG] Baseline data in API result:`, {
+                    full_length: apiResult.baseline.full?.length,
+                    forward_length: apiResult.baseline.forward?.length,
+                    reverse_length: apiResult.baseline.reverse?.length,
+                    segment_info: apiResult.baseline.segment_info
+                });
+            } else {
+                console.log(`❌ [DEBUG] No baseline data found in API result`);
+            }
+            
             // Multi-file: peaks เป็น array of array (แต่ละไฟล์)
             let peaksArr = Array.isArray(apiResult.peaks) ? apiResult.peaks : [];
             // ถ้าเป็น single-file (array of object) ให้ wrap เป็น array of array
@@ -275,6 +294,9 @@ const detectionManager = {
                 ...apiResult,
                 peaks: flatPeaks  // ใส่ peaks หลัง ...apiResult เพื่อ override
             });
+            
+            console.log(`📊 [DEBUG] Preview data for ${method}:`, previewData);
+            
             results = {
                 peaks: peaksArr,
                 confidence,

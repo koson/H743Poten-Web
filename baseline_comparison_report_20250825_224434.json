@@ -1,0 +1,135 @@
+{
+  "summary": {
+    "timestamp": "20250825_224434",
+    "total_files": 3,
+    "average_quality_improvement": -0.16083184909321332,
+    "average_peak_enhancement": 0.6353246813480654,
+    "average_snr_improvement": 0.7187984213508335,
+    "total_peaks_detected": 9
+  },
+  "individual_results": [
+    {
+      "filepath": "cv_data/measurement_93_100.0mVs_2025-08-25T06-39-11.686802.csv",
+      "traditional_smoothness": 0.6459289534734112,
+      "enhanced_smoothness": 0.5375013317158444,
+      "quality_improvement": -0.16786307716120996,
+      "peak_enhancement_ratio": 0.6513617479707705,
+      "snr_improvement": 0.7363727704317803,
+      "peaks_detected": 3,
+      "enhanced_metadata": {
+        "filename": "cv_data/measurement_93_100.0mVs_2025-08-25T06-39-11.686802.csv",
+        "processing_time": 0.027706384658813477,
+        "data_points": 220,
+        "peaks_detected": 3,
+        "peak_positions": [
+          0.170432,
+          0.700844,
+          0.090370248
+        ],
+        "segments_count": 44,
+        "stability_score": 0.7788724036040257,
+        "forward_scan_ratio": 0.5045454545454545,
+        "quality_metrics": {
+          "smoothness": 0.5898863060650784,
+          "peak_enhancement": 0.1161294175553596,
+          "flatness": 0.0983312684108086,
+          "overall_quality": 0.2828733155825779
+        },
+        "config_used": {
+          "base_window": 20,
+          "peak_proximity_weight": 0.3,
+          "stability_threshold": 0.05,
+          "segment_min_length": 5,
+          "scan_direction_adaptive": true,
+          "noise_estimation_window": 10,
+          "peak_distance_threshold": 15,
+          "baseline_smoothing": 5,
+          "confidence_threshold": 0.7
+        },
+        "timestamp": "2025-08-25T22:44:29.898450"
+      }
+    },
+    {
+      "filepath": "cv_data/measurement_95_200.0mVs_2025-08-25T06-46-14.158045.csv",
+      "traditional_smoothness": 0.5272172189761811,
+      "enhanced_smoothness": 0.45444211871011464,
+      "quality_improvement": -0.1380362735636568,
+      "peak_enhancement_ratio": 0.6230230318410168,
+      "snr_improvement": 0.6595241043085868,
+      "peaks_detected": 3,
+      "enhanced_metadata": {
+        "filename": "cv_data/measurement_95_200.0mVs_2025-08-25T06-46-14.158045.csv",
+        "processing_time": 0.0278322696685791,
+        "data_points": 220,
+        "peaks_detected": 3,
+        "peak_positions": [
+          0.200455,
+          0.700844,
+          0.110385808
+        ],
+        "segments_count": 44,
+        "stability_score": 0.7791538136473793,
+        "forward_scan_ratio": 0.5045454545454545,
+        "quality_metrics": {
+          "smoothness": 0.4957458055601811,
+          "peak_enhancement": 0.10634387462595832,
+          "flatness": 0.06647443476729151,
+          "overall_quality": 0.23419223384815366
+        },
+        "config_used": {
+          "base_window": 20,
+          "peak_proximity_weight": 0.3,
+          "stability_threshold": 0.05,
+          "segment_min_length": 5,
+          "scan_direction_adaptive": true,
+          "noise_estimation_window": 10,
+          "peak_distance_threshold": 15,
+          "baseline_smoothing": 5,
+          "confidence_threshold": 0.7
+        },
+        "timestamp": "2025-08-25T22:44:31.490264"
+      }
+    },
+    {
+      "filepath": "cv_data/measurement_96_20.0mVs_2025-08-25T06-46-22.774810.csv",
+      "traditional_smoothness": 0.7858868977311549,
+      "enhanced_smoothness": 0.647102260669603,
+      "quality_improvement": -0.17659619655477318,
+      "peak_enhancement_ratio": 0.6315892642324089,
+      "snr_improvement": 0.7604983893121335,
+      "peaks_detected": 3,
+      "enhanced_metadata": {
+        "filename": "cv_data/measurement_96_20.0mVs_2025-08-25T06-46-22.774810.csv",
+        "processing_time": 0.028110742568969727,
+        "data_points": 220,
+        "peaks_detected": 3,
+        "peak_positions": [
+          0.170432,
+          0.700844,
+          0.090370248
+        ],
+        "segments_count": 44,
+        "stability_score": 0.8035709732509637,
+        "forward_scan_ratio": 0.5045454545454545,
+        "quality_metrics": {
+          "smoothness": 0.6991626529926795,
+          "peak_enhancement": 0.12642793427559484,
+          "flatness": 0.18297510745486706,
+          "overall_quality": 0.3535217835748712
+        },
+        "config_used": {
+          "base_window": 20,
+          "peak_proximity_weight": 0.3,
+          "stability_threshold": 0.05,
+          "segment_min_length": 5,
+          "scan_direction_adaptive": true,
+          "noise_estimation_window": 10,
+          "peak_distance_threshold": 15,
+          "baseline_smoothing": 5,
+          "confidence_threshold": 0.7
+        },
+        "timestamp": "2025-08-25T22:44:32.848670"
+      }
+    }
+  ]
+}

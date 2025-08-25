@@ -790,27 +790,102 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
             console.log('[RENDER] Found baseline data in first peak:', peaksArr[0].baseline);
             const baseline = peaksArr[0].baseline;
             
-            if (baseline.forward && baseline.reverse) {
-                // Create baseline traces
+            if (baseline.full) {
+                // Use the full baseline array that matches the CV data points
+                console.log('[RENDER] Using baseline.full with length:', baseline.full.length);
+                console.log('[RENDER] Baseline.full range:', Math.min(...baseline.full).toFixed(3), 'to', Math.max(...baseline.full).toFixed(3));
+                console.log('[RENDER] CV data range:', Math.min(...chartData.current).toFixed(3), 'to', Math.max(...chartData.current).toFixed(3));
+                console.log('[RENDER] First 5 baseline values:', baseline.full.slice(0, 5));
+                console.log('[RENDER] Last 5 baseline values:', baseline.full.slice(-5));
+                
+                baselineTraces.push({
+                    x: chartData.voltage,
+                    y: baseline.full,
+                    mode: 'lines',
+                    name: 'Baseline',
+                    line: { color: '#ff6b6b', width: 2, dash: 'dash' },
+                    hovertemplate: 'Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
+                });
+                
+                // Add baseline markers for debugging - show actual points used for baseline calculation
+                if (baseline.markers && (baseline.markers.forward_segment || baseline.markers.reverse_segment)) {
+                    console.log('[RENDER] Adding baseline segment markers for debugging');
+                    console.log('[RENDER] Markers object:', baseline.markers);
+                    
+                    // Forward segment markers
+                    if (baseline.markers.forward_segment && baseline.markers.forward_segment.start_idx !== undefined) {
+                        const startIdx = baseline.markers.forward_segment.start_idx;
+                        const endIdx = baseline.markers.forward_segment.end_idx;
+                        console.log('[RENDER] Forward segment:', startIdx, 'to', endIdx);
+                        
+                        if (startIdx !== null && endIdx !== null && startIdx >= 0 && endIdx >= 0) {
+                            const segmentVoltage = chartData.voltage.slice(startIdx, endIdx + 1);
+                            const segmentCurrent = chartData.current.slice(startIdx, endIdx + 1);
+                            
+                            baselineTraces.push({
+                                x: segmentVoltage,
+                                y: segmentCurrent,
+                                mode: 'markers',
+                                name: `Forward Segment (R²=${baseline.markers.forward_segment.r2?.toFixed(3) || 'N/A'})`,
+                                marker: { color: '#ff0000', size: 8, symbol: 'square' },
+                                hovertemplate: 'Forward Baseline Points<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
+                            });
+                        }
+                    } else {
+                        console.log('[RENDER] Forward segment: no valid indices');
+                    }
+                    
+                    // Reverse segment markers
+                    if (baseline.markers.reverse_segment && baseline.markers.reverse_segment.start_idx !== undefined) {
+                        const startIdx = baseline.markers.reverse_segment.start_idx;
+                        const endIdx = baseline.markers.reverse_segment.end_idx;
+                        console.log('[RENDER] Reverse segment:', startIdx, 'to', endIdx);
+                        
+                        if (startIdx !== null && endIdx !== null && startIdx >= 0 && endIdx >= 0) {
+                            const segmentVoltage = chartData.voltage.slice(startIdx, endIdx + 1);
+                            const segmentCurrent = chartData.current.slice(startIdx, endIdx + 1);
+                            
+                            baselineTraces.push({
+                                x: segmentVoltage,
+                                y: segmentCurrent,
+                                mode: 'markers',
+                                name: `Reverse Segment (R²=${baseline.markers.reverse_segment.r2?.toFixed(3) || 'N/A'})`,
+                                marker: { color: '#00ff00', size: 8, symbol: 'square' },
+                                hovertemplate: 'Reverse Baseline Points<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
+                            });
+                        }
+                    } else {
+                        console.log('[RENDER] Reverse segment: no valid indices');
+                    }
+                } else {
+                    console.log('[RENDER] No baseline markers found or incomplete marker data');
+                    console.log('[RENDER] baseline.markers:', baseline.markers);
+                }
+            } else if (baseline.forward && baseline.reverse) {
+                // Create baseline traces using the full voltage array
+                // baseline.forward and baseline.reverse should match the voltage length
                 const n = chartData.voltage.length;
                 const mid = Math.floor(n / 2);
                 
+                // Forward baseline trace (first half of CV)
                 baselineTraces.push({
-                    x: chartData.voltage.slice(0, mid),
+                    x: chartData.voltage.slice(0, baseline.forward.length),
                     y: baseline.forward,
                     mode: 'lines',
                     name: 'Forward Baseline',
                     line: { color: '#ff6b6b', width: 2, dash: 'dash' },
-                    hovertemplate: 'Forward Baseline<br>V: %{x:.3f}<br>I: %{y:.3f}<extra></extra>',
+                    hovertemplate: 'Forward Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
                 });
                 
+                // Reverse baseline trace (second half of CV)
+                const reverseStartIdx = chartData.voltage.length - baseline.reverse.length;
                 baselineTraces.push({
-                    x: chartData.voltage.slice(mid),
+                    x: chartData.voltage.slice(reverseStartIdx),
                     y: baseline.reverse,
                     mode: 'lines',
                     name: 'Reverse Baseline',
                     line: { color: '#4ecdc4', width: 2, dash: 'dash' },
-                    hovertemplate: 'Reverse Baseline<br>V: %{x:.3f}<br>I: %{y:.3f}<extra></extra>',
+                    hovertemplate: 'Reverse Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
                 });
                 
                 // Add baseline segment markers if available
@@ -827,7 +902,7 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                             mode: 'markers',
                             name: `Forward Segment (R²=${baseline.markers.forward_segment.r2?.toFixed(3) || 'N/A'})`,
                             marker: { color: '#ff6b6b', size: 6, symbol: 'circle' },
-                            hovertemplate: 'Forward Segment<br>V: %{x:.3f}<br>I: %{y:.3f}<br>R²: ' + (baseline.markers.forward_segment.r2?.toFixed(3) || 'N/A') + '<extra></extra>',
+                            hovertemplate: 'Forward Segment<br>V: %{x:.3f}<br>I: %{y:.6f}<br>R²: ' + (baseline.markers.forward_segment.r2?.toFixed(3) || 'N/A') + '<extra></extra>',
                         });
                     }
                     
@@ -843,7 +918,7 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                             mode: 'markers',
                             name: `Reverse Segment (R²=${baseline.markers.reverse_segment.r2?.toFixed(3) || 'N/A'})`,
                             marker: { color: '#4ecdc4', size: 6, symbol: 'circle' },
-                            hovertemplate: 'Reverse Segment<br>V: %{x:.3f}<br>I: %{y:.3f}<br>R²: ' + (baseline.markers.reverse_segment.r2?.toFixed(3) || 'N/A') + '<extra></extra>',
+                            hovertemplate: 'Reverse Segment<br>V: %{x:.3f}<br>I: %{y:.6f}<br>R²: ' + (baseline.markers.reverse_segment.r2?.toFixed(3) || 'N/A') + '<extra></extra>',
                         });
                     }
                 }
@@ -896,7 +971,7 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
             text: enabledPeaks.map(p => p.type === 'oxidation' ? 'Ox' : 'Red'),
             textposition: 'top center',
             customdata: enabledPeaks.map(p => [p.height || 0, p.baseline_current || 0, true]),
-            hovertemplate: '%{text} peak (Active)<br>V: %{x:.3f} V<br>Current: %{y:.3f} µA<br>Height: %{customdata[0]:.3f} µA<br>Baseline: %{customdata[1]:.3f} µA<extra></extra>',
+            hovertemplate: '%{text} peak (Active)<br>V: %{x:.3f} V<br>Current: %{y:.6f} µA<br>Height: %{customdata[0]:.6f} µA<br>Baseline: %{customdata[1]:.6f} µA<extra></extra>',
         };
         peakTraces.push(enabledPeakTrace);
     }
@@ -917,7 +992,7 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
             text: disabledPeaks.map(p => p.type === 'oxidation' ? 'Ox' : 'Red'),
             textposition: 'top center',
             customdata: disabledPeaks.map(p => [p.height || 0, p.baseline_current || 0, false]),
-            hovertemplate: '%{text} peak (Disabled)<br>V: %{x:.3f} V<br>Current: %{y:.3f} µA<br>Height: %{customdata[0]:.3f} µA<br>Baseline: %{customdata[1]:.3f} µA<extra></extra>',
+            hovertemplate: '%{text} peak (Disabled)<br>V: %{x:.3f} V<br>Current: %{y:.6f} µA<br>Height: %{customdata[0]:.6f} µA<br>Baseline: %{customdata[1]:.6f} µA<extra></extra>',
         };
         peakTraces.push(disabledPeakTrace);
     }

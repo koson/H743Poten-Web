@@ -18,8 +18,29 @@ try:
 except ImportError:
     from services.parameter_logging import parameter_logger
 
+# Import Enhanced Baseline Detector v2.1
+try:
+    from ..utils.baseline_detector import BaselineDetector
+except ImportError:
+    from utils.baseline_detector import BaselineDetector
+
+# Import Voltage Window Baseline Detector v4
+try:
+    from ..baseline_detector_v4 import cv_baseline_detector_v4
+except ImportError:
+    from baseline_detector_v4 import cv_baseline_detector_v4
+
 # Set up logging
 logger = logging.getLogger(__name__)
+
+# Initialize Enhanced Baseline Detector v2.1 and Voltage Window Detector v4
+try:
+    baseline_detector = BaselineDetector(auto_mode=True)
+    logger.info("🎯 Enhanced Baseline Detector v2.1 initialized for web application")
+    logger.info("🔬 Voltage Window Baseline Detector v4 available as primary method")
+except Exception as e:
+    logger.error(f"Failed to initialize Enhanced Baseline Detector: {e}")
+    baseline_detector = None
 
 peak_detection_bp = Blueprint('peak_detection', __name__)
 
@@ -671,17 +692,20 @@ def load_csv_file(file_path):
         if voltage_idx == -1 or current_idx == -1:
             return jsonify({'success': False, 'error': f'Could not find voltage or current columns in headers: {headers}'})
         
-        # Determine current scaling
+        # Determine current scaling - keep in µA for baseline detection
         current_unit = headers[current_idx]
         current_scale = 1.0
-        if current_unit == 'ua':
-            current_scale = 1e-6  # microAmps to Amps
-        elif current_unit == 'ma':
-            current_scale = 1e-3  # milliAmps to Amps
-        elif current_unit == 'na':
-            current_scale = 1e-9  # nanoAmps to Amps
         
-        logger.info(f"Current unit: {current_unit}, scale: {current_scale}")
+        # Simple unit conversion to µA (PiPot files now have 'uA' headers after conversion)
+        if current_unit == 'ma':
+            current_scale = 1e3  # milliAmps to microAmps
+        elif current_unit == 'na':
+            current_scale = 1e-3  # nanoAmps to microAmps
+        elif current_unit == 'a':
+            current_scale = 1e6  # Amperes to microAmps
+        # For 'ua' or 'uA' - keep as is (no scaling)
+        
+        logger.info(f"Current unit: {current_unit}, scale: {current_scale} (keeping in µA)")
         
         # Parse data
         voltage = []
@@ -707,7 +731,7 @@ def load_csv_file(file_path):
         
         logger.info(f"Loaded {len(voltage)} data points from {file_path}")
         logger.info(f"Voltage range: {min(voltage):.3f} to {max(voltage):.3f} V")
-        logger.info(f"Current range: {min(current):.6e} to {max(current):.6e} A")
+        logger.info(f"Current range: {min(current):.3f} to {max(current):.3f} µA")
         
         return jsonify({
             'success': True,
@@ -768,17 +792,20 @@ def load_saved_file(file_path):
         if voltage_idx == -1 or current_idx == -1:
             return jsonify({'success': False, 'error': f'Could not find voltage or current columns in headers: {headers}'})
         
-        # Determine current scaling
+        # Determine current scaling - keep in µA for baseline detection
         current_unit = headers[current_idx]
         current_scale = 1.0
-        if current_unit == 'ua':
-            current_scale = 1e-6  # microAmps to Amps
-        elif current_unit == 'ma':
-            current_scale = 1e-3  # milliAmps to Amps
-        elif current_unit == 'na':
-            current_scale = 1e-9  # nanoAmps to Amps
         
-        logger.info(f"Current unit: {current_unit}, scale: {current_scale}")
+        # Simple unit conversion to µA (PiPot files now have 'uA' headers after conversion)
+        if current_unit == 'ma':
+            current_scale = 1e3  # milliAmps to microAmps
+        elif current_unit == 'na':
+            current_scale = 1e-3  # nanoAmps to microAmps
+        elif current_unit == 'a':
+            current_scale = 1e6  # Amperes to microAmps
+        # For 'ua' or 'uA' - keep as is (no scaling)
+        
+        logger.info(f"Current unit: {current_unit}, scale: {current_scale} (keeping in µA)")
         
         # Parse data
         voltage = []
@@ -804,7 +831,7 @@ def load_saved_file(file_path):
         
         logger.info(f"Loaded {len(voltage)} data points from {file_path}")
         logger.info(f"Voltage range: {min(voltage):.3f} to {max(voltage):.3f} V")
-        logger.info(f"Current range: {min(current):.6e} to {max(current):.6e} A")
+        logger.info(f"Current range: {min(current):.3f} to {max(current):.3f} µA")
         
         return jsonify({
             'success': True,
@@ -984,6 +1011,12 @@ def get_peaks(method):
                     try:
                         result = detect_cv_peaks(voltage, current, method=method)
                         file_peaks = result['peaks']
+                        
+                        # Store baseline data from first file only (for display)
+                        if i == 0 and 'baseline' in result:
+                            first_file_baseline = result['baseline']
+                            logger.info(f"[DEBUG] File {i}: stored baseline data with keys: {list(first_file_baseline.keys())}")
+                        
                         logger.info(f"[DEBUG] File {i}: detected {len(file_peaks)} peaks")
                         
                         # Add baseline data to each peak if available
@@ -994,9 +1027,17 @@ def get_peaks(method):
                     except Exception as e:
                         logger.error(f"[DEBUG] File {i}: peak detection error: {str(e)}")
                         file_peaks = []
+                        if i == 0:
+                            first_file_baseline = {}
                     for p in file_peaks:
                         p['fileIdx'] = i
                     peaks_per_file[i] = file_peaks
+            
+            # Include baseline data from first file in response
+            response_data = {'success': True, 'peaks': peaks_per_file}
+            if 'first_file_baseline' in locals() and first_file_baseline:
+                response_data['baseline'] = first_file_baseline
+                logger.info(f"[DEBUG] Including baseline data in files array response: {list(first_file_baseline.keys())}")
             
             # Mark completion
             peak_detection_progress.update({
@@ -1008,7 +1049,7 @@ def get_peaks(method):
             
             logger.info(f"[PROGRESS] Processing complete: {nFiles}/{nFiles} files (100%)")
             logger.info(f"[DEBUG] peaks_per_file lens: {[len(p) for p in peaks_per_file]}")
-            return jsonify({'success': True, 'peaks': peaks_per_file})
+            return jsonify(response_data)
         elif isinstance(data.get('voltage'), list) and len(data['voltage']) > 0 and isinstance(data['voltage'][0], list):
             # voltage/current เป็น list of list
             nFiles = len(data['voltage'])
@@ -1024,16 +1065,32 @@ def get_peaks(method):
                 if np.any(np.isinf(voltage)) or np.any(np.isinf(current)):
                     logger.warning(f"[DEBUG] File {i}: Inf detected in voltage or current!")
                 try:
-                    file_peaks = detect_cv_peaks(voltage, current, method=method)['peaks']
+                    detection_results = detect_cv_peaks(voltage, current, method=method)
+                    file_peaks = detection_results['peaks']
+                    
+                    # Store baseline data for first file only (for display)
+                    if i == 0 and 'baseline' in detection_results:
+                        first_file_baseline = detection_results['baseline']
+                        logger.info(f"[DEBUG] File {i}: stored baseline data with keys: {list(first_file_baseline.keys())}")
+                    
                     logger.info(f"[DEBUG] File {i}: detected {len(file_peaks)} peaks")
                 except Exception as e:
                     logger.error(f"[DEBUG] File {i}: peak detection error: {str(e)}")
                     file_peaks = []
+                    if i == 0:
+                        first_file_baseline = {}
                 for p in file_peaks:
                     p['fileIdx'] = i
                 peaks_per_file[i] = file_peaks
+            
+            # Include baseline data from first file in response
+            response_data = {'success': True, 'peaks': peaks_per_file}
+            if 'first_file_baseline' in locals() and first_file_baseline:
+                response_data['baseline'] = first_file_baseline
+                logger.info(f"[DEBUG] Including baseline data in multi-file response: {list(first_file_baseline.keys())}")
+            
             logger.info(f"[DEBUG] peaks_per_file lens: {[len(p) for p in peaks_per_file]}")
-            return jsonify({'success': True, 'peaks': peaks_per_file})
+            return jsonify(response_data)
         else:
             # Single trace (default)
             if 'voltage' not in data or 'current' not in data:
@@ -1146,164 +1203,242 @@ def detect_cv_peaks(voltage, current, method='prominence'):
 def detect_peaks_prominence(voltage, current):
     """Detect peaks using prominence method with simplified baseline"""
     try:
+        logger.info(f"🔍 Prominence Peak Detection: starting with {len(voltage)} data points")
+        logger.info(f"📊 Data range - V: {voltage.min():.3f} to {voltage.max():.3f}V, I: {current.min():.3f} to {current.max():.3f}µA")
+        
         # Get settings from config or use defaults
         prominence = current_app.config.get('PEAK_PROMINENCE', 0.1)
         width = current_app.config.get('PEAK_WIDTH', 5)
 
-        # Use improved baseline detection but with limited iterations for speed
-        logger.info("Using improved baseline for traditional method with speed optimization")
+        # Use Enhanced Baseline Detector v2.1
+        logger.info("🚀 Using Enhanced Baseline Detector v2.1 for improved peak detection")
         
-        # Detect baseline with peak-aware segmentation but limit iterations
+        baseline_full = None
+        baseline_metadata = None
+        segment_info = {}
+        
         try:
-            # First, get a quick baseline estimate for peak detection
-            baseline_result = detect_improved_baseline_2step(
-                voltage, current, 
-                max_iterations=3000,  # Limit iterations for speed
-                adaptive_step=True  # Use adaptive step size
-            )
+            # Use new Voltage Window Baseline Detector v4 as primary method
+            logger.info("� Using Voltage Window Baseline Detector v4 for improved CV analysis")
             
-            if baseline_result is None:
-                logger.warning("Baseline detection failed, using simple fallback")
-                # Simple fallback if advanced method fails
-                n = len(voltage)
-                mid = n // 2
-                
-                def simple_linear_fit(v, c):
-                    if len(v) < 2:
-                        return np.full_like(v, np.mean(c) if len(c) > 0 else 0)
-                    try:
-                        coeffs = np.polyfit(v, c, 1)
-                        return np.polyval(coeffs, v)
-                    except:
-                        return np.full_like(v, np.mean(c))
-                
-                baseline_forward = simple_linear_fit(voltage[:mid], current[:mid])
-                baseline_reverse = simple_linear_fit(voltage[mid:], current[mid:])
-                baseline_full = np.concatenate([baseline_forward, baseline_reverse])
-                segment_info = {'forward_segment': None, 'reverse_segment': None}
-            else:
-                # baseline_result is a tuple (baseline_forward, baseline_reverse, segment_info)
-                baseline_forward, baseline_reverse, segment_info = baseline_result
-                baseline_full = np.concatenate([baseline_forward, baseline_reverse])
-                logger.info(f"Successfully detected improved baseline with {len(baseline_forward)} forward and {len(baseline_reverse)} reverse points")
+            # Quick peak detection for baseline avoidance
+            peak_regions = []
+            if False:  # Temporarily disable peak avoidance to fix reverse baseline issue
+                try:
+                    # Normalize current for quick peak detection
+                    current_max = np.abs(current).max()
+                    if current_max > 0:
+                        current_norm = current / current_max
+                        
+                        # Quick peak detection with loose criteria
+                        pos_peaks, _ = find_peaks(current_norm, prominence=0.05, width=3)
+                        neg_peaks, _ = find_peaks(-current_norm, prominence=0.05, width=3)
+                    
+                    # Convert to peak regions (start_idx, end_idx)
+                    all_peak_indices = np.concatenate([pos_peaks, neg_peaks])
+                    for peak_idx in all_peak_indices:
+                        if 0 <= peak_idx < len(voltage):
+                            # Create a small region around each peak (±5 points)
+                            start_idx = max(0, peak_idx - 5)
+                            end_idx = min(len(voltage) - 1, peak_idx + 5)
+                            peak_regions.append((int(start_idx), int(end_idx)))
+                    
+                        
+                    logger.info(f"[BASELINE] Quick peak detection found {len(peak_regions)} peaks for baseline avoidance")
+                        
+                except Exception as peak_err:
+                    logger.warning(f"Quick peak detection failed: {peak_err}, proceeding without peak avoidance")            # Use the new voltage window detector with peak avoidance
+            logger.info(f"🔍 About to call cv_baseline_detector_v4 with voltage len={len(voltage)}, current len={len(current)}")
+            baseline_forward, baseline_reverse, segment_info = cv_baseline_detector_v4(
+                voltage, current, peak_regions
+            )
+            logger.info(f"🔍 cv_baseline_detector_v4 returned: forward len={len(baseline_forward)}, reverse len={len(baseline_reverse)}")
+            
+            logger.info("✅ Voltage window baseline detection completed successfully")
+            logger.info(f"🔍 Segment info: {segment_info}")
+            logger.info(f"📈 Forward baseline range: [{baseline_forward.min():.6f}, {baseline_forward.max():.6f}] μA, variation: {baseline_forward.max() - baseline_forward.min():.6f}")
+            logger.info(f"📉 Reverse baseline range: [{baseline_reverse.min():.6f}, {baseline_reverse.max():.6f}] μA, variation: {baseline_reverse.max() - baseline_reverse.min():.6f}")
+            
+            baseline_full = np.concatenate([baseline_forward, baseline_reverse])
+            logger.info(f"📊 Full baseline range: [{baseline_full.min():.3f}, {baseline_full.max():.3f}] μA")
                 
         except Exception as e:
-            logger.error(f"Baseline detection error: {str(e)}, using simple fallback")
-            # Simple fallback if any error occurs
+            logger.error(f"❌ Voltage window baseline detection failed: {e}")
+            
+            # Fallback to Enhanced Baseline Detector v2.1
+            if baseline_detector:
+                try:
+                    logger.info(f"🔧 Fallback: attempting Enhanced Baseline Detector v2.1")
+                    baseline_full, baseline_metadata = baseline_detector.detect_baseline(
+                        voltage, current, filename="web_prominence_detection"
+                    )
+                    
+                    logger.info(f"✅ Enhanced baseline detection completed: method={baseline_metadata['method']}")
+                    
+                    # Handle quality metrics
+                    if 'quality_metrics' in baseline_metadata:
+                        quality_score = baseline_metadata['quality_metrics']['overall_quality']
+                    elif 'quality_score' in baseline_metadata:
+                        quality_score = baseline_metadata['quality_score']
+                    else:
+                        quality_score = 0.5
+                    
+                    logger.info(f"📊 Quality: {quality_score:.2f}")
+                    
+                    # Split baseline for forward/reverse analysis
+                    n = len(voltage)
+                    mid = n // 2
+                    baseline_forward = baseline_full[:mid]
+                    baseline_reverse = baseline_full[mid:]
+                    
+                    # Create segment info for compatibility
+                    segment_info = {
+                        'method_used': baseline_metadata['method'],
+                        'processing_time': baseline_metadata['processing_time'],
+                        'quality': quality_score,
+                        'auto_selected': baseline_metadata.get('auto_selected', False)
+                    }
+                    
+                except Exception as fallback_err:
+                    logger.error(f"❌ Enhanced baseline detector fallback failed: {fallback_err}")
+                    raise Exception("All baseline detection methods failed")
+            else:
+                raise Exception("No baseline detector available")
+
+        # Ensure we have baseline data
+        if baseline_full is None or len(baseline_full) != len(voltage):
+            logger.warning(f"⚠️ Baseline length mismatch: baseline_full={len(baseline_full) if baseline_full is not None else 'None'}, voltage={len(voltage)}")
+            logger.warning(f"⚠️ Creating constant fallback baseline at median current")
+            baseline_full = np.full_like(current, np.median(current))
             n = len(voltage)
             mid = n // 2
-            
-            def simple_linear_fit(v, c):
-                if len(v) < 2:
-                    return np.full_like(v, np.mean(c) if len(c) > 0 else 0)
-                try:
-                    coeffs = np.polyfit(v, c, 1)
-                    return np.polyval(coeffs, v)
-                except:
-                    return np.full_like(v, np.mean(c))
-            
-            baseline_forward = simple_linear_fit(voltage[:mid], current[:mid])
-            baseline_reverse = simple_linear_fit(voltage[mid:], current[mid:])
-            baseline_full = np.concatenate([baseline_forward, baseline_reverse])
-            segment_info = {'forward_segment': None, 'reverse_segment': None}
+            baseline_forward = baseline_full[:mid]
+            baseline_reverse = baseline_full[mid:]
+        else:
+            logger.info(f"✅ Baseline length check passed: baseline_full={len(baseline_full)}, voltage={len(voltage)}")
 
         # Normalize current for peak detection
-        current_norm = current / np.abs(current).max()
+        current_max = np.abs(current).max()
+        if current_max == 0:
+            logger.warning("⚠️ Zero current detected, cannot normalize")
+            current_norm = np.zeros_like(current)
+        else:
+            current_norm = current / current_max
+
+        logger.info(f"🔢 Normalized current range: {current_norm.min():.3f} to {current_norm.max():.3f}")
 
         # Find positive peaks (oxidation)
-        pos_peaks, pos_properties = find_peaks(
-            current_norm,
-            prominence=prominence,
-            width=width
-        )
+        try:
+            pos_peaks, pos_properties = find_peaks(
+                current_norm,
+                prominence=prominence,
+                width=width
+            )
+            logger.info(f"➕ Found {len(pos_peaks)} positive peaks at indices {pos_peaks}")
+        except Exception as e:
+            logger.error(f"❌ Positive peak finding failed: {e}")
+            pos_peaks, pos_properties = np.array([]), {'prominences': np.array([])}
 
         # Find negative peaks (reduction)
-        neg_peaks, neg_properties = find_peaks(
-            -current_norm,
-            prominence=prominence,
-            width=width
-        )
+        try:
+            neg_peaks, neg_properties = find_peaks(
+                -current_norm,
+                prominence=prominence,
+                width=width
+            )
+            logger.info(f"➖ Found {len(neg_peaks)} negative peaks at indices {neg_peaks}")
+        except Exception as e:
+            logger.error(f"❌ Negative peak finding failed: {e}")
+            neg_peaks, neg_properties = np.array([]), {'prominences': np.array([])}
 
         # Format peak data with baseline-corrected heights
         peaks = []
 
         # Add oxidation peaks
         for i, peak_idx in enumerate(pos_peaks):
-            peak_voltage = float(voltage[peak_idx])
-            peak_current = float(current[peak_idx])
-            
-            # Calculate baseline current at peak voltage - use appropriate baseline section
-            n_forward = len(baseline_forward)  # n//2
-            n_reverse = len(baseline_reverse)  # n - n//2
-            
-            if peak_idx < n_forward:
-                # Peak is in forward scan, use forward baseline
-                baseline_at_peak = float(baseline_forward[peak_idx])
-                scan_section = "forward"
-            else:
-                # Peak is in reverse scan, use reverse baseline
-                reverse_idx = peak_idx - n_forward
-                if reverse_idx >= 0 and reverse_idx < n_reverse:
-                    baseline_at_peak = float(baseline_reverse[reverse_idx])
-                    scan_section = "reverse"
+            try:
+                peak_voltage = float(voltage[peak_idx])
+                peak_current = float(current[peak_idx])
+                
+                # Calculate baseline current at peak voltage - use appropriate baseline section
+                n_forward = len(baseline_forward)
+                n_reverse = len(baseline_reverse)
+                
+                if peak_idx < n_forward:
+                    # Peak is in forward scan, use forward baseline
+                    baseline_at_peak = float(baseline_forward[peak_idx])
+                    scan_section = "forward"
                 else:
-                    # Fallback to baseline_full if index is out of range
-                    baseline_at_peak = float(baseline_full[peak_idx])
-                    scan_section = "fallback"
-            
-            # Calculate peak height from baseline
-            peak_height = peak_current - baseline_at_peak
-            
-            logger.info(f"Oxidation peak {i}: idx={peak_idx}, voltage={peak_voltage:.3f}V, current={peak_current:.3f}μA, baseline={baseline_at_peak:.3f}μA, height={peak_height:.3f}μA, section={scan_section}")
-            
-            peaks.append({
-                'voltage': peak_voltage,
-                'current': peak_current,
-                'type': 'oxidation',
-                'confidence': float(pos_properties['prominences'][i] * 100),
-                'height': float(peak_height),
-                'baseline_current': baseline_at_peak,
-                'enabled': True  # Default enabled for user selection
-            })
+                    # Peak is in reverse scan, use reverse baseline
+                    reverse_idx = peak_idx - n_forward
+                    if reverse_idx >= 0 and reverse_idx < n_reverse:
+                        baseline_at_peak = float(baseline_reverse[reverse_idx])
+                        scan_section = "reverse"
+                    else:
+                        # Fallback to baseline_full if index is out of range
+                        baseline_at_peak = float(baseline_full[peak_idx])
+                        scan_section = "fallback"
+                
+                # Calculate peak height from baseline
+                peak_height = peak_current - baseline_at_peak
+                
+                logger.info(f"🔺 Oxidation peak {i}: idx={peak_idx}, V={peak_voltage:.3f}V, I={peak_current:.3f}μA, baseline={baseline_at_peak:.3f}μA, height={peak_height:.3f}μA, section={scan_section}")
+                
+                peaks.append({
+                    'voltage': peak_voltage,
+                    'current': peak_current,
+                    'type': 'oxidation',
+                    'confidence': float(pos_properties['prominences'][i] * 100),
+                    'height': float(peak_height),
+                    'baseline_current': baseline_at_peak,
+                    'enabled': True  # Default enabled for user selection
+                })
+            except Exception as e:
+                logger.error(f"❌ Error processing oxidation peak {i}: {e}")
 
         # Add reduction peaks
         for i, peak_idx in enumerate(neg_peaks):
-            peak_voltage = float(voltage[peak_idx])
-            peak_current = float(current[peak_idx])
-            
-            # Calculate baseline current at peak voltage - use appropriate baseline section
-            n_forward = len(baseline_forward)  # n//2
-            n_reverse = len(baseline_reverse)  # n - n//2
-            
-            if peak_idx < n_forward:
-                # Peak is in forward scan, use forward baseline
-                baseline_at_peak = float(baseline_forward[peak_idx])
-                scan_section = "forward"
-            else:
-                # Peak is in reverse scan, use reverse baseline
-                reverse_idx = peak_idx - n_forward
-                if reverse_idx >= 0 and reverse_idx < n_reverse:
-                    baseline_at_peak = float(baseline_reverse[reverse_idx])
-                    scan_section = "reverse"
+            try:
+                peak_voltage = float(voltage[peak_idx])
+                peak_current = float(current[peak_idx])
+                
+                # Calculate baseline current at peak voltage - use appropriate baseline section
+                n_forward = len(baseline_forward)
+                n_reverse = len(baseline_reverse)
+                
+                if peak_idx < n_forward:
+                    # Peak is in forward scan, use forward baseline
+                    baseline_at_peak = float(baseline_forward[peak_idx])
+                    scan_section = "forward"
                 else:
-                    # Fallback to baseline_full if index is out of range
-                    baseline_at_peak = float(baseline_full[peak_idx])
-                    scan_section = "fallback"
-            
-            # Calculate peak height from baseline (absolute value for reduction peaks)
-            peak_height = abs(peak_current - baseline_at_peak)
-            
-            logger.info(f"Reduction peak {i}: idx={peak_idx}, voltage={peak_voltage:.3f}V, current={peak_current:.3f}μA, baseline={baseline_at_peak:.3f}μA, height={peak_height:.3f}μA, section={scan_section}")
-            
-            peaks.append({
-                'voltage': peak_voltage,
-                'current': peak_current,
-                'type': 'reduction',
-                'confidence': float(neg_properties['prominences'][i] * 100),
-                'height': float(peak_height),
-                'baseline_current': baseline_at_peak,
-                'enabled': True  # Default enabled for user selection
-            })
+                    # Peak is in reverse scan, use reverse baseline
+                    reverse_idx = peak_idx - n_forward
+                    if reverse_idx >= 0 and reverse_idx < n_reverse:
+                        baseline_at_peak = float(baseline_reverse[reverse_idx])
+                        scan_section = "reverse"
+                    else:
+                        # Fallback to baseline_full if index is out of range
+                        baseline_at_peak = float(baseline_full[peak_idx])
+                        scan_section = "fallback"
+                
+                # Calculate peak height from baseline (absolute value for reduction peaks)
+                peak_height = abs(peak_current - baseline_at_peak)
+                
+                logger.info(f"🔻 Reduction peak {i}: idx={peak_idx}, V={peak_voltage:.3f}V, I={peak_current:.3f}μA, baseline={baseline_at_peak:.3f}μA, height={peak_height:.3f}μA, section={scan_section}")
+                
+                peaks.append({
+                    'voltage': peak_voltage,
+                    'current': peak_current,
+                    'type': 'reduction',
+                    'confidence': float(neg_properties['prominences'][i] * 100),
+                    'height': float(peak_height),
+                    'baseline_current': baseline_at_peak,
+                    'enabled': True  # Default enabled for user selection
+                })
+            except Exception as e:
+                logger.error(f"❌ Error processing reduction peak {i}: {e}")
+
+        logger.info(f"✅ Prominence method completed: {len(peaks)} total peaks found")
 
         return {
             'peaks': peaks,
@@ -1316,28 +1451,33 @@ def detect_peaks_prominence(voltage, current):
                 'forward': baseline_forward.tolist(),
                 'reverse': baseline_reverse.tolist(),
                 'full': baseline_full.tolist(),
+                'metadata': {
+                    'method_used': segment_info.get('method_used') or segment_info.get('method', 'unknown'),
+                    'quality': segment_info.get('quality', 0.5),
+                    'processing_time': segment_info.get('processing_time', 0),
+                    'auto_selected': segment_info.get('auto_selected', False),
+                    'error': segment_info.get('error')
+                },
                 'markers': {
-                    'forward_segment': {
-                        'start_idx': segment_info['forward_segment']['start_idx'] if segment_info['forward_segment'] else None,
-                        'end_idx': segment_info['forward_segment']['end_idx'] if segment_info['forward_segment'] else None,
-                        'voltage_range': segment_info['forward_segment']['voltage_range'] if segment_info['forward_segment'] else None,
-                        'r2': segment_info['forward_segment']['r2'] if segment_info['forward_segment'] else None,
-                        'slope': segment_info['forward_segment']['slope'] if segment_info['forward_segment'] else None
-                    },
-                    'reverse_segment': {
-                        'start_idx': segment_info['reverse_segment']['start_idx'] if segment_info['reverse_segment'] else None,
-                        'end_idx': segment_info['reverse_segment']['end_idx'] if segment_info['reverse_segment'] else None,
-                        'voltage_range': segment_info['reverse_segment']['voltage_range'] if segment_info['reverse_segment'] else None,
-                        'r2': segment_info['reverse_segment']['r2'] if segment_info['reverse_segment'] else None,
-                        'slope': segment_info['reverse_segment']['slope'] if segment_info['reverse_segment'] else None
-                    }
+                    'forward_segment': segment_info.get('forward_segment') or {},
+                    'reverse_segment': segment_info.get('reverse_segment') or {}
+                },
+                'debug': {
+                    'baseline_range': f"{baseline_full.min():.2e} to {baseline_full.max():.2e}",
+                    'forward_range': f"{baseline_forward.min():.2e} to {baseline_forward.max():.2e}",
+                    'reverse_range': f"{baseline_reverse.min():.2e} to {baseline_reverse.max():.2e}",
+                    'baseline_std': float(np.std(baseline_full)),
+                    'current_std': float(np.std(current))
                 }
             }
         }
 
     except Exception as e:
-        logger.error(f"Error in prominence peak detection: {str(e)}")
-        # Simple fallback
+        logger.error(f"❌ Critical error in prominence peak detection: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        # Emergency fallback - return empty result
         return {
             'peaks': [],
             'method': 'prominence_error',
@@ -1492,48 +1632,142 @@ def detect_peaks_derivative(voltage, current):
 def detect_peaks_ml(voltage, current):
     """Detect peaks using ML-enhanced method"""
     try:
+        logger.info(f"🤖 ML Peak Detection: starting with {len(voltage)} data points")
+        logger.info(f"📊 Data range - V: {voltage.min():.3f} to {voltage.max():.3f}V, I: {current.min():.3f} to {current.max():.3f}µA")
+        
         # Start with prominence method as baseline
-        base_results = detect_peaks_prominence(voltage, current)
-        base_peaks = base_results['peaks']
+        try:
+            base_results = detect_peaks_prominence(voltage, current)
+            base_peaks = base_results['peaks']
+            logger.info(f"✅ Prominence method found {len(base_peaks)} base peaks")
+        except Exception as e:
+            logger.error(f"❌ Prominence method failed in ML: {e}")
+            # Fallback to simple peak detection
+            logger.info("🔄 Falling back to simple peak detection in ML method")
+            base_peaks = []
+            
+            # Simple fallback peak detection
+            try:
+                current_norm = current / np.abs(current).max()
+                from scipy.signal import find_peaks
+                
+                # Find positive peaks
+                pos_peaks, _ = find_peaks(current_norm, prominence=0.1, width=5)
+                # Find negative peaks  
+                neg_peaks, _ = find_peaks(-current_norm, prominence=0.1, width=5)
+                
+                # Convert to peak format
+                for peak_idx in pos_peaks:
+                    base_peaks.append({
+                        'voltage': float(voltage[peak_idx]),
+                        'current': float(current[peak_idx]),
+                        'type': 'oxidation',
+                        'confidence': 75.0,
+                        'height': abs(float(current[peak_idx])),
+                        'baseline_current': 0.0,
+                        'enabled': True
+                    })
+                
+                for peak_idx in neg_peaks:
+                    base_peaks.append({
+                        'voltage': float(voltage[peak_idx]),
+                        'current': float(current[peak_idx]),
+                        'type': 'reduction',
+                        'confidence': 75.0,
+                        'height': abs(float(current[peak_idx])),
+                        'baseline_current': 0.0,
+                        'enabled': True
+                    })
+                
+                logger.info(f"🔄 Fallback found {len(base_peaks)} peaks ({len(pos_peaks)} pos, {len(neg_peaks)} neg)")
+                base_results = {'peaks': base_peaks, 'baseline': {}}
+                
+            except Exception as fallback_error:
+                logger.error(f"❌ Even fallback peak detection failed: {fallback_error}")
+                base_peaks = []
+                base_results = {'peaks': [], 'baseline': {}}
         
         # Add ML enhancements (feature extraction)
         enhanced_peaks = []
-        for peak in base_peaks:
-            # Find peak width at half height
-            peak_idx = np.where((voltage == peak['voltage']) & (current == peak['current']))[0][0]
-            half_height = peak['current'] / 2
-            left_idx = right_idx = peak_idx
-            
-            while left_idx > 0 and abs(current[left_idx]) > abs(half_height):
-                left_idx -= 1
-            while right_idx < len(current)-1 and abs(current[right_idx]) > abs(half_height):
-                right_idx += 1
+        for i, peak in enumerate(base_peaks):
+            try:
+                # Find peak index
+                peak_voltage = peak['voltage']
+                peak_current = peak['current']
                 
-            width = voltage[right_idx] - voltage[left_idx]
-            area = np.trapz(current[left_idx:right_idx], voltage[left_idx:right_idx])
-            
-            enhanced_peaks.append({
-                'voltage': peak['voltage'],
-                'current': peak['current'],
-                'type': peak['type'],
-                'confidence': min(100.0, peak['confidence'] * 1.1),  # ML confidence boost
-                'height': peak.get('height', 0.0),  # Pass through height from base method
-                'baseline_current': peak.get('baseline_current', 0.0),  # Pass through baseline_current
-                'enabled': peak.get('enabled', True),  # Pass through enabled state
-                'width': float(width),
-                'area': float(area)
-            })
-            
+                # Find closest index
+                voltage_diff = np.abs(voltage - peak_voltage)
+                peak_idx = np.argmin(voltage_diff)
+                
+                # Calculate peak width at half height
+                half_height = peak_current / 2
+                left_idx = right_idx = peak_idx
+                
+                # Find left boundary
+                while left_idx > 0 and abs(current[left_idx]) > abs(half_height):
+                    left_idx -= 1
+                    
+                # Find right boundary
+                while right_idx < len(current)-1 and abs(current[right_idx]) > abs(half_height):
+                    right_idx += 1
+                    
+                width = voltage[right_idx] - voltage[left_idx] if right_idx != left_idx else 0.01
+                
+                # Calculate area under the curve
+                try:
+                    area = np.trapz(current[left_idx:right_idx+1], voltage[left_idx:right_idx+1])
+                except:
+                    area = 0.0
+                
+                enhanced_peaks.append({
+                    'voltage': peak['voltage'],
+                    'current': peak['current'],
+                    'type': peak['type'],
+                    'confidence': min(100.0, peak.get('confidence', 50.0) * 1.1),  # ML confidence boost
+                    'height': peak.get('height', abs(peak_current)),
+                    'baseline_current': peak.get('baseline_current', 0.0),
+                    'enabled': peak.get('enabled', True),
+                    'width': float(width),
+                    'area': float(area)
+                })
+                
+            except Exception as peak_error:
+                logger.warning(f"⚠️ Error processing peak {i}: {peak_error}")
+                # Add peak without enhancements
+                enhanced_peaks.append({
+                    'voltage': peak['voltage'],
+                    'current': peak['current'],
+                    'type': peak.get('type', 'unknown'),
+                    'confidence': peak.get('confidence', 50.0),
+                    'height': peak.get('height', abs(peak.get('current', 0))),
+                    'baseline_current': peak.get('baseline_current', 0.0),
+                    'enabled': peak.get('enabled', True),
+                    'width': 0.01,
+                    'area': 0.0
+                })
+        
+        logger.info(f"🎯 ML method completed: {len(enhanced_peaks)} enhanced peaks")
+        
         return {
             'peaks': enhanced_peaks,
             'method': 'ml',
             'params': {
                 'feature_extraction': ['width', 'area'],
-                'confidence_boost': 1.1
+                'confidence_boost': 1.1,
+                'fallback_used': len(base_peaks) == 0
             },
             'baseline': base_results.get('baseline', {})  # Pass through baseline from prominence method
         }
         
     except Exception as e:
-        logger.error(f"Error in ML peak detection: {str(e)}")
-        raise
+        logger.error(f"❌ Critical error in ML peak detection: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        # Return empty result instead of raising
+        return {
+            'peaks': [],
+            'method': 'ml_error',
+            'params': {'error': str(e)},
+            'baseline': {}
+        }

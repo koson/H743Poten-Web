@@ -535,7 +535,9 @@
             ];
 
             peaksData.forEach(peak => {
-                rows.push([peak.type, peak.x.toFixed(3), peak.y.toFixed(3)]);
+                // Use appropriate precision for small current values
+                const currentStr = Math.abs(peak.y) < 0.1 ? peak.y.toFixed(6) : peak.y.toFixed(3);
+                rows.push([peak.type, peak.x.toFixed(3), currentStr]);
             });
 
             return rows.map(row => row.join(',')).join('\n');

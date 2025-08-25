@@ -1,0 +1,120 @@
+{
+  "good_file": "./Test_data/Palmsens/Palmsens_1.0mM/Palmsens_1.0mM_CV_200mVpS_E1_scan_05.csv",
+  "bad_file": "./Test_data/Palmsens/Palmsens_1.0mM/Palmsens_1.0mM_CV_100mVpS_E1_scan_05.csv",
+  "good_info": {
+    "forward_segment": {
+      "start_idx": 25,
+      "end_idx": 38,
+      "slope": 14.183786609531674,
+      "intercept": -3.6627622975953043,
+      "r2": 0.9997280387472525,
+      "p_value": 7.849274947933537e-15,
+      "std_err": 0.031237173008100843,
+      "length": 30,
+      "voltage_start": -0.109785344,
+      "voltage_end": -0.039730884,
+      "segment_count": 4
+    },
+    "reverse_segment": {
+      "start_idx": 133,
+      "end_idx": 148,
+      "slope": 18.097666738804104,
+      "intercept": -1.448303872823712,
+      "r2": 0.9986830457459082,
+      "p_value": 1.698742011380526e-12,
+      "std_err": 0.09315266331655453,
+      "length": 38,
+      "voltage_start": 0.430634,
+      "voltage_end": 0.36058,
+      "segment_count": 5
+    },
+    "forward_segments_count": 4,
+    "reverse_segments_count": 5,
+    "excluded_peaks": 3,
+    "peak_regions": [
+      [
+        56,
+        66
+      ],
+      [
+        199,
+        209
+      ],
+      [
+        165,
+        175
+      ]
+    ],
+    "method": "voltage_window_v4",
+    "voltage_range": [
+      -0.40001,
+      0.700844
+    ],
+    "current_range": [
+      -64.079264,
+      64.943544
+    ],
+    "baseline_range": [
+      -9.337135157386474,
+      10.865431021962364
+    ]
+  },
+  "bad_info": {
+    "forward_segment": {
+      "start_idx": 22,
+      "end_idx": 106,
+      "slope": 10.795498353949949,
+      "intercept": -3.866757742529314,
+      "r2": 0.9833925155047194,
+      "p_value": 2.4719875622022898e-11,
+      "std_err": 0.04543708917333024,
+      "length": 30,
+      "voltage_start": -0.149816,
+      "voltage_end": -0.089769784,
+      "segment_count": 4
+    },
+    "reverse_segment": {
+      "start_idx": 133,
+      "end_idx": 148,
+      "slope": 11.22295443773211,
+      "intercept": 0.2599855271183933,
+      "r2": 0.9986568746817179,
+      "p_value": 1.9280322026215832e-13,
+      "std_err": 0.039818153057637425,
+      "length": 38,
+      "voltage_start": 0.410619,
+      "voltage_end": 0.340564,
+      "segment_count": 5
+    },
+    "forward_segments_count": 4,
+    "reverse_segments_count": 5,
+    "excluded_peaks": 3,
+    "peak_regions": [
+      [
+        55,
+        65
+      ],
+      [
+        198,
+        208
+      ],
+      [
+        164,
+        174
+      ]
+    ],
+    "method": "voltage_window_v4",
+    "voltage_range": [
+      -0.40001,
+      0.700844
+    ],
+    "current_range": [
+      -55.605504,
+      40.781128
+    ],
+    "baseline_range": [
+      -4.673456419884834,
+      7.857133093895648
+    ]
+  }
+}
