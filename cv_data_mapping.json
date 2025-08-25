@@ -409,12 +409,322 @@
       "original_filename": "analysis_2025-08-24T13-23-35.csv",
       "exported_at": "2025-08-24T20:23:36.190047",
       "source": "auto_export"
+    },
+    "91": {
+      "filename": "measurement_91_100.0mVs_2025-08-25T06-38-34.928713.csv",
+      "file_path": "cv_data/measurement_91_100.0mVs_2025-08-25T06-38-34.928713.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-25 06:38:34.928713",
+      "original_filename": "analysis_2025-08-24T23-38-35.csv",
+      "exported_at": "2025-08-25T06:38:35.388787",
+      "source": "auto_export"
+    },
+    "92": {
+      "filename": "measurement_92_100.0mVs_2025-08-25T06-38-53.692126.csv",
+      "file_path": "cv_data/measurement_92_100.0mVs_2025-08-25T06-38-53.692126.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-25 06:38:53.692126",
+      "original_filename": "analysis_2025-08-24T23-38-54.csv",
+      "exported_at": "2025-08-25T06:38:54.137329",
+      "source": "auto_export"
+    },
+    "93": {
+      "filename": "measurement_93_100.0mVs_2025-08-25T06-39-11.686802.csv",
+      "file_path": "cv_data/measurement_93_100.0mVs_2025-08-25T06-39-11.686802.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-25 06:39:11.686802",
+      "original_filename": "analysis_2025-08-24T23-39-11.csv",
+      "exported_at": "2025-08-25T06:39:12.101915",
+      "source": "auto_export"
+    },
+    "94": {
+      "filename": "measurement_94_100.0mVs_2025-08-25T06-40-25.137449.csv",
+      "file_path": "cv_data/measurement_94_100.0mVs_2025-08-25T06-40-25.137449.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-25 06:40:25.137449",
+      "original_filename": "analysis_2025-08-24T23-40-24.csv",
+      "exported_at": "2025-08-25T06:40:25.590728",
+      "source": "auto_export"
+    },
+    "95": {
+      "filename": "measurement_95_200.0mVs_2025-08-25T06-46-14.158045.csv",
+      "file_path": "cv_data/measurement_95_200.0mVs_2025-08-25T06-46-14.158045.csv",
+      "data_points": 220,
+      "scan_rate": 200.0,
+      "timestamp": "2025-08-25 06:46:14.158045",
+      "original_filename": "analysis_2025-08-24T23-46-13.csv",
+      "exported_at": "2025-08-25T06:46:14.555497",
+      "source": "auto_export"
+    },
+    "96": {
+      "filename": "measurement_96_20.0mVs_2025-08-25T06-46-22.774810.csv",
+      "file_path": "cv_data/measurement_96_20.0mVs_2025-08-25T06-46-22.774810.csv",
+      "data_points": 220,
+      "scan_rate": 20.0,
+      "timestamp": "2025-08-25 06:46:22.774810",
+      "original_filename": "analysis_2025-08-24T23-46-22.csv",
+      "exported_at": "2025-08-25T06:46:23.187989",
+      "source": "auto_export"
+    },
+    "97": {
+      "filename": "measurement_97_400.0mVs_2025-08-25T06-46-33.785412.csv",
+      "file_path": "cv_data/measurement_97_400.0mVs_2025-08-25T06-46-33.785412.csv",
+      "data_points": 220,
+      "scan_rate": 400.0,
+      "timestamp": "2025-08-25 06:46:33.785412",
+      "original_filename": "analysis_2025-08-24T23-46-33.csv",
+      "exported_at": "2025-08-25T06:46:34.238110",
+      "source": "auto_export"
+    },
+    "98": {
+      "filename": "measurement_98_50.0mVs_2025-08-25T06-46-44.165711.csv",
+      "file_path": "cv_data/measurement_98_50.0mVs_2025-08-25T06-46-44.165711.csv",
+      "data_points": 220,
+      "scan_rate": 50.0,
+      "timestamp": "2025-08-25 06:46:44.165711",
+      "original_filename": "analysis_2025-08-24T23-46-43.csv",
+      "exported_at": "2025-08-25T06:46:44.554073",
+      "source": "auto_export"
+    },
+    "99": {
+      "filename": "measurement_99_200.0mVs_2025-08-25T06-48-22.070901.csv",
+      "file_path": "cv_data/measurement_99_200.0mVs_2025-08-25T06-48-22.070901.csv",
+      "data_points": 220,
+      "scan_rate": 200.0,
+      "timestamp": "2025-08-25 06:48:22.070901",
+      "original_filename": "analysis_2025-08-24T23-48-22.csv",
+      "exported_at": "2025-08-25T06:48:22.517724",
+      "source": "auto_export"
+    },
+    "100": {
+      "filename": "measurement_100_20.0mVs_2025-08-25T06-48-42.312168.csv",
+      "file_path": "cv_data/measurement_100_20.0mVs_2025-08-25T06-48-42.312168.csv",
+      "data_points": 220,
+      "scan_rate": 20.0,
+      "timestamp": "2025-08-25 06:48:42.312168",
+      "original_filename": "analysis_2025-08-24T23-48-42.csv",
+      "exported_at": "2025-08-25T06:48:42.778255",
+      "source": "auto_export"
+    },
+    "101": {
+      "filename": "measurement_101_400.0mVs_2025-08-25T06-48-52.997092.csv",
+      "file_path": "cv_data/measurement_101_400.0mVs_2025-08-25T06-48-52.997092.csv",
+      "data_points": 220,
+      "scan_rate": 400.0,
+      "timestamp": "2025-08-25 06:48:52.997092",
+      "original_filename": "analysis_2025-08-24T23-48-53.csv",
+      "exported_at": "2025-08-25T06:48:53.448691",
+      "source": "auto_export"
+    },
+    "102": {
+      "filename": "measurement_102_50.0mVs_2025-08-25T06-49-05.056081.csv",
+      "file_path": "cv_data/measurement_102_50.0mVs_2025-08-25T06-49-05.056081.csv",
+      "data_points": 220,
+      "scan_rate": 50.0,
+      "timestamp": "2025-08-25 06:49:05.056081",
+      "original_filename": "analysis_2025-08-24T23-49-05.csv",
+      "exported_at": "2025-08-25T06:49:05.586794",
+      "source": "auto_export"
+    },
+    "103": {
+      "filename": "measurement_103_200.0mVs_2025-08-25T06-49-57.973566.csv",
+      "file_path": "cv_data/measurement_103_200.0mVs_2025-08-25T06-49-57.973566.csv",
+      "data_points": 220,
+      "scan_rate": 200.0,
+      "timestamp": "2025-08-25 06:49:57.973566",
+      "original_filename": "analysis_2025-08-24T23-49-58.csv",
+      "exported_at": "2025-08-25T06:49:58.406579",
+      "source": "auto_export"
+    },
+    "104": {
+      "filename": "measurement_104_400.0mVs_2025-08-25T06-50-09.945140.csv",
+      "file_path": "cv_data/measurement_104_400.0mVs_2025-08-25T06-50-09.945140.csv",
+      "data_points": 220,
+      "scan_rate": 400.0,
+      "timestamp": "2025-08-25 06:50:09.945140",
+      "original_filename": "analysis_2025-08-24T23-50-10.csv",
+      "exported_at": "2025-08-25T06:50:10.352952",
+      "source": "auto_export"
+    },
+    "105": {
+      "filename": "measurement_105_50.0mVs_2025-08-25T06-50-21.581444.csv",
+      "file_path": "cv_data/measurement_105_50.0mVs_2025-08-25T06-50-21.581444.csv",
+      "data_points": 220,
+      "scan_rate": 50.0,
+      "timestamp": "2025-08-25 06:50:21.581444",
+      "original_filename": "analysis_2025-08-24T23-50-21.csv",
+      "exported_at": "2025-08-25T06:50:22.001113",
+      "source": "auto_export"
+    },
+    "106": {
+      "filename": "measurement_106_100.0mVs_2025-08-25T07-17-55.233200.csv",
+      "file_path": "cv_data/measurement_106_100.0mVs_2025-08-25T07-17-55.233200.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-25 07:17:55.233200",
+      "original_filename": "analysis_2025-08-25T00-17-55.csv",
+      "exported_at": "2025-08-25T07:17:55.684330",
+      "source": "auto_export"
+    },
+    "107": {
+      "filename": "measurement_107_200.0mVs_2025-08-25T07-18-03.470954.csv",
+      "file_path": "cv_data/measurement_107_200.0mVs_2025-08-25T07-18-03.470954.csv",
+      "data_points": 220,
+      "scan_rate": 200.0,
+      "timestamp": "2025-08-25 07:18:03.470954",
+      "original_filename": "analysis_2025-08-25T00-18-03.csv",
+      "exported_at": "2025-08-25T07:18:03.903227",
+      "source": "auto_export"
+    },
+    "108": {
+      "filename": "measurement_108_200.0mVs_2025-08-25T07-18-08.374363.csv",
+      "file_path": "cv_data/measurement_108_200.0mVs_2025-08-25T07-18-08.374363.csv",
+      "data_points": 220,
+      "scan_rate": 200.0,
+      "timestamp": "2025-08-25 07:18:08.374363",
+      "original_filename": "analysis_2025-08-25T00-18-08.csv",
+      "exported_at": "2025-08-25T07:18:08.764242",
+      "source": "auto_export"
+    },
+    "109": {
+      "filename": "measurement_109_20.0mVs_2025-08-25T07-18-47.648649.csv",
+      "file_path": "cv_data/measurement_109_20.0mVs_2025-08-25T07-18-47.648649.csv",
+      "data_points": 220,
+      "scan_rate": 20.0,
+      "timestamp": "2025-08-25 07:18:47.648649",
+      "original_filename": "analysis_2025-08-25T00-18-47.csv",
+      "exported_at": "2025-08-25T07:18:48.054226",
+      "source": "auto_export"
+    },
+    "110": {
+      "filename": "measurement_110_400.0mVs_2025-08-25T07-18-58.195910.csv",
+      "file_path": "cv_data/measurement_110_400.0mVs_2025-08-25T07-18-58.195910.csv",
+      "data_points": 220,
+      "scan_rate": 400.0,
+      "timestamp": "2025-08-25 07:18:58.195910",
+      "original_filename": "analysis_2025-08-25T00-18-58.csv",
+      "exported_at": "2025-08-25T07:18:58.635631",
+      "source": "auto_export"
+    },
+    "111": {
+      "filename": "measurement_111_50.0mVs_2025-08-25T07-19-09.547902.csv",
+      "file_path": "cv_data/measurement_111_50.0mVs_2025-08-25T07-19-09.547902.csv",
+      "data_points": 220,
+      "scan_rate": 50.0,
+      "timestamp": "2025-08-25 07:19:09.547902",
+      "original_filename": "analysis_2025-08-25T00-19-09.csv",
+      "exported_at": "2025-08-25T07:19:09.932603",
+      "source": "auto_export"
+    },
+    "112": {
+      "filename": "measurement_112_100.0mVs_2025-08-25T07-19-37.731778.csv",
+      "file_path": "cv_data/measurement_112_100.0mVs_2025-08-25T07-19-37.731778.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-25 07:19:37.731778",
+      "original_filename": "analysis_2025-08-25T00-19-37.csv",
+      "exported_at": "2025-08-25T07:19:38.148825",
+      "source": "auto_export"
+    },
+    "113": {
+      "filename": "measurement_113_200.0mVs_2025-08-25T07-19-48.017834.csv",
+      "file_path": "cv_data/measurement_113_200.0mVs_2025-08-25T07-19-48.017834.csv",
+      "data_points": 220,
+      "scan_rate": 200.0,
+      "timestamp": "2025-08-25 07:19:48.017834",
+      "original_filename": "analysis_2025-08-25T00-19-47.csv",
+      "exported_at": "2025-08-25T07:19:48.427025",
+      "source": "auto_export"
+    },
+    "114": {
+      "filename": "measurement_114_20.0mVs_2025-08-25T07-19-58.314568.csv",
+      "file_path": "cv_data/measurement_114_20.0mVs_2025-08-25T07-19-58.314568.csv",
+      "data_points": 220,
+      "scan_rate": 20.0,
+      "timestamp": "2025-08-25 07:19:58.314568",
+      "original_filename": "analysis_2025-08-25T00-19-58.csv",
+      "exported_at": "2025-08-25T07:19:58.756499",
+      "source": "auto_export"
+    },
+    "115": {
+      "filename": "measurement_115_400.0mVs_2025-08-25T07-20-08.278125.csv",
+      "file_path": "cv_data/measurement_115_400.0mVs_2025-08-25T07-20-08.278125.csv",
+      "data_points": 220,
+      "scan_rate": 400.0,
+      "timestamp": "2025-08-25 07:20:08.278125",
+      "original_filename": "analysis_2025-08-25T00-20-08.csv",
+      "exported_at": "2025-08-25T07:20:08.780481",
+      "source": "auto_export"
+    },
+    "116": {
+      "filename": "measurement_116_50.0mVs_2025-08-25T07-20-18.268581.csv",
+      "file_path": "cv_data/measurement_116_50.0mVs_2025-08-25T07-20-18.268581.csv",
+      "data_points": 220,
+      "scan_rate": 50.0,
+      "timestamp": "2025-08-25 07:20:18.268581",
+      "original_filename": "analysis_2025-08-25T00-20-18.csv",
+      "exported_at": "2025-08-25T07:20:18.704039",
+      "source": "auto_export"
+    },
+    "117": {
+      "filename": "measurement_117_100.0mVs_2025-08-25T07-20-41.796397.csv",
+      "file_path": "cv_data/measurement_117_100.0mVs_2025-08-25T07-20-41.796397.csv",
+      "data_points": 220,
+      "scan_rate": 100.0,
+      "timestamp": "2025-08-25 07:20:41.796397",
+      "original_filename": "analysis_2025-08-25T00-20-41.csv",
+      "exported_at": "2025-08-25T07:20:42.202958",
+      "source": "auto_export"
+    },
+    "118": {
+      "filename": "measurement_118_200.0mVs_2025-08-25T07-20-52.873416.csv",
+      "file_path": "cv_data/measurement_118_200.0mVs_2025-08-25T07-20-52.873416.csv",
+      "data_points": 220,
+      "scan_rate": 200.0,
+      "timestamp": "2025-08-25 07:20:52.873416",
+      "original_filename": "analysis_2025-08-25T00-20-52.csv",
+      "exported_at": "2025-08-25T07:20:53.290118",
+      "source": "auto_export"
+    },
+    "119": {
+      "filename": "measurement_119_20.0mVs_2025-08-25T07-21-03.582979.csv",
+      "file_path": "cv_data/measurement_119_20.0mVs_2025-08-25T07-21-03.582979.csv",
+      "data_points": 220,
+      "scan_rate": 20.0,
+      "timestamp": "2025-08-25 07:21:03.582979",
+      "original_filename": "analysis_2025-08-25T00-21-03.csv",
+      "exported_at": "2025-08-25T07:21:04.052944",
+      "source": "auto_export"
+    },
+    "120": {
+      "filename": "measurement_120_400.0mVs_2025-08-25T07-21-15.117275.csv",
+      "file_path": "cv_data/measurement_120_400.0mVs_2025-08-25T07-21-15.117275.csv",
+      "data_points": 220,
+      "scan_rate": 400.0,
+      "timestamp": "2025-08-25 07:21:15.117275",
+      "original_filename": "analysis_2025-08-25T00-21-15.csv",
+      "exported_at": "2025-08-25T07:21:15.559827",
+      "source": "auto_export"
+    },
+    "121": {
+      "filename": "measurement_121_50.0mVs_2025-08-25T07-21-27.710051.csv",
+      "file_path": "cv_data/measurement_121_50.0mVs_2025-08-25T07-21-27.710051.csv",
+      "data_points": 220,
+      "scan_rate": 50.0,
+      "timestamp": "2025-08-25 07:21:27.710051",
+      "original_filename": "analysis_2025-08-25T00-21-27.csv",
+      "exported_at": "2025-08-25T07:21:28.138836",
+      "source": "auto_export"
     }
   },
   "metadata": {
     "version": "1.0",
     "description": "Hybrid CV data mapping system",
-    "last_updated": "2025-08-24T20:23:36.190098",
-    "total_measurements": 41
+    "last_updated": "2025-08-25T07:21:28.138885",
+    "total_measurements": 72
   }
 }
