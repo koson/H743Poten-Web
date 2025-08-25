@@ -86,13 +86,18 @@ def main():
     
     # หาไฟล์ PiPot ทั้งหมด
     pipot_pattern = "Test_data/Stm32/**/*.csv"
-    pipot_files = glob.glob(pipot_pattern, recursive=True)
+    all_csv_files = glob.glob(pipot_pattern, recursive=True)
+    
+    # กรองไฟล์ backup ออก (ไฟล์ที่ลงท้ายด้วย .backup)
+    pipot_files = [f for f in all_csv_files if not f.endswith('.backup')]
     
     if not pipot_files:
         print("❌ No PiPot files found!")
         return
     
-    print(f"📁 Found {len(pipot_files)} potential PiPot files")
+    print(f"📁 Found {len(pipot_files)} potential PiPot files (excluding .backup files)")
+    if len(all_csv_files) > len(pipot_files):
+        print(f"📁 Filtered out {len(all_csv_files) - len(pipot_files)} backup files")
     print()
     
     # สถิติ

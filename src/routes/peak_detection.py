@@ -697,13 +697,15 @@ def load_csv_file(file_path):
         current_scale = 1.0
         
         # Simple unit conversion to µA (PiPot files now have 'uA' headers after conversion)
-        if current_unit == 'ma':
+        current_unit_lower = current_unit.lower()
+        if current_unit_lower == 'ma':
             current_scale = 1e3  # milliAmps to microAmps
-        elif current_unit == 'na':
+        elif current_unit_lower == 'na':
             current_scale = 1e-3  # nanoAmps to microAmps
-        elif current_unit == 'a':
+        elif current_unit_lower == 'a':
             current_scale = 1e6  # Amperes to microAmps
-        # For 'ua' or 'uA' - keep as is (no scaling)
+        elif current_unit_lower in ['ua', 'µa']:
+            current_scale = 1.0  # microAmps - keep as is (no scaling)
         
         logger.info(f"Current unit: {current_unit}, scale: {current_scale} (keeping in µA)")
         
@@ -797,13 +799,15 @@ def load_saved_file(file_path):
         current_scale = 1.0
         
         # Simple unit conversion to µA (PiPot files now have 'uA' headers after conversion)
-        if current_unit == 'ma':
+        current_unit_lower = current_unit.lower()
+        if current_unit_lower == 'ma':
             current_scale = 1e3  # milliAmps to microAmps
-        elif current_unit == 'na':
+        elif current_unit_lower == 'na':
             current_scale = 1e-3  # nanoAmps to microAmps
-        elif current_unit == 'a':
+        elif current_unit_lower == 'a':
             current_scale = 1e6  # Amperes to microAmps
-        # For 'ua' or 'uA' - keep as is (no scaling)
+        elif current_unit_lower in ['ua', 'µa']:
+            current_scale = 1.0  # microAmps - keep as is (no scaling)
         
         logger.info(f"Current unit: {current_unit}, scale: {current_scale} (keeping in µA)")
         

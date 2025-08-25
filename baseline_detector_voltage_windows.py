@@ -319,7 +319,7 @@ def select_best_segments(segments: List[Dict], direction: str) -> List[Dict]:
     
     # Step 3: Score each group with strict length filtering
     scored_groups = []
-    MAX_TOTAL_LENGTH = 30  # Maximum total length allowed for any group
+    MAX_TOTAL_LENGTH = 200  # Maximum total length allowed for any group
     
     for i, group in enumerate(slope_groups):
         total_length = sum([s['length'] for s in group])

@@ -1,66 +1,112 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "H743Poten: Start Development Server",
-            "type": "shell",
-            "command": "python3",
-            "args": ["auto_dev.py", "start"],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": false
-            },
-            "problemMatcher": [],
-            "runOptions": {
-                "runOn": "folderOpen"
-            }
-        },
-        {
-            "label": "H743Poten: Stop Development Server",
-            "type": "shell",
-            "command": "python3",
-            "args": ["auto_dev.py", "stop"],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "H743Poten: Server Status",
-            "type": "shell",
-            "command": "python3",
-            "args": ["auto_dev.py", "status"],
-            "group": "test",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "H743Poten: Show Logs",
-            "type": "shell",
-            "command": "python3",
-            "args": ["auto_dev.py", "logs"],
-            "group": "test",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        }
-    ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "H743Poten: Start Development Server",
+			"type": "shell",
+			"command": "python3",
+			"args": [
+				"auto_dev.py",
+				"start"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": [],
+			"runOptions": {
+				"runOn": "folderOpen"
+			}
+		},
+		{
+			"label": "H743Poten: Stop Development Server",
+			"type": "shell",
+			"command": "python3",
+			"args": [
+				"auto_dev.py",
+				"stop"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "H743Poten: Server Status",
+			"type": "shell",
+			"command": "python3",
+			"args": [
+				"auto_dev.py",
+				"status"
+			],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "H743Poten: Show Logs",
+			"type": "shell",
+			"command": "python3",
+			"args": [
+				"auto_dev.py",
+				"logs"
+			],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Fix Script",
+			"type": "shell",
+			"command": "python3",
+			"args": [
+				"simple_fix.py"
+			]
+		},
+		{
+			"label": "Run Fix Via Bash",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"cd /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web && python3 simple_fix.py"
+			]
+		},
+		{
+			"label": "Test API After Fix",
+			"type": "shell",
+			"command": "python3",
+			"args": [
+				"test_api_after_fix.py"
+			]
+		},
+		{
+			"label": "Test API with curl",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"curl -X POST http://localhost:5000/api/load_csv_file -H 'Content-Type: application/json' -d '{\"file_path\": \"Test_data/Stm32/Pipot_Ferro_1_0mM_20mVpS_E4_scan_05.csv\"}' | head -c 500"
+			]
+		}
+	]
 }
