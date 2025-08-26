@@ -107,6 +107,22 @@
 				"-c",
 				"curl -X POST http://localhost:5000/api/load_csv_file -H 'Content-Type: application/json' -d '{\"file_path\": \"Test_data/Stm32/Pipot_Ferro_1_0mM_20mVpS_E4_scan_05.csv\"}' | head -c 500"
 			]
+		},
+		{
+			"label": "Run Batch Visualization",
+			"type": "shell",
+			"command": "python3",
+			"args": [
+				"batch_baseline_visualization.py"
+			]
+		},
+		{
+			"label": "Test Single Visualization",
+			"type": "shell",
+			"command": "python3",
+			"args": [
+				"test_single_visualization.py"
+			]
 		}
 	]
 }
