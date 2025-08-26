@@ -16,6 +16,15 @@ from typing import Dict, List, Optional, Tuple
 import re
 from datetime import datetime
 
+# Import advanced baseline detection
+try:
+    from baseline_detector_v4 import cv_baseline_detector_v4
+    ADVANCED_BASELINE = True
+    logging.info("✅ Advanced baseline detection available")
+except ImportError:
+    ADVANCED_BASELINE = False
+    logging.warning("⚠️ Advanced baseline detection not available, using simple method")
+
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
@@ -166,21 +175,55 @@ class STM32PalmsensComparison:
             if len(voltage) < 10:
                 return None
             
-            # Simple baseline correction (first/last 20%)
-            n_points = len(voltage)
-            baseline_indices = np.concatenate([
-                np.arange(0, int(0.2 * n_points)),
-                np.arange(int(0.8 * n_points), n_points)
-            ])
-            
-            if len(baseline_indices) >= 2:
-                baseline_v = voltage[baseline_indices]
-                baseline_i = current[baseline_indices]
-                slope, intercept, _, _, _ = linregress(baseline_v, baseline_i)
-                baseline_fit = slope * voltage + intercept
-                corrected_current = current - baseline_fit
+            # Advanced baseline correction if available
+            if ADVANCED_BASELINE:
+                try:
+                    forward_baseline, reverse_baseline, info = cv_baseline_detector_v4(voltage, current)
+                    # Create baseline fit from detected baseline points
+                    baseline_fit = np.concatenate([forward_baseline, reverse_baseline])
+                    baseline_v = np.concatenate([voltage[:len(forward_baseline)], voltage[-len(reverse_baseline):]])
+                    
+                    if len(baseline_v) >= 2:
+                        # Fit line to detected baseline
+                        slope, intercept, _, _, _ = linregress(baseline_v, baseline_fit)
+                        full_baseline_fit = slope * voltage + intercept
+                        corrected_current = current - full_baseline_fit
+                        logger.debug(f"Advanced baseline: {info.get('detection_method', 'unknown')}")
+                    else:
+                        corrected_current = current
+                except Exception as e:
+                    logger.debug(f"Advanced baseline failed: {e}, using simple method")
+                    # Fallback to simple method
+                    n_points = len(voltage)
+                    baseline_indices = np.concatenate([
+                        np.arange(0, int(0.2 * n_points)),
+                        np.arange(int(0.8 * n_points), n_points)
+                    ])
+                    
+                    if len(baseline_indices) >= 2:
+                        baseline_v = voltage[baseline_indices]
+                        baseline_i = current[baseline_indices]
+                        slope, intercept, _, _, _ = linregress(baseline_v, baseline_i)
+                        baseline_fit = slope * voltage + intercept
+                        corrected_current = current - baseline_fit
+                    else:
+                        corrected_current = current
             else:
-                corrected_current = current
+                # Simple baseline correction (first/last 20%)
+                n_points = len(voltage)
+                baseline_indices = np.concatenate([
+                    np.arange(0, int(0.2 * n_points)),
+                    np.arange(int(0.8 * n_points), n_points)
+                ])
+                
+                if len(baseline_indices) >= 2:
+                    baseline_v = voltage[baseline_indices]
+                    baseline_i = current[baseline_indices]
+                    slope, intercept, _, _, _ = linregress(baseline_v, baseline_i)
+                    baseline_fit = slope * voltage + intercept
+                    corrected_current = current - baseline_fit
+                else:
+                    corrected_current = current
             
             # Calculate peak metrics
             peak_height = np.max(corrected_current) - np.min(corrected_current)
@@ -236,6 +279,38 @@ class STM32PalmsensComparison:
                 corrected_current = self.apply_baseline_correction(
                     voltage, current, self.corrections[file_key])
                 logger.debug(f"Applied saved correction to {file_path.name}")
+            elif ADVANCED_BASELINE:
+                try:
+                    forward_baseline, reverse_baseline, info = cv_baseline_detector_v4(voltage, current)
+                    # Create baseline fit from detected baseline points
+                    baseline_fit = np.concatenate([forward_baseline, reverse_baseline])
+                    baseline_v = np.concatenate([voltage[:len(forward_baseline)], voltage[-len(reverse_baseline):]])
+                    
+                    if len(baseline_v) >= 2:
+                        # Fit line to detected baseline
+                        slope, intercept, _, _, _ = linregress(baseline_v, baseline_fit)
+                        full_baseline_fit = slope * voltage + intercept
+                        corrected_current = current - full_baseline_fit
+                        logger.debug(f"Advanced baseline: {info.get('detection_method', 'unknown')}")
+                    else:
+                        corrected_current = current
+                except Exception as e:
+                    logger.debug(f"Advanced baseline failed: {e}, using simple method")
+                    # Default baseline correction
+                    n_points = len(voltage)
+                    baseline_indices = np.concatenate([
+                        np.arange(0, int(0.2 * n_points)),
+                        np.arange(int(0.8 * n_points), n_points)
+                    ])
+                    
+                    if len(baseline_indices) >= 2:
+                        baseline_v = voltage[baseline_indices]
+                        baseline_i = current[baseline_indices]
+                        slope, intercept, _, _, _ = linregress(baseline_v, baseline_i)
+                        baseline_fit = slope * voltage + intercept
+                        corrected_current = current - baseline_fit
+                    else:
+                        corrected_current = current
             else:
                 # Default baseline correction
                 n_points = len(voltage)
