@@ -21,7 +21,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import logging
-from sklearn.metrics import r2_score
 from scipy import stats
 import warnings
 import re
@@ -98,7 +97,14 @@ def load_and_process_csv(file_path):
         
         for encoding in encodings:
             try:
+                # Try reading normally first
                 df = pd.read_csv(file_path, encoding=encoding)
+                
+                # Check if this is the special format with header line
+                if len(df.columns) == 1 and 'FileName:' in df.columns[0]:
+                    # Skip first row and re-read
+                    df = pd.read_csv(file_path, encoding=encoding, skiprows=1)
+                
                 break
             except UnicodeDecodeError:
                 continue

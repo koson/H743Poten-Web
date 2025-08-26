@@ -11,7 +11,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import logging
-from sklearn.metrics import r2_score
 from scipy import stats
 import warnings
 warnings.filterwarnings('ignore')
@@ -19,7 +18,7 @@ warnings.filterwarnings('ignore')
 # Import our existing baseline detector
 import sys
 sys.path.append('.')
-from baseline_detector_voltage_windows import detect_baseline_voltage_windows
+from baseline_detector_voltage_windows import voltage_window_baseline_detector
 
 # Configure logging
 logging.basicConfig(level=logging.WARNING)
@@ -39,8 +38,13 @@ def calculate_r2_for_baseline(voltage_data, baseline_data, segment_type=""):
 def load_and_process_csv(file_path):
     """Load CSV file and process with our existing logic"""
     try:
-        # Read CSV file
-        df = pd.read_csv(file_path, encoding='utf-8')
+        # Read CSV file - skip first row if it contains filename
+        first_line = pd.read_csv(file_path, nrows=1, header=None, encoding='utf-8')
+        if 'FileName:' in str(first_line.iloc[0, 0]):
+            # Skip first row with filename
+            df = pd.read_csv(file_path, skiprows=1, encoding='utf-8')
+        else:
+            df = pd.read_csv(file_path, encoding='utf-8')
         
         # Find voltage and current columns (case-insensitive)
         headers = [h.strip().lower() for h in df.columns]
@@ -48,9 +52,9 @@ def load_and_process_csv(file_path):
         current_idx = -1
         
         for i, header in enumerate(headers):
-            if any(keyword in header for keyword in ['voltage', 'potential', 'v']):
+            if any(keyword in header for keyword in ['voltage', 'potential', 'v', 'volt']):
                 voltage_idx = i
-            elif any(keyword in header for keyword in ['current', 'i']):
+            elif any(keyword in header for keyword in ['current', 'i', 'ua', 'µa', 'ma', 'na', 'a']):
                 current_idx = i
         
         if voltage_idx == -1 or current_idx == -1:
@@ -88,15 +92,29 @@ def load_and_process_csv(file_path):
             return None, None, None, "Not enough valid data points"
         
         # Detect baseline using our algorithm
-        baseline_result = detect_baseline_voltage_windows(
-            voltage_data, current_data,
-            min_window_size=15,
-            max_baseline_current_µA=50.0,
-            min_baseline_points=10
+        forward_baseline, reverse_baseline, baseline_info = voltage_window_baseline_detector(
+            voltage_data, current_data
         )
         
-        if not baseline_result['baseline_detected']:
+        # Convert to our expected format
+        if len(forward_baseline) == 0 and len(reverse_baseline) == 0:
             return None, None, None, "No baseline detected"
+        
+        # Combine baseline voltage points
+        all_baseline_voltage = np.concatenate([forward_baseline, reverse_baseline]) if len(forward_baseline) > 0 and len(reverse_baseline) > 0 else (forward_baseline if len(forward_baseline) > 0 else reverse_baseline)
+        
+        # Calculate corresponding current values by interpolating from original data
+        all_baseline_current = np.interp(all_baseline_voltage, voltage_data, current_data)
+        
+        # Create baseline_result dict for compatibility
+        baseline_result = {
+            'baseline_detected': True,
+            'baseline_voltage': all_baseline_voltage,
+            'baseline_current': all_baseline_current,
+            'forward_segments': [],
+            'reverse_segments': [],
+            'info': baseline_info
+        }
         
         return voltage_data, current_data, baseline_result, None
         

@@ -1,0 +1,38 @@
+{
+  "timestamp": "20250826_181028",
+  "enhanced_analysis": true,
+  "v4_algorithm_used": true,
+  "summary": {
+    "total_files": 20,
+    "successful_analyses": 20,
+    "failed_analyses": 0,
+    "success_rate": 100.0
+  },
+  "algorithm_performance": {
+    "methods_used": {
+      "v4_enhanced": 20
+    },
+    "v4_success_rate": 100.0
+  },
+  "quality_distribution": {
+    "counts": {
+      "EXCELLENT": 20,
+      "GOOD": 0,
+      "FAIR": 0,
+      "POOR": 0
+    },
+    "percentages": {
+      "EXCELLENT": 100.0,
+      "GOOD": 0.0,
+      "FAIR": 0.0,
+      "POOR": 0.0
+    }
+  },
+  "r2_statistics": {
+    "mean": 0.986,
+    "median": 0.987,
+    "std": 0.007,
+    "min": 0.969,
+    "max": 0.994
+  }
+}

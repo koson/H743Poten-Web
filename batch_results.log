@@ -1,0 +1,936 @@
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+🎯 Batch Baseline Detection Visualization
+==================================================
+Found 181 CSV files to process
+
+📁 Processing (1/181): Palmsens_0.5mM_CV_100mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_100mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (2/181): Palmsens_0.5mM_CV_100mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_100mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (3/181): Palmsens_0.5mM_CV_100mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_100mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (4/181): Palmsens_0.5mM_CV_200mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_200mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (5/181): Palmsens_0.5mM_CV_200mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_200mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (6/181): Palmsens_0.5mM_CV_200mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_200mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (7/181): Palmsens_0.5mM_CV_20mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_20mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (8/181): Palmsens_0.5mM_CV_20mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_20mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (9/181): Palmsens_0.5mM_CV_400mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_400mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (10/181): Palmsens_0.5mM_CV_400mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_400mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (11/181): Palmsens_0.5mM_CV_400mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_400mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (12/181): Palmsens_0.5mM_CV_50mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_50mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (13/181): Palmsens_0.5mM_CV_50mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_50mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (14/181): Palmsens_0.5mM_CV_50mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_0.5mM_CV_50mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (15/181): Palmsens_1.0mM_CV_100mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_100mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (16/181): Palmsens_1.0mM_CV_100mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_100mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (17/181): Palmsens_1.0mM_CV_100mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_100mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (18/181): Palmsens_1.0mM_CV_200mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_200mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (19/181): Palmsens_1.0mM_CV_200mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_200mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (20/181): Palmsens_1.0mM_CV_200mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_200mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (21/181): Palmsens_1.0mM_CV_20mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_20mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (22/181): Palmsens_1.0mM_CV_20mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_20mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (23/181): Palmsens_1.0mM_CV_20mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_20mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (24/181): Palmsens_1.0mM_CV_400mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_400mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (25/181): Palmsens_1.0mM_CV_400mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_400mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (26/181): Palmsens_1.0mM_CV_400mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_400mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (27/181): Palmsens_1.0mM_CV_50mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_50mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (28/181): Palmsens_1.0mM_CV_50mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_50mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (29/181): Palmsens_1.0mM_CV_50mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_1.0mM_CV_50mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (30/181): Palmsens_10mM_CV_100mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_10mM_CV_100mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (31/181): Palmsens_10mM_CV_100mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_10mM_CV_100mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (32/181): Palmsens_10mM_CV_100mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_10mM_CV_100mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (33/181): Palmsens_10mM_CV_200mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_10mM_CV_200mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (34/181): Palmsens_10mM_CV_200mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_10mM_CV_200mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (35/181): Palmsens_10mM_CV_200mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_10mM_CV_200mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (36/181): Palmsens_10mM_CV_20mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_10mM_CV_20mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (37/181): Palmsens_10mM_CV_20mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_10mM_CV_20mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (38/181): Palmsens_10mM_CV_20mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_10mM_CV_20mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (39/181): Palmsens_10mM_CV_400mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_10mM_CV_400mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (40/181): Palmsens_10mM_CV_400mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_10mM_CV_400mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (41/181): Palmsens_10mM_CV_400mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_10mM_CV_400mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (42/181): Palmsens_10mM_CV_50mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_10mM_CV_50mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (43/181): Palmsens_10mM_CV_50mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_10mM_CV_50mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (44/181): Palmsens_10mM_CV_50mVpS_E3_scan_08.csv
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+   ✅ Plot saved: Palmsens_10mM_CV_50mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (45/181): Palmsens_20mM_CV_100mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_20mM_CV_100mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (46/181): Palmsens_20mM_CV_100mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_20mM_CV_100mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (47/181): Palmsens_20mM_CV_100mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_20mM_CV_100mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (48/181): Palmsens_20mM_CV_200mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_20mM_CV_200mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (49/181): Palmsens_20mM_CV_200mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_20mM_CV_200mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (50/181): Palmsens_20mM_CV_200mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_20mM_CV_200mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (51/181): Palmsens_20mM_CV_20mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_20mM_CV_20mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (52/181): Palmsens_20mM_CV_20mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_20mM_CV_20mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (53/181): Palmsens_20mM_CV_20mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_20mM_CV_20mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (54/181): Palmsens_20mM_CV_400mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_20mM_CV_400mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (55/181): Palmsens_20mM_CV_400mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_20mM_CV_400mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (56/181): Palmsens_20mM_CV_400mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_20mM_CV_400mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (57/181): Palmsens_20mM_CV_50mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_20mM_CV_50mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (58/181): Palmsens_20mM_CV_50mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_20mM_CV_50mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (59/181): Palmsens_20mM_CV_50mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_20mM_CV_50mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (60/181): Palmsens_50mM_CV_100mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_50mM_CV_100mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (61/181): Palmsens_50mM_CV_100mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_50mM_CV_100mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (62/181): Palmsens_50mM_CV_100mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_50mM_CV_100mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (63/181): Palmsens_50mM_CV_200mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_50mM_CV_200mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (64/181): Palmsens_50mM_CV_200mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_50mM_CV_200mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (65/181): Palmsens_50mM_CV_200mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_50mM_CV_200mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (66/181): Palmsens_50mM_CV_20mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_50mM_CV_20mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (67/181): Palmsens_50mM_CV_20mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_50mM_CV_20mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (68/181): Palmsens_50mM_CV_20mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_50mM_CV_20mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (69/181): Palmsens_50mM_CV_400mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_50mM_CV_400mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (70/181): Palmsens_50mM_CV_400mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_50mM_CV_400mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (71/181): Palmsens_50mM_CV_400mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_50mM_CV_400mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (72/181): Palmsens_50mM_CV_50mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_50mM_CV_50mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (73/181): Palmsens_50mM_CV_50mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_50mM_CV_50mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (74/181): Palmsens_50mM_CV_50mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_50mM_CV_50mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (75/181): Palmsens_5mM_CV_100mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_5mM_CV_100mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (76/181): Palmsens_5mM_CV_100mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_5mM_CV_100mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (77/181): Palmsens_5mM_CV_100mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_5mM_CV_100mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (78/181): Palmsens_5mM_CV_200mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_5mM_CV_200mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (79/181): Palmsens_5mM_CV_200mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_5mM_CV_200mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (80/181): Palmsens_5mM_CV_200mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_5mM_CV_200mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (81/181): Palmsens_5mM_CV_20mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_5mM_CV_20mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (82/181): Palmsens_5mM_CV_20mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_5mM_CV_20mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (83/181): Palmsens_5mM_CV_20mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_5mM_CV_20mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (84/181): Palmsens_5mM_CV_400mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_5mM_CV_400mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (85/181): Palmsens_5mM_CV_400mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_5mM_CV_400mVpS_E2_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (86/181): Palmsens_5mM_CV_400mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_5mM_CV_400mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (87/181): Palmsens_5mM_CV_50mVpS_E1_scan_05.csv
+   ✅ Plot saved: Palmsens_5mM_CV_50mVpS_E1_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (88/181): Palmsens_5mM_CV_50mVpS_E2_scan_06.csv
+   ✅ Plot saved: Palmsens_5mM_CV_50mVpS_E2_scan_06_baseline_plot.png
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (89/181): Palmsens_5mM_CV_50mVpS_E3_scan_08.csv
+   ✅ Plot saved: Palmsens_5mM_CV_50mVpS_E3_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (90/181): Pipot_Ferro_0_5mM_100mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_100mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (91/181): Pipot_Ferro_0_5mM_100mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_100mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (92/181): Pipot_Ferro_0_5mM_100mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_100mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (93/181): Pipot_Ferro_0_5mM_200mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_200mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (94/181): Pipot_Ferro_0_5mM_200mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_200mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (95/181): Pipot_Ferro_0_5mM_200mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_200mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (96/181): Pipot_Ferro_0_5mM_20mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_20mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (97/181): Pipot_Ferro_0_5mM_20mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_20mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (98/181): Pipot_Ferro_0_5mM_20mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_20mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (99/181): Pipot_Ferro_0_5mM_400mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_400mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (100/181): Pipot_Ferro_0_5mM_400mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_400mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (101/181): Pipot_Ferro_0_5mM_400mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_400mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (102/181): Pipot_Ferro_0_5mM_50mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_50mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (103/181): Pipot_Ferro_0_5mM_50mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_0_5mM_50mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (104/181): Pipot_Ferro-10mM_100mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-10mM_100mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (105/181): Pipot_Ferro-10mM_200mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-10mM_200mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (106/181): Pipot_Ferro-10mM_20mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-10mM_20mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (107/181): Pipot_Ferro-10mM_400mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-10mM_400mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (108/181): Pipot_Ferro-10mM_50mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-10mM_50mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (109/181): Pipot_Ferro_10mM_100mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_10mM_100mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (110/181): Pipot_Ferro_10mM_100mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_10mM_100mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (111/181): Pipot_Ferro_10mM_200mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_10mM_200mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (112/181): Pipot_Ferro_10mM_200mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_10mM_200mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (113/181): Pipot_Ferro_10mM_20mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_10mM_20mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (114/181): Pipot_Ferro_10mM_20mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_10mM_20mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (115/181): Pipot_Ferro_10mM_400mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_10mM_400mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (116/181): Pipot_Ferro_10mM_400mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_10mM_400mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (117/181): Pipot_Ferro_10mM_50mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_10mM_50mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (118/181): Pipot_Ferro_10mM_50mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_10mM_50mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (119/181): Pipot_Ferro-1_0mM_100mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-1_0mM_100mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (120/181): Pipot_Ferro-1_0mM_200mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-1_0mM_200mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (121/181): Pipot_Ferro-1_0mM_20mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-1_0mM_20mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (122/181): Pipot_Ferro-1_0mM_400mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-1_0mM_400mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (123/181): Pipot_Ferro-1_0mM_50mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-1_0mM_50mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (124/181): Pipot_Ferro_1_0mM_100mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_1_0mM_100mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (125/181): Pipot_Ferro_1_0mM_200mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_1_0mM_200mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (126/181): Pipot_Ferro_1_0mM_200mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_1_0mM_200mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (127/181): Pipot_Ferro_1_0mM_20mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_1_0mM_20mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (128/181): Pipot_Ferro_1_0mM_20mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_1_0mM_20mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (129/181): Pipot_Ferro_1_0mM_400mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_1_0mM_400mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (130/181): Pipot_Ferro_1_0mM_50mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_1_0mM_50mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (131/181): Pipot_Ferro_1_0mM_50mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_1_0mM_50mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (132/181): Pipot_Ferro-20mM_100mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-20mM_100mVpS_E1_scan_06_baseline_plot.png
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No reverse segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable reverse segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments provided for selection
+WARNING:baseline_detector_voltage_windows:⚠️ No suitable forward segments found
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (133/181): Pipot_Ferro-20mM_200mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-20mM_200mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (134/181): Pipot_Ferro-20mM_20mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-20mM_20mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (135/181): Pipot_Ferro-20mM_400mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-20mM_400mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (136/181): Pipot_Ferro-20mM_50mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-20mM_50mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (137/181): Pipot_Ferro_20mM_100mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_100mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (138/181): Pipot_Ferro_20mM_100mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_100mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (139/181): Pipot_Ferro_20mM_100mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_100mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (140/181): Pipot_Ferro_20mM_200mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_200mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (141/181): Pipot_Ferro_20mM_200mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_200mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (142/181): Pipot_Ferro_20mM_200mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_200mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (143/181): Pipot_Ferro_20mM_20mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_20mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (144/181): Pipot_Ferro_20mM_20mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_20mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (145/181): Pipot_Ferro_20mM_20mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_20mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (146/181): Pipot_Ferro_20mM_400mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_400mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (147/181): Pipot_Ferro_20mM_400mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_400mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (148/181): Pipot_Ferro_20mM_400mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_400mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (149/181): Pipot_Ferro_20mM_50mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_50mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (150/181): Pipot_Ferro_20mM_50mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_50mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (151/181): Pipot_Ferro_20mM_50mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_20mM_50mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (152/181): Pipot_Ferro-50mM_100mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-50mM_100mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (153/181): Pipot_Ferro-50mM_200mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-50mM_200mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (154/181): Pipot_Ferro-50mM_20mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-50mM_20mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (155/181): Pipot_Ferro-50mM_400mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-50mM_400mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (156/181): Pipot_Ferro-50mM_50mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-50mM_50mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (157/181): Pipot_Ferro_50mM_100mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_50mM_100mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (158/181): Pipot_Ferro_50mM_100mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_50mM_100mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (159/181): Pipot_Ferro_50mM_200mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_50mM_200mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (160/181): Pipot_Ferro_50mM_200mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_50mM_200mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (161/181): Pipot_Ferro_50mM_20mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_50mM_20mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (162/181): Pipot_Ferro_50mM_20mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_50mM_20mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (163/181): Pipot_Ferro_50mM_400mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_50mM_400mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (164/181): Pipot_Ferro_50mM_400mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_50mM_400mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (165/181): Pipot_Ferro_50mM_50mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_50mM_50mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (166/181): Pipot_Ferro_50mM_50mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_50mM_50mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (167/181): Pipot_Ferro-5_0mM_100mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-5_0mM_100mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (168/181): Pipot_Ferro-5_0mM_200mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-5_0mM_200mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (169/181): Pipot_Ferro-5_0mM_20mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-5_0mM_20mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (170/181): Pipot_Ferro-5_0mM_400mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-5_0mM_400mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (171/181): Pipot_Ferro-5_0mM_50mVpS_E1_scan_06.csv
+   ✅ Plot saved: Pipot_Ferro-5_0mM_50mVpS_E1_scan_06_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (172/181): Pipot_Ferro_5_0mM_100mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_5_0mM_100mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (173/181): Pipot_Ferro_5_0mM_100mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_5_0mM_100mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (174/181): Pipot_Ferro_5_0mM_200mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_5_0mM_200mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (175/181): Pipot_Ferro_5_0mM_200mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_5_0mM_200mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (176/181): Pipot_Ferro_5_0mM_20mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_5_0mM_20mVpS_E2_scan_08_baseline_plot.png
+WARNING:baseline_detector_voltage_windows:⚠️ No forward segments in preferred region, using all segments
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (177/181): Pipot_Ferro_5_0mM_20mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_5_0mM_20mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (178/181): Pipot_Ferro_5_0mM_400mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_5_0mM_400mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (179/181): Pipot_Ferro_5_0mM_400mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_5_0mM_400mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (180/181): Pipot_Ferro_5_0mM_50mVpS_E2_scan_08.csv
+   ✅ Plot saved: Pipot_Ferro_5_0mM_50mVpS_E2_scan_08_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+📁 Processing (181/181): Pipot_Ferro_5_0mM_50mVpS_E4_scan_05.csv
+   ✅ Plot saved: Pipot_Ferro_5_0mM_50mVpS_E4_scan_05_baseline_plot.png
+   📊 R² - Forward: 0.000, Reverse: 0.000
+
+==================================================
+📈 SUMMARY
+✅ Successful plots: 181
+❌ Failed files: 0
+
+🎯 All plots saved in their respective directories!
