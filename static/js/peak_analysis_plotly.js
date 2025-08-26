@@ -798,14 +798,45 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                 console.log('[RENDER] First 5 baseline values:', baseline.full.slice(0, 5));
                 console.log('[RENDER] Last 5 baseline values:', baseline.full.slice(-5));
                 
-                baselineTraces.push({
-                    x: chartData.voltage,
-                    y: baseline.full,
-                    mode: 'lines',
-                    name: 'Baseline',
-                    line: { color: '#ff6b6b', width: 2, dash: 'dash' },
-                    hovertemplate: 'Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
-                });
+                // Split baseline into forward and reverse segments with different colors
+                if (baseline.markers && baseline.markers.forward_segment && baseline.markers.reverse_segment) {
+                    // Use actual segment indices for proper separation
+                    const forwardEndIdx = baseline.markers.forward_segment.end_idx;
+                    const reverseStartIdx = baseline.markers.reverse_segment.start_idx;
+                    
+                    // Calculate midpoint for better visual separation
+                    const midPoint = Math.floor((forwardEndIdx + reverseStartIdx) / 2);
+                    
+                    // Forward segment baseline - extend to midpoint to reach Ox peak area
+                    baselineTraces.push({
+                        x: chartData.voltage.slice(0, midPoint + 1),
+                        y: baseline.full.slice(0, midPoint + 1),
+                        mode: 'lines',
+                        name: `Forward Baseline (R²=${baseline.markers.forward_segment.r2?.toFixed(3) || 'N/A'})`,
+                        line: { color: '#ff0000', width: 2, dash: 'dash' },
+                        hovertemplate: 'Forward Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
+                    });
+                    
+                    // Reverse segment baseline - start from midpoint to avoid overlap
+                    baselineTraces.push({
+                        x: chartData.voltage.slice(midPoint),
+                        y: baseline.full.slice(midPoint),
+                        mode: 'lines',
+                        name: `Reverse Baseline (R²=${baseline.markers.reverse_segment.r2?.toFixed(3) || 'N/A'})`,
+                        line: { color: '#00aa00', width: 2, dash: 'dash' },
+                        hovertemplate: 'Reverse Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
+                    });
+                } else {
+                    // Fallback: single baseline with original color
+                    baselineTraces.push({
+                        x: chartData.voltage,
+                        y: baseline.full,
+                        mode: 'lines',
+                        name: 'Baseline',
+                        line: { color: '#ff6b6b', width: 2, dash: 'dash' },
+                        hovertemplate: 'Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
+                    });
+                }
                 
                 // Add baseline markers for debugging - show actual points used for baseline calculation
                 if (baseline.markers && (baseline.markers.forward_segment || baseline.markers.reverse_segment)) {
@@ -850,7 +881,7 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                                 y: segmentCurrent,
                                 mode: 'markers',
                                 name: `Reverse Segment (R²=${baseline.markers.reverse_segment.r2?.toFixed(3) || 'N/A'})`,
-                                marker: { color: '#00ff00', size: 8, symbol: 'square' },
+                                marker: { color: '#00aa00', size: 8, symbol: 'square' },
                                 hovertemplate: 'Reverse Baseline Points<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
                             });
                         }
@@ -873,7 +904,7 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                     y: baseline.forward,
                     mode: 'lines',
                     name: 'Forward Baseline',
-                    line: { color: '#ff6b6b', width: 2, dash: 'dash' },
+                    line: { color: '#ff0000', width: 2, dash: 'dash' },
                     hovertemplate: 'Forward Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
                 });
                 
@@ -884,7 +915,7 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                     y: baseline.reverse,
                     mode: 'lines',
                     name: 'Reverse Baseline',
-                    line: { color: '#4ecdc4', width: 2, dash: 'dash' },
+                    line: { color: '#00aa00', width: 2, dash: 'dash' },
                     hovertemplate: 'Reverse Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
                 });
                 
@@ -901,7 +932,7 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                             y: segmentCurrent,
                             mode: 'markers',
                             name: `Forward Segment (R²=${baseline.markers.forward_segment.r2?.toFixed(3) || 'N/A'})`,
-                            marker: { color: '#ff6b6b', size: 6, symbol: 'circle' },
+                            marker: { color: '#ff0000', size: 6, symbol: 'circle' },
                             hovertemplate: 'Forward Segment<br>V: %{x:.3f}<br>I: %{y:.6f}<br>R²: ' + (baseline.markers.forward_segment.r2?.toFixed(3) || 'N/A') + '<extra></extra>',
                         });
                     }
@@ -917,7 +948,7 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                             y: segmentCurrent,
                             mode: 'markers',
                             name: `Reverse Segment (R²=${baseline.markers.reverse_segment.r2?.toFixed(3) || 'N/A'})`,
-                            marker: { color: '#4ecdc4', size: 6, symbol: 'circle' },
+                            marker: { color: '#00aa00', size: 6, symbol: 'circle' },
                             hovertemplate: 'Reverse Segment<br>V: %{x:.3f}<br>I: %{y:.6f}<br>R²: ' + (baseline.markers.reverse_segment.r2?.toFixed(3) || 'N/A') + '<extra></extra>',
                         });
                     }
@@ -956,24 +987,38 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
     
     const peakTraces = [];
     
+    // Debug: Log peak data before rendering
+    console.log('[RENDER] Peak data received:', {
+        peaksData: peaksData,
+        isArray: Array.isArray(peaksData),
+        length: peaksData ? peaksData.length : 0,
+        samplePeak: peaksData && peaksData.length > 0 ? peaksData[0] : null
+    });
+
     // Enabled peaks trace
     if (enabledPeaks.length > 0) {
+        console.log('[RENDER] Rendering enabled peaks:', enabledPeaks);
         const enabledPeakTrace = {
             x: enabledPeaks.map(p => p.x !== undefined ? p.x : p.voltage),
             y: enabledPeaks.map(p => p.y !== undefined ? p.y : p.current),
             mode: 'markers+text',
             name: 'Active Peaks',
             marker: {
-                size: 12,
-                color: enabledPeaks.map(p => p.type === 'oxidation' ? '#dc3545' : '#198754'),
-                line: { width: 2, color: '#fff' }
+                size: 20,  // Very large for visibility
+                color: enabledPeaks.map(p => p.type === 'oxidation' ? '#ff0000' : '#00ff00'),  // Bright colors
+                line: { width: 4, color: '#000000' },  // Black border
+                symbol: 'star'  // Star shape for visibility
             },
-            text: enabledPeaks.map(p => p.type === 'oxidation' ? 'Ox' : 'Red'),
+            text: enabledPeaks.map(p => p.type === 'oxidation' ? 'OX' : 'RED'),
             textposition: 'top center',
+            textfont: { size: 16, color: '#000000' },  // Large, bold text
             customdata: enabledPeaks.map(p => [p.height || 0, p.baseline_current || 0, true]),
             hovertemplate: '%{text} peak (Active)<br>V: %{x:.3f} V<br>Current: %{y:.6f} µA<br>Height: %{customdata[0]:.6f} µA<br>Baseline: %{customdata[1]:.6f} µA<extra></extra>',
         };
         peakTraces.push(enabledPeakTrace);
+        console.log('[RENDER] Added enabled peak trace with', enabledPeaks.length, 'peaks');
+    } else {
+        console.log('[RENDER] No enabled peaks to render');
     }
     
     // Disabled peaks trace (grayed out)

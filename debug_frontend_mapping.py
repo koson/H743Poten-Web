@@ -107,6 +107,14 @@ def debug_data_mapping():
         print(f"      Difference: ΔV={abs(peak_voltage-actual_voltage):.6f}, ΔI={abs(peak_current-actual_current):.6f}")
         print()
     
+    # Additional debug: check the negative peak indices directly
+    peak_indices = debug_info.get('peak_indices_found', {})
+    neg_indices = peak_indices.get('negative', [])
+    print(f"🔍 Direct negative peak index verification:")
+    for idx in neg_indices:
+        print(f"   Index {idx}: V={voltage[idx]:.3f}V, I={current[idx]:.3f}μA")
+    print()
+    
     # Output raw JSON that would be sent to frontend
     print(f"📤 JSON payload that frontend receives:")
     json_output = json.dumps(result, indent=2)

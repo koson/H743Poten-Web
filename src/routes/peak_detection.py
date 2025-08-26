@@ -1210,9 +1210,15 @@ def detect_peaks_prominence(voltage, current):
         logger.info(f"🔍 Prominence Peak Detection: starting with {len(voltage)} data points")
         logger.info(f"📊 Data range - V: {voltage.min():.3f} to {voltage.max():.3f}V, I: {current.min():.3f} to {current.max():.3f}µA")
         
-        # Get settings from config or use defaults
-        prominence = current_app.config.get('PEAK_PROMINENCE', 0.1)
-        width = current_app.config.get('PEAK_WIDTH', 5)
+        # Get settings from config or use defaults (handle cases without Flask context)
+        try:
+            prominence = current_app.config.get('PEAK_PROMINENCE', 0.1)
+            width = current_app.config.get('PEAK_WIDTH', 5)
+        except RuntimeError:
+            # Working outside Flask context - use defaults
+            prominence = 0.1
+            width = 5
+            logger.info(f"🔧 Using default settings: prominence={prominence}, width={width}")
 
         # Use Enhanced Baseline Detector v2.1
         logger.info("🚀 Using Enhanced Baseline Detector v2.1 for improved peak detection")
@@ -1331,34 +1337,67 @@ def detect_peaks_prominence(voltage, current):
 
         logger.info(f"🔢 Normalized current range: {current_norm.min():.3f} to {current_norm.max():.3f}")
 
-        # Find positive peaks (oxidation)
+        # Enhanced Peak Detection with Validation Rules
+        logger.info("🎯 Using Enhanced Peak Detection with validation rules")
+        
+        # Updated voltage zones for better compatibility (based on real data analysis)
+        OX_VOLTAGE_MIN = -0.3    # Allow more negative voltages for Ox peaks
+        OX_VOLTAGE_MAX = 0.8     # Extended upper range for Ox peaks
+        RED_VOLTAGE_MIN = -0.8   # Allow more negative voltages for Red peaks
+        RED_VOLTAGE_MAX = 0.4    # Extended upper range for Red peaks
+        MIN_PEAK_HEIGHT = 1.0    # Reduced from 5.0 to accept smaller signals
+        
+        def validate_peak_pre_detection(voltage_val, current_val, peak_type):
+            """ตรวจสอบ peak ก่อน add เข้าไปในผลลัพธ์"""
+            # Rule 1: Voltage zone validation
+            if peak_type == 'oxidation':
+                if voltage_val < OX_VOLTAGE_MIN or voltage_val > OX_VOLTAGE_MAX:
+                    return False, f"Ox peak voltage {voltage_val:.3f}V outside valid range {OX_VOLTAGE_MIN}-{OX_VOLTAGE_MAX}V"
+            elif peak_type == 'reduction':
+                if voltage_val < RED_VOLTAGE_MIN or voltage_val > RED_VOLTAGE_MAX:
+                    return False, f"Red peak voltage {voltage_val:.3f}V outside valid range {RED_VOLTAGE_MIN}-{RED_VOLTAGE_MAX}V"
+            
+            # Rule 2: Current direction validation
+            if peak_type == 'oxidation' and current_val < 0:
+                return False, f"Ox peak has negative current {current_val:.2f}μA"
+            elif peak_type == 'reduction' and current_val > 0:
+                return False, f"Red peak has positive current {current_val:.2f}μA"
+            
+            # Rule 3: Peak size validation
+            if abs(current_val) < MIN_PEAK_HEIGHT:
+                return False, f"Peak current {current_val:.2f}μA too small"
+            
+            return True, "Valid peak"
+
+        # Find positive peaks (oxidation candidates)
         try:
             pos_peaks, pos_properties = find_peaks(
                 current_norm,
                 prominence=prominence,
                 width=width
             )
-            logger.info(f"➕ Found {len(pos_peaks)} positive peaks at indices {pos_peaks}")
+            logger.info(f"➕ Found {len(pos_peaks)} oxidation candidates at indices {pos_peaks}")
         except Exception as e:
             logger.error(f"❌ Positive peak finding failed: {e}")
             pos_peaks, pos_properties = np.array([]), {'prominences': np.array([])}
 
-        # Find negative peaks (reduction)
+        # Find negative peaks (reduction candidates)
         try:
             neg_peaks, neg_properties = find_peaks(
                 -current_norm,
                 prominence=prominence,
                 width=width
             )
-            logger.info(f"➖ Found {len(neg_peaks)} negative peaks at indices {neg_peaks}")
+            logger.info(f"➖ Found {len(neg_peaks)} reduction candidates at indices {neg_peaks}")
         except Exception as e:
             logger.error(f"❌ Negative peak finding failed: {e}")
             neg_peaks, neg_properties = np.array([]), {'prominences': np.array([])}
 
-        # Format peak data with baseline-corrected heights
+        # Format peak data with validation
         peaks = []
+        rejected_peaks = []
 
-        # Add oxidation peaks
+        # Add oxidation peaks with validation
         for i, peak_idx in enumerate(pos_peaks):
             try:
                 peak_voltage = float(voltage[peak_idx])
@@ -1386,21 +1425,34 @@ def detect_peaks_prominence(voltage, current):
                 # Calculate peak height from baseline
                 peak_height = peak_current - baseline_at_peak
                 
-                logger.info(f"🔺 Oxidation peak {i}: idx={peak_idx}, V={peak_voltage:.3f}V, I={peak_current:.3f}μA, baseline={baseline_at_peak:.3f}μA, height={peak_height:.3f}μA, section={scan_section}")
+                # Validate peak before adding
+                is_valid, validation_message = validate_peak_pre_detection(
+                    peak_voltage, peak_current, 'oxidation'
+                )
                 
-                peaks.append({
-                    'voltage': peak_voltage,
-                    'current': peak_current,
-                    'type': 'oxidation',
-                    'confidence': float(pos_properties['prominences'][i] * 100),
-                    'height': float(peak_height),
-                    'baseline_current': baseline_at_peak,
-                    'enabled': True  # Default enabled for user selection
-                })
+                if is_valid:
+                    peaks.append({
+                        'voltage': peak_voltage,
+                        'current': peak_current,
+                        'type': 'oxidation',
+                        'confidence': float(pos_properties['prominences'][i] * 100),
+                        'height': float(peak_height),
+                        'baseline_current': baseline_at_peak,
+                        'enabled': True  # Default enabled for user selection
+                    })
+                    logger.info(f"✅ Valid Ox peak: V={peak_voltage:.3f}V, I={peak_current:.3f}μA, height={peak_height:.3f}μA, section={scan_section}")
+                else:
+                    rejected_peaks.append({
+                        'voltage': peak_voltage,
+                        'current': peak_current,
+                        'type': 'oxidation',
+                        'reason': validation_message
+                    })
+                    logger.warning(f"❌ Rejected Ox peak: V={peak_voltage:.3f}V, I={peak_current:.3f}μA - {validation_message}")
             except Exception as e:
                 logger.error(f"❌ Error processing oxidation peak {i}: {e}")
 
-        # Add reduction peaks
+        # Add reduction peaks with validation
         for i, peak_idx in enumerate(neg_peaks):
             try:
                 peak_voltage = float(voltage[peak_idx])
@@ -1428,28 +1480,66 @@ def detect_peaks_prominence(voltage, current):
                 # Calculate peak height from baseline (absolute value for reduction peaks)
                 peak_height = abs(peak_current - baseline_at_peak)
                 
-                logger.info(f"🔻 Reduction peak {i}: idx={peak_idx}, V={peak_voltage:.3f}V, I={peak_current:.3f}μA, baseline={baseline_at_peak:.3f}μA, height={peak_height:.3f}μA, section={scan_section}")
+                # Validate peak before adding
+                is_valid, validation_message = validate_peak_pre_detection(
+                    peak_voltage, peak_current, 'reduction'
+                )
                 
-                peaks.append({
-                    'voltage': peak_voltage,
-                    'current': peak_current,
-                    'type': 'reduction',
-                    'confidence': float(neg_properties['prominences'][i] * 100),
-                    'height': float(peak_height),
-                    'baseline_current': baseline_at_peak,
-                    'enabled': True  # Default enabled for user selection
-                })
+                if is_valid:
+                    peaks.append({
+                        'voltage': peak_voltage,
+                        'current': peak_current,
+                        'type': 'reduction',
+                        'confidence': float(neg_properties['prominences'][i] * 100),
+                        'height': float(peak_height),
+                        'baseline_current': baseline_at_peak,
+                        'enabled': True  # Default enabled for user selection
+                    })
+                    logger.info(f"✅ Valid Red peak: V={peak_voltage:.3f}V, I={peak_current:.3f}μA, height={peak_height:.3f}μA, section={scan_section}")
+                else:
+                    rejected_peaks.append({
+                        'voltage': peak_voltage,
+                        'current': peak_current,
+                        'type': 'reduction',
+                        'reason': validation_message
+                    })
+                    logger.warning(f"❌ Rejected Red peak: V={peak_voltage:.3f}V, I={peak_current:.3f}μA - {validation_message}")
             except Exception as e:
                 logger.error(f"❌ Error processing reduction peak {i}: {e}")
+
+        # Log summary of peak detection results
+        valid_ox_count = len([p for p in peaks if p['type'] == 'oxidation'])
+        valid_red_count = len([p for p in peaks if p['type'] == 'reduction'])
+        rejected_ox_count = len([p for p in rejected_peaks if p['type'] == 'oxidation'])
+        rejected_red_count = len([p for p in rejected_peaks if p['type'] == 'reduction'])
+        
+        logger.info(f"🎯 Peak Detection Summary:")
+        logger.info(f"   ✅ Valid peaks: {len(peaks)} (Ox: {valid_ox_count}, Red: {valid_red_count})")
+        logger.info(f"   ❌ Rejected peaks: {len(rejected_peaks)} (Ox: {rejected_ox_count}, Red: {rejected_red_count})")
+        
+        # Log details of rejected peaks if any
+        if rejected_peaks:
+            logger.info(f"   📋 Rejected peak details:")
+            for rp in rejected_peaks:
+                logger.info(f"      {rp['type']}: V={rp['voltage']:.3f}V, I={rp['current']:.3f}μA - {rp['reason']}")
 
         logger.info(f"✅ Prominence method completed: {len(peaks)} total peaks found")
 
         return {
             'peaks': peaks,
+            'rejected_peaks': rejected_peaks,
             'method': 'prominence',
             'params': {
                 'prominence': prominence,
                 'width': width
+            },
+            'peak_summary': {
+                'total_valid': len(peaks),
+                'total_rejected': len(rejected_peaks),
+                'oxidation_valid': valid_ox_count,
+                'reduction_valid': valid_red_count,
+                'oxidation_rejected': rejected_ox_count,
+                'reduction_rejected': rejected_red_count
             },
             'baseline': {
                 'forward': baseline_forward.tolist(),
@@ -1471,7 +1561,14 @@ def detect_peaks_prominence(voltage, current):
                     'forward_range': f"{baseline_forward.min():.2e} to {baseline_forward.max():.2e}",
                     'reverse_range': f"{baseline_reverse.min():.2e} to {baseline_reverse.max():.2e}",
                     'baseline_std': float(np.std(baseline_full)),
-                    'current_std': float(np.std(current))
+                    'current_std': float(np.std(current)),
+                    'data_length': len(voltage),
+                    'sample_voltage_range': f"{voltage[0]:.3f} to {voltage[-1]:.3f}V",
+                    'sample_current_range': f"{current.min():.3f} to {current.max():.3f}μA",
+                    'peak_indices_found': {
+                        'positive': pos_peaks.tolist() if len(pos_peaks) > 0 else [],
+                        'negative': neg_peaks.tolist() if len(neg_peaks) > 0 else []
+                    }
                 }
             }
         }

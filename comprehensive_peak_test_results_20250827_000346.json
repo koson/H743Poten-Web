@@ -1,0 +1,1216 @@
+{
+  "total_files": 50,
+  "successful_files": 50,
+  "failed_files": 0,
+  "perfect_files": 40,
+  "by_concentration": {
+    "0.5mM": {
+      "total": 50,
+      "perfect": 40
+    }
+  },
+  "by_scan_rate": {
+    "100mV/s": {
+      "total": 50,
+      "perfect": 40
+    }
+  },
+  "by_dataset": {
+    "Palmsens": {
+      "total": 50,
+      "perfect": 40
+    }
+  },
+  "detailed_results": [
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_01.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 15.39,
+          "confidence": 59.1
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.1,
+          "current": -17.5,
+          "confidence": 10.5
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_02.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 17.47,
+          "confidence": 127.9
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.1,
+          "current": -17.48,
+          "confidence": 21.9
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_03.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 17.71,
+          "confidence": 129.3
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.1,
+          "current": -17.54,
+          "confidence": 22.1
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_04.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 17.87,
+          "confidence": 130.1
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.1,
+          "current": -17.66,
+          "confidence": 22.1
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_05.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 18.0,
+          "confidence": 129.9
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.1,
+          "current": -17.76,
+          "confidence": 22.1
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_06.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 18.15,
+          "confidence": 129.2
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.1,
+          "current": -17.82,
+          "confidence": 22.0
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_07.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 18.22,
+          "confidence": 129.3
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.1,
+          "current": -17.87,
+          "confidence": 22.0
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_08.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 18.27,
+          "confidence": 130.0
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.1,
+          "current": -17.95,
+          "confidence": 22.1
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_09.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 18.35,
+          "confidence": 130.0
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.1,
+          "current": -17.99,
+          "confidence": 22.1
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_10.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "total_valid": 1,
+      "rejected": 2,
+      "is_perfect": false,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 18.45,
+          "confidence": 129.3
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_11.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "total_valid": 1,
+      "rejected": 2,
+      "is_perfect": false,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 18.52,
+          "confidence": 143.7
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E2_scan_01.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "total_valid": 1,
+      "rejected": 0,
+      "is_perfect": false,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 12.35,
+          "confidence": 43.5
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E2_scan_02.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 13.86,
+          "confidence": 139.1
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -14.98,
+          "confidence": 26.9
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E2_scan_03.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.1,
+          "confidence": 140.5
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -14.97,
+          "confidence": 27.1
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E2_scan_04.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.21,
+          "confidence": 140.9
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -15.0,
+          "confidence": 27.0
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E2_scan_05.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.3,
+          "confidence": 140.7
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -15.03,
+          "confidence": 26.9
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E2_scan_06.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.36,
+          "confidence": 140.4
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -15.08,
+          "confidence": 26.8
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E2_scan_07.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.4,
+          "confidence": 140.9
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -15.12,
+          "confidence": 26.7
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E2_scan_08.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.43,
+          "confidence": 140.5
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -15.15,
+          "confidence": 26.6
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E2_scan_09.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.46,
+          "confidence": 139.7
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -15.17,
+          "confidence": 26.5
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E2_scan_10.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.5,
+          "confidence": 139.6
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -15.19,
+          "confidence": 26.7
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E2_scan_11.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.5,
+          "confidence": 152.7
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -15.19,
+          "confidence": 26.9
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E3_scan_01.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "total_valid": 1,
+      "rejected": 0,
+      "is_perfect": false,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.48,
+          "confidence": 47.8
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E3_scan_02.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 3,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 16.62,
+          "confidence": 125.0
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -17.21,
+          "confidence": 18.5
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E3_scan_03.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 3,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 16.87,
+          "confidence": 126.0
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -17.26,
+          "confidence": 18.6
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E3_scan_04.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 3,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 16.98,
+          "confidence": 126.6
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -17.29,
+          "confidence": 18.6
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E3_scan_05.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 3,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 17.09,
+          "confidence": 126.4
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -17.36,
+          "confidence": 18.5
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E3_scan_06.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 3,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 17.14,
+          "confidence": 125.9
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -17.41,
+          "confidence": 18.5
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E3_scan_07.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 3,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 17.18,
+          "confidence": 126.1
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -17.44,
+          "confidence": 18.7
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E3_scan_08.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 3,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 17.18,
+          "confidence": 127.0
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -17.46,
+          "confidence": 18.9
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E3_scan_09.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 3,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 17.21,
+          "confidence": 126.9
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -17.51,
+          "confidence": 19.0
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E3_scan_10.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 3,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 17.22,
+          "confidence": 128.1
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -17.52,
+          "confidence": 19.0
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E3_scan_11.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 3,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 17.26,
+          "confidence": 141.0
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -17.52,
+          "confidence": 18.9
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E4_scan_01.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 12.42,
+          "confidence": 53.6
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -14.25,
+          "confidence": 10.8
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E4_scan_02.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 13.64,
+          "confidence": 138.2
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -14.25,
+          "confidence": 26.9
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E4_scan_03.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 13.82,
+          "confidence": 139.2
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -14.29,
+          "confidence": 27.0
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E4_scan_04.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 13.91,
+          "confidence": 139.3
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -14.34,
+          "confidence": 27.0
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E4_scan_05.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 13.98,
+          "confidence": 139.4
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -14.39,
+          "confidence": 27.0
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E4_scan_06.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.02,
+          "confidence": 139.4
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -14.42,
+          "confidence": 27.0
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E4_scan_07.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.05,
+          "confidence": 139.9
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -14.45,
+          "confidence": 26.9
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E4_scan_08.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.06,
+          "confidence": 139.5
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.08,
+          "current": -14.45,
+          "confidence": 26.8
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E4_scan_09.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.09,
+          "confidence": 139.2
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -14.47,
+          "confidence": 26.7
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E4_scan_10.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.1,
+          "confidence": 138.6
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -14.46,
+          "confidence": 26.7
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E4_scan_11.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "total_valid": 2,
+      "rejected": 1,
+      "is_perfect": true,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.17,
+          "current": 14.12,
+          "confidence": 152.6
+        },
+        {
+          "type": "reduction",
+          "voltage": 0.09,
+          "current": -14.48,
+          "confidence": 26.8
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E5_scan_01.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "total_valid": 1,
+      "rejected": 2,
+      "is_perfect": false,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 15.38,
+          "confidence": 68.7
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E5_scan_02.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "total_valid": 1,
+      "rejected": 4,
+      "is_perfect": false,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 16.44,
+          "confidence": 131.9
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E5_scan_03.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "total_valid": 1,
+      "rejected": 4,
+      "is_perfect": false,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 16.46,
+          "confidence": 131.7
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E5_scan_04.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "total_valid": 1,
+      "rejected": 4,
+      "is_perfect": false,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 16.46,
+          "confidence": 131.6
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E5_scan_05.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "total_valid": 1,
+      "rejected": 4,
+      "is_perfect": false,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 16.47,
+          "confidence": 131.5
+        }
+      ]
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E5_scan_06.csv",
+      "dataset": "Palmsens",
+      "concentration": "0.5mM",
+      "scan_rate": "100mV/s",
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "total_valid": 1,
+      "rejected": 4,
+      "is_perfect": false,
+      "peak_details": [
+        {
+          "type": "oxidation",
+          "voltage": 0.19,
+          "current": 16.47,
+          "confidence": 131.5
+        }
+      ]
+    }
+  ]
+}

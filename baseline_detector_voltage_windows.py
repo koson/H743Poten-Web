@@ -281,23 +281,30 @@ def select_best_segments(segments: List[Dict], direction: str) -> List[Dict]:
     # Filter segments based on position preference for CV baseline detection
     if direction == "forward":
         # For forward sweep, prefer segments in the initial flat region (before main peak)
-        # Typically around -0.4V to 0.0V for cathodic CV
-        preferred_segments = [s for s in segments if s['voltage_start'] <= 0.1]  # Before positive peaks
+        # Look for baseline in the early part of forward sweep
+        preferred_segments = [s for s in segments if s['voltage_start'] <= 0.0]  # Before peaks start
         if preferred_segments:
             segments = preferred_segments
-            logger.info(f"🎯 Forward position filter: {len(segments)} segments in preferred region (V ≤ 0.1V)")
+            logger.info(f"🎯 Forward position filter: {len(segments)} segments in preferred region (V ≤ 0.0V)")
         else:
-            logger.warning(f"⚠️ No forward segments in preferred region, using all segments")
+            # Fallback: use segments in the first 30% of forward sweep
+            forward_third = len(segments) // 3
+            segments = segments[:forward_third] if len(segments) > 3 else segments
+            logger.warning(f"⚠️ No forward segments in preferred region, using first {len(segments)} segments")
     
     elif direction == "reverse":
-        # For reverse sweep, prefer segments in the return flat region (after main peak)
-        # Typically around 0.0V to 0.6V for anodic return
-        preferred_segments = [s for s in segments if s['voltage_start'] >= 0.2]  # After negative peaks
+        # For reverse sweep, prefer segments in the final flat region (after peaks end)
+        # But avoid segments that are clearly after peak regions
+        # Look for baseline in the later part but avoid post-peak distortions
+        preferred_segments = [s for s in segments if s['voltage_end'] >= 0.1 and s['voltage_start'] <= 0.5]  # Mid-to-late reverse
         if preferred_segments:
             segments = preferred_segments
-            logger.info(f"🎯 Reverse position filter: {len(segments)} segments in preferred region (V ≥ 0.2V)")
+            logger.info(f"🎯 Reverse position filter: {len(segments)} segments in preferred region (0.1V ≤ V ≤ 0.5V)")
         else:
-            logger.warning(f"⚠️ No reverse segments in preferred region, using all segments")
+            # Fallback: use segments in the last 30% of reverse sweep
+            reverse_third = len(segments) // 3
+            segments = segments[-reverse_third:] if len(segments) > 3 else segments
+            logger.warning(f"⚠️ No reverse segments in preferred region, using last {len(segments)} segments")
     
     # Step 1: Sort by slope (prefer flat segments)
     segments_by_slope = sorted(segments, key=lambda x: abs(x['slope']))

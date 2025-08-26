@@ -16,6 +16,19 @@
             padding: 20px;
             margin-bottom: 20px;
         }
+        
+        /* Enhanced keyboard shortcut styling */
+        kbd {
+            background-color: #212529;
+            color: #fff;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid #495057;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            margin: 0 1px;
+        }
 
         #cvPlot {
             width: 100% !important;
@@ -204,7 +217,11 @@
                 <div class="peak-visualization-container">
                     <div class="d-flex align-items-center mb-2">
                         <label for="traceSelect" class="me-2 mb-0">Select File:</label>
-                        <select id="traceSelect" class="form-select form-select-sm w-auto"></select>
+                        <select id="traceSelect" class="form-select form-select-sm w-auto" 
+                                title="Navigate files: Ctrl+← (Previous) | Ctrl+→ (Next)"></select>
+                        <small class="text-muted ms-2" style="font-size: 11px;">
+                            <kbd>Ctrl+←</kbd> <kbd>Ctrl+→</kbd> to navigate
+                        </small>
                     </div>
                     <div id="plotly-peak-graph" style="width:100%;height:100%;min-height:500px;"></div>
                 </div>
@@ -253,10 +270,24 @@
                             <textarea class="form-control form-control-sm" id="userNotes" rows="4" 
                                       placeholder="Measurement conditions, observations..."></textarea>
                         </div>
-                        <button id="saveParametersBtn" class="btn btn-success btn-sm w-100" disabled>
+                        <button id="saveParametersBtn" class="btn btn-success btn-sm w-100" disabled
+                                title="Save analysis parameters (Ctrl+Shift+Enter)">
                             <i class="bi bi-cloud-upload"></i> Save Analysis Parameters
+                            <small class="d-block text-light mt-1" style="font-size: 10px; opacity: 0.8;">
+                                <kbd>Ctrl+Shift+Enter</kbd>
+                            </small>
                         </button>
                         <div id="saveStatus" class="mt-2 small"></div>
+                        
+                        <!-- Keyboard Shortcuts Info -->
+                        <div class="mt-3 pt-2 border-top border-light">
+                            <div class="text-muted small">
+                                <i class="bi bi-keyboard me-1"></i><strong>Keyboard Shortcuts:</strong>
+                            </div>
+                            <div class="small text-muted mt-1">
+                                <div><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd> Save Parameters</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -374,7 +405,6 @@
                 if (traceSelect.options.length > 0) {
                     traceSelect.options[0].selected = true;
                     renderSingleTrace(0);
-                    updatePeakList(getPeaksForTrace(0));
                     updateDataInfo(chartData, getPeaksForTrace(0));
                 }
                 
@@ -395,7 +425,6 @@
                     
                     // Then render new trace
                     renderSingleTrace(idx);
-                    updatePeakList(getPeaksForTrace(idx));
                     updateDataInfo(chartData, getPeaksForTrace(idx));
                 });
             });
@@ -408,6 +437,90 @@
                 return peaksData[idx] || [];
             }
             return peaksData || [];
+        }
+
+        // Auto-select only the highest oxidation and reduction peaks for initial display
+        function autoSelectHighestPeaks(peaks) {
+            if (!peaks || peaks.length <= 2) {
+                // If 2 or fewer peaks, enable them all
+                return peaks.map(peak => ({ ...peak, enabled: true }));
+            }
+            
+            console.log('[AUTO-SELECT] Processing', peaks.length, 'peaks for auto-selection');
+            
+            // Separate peaks by CV type: oxidation (Ox) and reduction (Red)
+            const oxidationPeaks = [];
+            const reductionPeaks = [];
+            
+            peaks.forEach((peak, index) => {
+                // Check peak type based on CV terminology
+                const isOxidation = peak.type && (
+                    peak.type.toLowerCase().includes('oxidation') || 
+                    peak.type.toLowerCase().includes('ox')
+                );
+                const isReduction = peak.type && (
+                    peak.type.toLowerCase().includes('reduction') || 
+                    peak.type.toLowerCase().includes('red')
+                );
+                
+                console.log(`[AUTO-SELECT] Peak ${index}: type="${peak.type}", y=${peak.y}, x=${peak.x}`);
+                
+                if (isOxidation) {
+                    oxidationPeaks.push(peak);
+                    console.log(`[AUTO-SELECT] → Added to oxidation group`);
+                } else if (isReduction) {
+                    reductionPeaks.push(peak);
+                    console.log(`[AUTO-SELECT] → Added to reduction group`);
+                } else {
+                    // Fallback: guess based on current sign (positive = oxidation, negative = reduction)
+                    if (peak.y > 0) {
+                        oxidationPeaks.push(peak);
+                        console.log(`[AUTO-SELECT] → Added to oxidation group (fallback)`);
+                    } else {
+                        reductionPeaks.push(peak);
+                        console.log(`[AUTO-SELECT] → Added to reduction group (fallback)`);
+                    }
+                }
+            });
+            
+            console.log(`[AUTO-SELECT] Groups: ${oxidationPeaks.length} oxidation, ${reductionPeaks.length} reduction`);
+            
+            // Find highest peak in each group (by absolute current magnitude)
+            let highestOxidation = null;
+            let highestReduction = null;
+            
+            if (oxidationPeaks.length > 0) {
+                highestOxidation = oxidationPeaks.reduce((max, peak) => 
+                    Math.abs(peak.y) > Math.abs(max.y) ? peak : max
+                );
+                console.log(`[AUTO-SELECT] Highest oxidation: y=${highestOxidation.y}, x=${highestOxidation.x}`);
+            }
+            
+            if (reductionPeaks.length > 0) {
+                highestReduction = reductionPeaks.reduce((max, peak) => 
+                    Math.abs(peak.y) > Math.abs(max.y) ? peak : max
+                );
+                console.log(`[AUTO-SELECT] Highest reduction: y=${highestReduction.y}, x=${highestReduction.x}`);
+            }
+            
+            // Set enabled state: only highest oxidation and highest reduction
+            const result = peaks.map(peak => {
+                const isHighestOxidation = highestOxidation && peak === highestOxidation;
+                const isHighestReduction = highestReduction && peak === highestReduction;
+                const enabled = isHighestOxidation || isHighestReduction;
+                
+                console.log(`[AUTO-SELECT] Peak y=${peak.y}, x=${peak.x} → enabled=${enabled}`);
+                
+                return {
+                    ...peak,
+                    enabled: enabled
+                };
+            });
+            
+            const enabledCount = result.filter(p => p.enabled).length;
+            console.log(`[AUTO-SELECT] Result: ${enabledCount}/${peaks.length} peaks enabled`);
+            
+            return result;
         }
 
         // Render only one trace and its peaks
@@ -456,12 +569,18 @@
             let peaks = getPeaksForTrace(idx);
             if (!Array.isArray(peaks)) peaks = [];
             
+            // Auto-enable only the highest anodic and cathodic peaks
+            peaks = autoSelectHighestPeaks(peaks);
+            
             console.log('[DEBUG] About to call renderPeakAnalysisPlot with:');
             console.log('[DEBUG] - voltage.length:', voltage.length);
             console.log('[DEBUG] - current.length:', current.length);
             console.log('[DEBUG] - label:', label);
             console.log('[DEBUG] - peaks.length:', peaks.length);
             console.log('[DEBUG] - methodNameStr:', methodNameStr);
+            
+            // Update the global peaks data with processed peaks
+            updatePeakList(peaks);
             
             renderPeakAnalysisPlot({voltage, current, label}, peaks, methodNameStr);
         }
@@ -553,6 +672,59 @@
             saveBtn.disabled = !isValid;
         }
         
+        function showShortcutNotification(message, type = 'success') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                color: white;
+                max-width: 350px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                transition: all 0.3s ease;
+                opacity: 0;
+                transform: translateX(100%);
+            `;
+            
+            // Set background color based on type
+            if (type === 'success') {
+                notification.style.backgroundColor = '#198754'; // Bootstrap success green
+                notification.innerHTML = `<i class="bi bi-check-circle me-2"></i>${message}`;
+            } else if (type === 'warning') {
+                notification.style.backgroundColor = '#fd7e14'; // Bootstrap warning orange
+                notification.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i>${message}`;
+            } else if (type === 'info') {
+                notification.style.backgroundColor = '#0d6efd'; // Bootstrap info blue
+                notification.innerHTML = `<i class="bi bi-info-circle me-2"></i>${message}`;
+            }
+            
+            // Add to document
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
         function initializeParameterLogging() {
             const sampleIdInput = document.getElementById('sampleId');
             const instrumentSelect = document.getElementById('instrumentType');
@@ -569,9 +741,135 @@
             // Save parameters event
             saveBtn.addEventListener('click', saveAnalysisParameters);
             
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(event) {
+                // Ctrl+Shift+Enter: Save Analysis Parameters
+                if (event.ctrlKey && event.shiftKey && event.key === 'Enter') {
+                    event.preventDefault(); // Prevent default browser behavior
+                    
+                    // Check if save button is enabled
+                    const saveBtn = document.getElementById('saveParametersBtn');
+                    if (saveBtn && !saveBtn.disabled) {
+                        // Add visual feedback
+                        saveBtn.style.backgroundColor = '#198754'; // Bootstrap success green
+                        saveBtn.style.transform = 'scale(0.98)';
+                        
+                        // Trigger save function
+                        saveAnalysisParameters();
+                        
+                        // Reset visual feedback after short delay
+                        setTimeout(() => {
+                            saveBtn.style.backgroundColor = '';
+                            saveBtn.style.transform = '';
+                        }, 150);
+                        
+                        // Show toast notification
+                        showShortcutNotification('Save Analysis Parameters triggered (Ctrl+Shift+Enter)');
+                    } else {
+                        // Show warning if button is disabled
+                        showShortcutNotification('Please fill required fields first', 'warning');
+                    }
+                }
+                
+                // Ctrl+Left: Previous file
+                else if (event.ctrlKey && event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    switchFile('previous');
+                }
+                
+                // Ctrl+Right: Next file
+                else if (event.ctrlKey && event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    switchFile('next');
+                }
+            });
+            
+            // Function to switch between files using keyboard shortcuts
+            function switchFile(direction) {
+                const traceSelect = document.getElementById('traceSelect');
+                if (!traceSelect || traceSelect.options.length <= 1) {
+                    showShortcutNotification('No files to switch between', 'warning');
+                    return;
+                }
+                
+                const currentIndex = parseInt(traceSelect.value) || 0;
+                let newIndex;
+                
+                if (direction === 'previous') {
+                    newIndex = currentIndex > 0 ? currentIndex - 1 : traceSelect.options.length - 1;
+                    showShortcutNotification(`Previous file (${newIndex + 1}/${traceSelect.options.length})`, 'info');
+                } else if (direction === 'next') {
+                    newIndex = currentIndex < traceSelect.options.length - 1 ? currentIndex + 1 : 0;
+                    showShortcutNotification(`Next file (${newIndex + 1}/${traceSelect.options.length})`, 'info');
+                }
+                
+                // Update dropdown selection
+                traceSelect.value = newIndex.toString();
+                
+                // Add visual feedback to dropdown
+                traceSelect.style.backgroundColor = '#e3f2fd'; // Light blue
+                traceSelect.style.transition = 'all 0.2s ease';
+                
+                // Trigger change event to update the plot
+                const changeEvent = new Event('change', { bubbles: true });
+                traceSelect.dispatchEvent(changeEvent);
+                
+                // Reset visual feedback
+                setTimeout(() => {
+                    traceSelect.style.backgroundColor = '';
+                    traceSelect.style.transition = '';
+                }, 300);
+                
+                // Maintain focus on the dropdown to prevent losing focus
+                setTimeout(() => {
+                    traceSelect.focus();
+                }, 50);
+            }
+            
             // Try to detect file source for auto-suggestion
             autoDetectInstrument();
+            autoFillSampleId();
             autoFillMeasurementParams();
+        }
+        
+        function autoFillSampleId() {
+            // Auto-fill sample ID based on filename
+            const filenameElement = document.querySelector('[data-filename]');
+            const sampleIdInput = document.getElementById('sampleId');
+            
+            if (filenameElement && sampleIdInput && !sampleIdInput.value.trim()) {
+                const filename = filenameElement.dataset.filename;
+                console.log('[DEBUG] Auto-filling sample ID from filename:', filename);
+                
+                // Extract sample ID from filename patterns
+                let sampleId = '';
+                
+                // Pattern 1: Palmsens files - extract concentration and electrode
+                const palmsensMatch = filename.match(/palmsens[_\s]*(\d+\.?\d*)mm[_\s]*.*?e(\d+)/i);
+                if (palmsensMatch) {
+                    const concentration = parseFloat(palmsensMatch[1]);
+                    const electrode = palmsensMatch[2];
+                    sampleId = `PS${concentration}mME${electrode}`;
+                } 
+                // Pattern 2: General pattern with concentration
+                else {
+                    const concMatch = filename.match(/(\d+\.?\d*)mm/i);
+                    const electrodeMatch = filename.match(/e(\d+)/i);
+                    
+                    if (concMatch) {
+                        const concentration = parseFloat(concMatch[1]);
+                        const electrode = electrodeMatch ? electrodeMatch[1] : '1';
+                        sampleId = `PS${concentration}mME${electrode}`;
+                    }
+                }
+                
+                if (sampleId) {
+                    sampleIdInput.value = sampleId;
+                    console.log('[DEBUG] Auto-filled sample ID:', sampleId);
+                } else {
+                    console.log('[DEBUG] Could not extract sample ID from filename');
+                }
+            }
         }
         
         function autoDetectInstrument() {
