@@ -1048,6 +1048,13 @@ def get_peaks(method):
     try:
         logger.info(f"Starting peak detection with method: {method}")
         
+        # Validate method exists
+        valid_methods = ['prominence', 'derivative', 'ml', 'enhanced_v3', 'enhanced_v4', 'enhanced_v4_improved', 'enhanced_v5']
+        if method not in valid_methods:
+            logger.error(f"Invalid method: {method}")
+            peak_detection_progress['active'] = False
+            return jsonify({'success': False, 'error': f'Invalid method: {method}'}), 400
+        
         # Initialize progress tracking
         peak_detection_progress.update({
             'active': True,
@@ -1121,11 +1128,18 @@ def get_peaks(method):
                         p['fileIdx'] = i
                     peaks_per_file[i] = file_peaks
             
+            # For multi-file processing, return peaks per file (not flattened)
+            # This allows frontend to properly map peaks to individual files
+            total_peaks = sum(len(file_peaks) for file_peaks in peaks_per_file)
+            
             # Include baseline data from first file in response
             response_data = {'success': True, 'peaks': peaks_per_file}
             if 'first_file_baseline' in locals() and first_file_baseline:
                 response_data['baseline'] = first_file_baseline
                 logger.info(f"[DEBUG] Including baseline data in files array response: {list(first_file_baseline.keys())}")
+            
+            # Clean response data for JSON serialization
+            response_data = ensure_json_serializable(response_data)
             
             # Mark completion
             peak_detection_progress.update({
@@ -1137,52 +1151,79 @@ def get_peaks(method):
             
             logger.info(f"[PROGRESS] Processing complete: {nFiles}/{nFiles} files (100%)")
             logger.info(f"[DEBUG] peaks_per_file lens: {[len(p) for p in peaks_per_file]}")
+            logger.info(f"[DEBUG] Per-file peaks structure: {total_peaks} total from {len(peaks_per_file)} files")
             return jsonify(response_data)
         elif isinstance(data.get('voltage'), list) and len(data['voltage']) > 0 and isinstance(data['voltage'][0], list):
             # voltage/current เป็น list of list
             nFiles = len(data['voltage'])
             peaks_per_file = [ [] for _ in range(nFiles) ]
             for i, (v, c) in enumerate(zip(data['voltage'], data['current'])):
-                voltage = np.array(v)
-                current = np.array(c)
-                logger.info(f"[DEBUG] File {i}: voltage len={len(voltage)}, current len={len(current)}")
-                logger.info(f"[DEBUG] File {i}: voltage min={np.min(voltage) if len(voltage)>0 else 'NA'}, max={np.max(voltage) if len(voltage)>0 else 'NA'}, mean={np.mean(voltage) if len(voltage)>0 else 'NA'}")
-                logger.info(f"[DEBUG] File {i}: current min={np.min(current) if len(current)>0 else 'NA'}, max={np.max(current) if len(current)>0 else 'NA'}, mean={np.mean(current) if len(current)>0 else 'NA'}")
-                if np.any(np.isnan(voltage)) or np.any(np.isnan(current)):
-                    logger.warning(f"[DEBUG] File {i}: NaN detected in voltage or current!")
-                if np.any(np.isinf(voltage)) or np.any(np.isinf(current)):
-                    logger.warning(f"[DEBUG] File {i}: Inf detected in voltage or current!")
                 try:
-                    detection_results = detect_cv_peaks(voltage, current, method=method)
-                    file_peaks = detection_results['peaks']
+                    # Progress update
+                    progress_percent = int(((i + 1) / nFiles) * 100)
+                    peak_detection_progress.update({
+                        'current_file': i + 1,
+                        'percent': progress_percent,
+                        'message': f'Processing file {i+1}/{nFiles}...'
+                    })
                     
-                    # Store baseline data for first file only (for display)
-                    if i == 0 and 'baseline' in detection_results:
-                        first_file_baseline = detection_results['baseline']
-                        logger.info(f"[DEBUG] File {i}: stored baseline data with keys: {list(first_file_baseline.keys())}")
+                    voltage = np.array(v)
+                    current = np.array(c)
+                    logger.info(f"[DEBUG] File {i}: voltage len={len(voltage)}, current len={len(current)}")
                     
-                    logger.info(f"[DEBUG] File {i}: detected {len(file_peaks)} peaks")
+                    # Skip invalid data
+                    if len(voltage) == 0 or len(current) == 0:
+                        logger.warning(f"[DEBUG] File {i}: Empty data, skipping")
+                        peaks_per_file[i] = []
+                        continue
+                    
+                    # Check for invalid data
+                    if np.any(np.isnan(voltage)) or np.any(np.isnan(current)):
+                        logger.warning(f"[DEBUG] File {i}: NaN detected in voltage or current!")
+                    if np.any(np.isinf(voltage)) or np.any(np.isinf(current)):
+                        logger.warning(f"[DEBUG] File {i}: Inf detected in voltage or current!")
+                    
+                    # Detect peaks with timeout protection
+                    try:
+                        detection_results = detect_cv_peaks(voltage, current, method=method)
+                        file_peaks = detection_results['peaks']
+                        
+                        # Store baseline data for first file only (for display)
+                        if i == 0 and 'baseline' in detection_results:
+                            first_file_baseline = detection_results['baseline']
+                            logger.info(f"[DEBUG] File {i}: stored baseline data with keys: {list(first_file_baseline.keys())}")
+                        
+                        logger.info(f"[DEBUG] File {i}: detected {len(file_peaks)} peaks")
+                    except Exception as e:
+                        logger.error(f"[DEBUG] File {i}: peak detection error: {str(e)}")
+                        file_peaks = []
+                        if i == 0:
+                            first_file_baseline = {}
+                    
+                    # Add file index to peaks
+                    for p in file_peaks:
+                        p['fileIdx'] = i
+                    peaks_per_file[i] = file_peaks
+                    
                 except Exception as e:
-                    logger.error(f"[DEBUG] File {i}: peak detection error: {str(e)}")
-                    file_peaks = []
-                    if i == 0:
-                        first_file_baseline = {}
-                for p in file_peaks:
-                    p['fileIdx'] = i
-                peaks_per_file[i] = file_peaks
+                    logger.error(f"[DEBUG] File {i}: processing error: {str(e)}")
+                    peaks_per_file[i] = []
+                    continue
             
-            # Flatten peaks for consistent API response
-            all_peaks = []
-            for file_peaks in peaks_per_file:
-                all_peaks.extend(file_peaks)
+            # For multi-file processing, return peaks per file (not flattened)
+            # This allows frontend to properly map peaks to individual files
+            total_peaks = sum(len(file_peaks) for file_peaks in peaks_per_file)
             
-            logger.info(f"[DEBUG] Flattened peaks: {len(all_peaks)} total from {len(peaks_per_file)} files")
+            logger.info(f"[DEBUG] Per-file peaks structure: {total_peaks} total from {len(peaks_per_file)} files")
             
             # Include baseline data from first file in response
-            response_data = {'success': True, 'peaks': all_peaks}
+            response_data = {'success': True, 'peaks': peaks_per_file}
             if 'first_file_baseline' in locals() and first_file_baseline:
                 response_data['baseline'] = first_file_baseline
                 logger.info(f"[DEBUG] Including baseline data in multi-file response: {list(first_file_baseline.keys())}")
+            
+            # Clean response data for JSON serialization
+            response_data = ensure_json_serializable(response_data)
             
             logger.info(f"[DEBUG] peaks_per_file lens: {[len(p) for p in peaks_per_file]}")
             return jsonify(response_data)
@@ -1223,11 +1264,19 @@ def get_peaks(method):
             
             return jsonify(ensure_json_serializable({'success': True, **results}))
     except Exception as e:
-        logger.error(f"Error in peak detection: {str(e)}")
+        logger.error(f"Error in peak detection with method {method}: {str(e)}")
+        # Ensure progress is reset on error
+        peak_detection_progress.update({
+            'active': False,
+            'percent': 0,
+            'message': f'Error: {str(e)}',
+            'current_file': 0,
+            'total_files': 0
+        })
         return jsonify({
             'success': False,
             'error': str(e)
-        })
+        }), 500
 
 @peak_detection_bp.route('/get-settings', methods=['GET'])
 def get_settings():

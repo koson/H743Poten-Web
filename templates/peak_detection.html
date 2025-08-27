@@ -920,10 +920,14 @@
                                     <small class="text-muted">Time</small>
                                 </div>
                             </div>
+                            <!-- Preview Graph -->
+                            <div class="preview-graph mb-3">
+                                <canvas class="preview-canvas" width="400" height="200"></canvas>
+                            </div>
                             <!-- V4 Improved Action Buttons -->
                             <div class="d-flex gap-2 mt-2">
-                                <button class="btn btn-primary flex-grow-1 view-analysis-btn" style="display: none;" onclick="window.open('/peak_detection', '_blank')">
-                                    <i class="fas fa-chart-line"></i> View Peak Analysis
+                                <button class="btn btn-primary flex-grow-1 view-analysis-btn" style="display: none;" onclick="createAnalysisSession('enhanced_v4_improved')">>
+                                    <i class="fas fa-chart-line"></i> View Detailed Analysis
                                 </button>
                                 <button class="btn btn-success flex-grow-1 export-pls-btn" style="display: none;" onclick="exportPLSData('enhanced_v4_improved')">
                                     <i class="fas fa-download"></i> Export PLS Data
@@ -933,17 +937,8 @@
                     </div>
                 </div>
             </div>
-                            <!-- Preview Graph -->
-                            <div class="preview-graph mb-3">
-                                <canvas class="preview-canvas" width="400" height="200"></canvas>
-                            </div>
-                            <div class="progress mb-3">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
-                            </div>
-                            <button class="btn btn-outline-primary w-100 view-details-btn" disabled>
-                                View Detailed Analysis
-                            </button>
-                        </div>
+
+            <!-- Enhanced V5 Method Card -->
                     </div>
                 </div>
             </div>
@@ -1006,7 +1001,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/peak_canvas_manager.js"></script>
     <script src="/static/js/peak_graph_utils.js"></script>
-    <script src="/static/js/peak_detection.js"></script>
+    <script src="/static/js/peak_detection.js?v=4004"></script>
     
     <script>
         // Progress tracking functionality

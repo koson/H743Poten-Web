@@ -1,5 +1,23 @@
 // Peak detection utilities
-const detectionManager = {
+// Global storage for detection results
+window.detectionResults = {};
+
+const PeakDetection = {
+    // Store results for later analysis
+    storeResults(method, results) {
+        window.detectionResults[method] = results;
+        console.log(`Stored results for ${method}:`, results);
+    },
+
+    // Create analysis session from stored results  
+    createAnalysisSession(method) {
+        const results = window.detectionResults[method];
+        if (!results) {
+            alert(`No results available for ${method}. Please run detection first.`);
+            return;
+        }
+        this.showDetails(method, results);
+    },
     results: {},
     
     // Show details in new tab
@@ -149,6 +167,16 @@ const detectionManager = {
         }, 100);
     },
 
+    // Get maximum files for different methods to prevent server overload
+    getMaxFilesForMethod(method) {
+        switch(method) {
+            case 'ml': return 50; // ML processing is most intensive
+            case 'prominence': return 100; // Prominence is moderately intensive
+            case 'enhanced_v4_improved': return 500; // Optimized algorithm
+            default: return 275; // Default batch size
+        }
+    },
+
     // Execute actual peak detection
     async executeDetection(method, data) {
         const startTime = performance.now(); // Track actual time
@@ -157,8 +185,14 @@ const detectionManager = {
             // Multi-file: ถ้ามี currentDataFiles หลายไฟล์ ให้ส่ง dataFiles array ไป backend
             let payload;
             if (window.currentDataFiles && Array.isArray(window.currentDataFiles) && window.currentDataFiles.length > 0) {
-                // Process all files - baseline detection is now fast with progress tracking
-                const filesToProcess = window.currentDataFiles;
+                // Apply file limits for heavy methods to prevent server overload
+                const maxFiles = this.getMaxFilesForMethod(method);
+                const filesToProcess = window.currentDataFiles.slice(0, maxFiles);
+                
+                if (filesToProcess.length < window.currentDataFiles.length) {
+                    console.warn(`[${method}] File limit applied: processing ${filesToProcess.length}/${window.currentDataFiles.length} files to prevent server overload`);
+                }
+                
                 payload = {
                     dataFiles: filesToProcess.map(f => ({
                         voltage: f.voltage,
@@ -174,10 +208,17 @@ const detectionManager = {
                 };
                 console.log(`[${method}] Sending single-file payload`);
             }
-            // Call backend peak detection API
+            // Call backend peak detection API with extended timeout for large datasets
             console.log(`[${method}] Making API call to /get-peaks/${method}`);
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout for large datasets
+            
+            // Extended timeout for different methods
+            let timeoutDuration = 120000; // Default 2 minutes
+            if (method === 'ml' || method === 'prominence') {
+                timeoutDuration = 300000; // 5 minutes for heavy methods
+            }
+            
+            const timeoutId = setTimeout(() => controller.abort(), timeoutDuration);
             
             const response = await fetch(`/get-peaks/${method}`, {
                 method: 'POST',
@@ -327,6 +368,9 @@ const detectionManager = {
             };
         }
 
+        // Store results for analysis session
+        this.storeResults(method, apiResult || results);
+
         // Get grid and update it
         const gridId = this.getGridId(method);
         const grid = document.getElementById(gridId);
@@ -411,7 +455,34 @@ const detectionManager = {
         // Use previewData for this card only (not global results)
         const previewData = results.previewData;
         // Peak count = จำนวน peak ใน previewData เท่านั้น
-        grid.querySelector('.peaks-count').textContent = previewData.peaks ? previewData.peaks.length : 0;
+        const totalPeaks = previewData.peaks ? previewData.peaks.length : 0;
+        grid.querySelector('.peaks-count').textContent = totalPeaks;
+        
+        // Count OX and RED peaks
+        let oxCount = 0, redCount = 0;
+        if (previewData.peaks && previewData.peaks.length > 0) {
+            previewData.peaks.forEach(peak => {
+                if (peak.type === 'oxidation') {
+                    oxCount++;
+                } else if (peak.type === 'reduction') {
+                    redCount++;
+                }
+            });
+        }
+        
+        // Update OX and RED counts
+        const oxElement = grid.querySelector('.ox-count');
+        const redElement = grid.querySelector('.red-count');
+        const filesElement = grid.querySelector('.files-count');
+        
+        if (oxElement) oxElement.textContent = oxCount;
+        if (redElement) redElement.textContent = redCount;
+        if (filesElement) {
+            // Show number of files processed
+            const fileCount = window.currentDataFiles ? window.currentDataFiles.length : 1;
+            filesElement.textContent = fileCount;
+        }
+        
         // Confidence = เฉลี่ย confidence ของ peak ใน previewData (หรือ 0)
         let conf = 0;
         if (previewData.peaks && previewData.peaks.length > 0) {
@@ -428,6 +499,17 @@ const detectionManager = {
         const processingTimeElement = grid.querySelector('.processing-time');
         if (processingTimeElement) {
             processingTimeElement.textContent = results.processingTime + 's';
+        }
+        
+        // Show action buttons if peaks were detected
+        const viewAnalysisBtn = grid.querySelector('.view-analysis-btn');
+        const exportPLSBtn = grid.querySelector('.export-pls-btn');
+        
+        if (viewAnalysisBtn && totalPeaks > 0) {
+            viewAnalysisBtn.style.display = 'block';
+        }
+        if (exportPLSBtn && totalPeaks > 0) {
+            exportPLSBtn.style.display = 'block';
         }
         // Update preview graph
         const previewCanvas = grid.querySelector('.preview-canvas');
@@ -496,7 +578,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Expose global functions
-    window.detectionManager = detectionManager;
-    window.startDetection = (method) => detectionManager.startDetection(method);
+    // Expose PeakDetection object globally (for backward compatibility)
+    window.detectionManager = PeakDetection;
+    window.startDetection = (method) => PeakDetection.startDetection(method);
+    
+    // Export PLS Data function
+    window.exportPLSData = function(method) {
+        console.log(`Exporting PLS data for method: ${method}`);
+        
+        const results = detectionManager.results[method];
+        if (!results || !results.peaks || results.peaks.length === 0) {
+            alert('No peak data available for export');
+            return;
+        }
+        
+        // Prepare CSV data
+        const headers = ['File_Index', 'Peak_Type', 'Voltage_V', 'Current_uA', 'Confidence_%', 'Height_uA'];
+        const csvData = [headers];
+        
+        // Add peak data
+        results.peaks.forEach((peak, index) => {
+            csvData.push([
+                peak.fileIdx || 0,
+                peak.type || 'unknown',
+                peak.voltage || peak.x || 0,
+                peak.current || peak.y || 0,
+                peak.confidence || 50,
+                peak.height || 0
+            ]);
+        });
+        
+        // Convert to CSV string
+        const csvContent = csvData.map(row => row.join(',')).join('\n');
+        
+        // Create download
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pls_data_${method}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        console.log(`PLS data exported for ${method}: ${results.peaks.length} peaks`);
+    };
 });
+
+// Global functions for HTML onclick
+window.createAnalysisSession = function(method) {
+    PeakDetection.createAnalysisSession(method);
+};
+
+window.exportPLSData = function(method) {
+    PeakDetection.exportPLSData(method);
+};
+
+window.startDetection = function(method) {
+    PeakDetection.startDetection(method);
+};

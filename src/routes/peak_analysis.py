@@ -32,7 +32,9 @@ def peak_analysis(session_id):
     session_data = analysis_sessions[session_id]
     return render_template('peak_analysis.html',
                          peaks=session_data['peaks'],
-                         data=session_data['data'])
+                         data=session_data['data'],
+                         method=session_data.get('method', 'unknown'),
+                         methodName=session_data.get('methodName', 'Unknown Method'))
 
 # Cleanup function for old sessions
 def cleanup_old_sessions(max_age_hours=24):

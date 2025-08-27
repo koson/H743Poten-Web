@@ -322,9 +322,13 @@ class EnhancedDetectorV4Improved:
         for peak_idx in red_peaks_no_edge:
             confidence = self.calculate_peak_confidence_v4(peak_idx, voltage, current, baseline_info, 'reduction')
             
+            # Use the correct current value for reduction peaks
+            # In STM32 data, the actual current at reduction peaks should be used directly
+            peak_current = current[peak_idx]
+            
             peak_data = {
                 'voltage': voltage[peak_idx],
-                'current': current[peak_idx],
+                'current': peak_current,
                 'type': 'reduction',
                 'index': int(peak_idx),
                 'confidence': confidence
