@@ -1,0 +1,71 @@
+{
+  "analysis_info": {
+    "timestamp": "20250828_033006",
+    "method": "Enhanced Detector V4 Improved",
+    "scan_01_excluded": true,
+    "max_files_per_device": 100,
+    "processing_time_seconds": 2.365359306335449
+  },
+  "data_summary": {
+    "palmsens": {
+      "total_samples": 100,
+      "concentrations": [
+        0.5
+      ],
+      "scan_rates": [
+        100.0,
+        200.0
+      ]
+    },
+    "stm32": {
+      "total_samples": 60,
+      "concentrations": [
+        5.0
+      ],
+      "scan_rates": [
+        100.0,
+        200.0
+      ]
+    }
+  },
+  "peak_statistics": {
+    "palmsens": {
+      "ox_voltage_mean": 0.18334212000000008,
+      "ox_voltage_std": 0.011136407538984176,
+      "red_voltage_mean": 0.09197149536000002,
+      "red_voltage_std": 0.011265180086546341,
+      "peak_separation_mean": 0.09137062464,
+      "peak_separation_std": 0.006770387545151202
+    },
+    "stm32": {
+      "ox_voltage_mean": 0.17638333333333334,
+      "ox_voltage_std": 0.006894708525363317,
+      "red_voltage_mean": 0.07680000000000003,
+      "red_voltage_std": 0.01075726006322226,
+      "peak_separation_mean": 0.09958333333333333,
+      "peak_separation_std": 0.015459231970164132
+    }
+  },
+  "processing_statistics": {
+    "palmsens": {
+      "total": 100,
+      "success": 100,
+      "failed": 0,
+      "skipped_scan01": 150
+    },
+    "stm32": {
+      "total": 100,
+      "success": 60,
+      "failed": 40,
+      "skipped_scan01": 152
+    },
+    "processing_time": 2.365359306335449
+  },
+  "files_generated": {
+    "labplot2_csv": "pls_labplot2_data_20250828_033006.csv",
+    "palmsens_csv": "palmsens_data_20250828_033006.csv",
+    "stm32_csv": "stm32_data_20250828_033006.csv",
+    "visualization": "pls_analysis_full_20250828_033006.png",
+    "report": "pls_full_report_20250828_033006.json"
+  }
+}

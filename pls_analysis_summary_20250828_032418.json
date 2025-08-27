@@ -1,0 +1,22 @@
+{
+  "timestamp": "20250828_032418",
+  "ref_samples": 1062,
+  "target_samples": 550,
+  "total_samples": 1612,
+  "scan_01_skipped": true,
+  "ref_concentrations": [
+    0.5,
+    1.0,
+    5.0,
+    10.0,
+    20.0,
+    50.0
+  ],
+  "target_concentrations": [],
+  "method": "Enhanced Detector V4 Improved",
+  "files": {
+    "labplot2_csv": "pls_data_labplot2_compatible_20250828_032418.csv",
+    "ref_csv": "pls_reference_palmsens_20250828_032418.csv",
+    "target_csv": "pls_target_stm32_20250828_032418.csv"
+  }
+}
