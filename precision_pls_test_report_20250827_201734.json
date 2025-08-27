@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-08-27T20:17:34.319215",
+  "test_suite_version": "1.0.0",
+  "tests_performed": [
+    {
+      "test_name": "precision_analyzer",
+      "status": "PASSED",
+      "timestamp": "2025-08-27T20:17:34.864617"
+    },
+    {
+      "test_name": "pls_analyzer",
+      "status": "FAILED",
+      "timestamp": "2025-08-27T20:17:34.881315"
+    },
+    {
+      "test_name": "integration",
+      "status": "FAILED",
+      "timestamp": "2025-08-27T20:17:34.928640"
+    }
+  ],
+  "overall_status": "FAILED"
+}

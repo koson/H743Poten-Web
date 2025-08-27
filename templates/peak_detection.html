@@ -772,47 +772,46 @@
             <div class="col-md-3 mb-4">
                 <div class="method-card">
                     <div class="method-header">
-                        <img src="/static/img/enhanced.svg" alt="Enhanced V3" class="method-icon">
-                        <h3>Enhanced V3</h3>
-                        <div class="quality-badge" style="background: linear-gradient(45deg, #28a745, #20c997);">Latest</div>
+                        <img src="/static/img/enhanced.svg" alt="Enhanced V4" class="method-icon">
+                        <h3>Enhanced V4</h3>
+                        <div class="quality-badge" style="background: linear-gradient(45deg, #007bff, #0056b3);">Production</div>
                     </div>
                     <div class="method-content text-center">
-                        <p class="text-muted mb-3">Enhanced Algorithm V3.0</p>
-                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="enhanced_v3" onclick="showInlineProgress('enhanced_v3'); window.startDetection && window.startDetection('enhanced_v3')" id="enhanced_v3-start-btn">
+                        <p class="text-muted mb-3">Enhanced Algorithm V4.0 - Ferrocyanide Optimized</p>
+                        <button class="btn btn-primary w-100 mb-1 start-detection" data-method="enhanced_v4" onclick="showInlineProgress('enhanced_v4'); window.startDetection && window.startDetection('enhanced_v4')" id="enhanced_v4-start-btn">
                             Start Detection
                         </button>
                         
                         <!-- Inline Progress Bar -->
-                        <div class="progress-container" id="enhanced_v3-progress" style="display: none;">
+                        <div class="progress-container" id="enhanced_v4-progress" style="display: none;">
                             <div class="progress" style="height: 20px;">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                     style="background: linear-gradient(45deg, #28a745, #20c997);"
-                                     role="progressbar" style="width: 0%" id="enhanced_v3-progressBar">
-                                    <small id="enhanced_v3-progressPercent">0%</small>
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                     role="progressbar" style="width: 0%" id="enhanced_v4-progressBar">
+                                    <small id="enhanced_v4-progressPercent">0%</small>
                                 </div>
                             </div>
                             <div class="row text-center" style="margin: 2px 0 0 0;">
                                 <div class="col-4" style="padding: 0 2px;">
                                     <small class="text-muted">
-                                        <strong id="enhanced_v3-currentFile">0</strong>/<span id="enhanced_v3-totalFiles">0</span> files
+                                        <strong id="enhanced_v4-currentFile">0</strong>/<span id="enhanced_v4-totalFiles">0</span> files
                                     </small>
                                 </div>
                                 <div class="col-4" style="padding: 0 2px;">
                                     <small class="text-muted">
-                                        <i class="fas fa-clock"></i> <span id="enhanced_v3-elapsedTime">0s</span>
+                                        <i class="fas fa-clock"></i> <span id="enhanced_v4-elapsedTime">0s</span>
                                     </small>
                                 </div>
                                 <div class="col-4" style="padding: 0 2px;">
-                                    <small class="text-success">
-                                        <i class="fas fa-rocket"></i> V3.0
+                                    <small class="text-primary">
+                                        <i class="fas fa-cogs"></i> V4 Pro
                                     </small>
                                 </div>
                             </div>
-                            <small class="text-muted d-block text-center" id="enhanced_v3-progressMessage" style="margin-top: 2px;">Initializing...</small>
+                            <small class="text-muted d-block text-center" id="enhanced_v4-progressMessage" style="margin-top: 2px;">Initializing...</small>
                         </div>
                     </div>
                     <!-- Analysis Results Grid -->
-                    <div class="analysis-grid mt-4" id="enhanced_v3-analysis" style="display: none;">
+                    <div class="analysis-grid mt-4" id="enhanced_v4-analysis" style="display: none;">
                         <div class="method-results">
                             <div class="d-flex justify-content-between align-items-center gap-2">
                                 <div class="analysis-box border rounded flex-grow-1">
@@ -828,6 +827,112 @@
                                     <small class="text-muted">T</small>
                                 </div>
                             </div>
+                            <!-- Preview Graph -->
+                            <div class="preview-graph mb-3">
+                                <canvas class="preview-canvas" width="400" height="200"></canvas>
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <button class="btn btn-outline-primary w-100 view-details-btn" disabled>
+                                View Detailed Analysis
+                            </button>
+                            <!-- V4 Specific Export Button -->
+                            <button class="btn btn-success w-100 mt-2 export-pls-btn" style="display: none;" onclick="exportPLSData('enhanced_v4')">
+                                <i class="fas fa-download"></i> Export for PLS Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced V4 Improved Method Card -->
+            <div class="col-md-3 mb-4">
+                <div class="method-card">
+                    <div class="method-header">
+                        <img src="/static/img/enhanced.svg" alt="Enhanced V4 Improved" class="method-icon">
+                        <h3>Enhanced V4+</h3>
+                        <div class="quality-badge" style="background: linear-gradient(45deg, #28a745, #1e7e34);">Improved</div>
+                    </div>
+                    <div class="method-content text-center">
+                        <p class="text-muted mb-3">Enhanced V4 + Better Reduction Detection</p>
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="enhanced_v4_improved" onclick="showInlineProgress('enhanced_v4_improved'); window.startDetection && window.startDetection('enhanced_v4_improved')" id="enhanced_v4_improved-start-btn">
+                            Start Detection
+                        </button>
+                        
+                        <!-- Inline Progress Bar -->
+                        <div class="progress-container" id="enhanced_v4_improved-progress" style="display: none;">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                     role="progressbar" style="width: 0%" id="enhanced_v4_improved-progressBar">
+                                    <small id="enhanced_v4_improved-progressPercent">0%</small>
+                                </div>
+                            </div>
+                            <div class="row text-center" style="margin: 2px 0 0 0;">
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <strong id="enhanced_v4_improved-currentFile">0</strong>/<span id="enhanced_v4_improved-totalFiles">0</span> files
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> <span id="enhanced_v4_improved-elapsedTime">0s</span>
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-success">
+                                        <i class="fas fa-plus-circle"></i> V4+
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-center" id="enhanced_v4_improved-progressMessage" style="margin-top: 2px;">Initializing...</small>
+                        </div>
+                    </div>
+                    <!-- Analysis Results Grid -->
+                    <div class="analysis-grid mt-4" id="enhanced_v4_improved-analysis" style="display: none;">
+                        <div class="method-results">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="peaks-count">0</h4>
+                                    <small class="text-muted">P</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="ox-count">0</h4>
+                                    <small class="text-danger">Ox</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="red-count">0</h4>
+                                    <small class="text-primary">Red</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="files-count">0</h4>
+                                    <small class="text-muted">F</small>
+                                </div>
+                            </div>
+                            <!-- Additional metrics row -->
+                            <div class="d-flex justify-content-between align-items-center gap-2 mt-2">
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="confidence-value">0%</h4>
+                                    <small class="text-muted">Conf</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="processing-time">0s</h4>
+                                    <small class="text-muted">Time</small>
+                                </div>
+                            </div>
+                            <!-- V4 Improved Action Buttons -->
+                            <div class="d-flex gap-2 mt-2">
+                                <button class="btn btn-primary flex-grow-1 view-analysis-btn" style="display: none;" onclick="window.open('/peak_detection', '_blank')">
+                                    <i class="fas fa-chart-line"></i> View Peak Analysis
+                                </button>
+                                <button class="btn btn-success flex-grow-1 export-pls-btn" style="display: none;" onclick="exportPLSData('enhanced_v4_improved')">
+                                    <i class="fas fa-download"></i> Export PLS Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
                             <!-- Preview Graph -->
                             <div class="preview-graph mb-3">
                                 <canvas class="preview-canvas" width="400" height="200"></canvas>
@@ -1008,7 +1113,7 @@
             if (!currentMethod) return;
             
             try {
-                const response = await fetch('/peak_detection/get-progress');
+                const response = await fetch('/get-progress');
                 const data = await response.json();
                 
                 console.log('[PROGRESS] Update received:', data);
@@ -1131,7 +1236,174 @@
         function showProgressModal() {
             console.log('[PROGRESS] Modal test - showing inline progress for ml method');
             showInlineProgress('ml');
+            setTimeout(() => {
+                hideInlineProgress('ml');
+            }, 5000);
         }
+        
+        // Enhanced V4 PLS Export Functions
+        let enhancedV4Results = null; // Store V4 results for export
+        let enhancedV4ImprovedResults = null; // Store V4 Improved results for export
+        
+        function exportPLSData(method) {
+            console.log('🚀 Exporting PLS data for method:', method);
+            
+            if (method === 'enhanced_v4' && enhancedV4Results) {
+                // Export Enhanced V4 results to CSV
+                const csvData = formatPLSDataAsCSV(enhancedV4Results);
+                downloadCSV(csvData, `enhanced_v4_peaks_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`);
+                
+                // Show success message
+                showToast('✅ Enhanced V4 peaks exported successfully for PLS analysis!', 'success');
+            } else if (method === 'enhanced_v4_improved' && enhancedV4ImprovedResults) {
+                // Export Enhanced V4 Improved results to CSV
+                const csvData = formatPLSDataAsCSV(enhancedV4ImprovedResults);
+                downloadCSV(csvData, `enhanced_v4_improved_peaks_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`);
+                
+                // Show success message
+                showToast('✅ Enhanced V4 Improved peaks exported successfully for PLS analysis!', 'success');
+            } else {
+                showToast(`❌ No ${method} data available for export`, 'error');
+            }
+        }
+        
+        function formatPLSDataAsCSV(results) {
+            console.log('📊 Formatting PLS data as CSV:', results);
+            
+            const headers = [
+                'filename', 'peak_type', 'peak_index', 'voltage', 'current', 'height',
+                'confidence', 'baseline_current', 'validation_score', 'peak_region',
+                'scan_section', 'peak_separation_voltage', 'peak_separation_current',
+                'current_ratio', 'midpoint_potential'
+            ];
+            
+            let csvContent = headers.join(',') + '\n';
+            
+            // Process each file's results
+            if (results.pls_ready_data) {
+                results.pls_ready_data.forEach(fileData => {
+                    const filename = fileData.filename || 'unknown';
+                    const derived = fileData.derived_features || {};
+                    
+                    // Add oxidation peaks
+                    if (fileData.oxidation_peaks) {
+                        fileData.oxidation_peaks.forEach(peak => {
+                            const row = [
+                                filename, 'oxidation', peak.peak_index || 0,
+                                peak.voltage || 0, peak.current || 0, peak.height || 0,
+                                peak.confidence || 0, peak.baseline_current || 0,
+                                peak.validation_score || 0, peak.peak_region || 'unknown',
+                                peak.scan_section || 'unknown',
+                                derived.peak_separation_voltage || 0,
+                                derived.peak_separation_current || 0,
+                                derived.current_ratio || 0,
+                                derived.midpoint_potential || 0
+                            ];
+                            csvContent += row.join(',') + '\n';
+                        });
+                    }
+                    
+                    // Add reduction peaks
+                    if (fileData.reduction_peaks) {
+                        fileData.reduction_peaks.forEach(peak => {
+                            const row = [
+                                filename, 'reduction', peak.peak_index || 0,
+                                peak.voltage || 0, peak.current || 0, peak.height || 0,
+                                peak.confidence || 0, peak.baseline_current || 0,
+                                peak.validation_score || 0, peak.peak_region || 'unknown',
+                                peak.scan_section || 'unknown',
+                                derived.peak_separation_voltage || 0,
+                                derived.peak_separation_current || 0,
+                                derived.current_ratio || 0,
+                                derived.midpoint_potential || 0
+                            ];
+                            csvContent += row.join(',') + '\n';
+                        });
+                    }
+                });
+            }
+            
+            return csvContent;
+        }
+        
+        function downloadCSV(csvContent, filename) {
+            console.log('📥 Downloading CSV file:', filename);
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+        
+        function showToast(message, type = 'info') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 5000);
+        }
+        
+        // Hook into the original peak detection success to store V4 results
+        const originalHandleAnalysisSuccess = window.handleAnalysisSuccess;
+        window.handleAnalysisSuccess = function(data, method) {
+            console.log('🔍 Analysis success for method:', method, 'Data:', data);
+            
+            // Store Enhanced V4 results for export
+            if (method === 'enhanced_v4') {
+                enhancedV4Results = data;
+                
+                // Show export button if V4 was successful
+                const exportBtn = document.querySelector('#enhanced_v4-analysis .export-pls-btn');
+                if (exportBtn && data.pls_ready_data && data.pls_ready_data.length > 0) {
+                    exportBtn.style.display = 'block';
+                    console.log('✅ Enhanced V4 export button enabled');
+                }
+            }
+            
+            // Store Enhanced V4 Improved results for export
+            if (method === 'enhanced_v4_improved') {
+                enhancedV4ImprovedResults = data;
+                
+                // Show both view analysis and export buttons if V4 Improved was successful
+                const viewBtn = document.querySelector('#enhanced_v4_improved-analysis .view-analysis-btn');
+                const exportBtn = document.querySelector('#enhanced_v4_improved-analysis .export-pls-btn');
+                
+                if (viewBtn) {
+                    viewBtn.style.display = 'block';
+                    console.log('✅ Enhanced V4 Improved view analysis button enabled');
+                }
+                
+                if (exportBtn && data.pls_ready_data && data.pls_ready_data.length > 0) {
+                    exportBtn.style.display = 'block';
+                    console.log('✅ Enhanced V4 Improved export button enabled');
+                }
+            }
+            
+            // Call original function if it exists
+            if (originalHandleAnalysisSuccess) {
+                return originalHandleAnalysisSuccess(data, method);
+            }
+        };
     </script>
 </body>
 </html>

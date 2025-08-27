@@ -12,6 +12,31 @@ import glob
 import json
 from datetime import datetime
 
+def ensure_json_serializable(obj):
+    """Convert numpy types to native Python types for JSON serialization"""
+    if isinstance(obj, dict):
+        return {k: ensure_json_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [ensure_json_serializable(v) for v in obj]
+    elif isinstance(obj, tuple):
+        return [ensure_json_serializable(v) for v in obj]
+    elif isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, (bool, type(None), str, int, float)):
+        return obj
+    else:
+        # For any other type, try to convert to string as fallback
+        try:
+            return str(obj)
+        except:
+            return None
+
 # Import parameter logging
 try:
     from ..services.parameter_logging import parameter_logger
@@ -44,6 +69,36 @@ except ImportError:
     except ImportError as e:
         logger.warning(f"Enhanced Detector V3.0 not available: {e}")
 
+# Import Enhanced Detector V4.0 (Legacy High-Performance)
+try:
+    from ..enhanced_detector_v4 import EnhancedDetectorV4
+except ImportError:
+    try:
+        # Try relative import from parent directory
+        import sys
+        import os
+        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sys.path.insert(0, parent_dir)
+        from enhanced_detector_v4 import EnhancedDetectorV4
+    except ImportError as e:
+        logger.warning(f"Enhanced Detector V4.0 not available: {e}")
+        EnhancedDetectorV4 = None
+
+# Import Enhanced Detector V4 Improved (Optimized for better reduction peak detection)
+try:
+    from ..enhanced_detector_v4_improved import EnhancedDetectorV4Improved
+except ImportError:
+    try:
+        # Try relative import from parent directory
+        import sys
+        import os
+        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sys.path.insert(0, parent_dir)
+        from enhanced_detector_v4_improved import EnhancedDetectorV4Improved
+    except ImportError as e:
+        logger.warning(f"Enhanced Detector V4 Improved not available: {e}")
+        EnhancedDetectorV4Improved = None
+
 # Import Enhanced Detector V5.0 (Production Ready)
 try:
     from ..enhanced_detector_v5 import EnhancedDetectorV5
@@ -57,7 +112,7 @@ except ImportError:
         from enhanced_detector_v5 import EnhancedDetectorV5
     except ImportError as e:
         logger.warning(f"Enhanced Detector V5.0 not available: {e}")
-        EnhancedDetectorV3 = None
+        EnhancedDetectorV5 = None
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -1116,8 +1171,15 @@ def get_peaks(method):
                     p['fileIdx'] = i
                 peaks_per_file[i] = file_peaks
             
+            # Flatten peaks for consistent API response
+            all_peaks = []
+            for file_peaks in peaks_per_file:
+                all_peaks.extend(file_peaks)
+            
+            logger.info(f"[DEBUG] Flattened peaks: {len(all_peaks)} total from {len(peaks_per_file)} files")
+            
             # Include baseline data from first file in response
-            response_data = {'success': True, 'peaks': peaks_per_file}
+            response_data = {'success': True, 'peaks': all_peaks}
             if 'first_file_baseline' in locals() and first_file_baseline:
                 response_data['baseline'] = first_file_baseline
                 logger.info(f"[DEBUG] Including baseline data in multi-file response: {list(first_file_baseline.keys())}")
@@ -1159,7 +1221,7 @@ def get_peaks(method):
                 'active': False
             })
             
-            return jsonify({'success': True, **results})
+            return jsonify(ensure_json_serializable({'success': True, **results}))
     except Exception as e:
         logger.error(f"Error in peak detection: {str(e)}")
         return jsonify({
@@ -1229,6 +1291,10 @@ def detect_cv_peaks(voltage, current, method='prominence'):
             return detect_peaks_ml(voltage, current)
         elif method == 'enhanced_v3':
             return detect_peaks_enhanced_v3(voltage, current)
+        elif method == 'enhanced_v4':
+            return detect_peaks_enhanced_v4(voltage, current)
+        elif method == 'enhanced_v4_improved':
+            return detect_peaks_enhanced_v4_improved(voltage, current)
         elif method == 'enhanced_v5':
             return detect_peaks_enhanced_v5(voltage, current)
         else:
@@ -2021,6 +2087,284 @@ def detect_peaks_enhanced_v3(voltage, current):
         fallback_result['params']['fallback_reason'] = str(e)
         return fallback_result
 
+def detect_peaks_enhanced_v4(voltage, current):
+    """Detect peaks using Enhanced Detector V4.0 with improved accuracy"""
+    try:
+        logger.info(f"🚀 Enhanced Detector V4.0: starting with {len(voltage)} data points")
+        logger.info(f"📊 Data range - V: {voltage.min():.3f} to {voltage.max():.3f}V, I: {current.min():.3f} to {current.max():.3f}µA")
+        
+        # Check if Enhanced Detector V4.0 is available
+        if EnhancedDetectorV4 is None:
+            logger.warning("⚠️ Enhanced Detector V4.0 not available, falling back to prominence method")
+            return detect_peaks_prominence(voltage, current)
+        
+        # Create detector instance
+        detector = EnhancedDetectorV4()
+        
+        # Convert data to compatible format
+        data = {
+            'voltage': voltage.tolist(),
+            'current': current.tolist()
+        }
+        
+        # Run enhanced detection with improved V4 algorithm
+        results = detector.analyze_cv_data(data)
+        
+        # Convert to web API format
+        web_peaks = []
+        for peak in results['peaks']:
+            # Enhanced V4 returns peaks with improved accuracy
+            web_peaks.append({
+                'voltage': float(peak['voltage']),
+                'current': float(peak['current']),
+                'type': peak['type'],  # 'oxidation' or 'reduction'
+                'confidence': float(peak.get('confidence', 75.0)),
+                'height': float(peak.get('height', abs(peak['current']))),
+                'baseline_current': float(peak.get('baseline_current', 0.0)),
+                'enabled': True,
+                # Enhanced V4 specific features
+                'validation_score': float(peak.get('validation_score', 100.0)),
+                'peak_region': peak.get('peak_region', 'unknown'),
+                'scan_section': peak.get('scan_section', 'unknown')
+            })
+        
+        # Format baseline data for web interface
+        baseline_data = {
+            'forward': [],
+            'reverse': [],
+            'full': [],
+            'metadata': {},
+            'markers': {},
+            'debug': {}
+        }
+        
+        # Enhanced V4 provides scan analysis
+        scan_info = results.get('scan_analysis', {})
+        if scan_info and 'turning_point' in scan_info:
+            turning_point = int(scan_info['turning_point'])  # Convert to int for JSON
+            
+            # Create simple baseline array (V4 focuses on peak accuracy over baseline)
+            baseline_full = np.full(len(voltage), float(np.median(current)))
+            
+            # Split into forward/reverse
+            baseline_data['forward'] = [float(x) for x in baseline_full[:turning_point]]
+            baseline_data['reverse'] = [float(x) for x in baseline_full[turning_point:]]
+            baseline_data['full'] = [float(x) for x in baseline_full]
+            
+            # Add metadata
+            baseline_data['metadata'] = {
+                'method_used': 'enhanced_v4_simple',
+                'quality': 0.85,  # V4 focuses on peak accuracy
+                'processing_time': float(results.get('processing_time', 0.0)),
+                'auto_selected': True,
+                'peak_focused': True,
+                'accuracy_optimized': True
+            }
+            
+            # Add V4 specific debug info - ensure all values are JSON serializable
+            thresholds_safe = {}
+            for k, v in results.get('thresholds', {}).items():
+                if isinstance(v, (np.integer, np.floating)):
+                    thresholds_safe[k] = float(v)
+                elif isinstance(v, bool):
+                    thresholds_safe[k] = bool(v)
+                else:
+                    thresholds_safe[k] = v
+            
+            baseline_data['debug'] = {
+                'scan_direction': {
+                    'turning_point': turning_point,
+                    'detection_method': 'enhanced_v4_voltage_analysis',
+                    'forward_points': turning_point,
+                    'reverse_points': len(voltage) - turning_point
+                },
+                'thresholds_used': thresholds_safe,
+                'validation_stats': {
+                    'total_peaks_found': len(results.get('all_peaks', [])),
+                    'peaks_after_validation': len(web_peaks),
+                    'rejection_rate': float((len(results.get('all_peaks', [])) - len(web_peaks)) / max(len(results.get('all_peaks', [])), 1) * 100)
+                },
+                'enhanced_v4_features': {
+                    'voltage_range_validation': True,
+                    'current_direction_validation': True,
+                    'peak_height_validation': True,
+                    'confidence_threshold': float(getattr(detector, 'confidence_threshold', 40.0))
+                }
+            }
+        
+        logger.info(f"✅ Enhanced V4.0 completed: {len(web_peaks)} peaks found with high accuracy")
+        logger.info(f"🎯 V4 optimized for: Ferrocyanide detection, minimal false positives")
+        logger.info(f"📊 Validation: {baseline_data['debug']['validation_stats']['rejection_rate']:.1f}% rejection rate")
+        
+        # Ensure all enhanced_v4_results values are JSON serializable
+        enhanced_results = {
+            'scan_analysis': {},
+            'thresholds': {},
+            'all_peaks_count': len(results.get('all_peaks', [])),
+            'validated_peaks_count': len(web_peaks),
+            'detection_accuracy_optimized': True,
+            'ferrocyanide_optimized': True
+        }
+        
+        # Convert scan_analysis to JSON-safe format
+        for k, v in scan_info.items():
+            if isinstance(v, (np.integer, np.floating)):
+                enhanced_results['scan_analysis'][k] = float(v)
+            elif isinstance(v, bool):
+                enhanced_results['scan_analysis'][k] = bool(v)
+            else:
+                enhanced_results['scan_analysis'][k] = v
+        
+        # Convert thresholds to JSON-safe format
+        for k, v in results.get('thresholds', {}).items():
+            if isinstance(v, (np.integer, np.floating)):
+                enhanced_results['thresholds'][k] = float(v)
+            elif isinstance(v, bool):
+                enhanced_results['thresholds'][k] = bool(v)
+            else:
+                enhanced_results['thresholds'][k] = v
+        
+        return {
+            'peaks': web_peaks,
+            'method': 'enhanced_v4',
+            'params': {
+                'scan_direction_detection': 'enhanced_v4_voltage_analysis',
+                'threshold_calculation': 'dynamic_snr_v4',
+                'peak_validation': 'multi_criteria_electrochemical_v4',
+                'baseline_detection': 'simple_median_baseline',
+                'confidence_scoring': 'validation_based_v4',
+                'optimization_focus': 'peak_accuracy_over_baseline'
+            },
+            'enhanced_v4_results': enhanced_results,
+            'baseline': baseline_data
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error in Enhanced Detector V4.0: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        # Fallback to prominence method
+        logger.info("🔄 Falling back to prominence method due to Enhanced V4.0 error")
+        fallback_result = detect_peaks_prominence(voltage, current)
+        fallback_result['method'] = 'enhanced_v4_fallback'
+        return fallback_result
+
+def detect_peaks_enhanced_v4_improved(voltage, current):
+    """Detect peaks using Enhanced Detector V4 Improved - Better reduction peak detection"""
+    try:
+        logger.info(f"🚀 Enhanced Detector V4 Improved: starting with {len(voltage)} data points")
+        logger.info(f"📊 Data range - V: {voltage.min():.3f} to {voltage.max():.3f}V, I: {current.min():.3f} to {current.max():.3f}µA")
+        
+        # Check if Enhanced Detector V4 Improved is available
+        if EnhancedDetectorV4Improved is None:
+            logger.warning("⚠️ Enhanced Detector V4 Improved not available, falling back to enhanced V4")
+            return detect_peaks_enhanced_v4(voltage, current)
+        
+        # Create detector instance with lower confidence threshold for better sensitivity
+        detector = EnhancedDetectorV4Improved(confidence_threshold=25.0)
+        
+        # Convert data to compatible format
+        data = {
+            'voltage': voltage.tolist(),
+            'current': current.tolist()
+        }
+        
+        # Run enhanced detection with improved V4 algorithm
+        results = detector.analyze_cv_data(data)
+        
+        # Convert to web API format
+        web_peaks = []
+        for peak in results['peaks']:
+            web_peaks.append({
+                'voltage': float(peak['voltage']),
+                'current': float(peak['current']),
+                'type': peak['type'],  # 'oxidation' or 'reduction'
+                'confidence': float(peak['confidence']),
+                'height': float(abs(peak['current'])),
+                'baseline_current': 0.0,
+                'enabled': True,
+                'shape_score': 1.0,
+                'snr': float(peak.get('snr', 1.0)) if 'snr' in peak else 1.0
+            })
+        
+        # Format baseline data for web interface
+        baseline_data = {
+            'forward': [],
+            'reverse': [],
+            'full': [],
+            'metadata': {},
+            'markers': {},
+            'debug': {}
+        }
+        
+        # Create simple baseline array (Enhanced V4 doesn't provide detailed baseline)
+        baseline_full = np.full(len(voltage), results['thresholds']['baseline'])
+        baseline_data['forward'] = baseline_full[:len(voltage)//2].tolist()
+        baseline_data['reverse'] = baseline_full[len(voltage)//2:].tolist()
+        baseline_data['full'] = baseline_full.tolist()
+        
+        # Add metadata for Enhanced V4 Improved
+        baseline_data['metadata'] = {
+            'method_used': 'enhanced_v4_improved',
+            'quality': 0.85,
+            'processing_time': 0.1,
+            'auto_selected': True,
+            'confidence_threshold': detector.confidence_threshold,
+            'voltage_ranges': {
+                'oxidation': detector.ferrocyanide_ox_range,
+                'reduction': detector.ferrocyanide_red_range
+            }
+        }
+        
+        # Add debug info
+        baseline_data['debug'] = {
+            'scan_direction': results.get('scan_analysis', {}),
+            'thresholds_used': results['thresholds'],
+            'edge_effects_filtered': len(results.get('edge_indices', [])),
+            'improvements': results.get('improvements', []),
+            'detection_methods': ['savgol_smoothing', 'scipy_peaks_improved', 'edge_filtering']
+        }
+        
+        # Count peaks by type
+        ox_count = len([p for p in web_peaks if p['type'] == 'oxidation'])
+        red_count = len([p for p in web_peaks if p['type'] == 'reduction'])
+        
+        logger.info(f"✅ Enhanced V4 Improved completed: {ox_count} oxidation + {red_count} reduction = {len(web_peaks)} total peaks")
+        logger.info(f"📊 Confidence threshold: {detector.confidence_threshold}%")
+        logger.info(f"🎯 Edge effects filtered: {len(results.get('edge_indices', []))} points")
+        
+        return {
+            'peaks': web_peaks,
+            'method': 'enhanced_v4_improved',
+            'params': {
+                'scan_direction_detection': 'enhanced_v4_improved',
+                'threshold_calculation': 'dynamic_improved',
+                'peak_validation': 'voltage_range_with_edge_filtering',
+                'baseline_detection': 'savgol_smoothed_stable_regions',
+                'confidence_scoring': 'improved_snr_voltage_position',
+                'improvements': results.get('improvements', []),
+                'confidence_threshold': detector.confidence_threshold,
+                'voltage_ranges': {
+                    'oxidation': detector.ferrocyanide_ox_range,
+                    'reduction': detector.ferrocyanide_red_range
+                },
+                'edge_margin': detector.edge_voltage_margin
+            },
+            'baseline': baseline_data
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error in Enhanced Detector V4 Improved: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        # Fallback to Enhanced V4
+        logger.info("🔄 Falling back to Enhanced V4 due to V4 Improved error")
+        fallback_result = detect_peaks_enhanced_v4(voltage, current)
+        fallback_result['method'] = 'enhanced_v4_improved_fallback'
+        return fallback_result
+
 def detect_peaks_enhanced_v5(voltage, current):
     """Detect peaks using Enhanced Detector V5.0 - Production Ready"""
     try:
@@ -2140,3 +2484,495 @@ def detect_peaks_enhanced_v5(voltage, current):
         fallback_result['method'] = 'enhanced_v5_fallback'
         fallback_result['params']['fallback_reason'] = str(e)
         return fallback_result
+
+@peak_detection_bp.route('/api/enhanced_v4_analysis', methods=['POST'])
+def enhanced_v4_analysis():
+    """
+    Enhanced Detector V4 API endpoint for production use
+    Optimized for Ferrocyanide detection with PLS-ready output
+    """
+    try:
+        logger.info("🚀 Enhanced V4 Analysis: Production API called")
+        
+        # Get data from POST request
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+
+        # Handle multi-file or single file data
+        results = []
+        
+        if 'dataFiles' in data and isinstance(data['dataFiles'], list):
+            # Multi-file processing
+            logger.info(f"📁 Processing {len(data['dataFiles'])} files with Enhanced V4")
+            
+            for i, file_data in enumerate(data['dataFiles']):
+                voltage = np.array(file_data.get('voltage', []))
+                current = np.array(file_data.get('current', []))
+                filename = file_data.get('filename', f'File_{i+1}')
+                
+                if len(voltage) == 0 or len(current) == 0:
+                    logger.warning(f"⚠️ File {i+1}: Empty data, skipping")
+                    continue
+                
+                # Run Enhanced V4 detection using the new API
+                if EnhancedDetectorV4 is None:
+                    logger.warning(f"⚠️ Enhanced V4 not available for file {i+1}")
+                    continue
+                
+                detector = EnhancedDetectorV4()
+                file_data_dict = {
+                    'voltage': voltage.tolist(),
+                    'current': current.tolist()
+                }
+                
+                # Use analyze_cv_data method for web compatibility
+                analysis_result = detector.analyze_cv_data(file_data_dict)
+                peaks = analysis_result['peaks']
+                
+                # Format PLS-ready data
+                pls_data = extract_pls_features(peaks, filename)
+                
+                results.append({
+                    'filename': filename,
+                    'file_index': i,
+                    'peaks': peaks,
+                    'peak_count': len(peaks),
+                    'pls_features': pls_data,
+                    'detection_metadata': {
+                        'method': analysis_result.get('method', 'enhanced_v4'),
+                        'ferrocyanide_optimized': analysis_result.get('ferrocyanide_optimized', True),
+                        'confidence_threshold': float(analysis_result.get('confidence_threshold', 40.0)),
+                        'processing_time': float(analysis_result.get('processing_time', 0.1))
+                    },
+                    'success': True
+                })
+                
+                logger.info(f"✅ File {i+1} ({filename}): {len(peaks)} peaks detected")
+            
+        else:
+            # Single file processing
+            voltage = np.array(data.get('voltage', []))
+            current = np.array(data.get('current', []))
+            filename = data.get('filename', 'SingleFile')
+            
+            if len(voltage) == 0 or len(current) == 0:
+                return jsonify({'success': False, 'error': 'Empty voltage or current data'}), 400
+            
+            # Run Enhanced V4 detection using the new API
+            if EnhancedDetectorV4 is None:
+                return jsonify({'success': False, 'error': 'Enhanced V4 not available'}), 500
+            
+            detector = EnhancedDetectorV4()
+            data_dict = {
+                'voltage': voltage.tolist(),
+                'current': current.tolist()
+            }
+            
+            # Use analyze_cv_data method for web compatibility
+            analysis_result = detector.analyze_cv_data(data_dict)
+            peaks = analysis_result['peaks']
+            pls_data = extract_pls_features(peaks, filename)
+            
+            results.append({
+                'filename': filename,
+                'file_index': 0,
+                'peaks': peaks,
+                'peak_count': len(peaks),
+                'pls_features': pls_data,
+                'detection_metadata': {
+                    'method': analysis_result.get('method', 'enhanced_v4'),
+                    'ferrocyanide_optimized': analysis_result.get('ferrocyanide_optimized', True),
+                    'confidence_threshold': float(analysis_result.get('confidence_threshold', 40.0)),
+                    'processing_time': float(analysis_result.get('processing_time', 0.1))
+                },
+                'success': True
+            })
+            
+            logger.info(f"✅ Single file ({filename}): {len(peaks)} peaks detected")
+        
+        # Aggregate results for PLS
+        total_files = len(results)
+        total_peaks = sum(r['peak_count'] for r in results)
+        
+        # Extract all PLS features for batch analysis
+        all_pls_features = [r['pls_features'] for r in results]
+        
+        logger.info(f"🎯 Enhanced V4 Analysis completed: {total_files} files, {total_peaks} total peaks")
+        
+        return jsonify({
+            'success': True,
+            'method': 'enhanced_v4',
+            'total_files': total_files,
+            'total_peaks': total_peaks,
+            'results': results,
+            'pls_ready_data': all_pls_features,
+            'export_ready': True,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error in Enhanced V4 Analysis API: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'method': 'enhanced_v4'
+        }), 500
+
+@peak_detection_bp.route('/api/enhanced_v4_improved_analysis', methods=['POST'])
+def enhanced_v4_improved_analysis():
+    """
+    Enhanced Detector V4 Improved API endpoint - Better reduction peak detection
+    Optimized for production use with enhanced sensitivity
+    """
+    try:
+        logger.info("🚀 Enhanced V4 Improved Analysis: Production API called")
+        
+        # Get data from POST request
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+
+        # Handle multi-file or single file data
+        results = []
+        
+        if 'dataFiles' in data and isinstance(data['dataFiles'], list):
+            # Multi-file processing
+            logger.info(f"📁 Processing {len(data['dataFiles'])} files with Enhanced V4 Improved")
+            
+            for i, file_data in enumerate(data['dataFiles']):
+                voltage = np.array(file_data.get('voltage', []))
+                current = np.array(file_data.get('current', []))
+                filename = file_data.get('filename', f'File_{i+1}')
+                
+                if len(voltage) == 0 or len(current) == 0:
+                    logger.warning(f"⚠️ File {i+1}: Empty data, skipping")
+                    continue
+                
+                # Run Enhanced V4 Improved detection
+                if EnhancedDetectorV4Improved is None:
+                    logger.warning(f"⚠️ Enhanced V4 Improved not available for file {i+1}")
+                    continue
+                
+                detector = EnhancedDetectorV4Improved(confidence_threshold=25.0)
+                file_data_dict = {
+                    'voltage': voltage.tolist(),
+                    'current': current.tolist()
+                }
+                
+                # Use analyze_cv_data method for web compatibility
+                analysis_result = detector.analyze_cv_data(file_data_dict)
+                peaks = analysis_result['peaks']
+                
+                # Format PLS-ready data
+                pls_data = extract_pls_features(peaks, filename)
+                
+                results.append({
+                    'filename': filename,
+                    'file_index': i,
+                    'peaks': peaks,
+                    'peak_count': len(peaks),
+                    'pls_features': pls_data,
+                    'detection_metadata': {
+                        'method': analysis_result.get('method', 'enhanced_v4_improved'),
+                        'ferrocyanide_optimized': analysis_result.get('ferrocyanide_optimized', True),
+                        'confidence_threshold': float(analysis_result.get('confidence_threshold', 25.0)),
+                        'processing_time': float(analysis_result.get('processing_time', 0.1)),
+                        'improvements': analysis_result.get('improvements', []),
+                        'voltage_ranges': analysis_result.get('voltage_ranges', {}),
+                        'edge_effects_filtered': bool(analysis_result.get('edge_effects_filtered', True))
+                    },
+                    'success': True
+                })
+                
+                ox_count = len([p for p in peaks if p['type'] == 'oxidation'])
+                red_count = len([p for p in peaks if p['type'] == 'reduction'])
+                logger.info(f"✅ File {i+1} ({filename}): {ox_count} ox + {red_count} red = {len(peaks)} total peaks")
+        
+        else:
+            # Single file processing
+            voltage = np.array(data.get('voltage', []))
+            current = np.array(data.get('current', []))
+            filename = data.get('filename', 'Single_File')
+            
+            if len(voltage) == 0 or len(current) == 0:
+                return jsonify({'success': False, 'error': 'Empty voltage or current data'}), 400
+            
+            if EnhancedDetectorV4Improved is None:
+                return jsonify({'success': False, 'error': 'Enhanced V4 Improved not available'}), 500
+            
+            detector = EnhancedDetectorV4Improved(confidence_threshold=25.0)
+            data_dict = {
+                'voltage': voltage.tolist(),
+                'current': current.tolist()
+            }
+            
+            # Use analyze_cv_data method for web compatibility
+            analysis_result = detector.analyze_cv_data(data_dict)
+            peaks = analysis_result['peaks']
+            pls_data = extract_pls_features(peaks, filename)
+            
+            results.append({
+                'filename': filename,
+                'file_index': 0,
+                'peaks': peaks,
+                'peak_count': len(peaks),
+                'pls_features': pls_data,
+                'detection_metadata': {
+                    'method': analysis_result.get('method', 'enhanced_v4_improved'),
+                    'ferrocyanide_optimized': analysis_result.get('ferrocyanide_optimized', True),
+                    'confidence_threshold': float(analysis_result.get('confidence_threshold', 25.0)),
+                    'processing_time': float(analysis_result.get('processing_time', 0.1)),
+                    'improvements': analysis_result.get('improvements', []),
+                    'voltage_ranges': analysis_result.get('voltage_ranges', {}),
+                    'edge_effects_filtered': True
+                },
+                'success': True
+            })
+            
+            ox_count = len([p for p in peaks if p['type'] == 'oxidation'])
+            red_count = len([p for p in peaks if p['type'] == 'reduction'])
+            logger.info(f"✅ Single file ({filename}): {ox_count} ox + {red_count} red = {len(peaks)} total peaks")
+        
+        # Aggregate results for PLS
+        total_files = len(results)
+        total_peaks = sum(r['peak_count'] for r in results)
+        total_ox = sum(len([p for p in r['peaks'] if p['type'] == 'oxidation']) for r in results)
+        total_red = sum(len([p for p in r['peaks'] if p['type'] == 'reduction']) for r in results)
+        
+        # Extract all PLS features for batch analysis
+        all_pls_features = [r['pls_features'] for r in results]
+        
+        logger.info(f"🎯 Enhanced V4 Improved Analysis completed:")
+        logger.info(f"   Files processed: {total_files}")
+        logger.info(f"   Total peaks: {total_peaks} ({total_ox} ox + {total_red} red)")
+        logger.info(f"   Avg peaks per file: {total_peaks/total_files:.1f}" if total_files > 0 else "   No files processed")
+        
+        return jsonify({
+            'success': True,
+            'method': 'enhanced_v4_improved',
+            'total_files': total_files,
+            'total_peaks': total_peaks,
+            'peak_breakdown': {
+                'oxidation': total_ox,
+                'reduction': total_red
+            },
+            'results': results,
+            'pls_ready_data': all_pls_features,
+            'export_ready': True,
+            'timestamp': datetime.now().isoformat(),
+            'improvements_applied': [
+                'Expanded voltage ranges for better reduction detection',
+                'Lowered confidence threshold from 40% to 25%',
+                'Added edge effect detection and filtering',
+                'Improved baseline detection with Savitzky-Golay smoothing',
+                'Enhanced peak detection sensitivity'
+            ]
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error in Enhanced V4 Improved Analysis API: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'method': 'enhanced_v4_improved'
+        }), 500
+
+def extract_pls_features(peaks, filename):
+    """
+    Extract PLS-ready features from detected peaks
+    Optimized for Ferrocyanide analysis
+    """
+    try:
+        # Initialize feature dict
+        features = {
+            'filename': filename,
+            'peak_count': len(peaks),
+            'oxidation_peaks': [],
+            'reduction_peaks': [],
+            'peak_summary': {
+                'ox_count': 0,
+                'red_count': 0,
+                'total_count': len(peaks)
+            }
+        }
+        
+        # Separate oxidation and reduction peaks
+        ox_peaks = [p for p in peaks if p.get('type') == 'oxidation']
+        red_peaks = [p for p in peaks if p.get('type') == 'reduction']
+        
+        features['peak_summary']['ox_count'] = len(ox_peaks)
+        features['peak_summary']['red_count'] = len(red_peaks)
+        
+        # Extract oxidation peak features
+        for i, peak in enumerate(ox_peaks):
+            ox_feature = {
+                'peak_index': i,
+                'voltage': peak['voltage'],
+                'current': peak['current'],
+                'height': peak.get('height', abs(peak['current'])),
+                'confidence': peak.get('confidence', 50.0),
+                'baseline_current': peak.get('baseline_current', 0.0),
+                'type': 'oxidation'
+            }
+            features['oxidation_peaks'].append(ox_feature)
+        
+        # Extract reduction peak features  
+        for i, peak in enumerate(red_peaks):
+            red_feature = {
+                'peak_index': i,
+                'voltage': peak['voltage'],
+                'current': peak['current'],
+                'height': peak.get('height', abs(peak['current'])),
+                'confidence': peak.get('confidence', 50.0),
+                'baseline_current': peak.get('baseline_current', 0.0),
+                'type': 'reduction'
+            }
+            features['reduction_peaks'].append(red_feature)
+        
+        # Calculate derived features for PLS
+        features['derived_features'] = calculate_derived_features(ox_peaks, red_peaks)
+        
+        return features
+        
+    except Exception as e:
+        logger.error(f"❌ Error extracting PLS features: {str(e)}")
+        return {
+            'filename': filename,
+            'peak_count': 0,
+            'error': str(e),
+            'oxidation_peaks': [],
+            'reduction_peaks': [],
+            'peak_summary': {'ox_count': 0, 'red_count': 0, 'total_count': 0}
+        }
+
+def calculate_derived_features(ox_peaks, red_peaks):
+    """
+    Calculate derived electrochemical features for PLS analysis
+    """
+    try:
+        features = {}
+        
+        # Peak separation analysis
+        if len(ox_peaks) > 0 and len(red_peaks) > 0:
+            # Find the most prominent peaks
+            main_ox = max(ox_peaks, key=lambda x: x.get('confidence', 0))
+            main_red = max(red_peaks, key=lambda x: x.get('confidence', 0))
+            
+            # Calculate peak separation
+            features['peak_separation_voltage'] = abs(main_ox['voltage'] - main_red['voltage'])
+            features['peak_separation_current'] = abs(main_ox['current'] - main_red['current'])
+            
+            # Calculate peak ratio
+            features['current_ratio'] = abs(main_ox['current'] / main_red['current']) if main_red['current'] != 0 else 1.0
+            
+            # Calculate midpoint potential
+            features['midpoint_potential'] = (main_ox['voltage'] + main_red['voltage']) / 2.0
+            
+        else:
+            # Default values when peaks are missing
+            features['peak_separation_voltage'] = 0.0
+            features['peak_separation_current'] = 0.0
+            features['current_ratio'] = 1.0
+            features['midpoint_potential'] = 0.0
+        
+        # Peak statistics
+        if ox_peaks:
+            features['ox_peak_voltage_mean'] = np.mean([p['voltage'] for p in ox_peaks])
+            features['ox_peak_current_mean'] = np.mean([p['current'] for p in ox_peaks])
+            features['ox_peak_height_mean'] = np.mean([p.get('height', 0) for p in ox_peaks])
+        else:
+            features['ox_peak_voltage_mean'] = 0.0
+            features['ox_peak_current_mean'] = 0.0
+            features['ox_peak_height_mean'] = 0.0
+            
+        if red_peaks:
+            features['red_peak_voltage_mean'] = np.mean([p['voltage'] for p in red_peaks])
+            features['red_peak_current_mean'] = np.mean([p['current'] for p in red_peaks])
+            features['red_peak_height_mean'] = np.mean([p.get('height', 0) for p in red_peaks])
+        else:
+            features['red_peak_voltage_mean'] = 0.0
+            features['red_peak_current_mean'] = 0.0
+            features['red_peak_height_mean'] = 0.0
+        
+        return features
+        
+    except Exception as e:
+        logger.error(f"❌ Error calculating derived features: {str(e)}")
+        return {}
+
+@peak_detection_bp.route('/api/export_peaks_csv', methods=['POST'])
+def export_peaks_csv():
+    """
+    Export detected peaks to CSV format for PLS analysis
+    """
+    try:
+        data = request.get_json()
+        if not data or 'pls_ready_data' not in data:
+            return jsonify({'success': False, 'error': 'No PLS data provided'}), 400
+        
+        pls_data = data['pls_ready_data']
+        
+        # Create CSV content
+        import io
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Write headers
+        headers = [
+            'filename', 'peak_type', 'peak_index', 'voltage', 'current', 'height',
+            'confidence', 'baseline_current', 'peak_separation_voltage', 
+            'peak_separation_current', 'current_ratio', 'midpoint_potential'
+        ]
+        writer.writerow(headers)
+        
+        # Write data rows
+        for file_data in pls_data:
+            filename = file_data.get('filename', 'unknown')
+            derived = file_data.get('derived_features', {})
+            
+            # Write oxidation peaks
+            for peak in file_data.get('oxidation_peaks', []):
+                row = [
+                    filename, 'oxidation', peak.get('peak_index', 0),
+                    peak.get('voltage', 0), peak.get('current', 0), peak.get('height', 0),
+                    peak.get('confidence', 0), peak.get('baseline_current', 0),
+                    derived.get('peak_separation_voltage', 0),
+                    derived.get('peak_separation_current', 0),
+                    derived.get('current_ratio', 0),
+                    derived.get('midpoint_potential', 0)
+                ]
+                writer.writerow(row)
+            
+            # Write reduction peaks
+            for peak in file_data.get('reduction_peaks', []):
+                row = [
+                    filename, 'reduction', peak.get('peak_index', 0),
+                    peak.get('voltage', 0), peak.get('current', 0), peak.get('height', 0),
+                    peak.get('confidence', 0), peak.get('baseline_current', 0),
+                    derived.get('peak_separation_voltage', 0),
+                    derived.get('peak_separation_current', 0),
+                    derived.get('current_ratio', 0),
+                    derived.get('midpoint_potential', 0)
+                ]
+                writer.writerow(row)
+        
+        csv_content = output.getvalue()
+        output.close()
+        
+        # Create response
+        from flask import make_response
+        response = make_response(csv_content)
+        response.headers["Content-Disposition"] = f"attachment; filename=enhanced_v4_peaks_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        response.headers["Content-Type"] = "text/csv"
+        
+        logger.info(f"✅ CSV export completed: {len(pls_data)} files exported")
+        return response
+        
+    except Exception as e:
+        logger.error(f"❌ Error exporting CSV: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500

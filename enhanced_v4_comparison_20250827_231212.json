@@ -1,0 +1,56 @@
+{
+  "timestamp": "20250827_231212",
+  "test_directory": "Test_data/Palmsens/Palmsens_0.5mM",
+  "files_tested": 10,
+  "summary_statistics": {
+    "Enhanced_V4": {
+      "total_peaks": 0,
+      "ox_peaks": 0,
+      "red_peaks": 0,
+      "both_peaks": 0,
+      "edge_effects": 0,
+      "errors": 0
+    },
+    "Enhanced_V4_Improved": {
+      "total_peaks": 0,
+      "ox_peaks": 0,
+      "red_peaks": 0,
+      "both_peaks": 0,
+      "edge_effects": 0,
+      "errors": 0
+    }
+  },
+  "detailed_results": [],
+  "detector_configs": {
+    "Enhanced_V4": {
+      "confidence_threshold": 40.0,
+      "oxidation_range": [
+        0.2,
+        0.6
+      ],
+      "reduction_range": [
+        0.0,
+        0.3
+      ]
+    },
+    "Enhanced_V4_Improved": {
+      "confidence_threshold": 25.0,
+      "oxidation_range": [
+        0.1,
+        0.7
+      ],
+      "reduction_range": [
+        -0.1,
+        0.4
+      ],
+      "edge_margin": 0.05,
+      "improvements": [
+        "Expanded voltage ranges",
+        "Lowered confidence threshold",
+        "Edge effect filtering",
+        "Savgol smoothing",
+        "Improved peak sensitivity"
+      ]
+    }
+  }
+}

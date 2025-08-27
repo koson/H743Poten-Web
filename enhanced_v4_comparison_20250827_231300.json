@@ -1,0 +1,717 @@
+{
+  "timestamp": "20250827_231300",
+  "test_directory": "Test_data/Palmsens/Palmsens_0.5mM",
+  "files_tested": 10,
+  "summary_statistics": {
+    "Enhanced_V4": {
+      "total_peaks": 10,
+      "ox_peaks": 10,
+      "red_peaks": 0,
+      "both_peaks": 0,
+      "edge_effects": 0,
+      "errors": 0
+    },
+    "Enhanced_V4_Improved": {
+      "total_peaks": 20,
+      "ox_peaks": 10,
+      "red_peaks": 10,
+      "both_peaks": 10,
+      "edge_effects": 0,
+      "errors": 0
+    }
+  },
+  "detailed_results": [
+    {
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_01.csv",
+      "Enhanced_V4": {
+        "total_peaks": 1,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 0,
+        "edge_effects": 0,
+        "has_both_peaks": false,
+        "confidence_threshold": 40.0,
+        "voltage_ranges": {
+          "oxidation": [
+            -0.1,
+            0.8
+          ],
+          "reduction": [
+            -0.4,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.190448,
+            "current": 15.386162,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 80.0
+          }
+        ],
+        "edge_peaks": []
+      },
+      "Enhanced_V4_Improved": {
+        "total_peaks": 2,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 1,
+        "edge_effects": 0,
+        "has_both_peaks": true,
+        "confidence_threshold": 25.0,
+        "voltage_ranges": {
+          "oxidation": [
+            0.1,
+            0.7
+          ],
+          "reduction": [
+            -0.1,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.100378032,
+            "current": -17.500844,
+            "type": "reduction",
+            "index": 170,
+            "confidence": 100
+          },
+          {
+            "voltage": 0.190448,
+            "current": 15.386162,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 78.45717038299244
+          }
+        ],
+        "edge_peaks": []
+      }
+    },
+    {
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_02.csv",
+      "Enhanced_V4": {
+        "total_peaks": 1,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 0,
+        "edge_effects": 0,
+        "has_both_peaks": false,
+        "confidence_threshold": 40.0,
+        "voltage_ranges": {
+          "oxidation": [
+            -0.1,
+            0.8
+          ],
+          "reduction": [
+            -0.4,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.190448,
+            "current": 17.467964,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 80.0
+          }
+        ],
+        "edge_peaks": []
+      },
+      "Enhanced_V4_Improved": {
+        "total_peaks": 2,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 1,
+        "edge_effects": 0,
+        "has_both_peaks": true,
+        "confidence_threshold": 25.0,
+        "voltage_ranges": {
+          "oxidation": [
+            0.1,
+            0.7
+          ],
+          "reduction": [
+            -0.1,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.100378032,
+            "current": -17.482056,
+            "type": "reduction",
+            "index": 170,
+            "confidence": 100
+          },
+          {
+            "voltage": 0.190448,
+            "current": 17.467964,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 82.81333251929172
+          }
+        ],
+        "edge_peaks": []
+      }
+    },
+    {
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_03.csv",
+      "Enhanced_V4": {
+        "total_peaks": 1,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 0,
+        "edge_effects": 0,
+        "has_both_peaks": false,
+        "confidence_threshold": 40.0,
+        "voltage_ranges": {
+          "oxidation": [
+            -0.1,
+            0.8
+          ],
+          "reduction": [
+            -0.4,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.190448,
+            "current": 17.7094,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 80.0
+          }
+        ],
+        "edge_peaks": []
+      },
+      "Enhanced_V4_Improved": {
+        "total_peaks": 2,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 1,
+        "edge_effects": 0,
+        "has_both_peaks": true,
+        "confidence_threshold": 25.0,
+        "voltage_ranges": {
+          "oxidation": [
+            0.1,
+            0.7
+          ],
+          "reduction": [
+            -0.1,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.100378032,
+            "current": -17.535602,
+            "type": "reduction",
+            "index": 170,
+            "confidence": 100
+          },
+          {
+            "voltage": 0.190448,
+            "current": 17.7094,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 82.24461875637006
+          }
+        ],
+        "edge_peaks": []
+      }
+    },
+    {
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_04.csv",
+      "Enhanced_V4": {
+        "total_peaks": 1,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 0,
+        "edge_effects": 0,
+        "has_both_peaks": false,
+        "confidence_threshold": 40.0,
+        "voltage_ranges": {
+          "oxidation": [
+            -0.1,
+            0.8
+          ],
+          "reduction": [
+            -0.4,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.190448,
+            "current": 17.866286,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 80.0
+          }
+        ],
+        "edge_peaks": []
+      },
+      "Enhanced_V4_Improved": {
+        "total_peaks": 2,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 1,
+        "edge_effects": 0,
+        "has_both_peaks": true,
+        "confidence_threshold": 25.0,
+        "voltage_ranges": {
+          "oxidation": [
+            0.1,
+            0.7
+          ],
+          "reduction": [
+            -0.1,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.100378032,
+            "current": -17.65585,
+            "type": "reduction",
+            "index": 170,
+            "confidence": 100
+          },
+          {
+            "voltage": 0.190448,
+            "current": 17.866286,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 82.01115340878978
+          }
+        ],
+        "edge_peaks": []
+      }
+    },
+    {
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_05.csv",
+      "Enhanced_V4": {
+        "total_peaks": 1,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 0,
+        "edge_effects": 0,
+        "has_both_peaks": false,
+        "confidence_threshold": 40.0,
+        "voltage_ranges": {
+          "oxidation": [
+            -0.1,
+            0.8
+          ],
+          "reduction": [
+            -0.4,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.190448,
+            "current": 18.001566,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 80.0
+          }
+        ],
+        "edge_peaks": []
+      },
+      "Enhanced_V4_Improved": {
+        "total_peaks": 2,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 1,
+        "edge_effects": 0,
+        "has_both_peaks": true,
+        "confidence_threshold": 25.0,
+        "voltage_ranges": {
+          "oxidation": [
+            0.1,
+            0.7
+          ],
+          "reduction": [
+            -0.1,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.100378032,
+            "current": -17.75825,
+            "type": "reduction",
+            "index": 170,
+            "confidence": 100
+          },
+          {
+            "voltage": 0.190448,
+            "current": 18.001566,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 82.88960031490477
+          }
+        ],
+        "edge_peaks": []
+      }
+    },
+    {
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_06.csv",
+      "Enhanced_V4": {
+        "total_peaks": 1,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 0,
+        "edge_effects": 0,
+        "has_both_peaks": false,
+        "confidence_threshold": 40.0,
+        "voltage_ranges": {
+          "oxidation": [
+            -0.1,
+            0.8
+          ],
+          "reduction": [
+            -0.4,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.190448,
+            "current": 18.149998,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 80.0
+          }
+        ],
+        "edge_peaks": []
+      },
+      "Enhanced_V4_Improved": {
+        "total_peaks": 2,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 1,
+        "edge_effects": 0,
+        "has_both_peaks": true,
+        "confidence_threshold": 25.0,
+        "voltage_ranges": {
+          "oxidation": [
+            0.1,
+            0.7
+          ],
+          "reduction": [
+            -0.1,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.100378032,
+            "current": -17.815556,
+            "type": "reduction",
+            "index": 170,
+            "confidence": 100
+          },
+          {
+            "voltage": 0.190448,
+            "current": 18.149998,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 82.19057630238058
+          }
+        ],
+        "edge_peaks": []
+      }
+    },
+    {
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_07.csv",
+      "Enhanced_V4": {
+        "total_peaks": 1,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 0,
+        "edge_effects": 0,
+        "has_both_peaks": false,
+        "confidence_threshold": 40.0,
+        "voltage_ranges": {
+          "oxidation": [
+            -0.1,
+            0.8
+          ],
+          "reduction": [
+            -0.4,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.190448,
+            "current": 18.219516,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 80.0
+          }
+        ],
+        "edge_peaks": []
+      },
+      "Enhanced_V4_Improved": {
+        "total_peaks": 2,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 1,
+        "edge_effects": 0,
+        "has_both_peaks": true,
+        "confidence_threshold": 25.0,
+        "voltage_ranges": {
+          "oxidation": [
+            0.1,
+            0.7
+          ],
+          "reduction": [
+            -0.1,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.100378032,
+            "current": -17.870982,
+            "type": "reduction",
+            "index": 170,
+            "confidence": 100
+          },
+          {
+            "voltage": 0.190448,
+            "current": 18.219516,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 82.20386873848291
+          }
+        ],
+        "edge_peaks": []
+      }
+    },
+    {
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_08.csv",
+      "Enhanced_V4": {
+        "total_peaks": 1,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 0,
+        "edge_effects": 0,
+        "has_both_peaks": false,
+        "confidence_threshold": 40.0,
+        "voltage_ranges": {
+          "oxidation": [
+            -0.1,
+            0.8
+          ],
+          "reduction": [
+            -0.4,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.190448,
+            "current": 18.274004,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 80.0
+          }
+        ],
+        "edge_peaks": []
+      },
+      "Enhanced_V4_Improved": {
+        "total_peaks": 2,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 1,
+        "edge_effects": 0,
+        "has_both_peaks": true,
+        "confidence_threshold": 25.0,
+        "voltage_ranges": {
+          "oxidation": [
+            0.1,
+            0.7
+          ],
+          "reduction": [
+            -0.1,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.100378032,
+            "current": -17.9452,
+            "type": "reduction",
+            "index": 170,
+            "confidence": 100
+          },
+          {
+            "voltage": 0.190448,
+            "current": 18.274004,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 82.20071874986664
+          }
+        ],
+        "edge_peaks": []
+      }
+    },
+    {
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_09.csv",
+      "Enhanced_V4": {
+        "total_peaks": 1,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 0,
+        "edge_effects": 0,
+        "has_both_peaks": false,
+        "confidence_threshold": 40.0,
+        "voltage_ranges": {
+          "oxidation": [
+            -0.1,
+            0.8
+          ],
+          "reduction": [
+            -0.4,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.190448,
+            "current": 18.353856,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 80.0
+          }
+        ],
+        "edge_peaks": []
+      },
+      "Enhanced_V4_Improved": {
+        "total_peaks": 2,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 1,
+        "edge_effects": 0,
+        "has_both_peaks": true,
+        "confidence_threshold": 25.0,
+        "voltage_ranges": {
+          "oxidation": [
+            0.1,
+            0.7
+          ],
+          "reduction": [
+            -0.1,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.100378032,
+            "current": -17.985596,
+            "type": "reduction",
+            "index": 170,
+            "confidence": 100
+          },
+          {
+            "voltage": 0.190448,
+            "current": 18.353856,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 83.01716204336995
+          }
+        ],
+        "edge_peaks": []
+      }
+    },
+    {
+      "filename": "Palmsens_0.5mM_CV_100mVpS_E1_scan_10.csv",
+      "Enhanced_V4": {
+        "total_peaks": 1,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 0,
+        "edge_effects": 0,
+        "has_both_peaks": false,
+        "confidence_threshold": 40.0,
+        "voltage_ranges": {
+          "oxidation": [
+            -0.1,
+            0.8
+          ],
+          "reduction": [
+            -0.4,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.190448,
+            "current": 18.445922,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 80.0
+          }
+        ],
+        "edge_peaks": []
+      },
+      "Enhanced_V4_Improved": {
+        "total_peaks": 2,
+        "oxidation_peaks": 1,
+        "reduction_peaks": 1,
+        "edge_effects": 0,
+        "has_both_peaks": true,
+        "confidence_threshold": 25.0,
+        "voltage_ranges": {
+          "oxidation": [
+            0.1,
+            0.7
+          ],
+          "reduction": [
+            -0.1,
+            0.4
+          ]
+        },
+        "peaks": [
+          {
+            "voltage": 0.100378032,
+            "current": -17.969624,
+            "type": "reduction",
+            "index": 170,
+            "confidence": 100
+          },
+          {
+            "voltage": 0.190448,
+            "current": 18.445922,
+            "type": "oxidation",
+            "index": 59,
+            "confidence": 82.17638116430159
+          }
+        ],
+        "edge_peaks": []
+      }
+    }
+  ],
+  "detector_configs": {
+    "Enhanced_V4": {
+      "confidence_threshold": 40.0,
+      "oxidation_range": [
+        0.2,
+        0.6
+      ],
+      "reduction_range": [
+        0.0,
+        0.3
+      ]
+    },
+    "Enhanced_V4_Improved": {
+      "confidence_threshold": 25.0,
+      "oxidation_range": [
+        0.1,
+        0.7
+      ],
+      "reduction_range": [
+        -0.1,
+        0.4
+      ],
+      "edge_margin": 0.05,
+      "improvements": [
+        "Expanded voltage ranges",
+        "Lowered confidence threshold",
+        "Edge effect filtering",
+        "Savgol smoothing",
+        "Improved peak sensitivity"
+      ]
+    }
+  }
+}

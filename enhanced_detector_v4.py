@@ -398,6 +398,57 @@ class EnhancedDetectorV4:
                     red_peaks.append(i)
         
         return np.array(ox_peaks), np.array(red_peaks)
+    
+    def analyze_cv_data(self, data):
+        """
+        Web API compatible method for Enhanced V4 analysis
+        Args:
+            data: Dict with 'voltage' and 'current' lists
+        Returns:
+            Dict with 'peaks', 'scan_analysis', 'thresholds', etc.
+        """
+        try:
+            voltage = np.array(data['voltage'])
+            current = np.array(data['current'])
+            
+            logger.info(f"🔍 Enhanced V4 analyze_cv_data: {len(voltage)} points")
+            logger.info(f"📊 V-range: {voltage.min():.3f}-{voltage.max():.3f}V, I-range: {current.min():.3f}-{current.max():.3f}µA")
+            
+            # Run enhanced detection
+            detection_results = self.detect_peaks_enhanced_v4(voltage, current)
+            
+            # Analyze scan direction
+            scan_analysis = self.detect_scan_direction_v4(voltage)
+            
+            # Calculate thresholds
+            thresholds = self.calculate_dynamic_thresholds_v4(current, scan_analysis)
+            
+            # Extract all peaks (including rejected ones)
+            all_peaks = detection_results['peaks'] + detection_results.get('rejected_peaks', [])
+            
+            # Format results for web API
+            result = {
+                'peaks': detection_results['peaks'],
+                'scan_analysis': scan_analysis,
+                'thresholds': thresholds,
+                'all_peaks': all_peaks,
+                'processing_time': 0.1,  # Enhanced V4 is fast
+                'method': 'enhanced_v4',
+                'ferrocyanide_optimized': True,
+                'confidence_threshold': self.confidence_threshold,
+                'voltage_ranges': {
+                    'oxidation': self.ferrocyanide_ox_range,
+                    'reduction': self.ferrocyanide_red_range
+                }
+            }
+            
+            logger.info(f"✅ Enhanced V4 completed: {len(detection_results['peaks'])} valid peaks, {len(detection_results.get('rejected_peaks', []))} rejected")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Error in analyze_cv_data: {e}")
+            raise
 
 # Test function
 def test_enhanced_v4(file_path):

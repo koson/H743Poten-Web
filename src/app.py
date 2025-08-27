@@ -121,7 +121,7 @@ def create_app():
     app.register_blueprint(workflow_bp)
     app.register_blueprint(preview_bp)
     app.register_blueprint(workflow_api_bp)
-    app.register_blueprint(peak_detection_bp, url_prefix='/peak_detection')
+    app.register_blueprint(peak_detection_bp)  # Remove url_prefix to use root URLs
     app.register_blueprint(peak_analysis_bp, url_prefix='/peak_detection')
     app.register_blueprint(parameter_bp)
     app.register_blueprint(parameter_api_bp)

@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-08-27T19:47:18.229952",
+  "test_suite_version": "1.0.0",
+  "tests_performed": [
+    {
+      "test_name": "precision_analyzer",
+      "status": "FAILED",
+      "timestamp": "2025-08-27T19:47:18.750703"
+    },
+    {
+      "test_name": "pls_analyzer",
+      "status": "CRASHED",
+      "error": "name 'PLSRegression' is not defined",
+      "timestamp": "2025-08-27T19:47:18.781995"
+    },
+    {
+      "test_name": "integration",
+      "status": "CRASHED",
+      "error": "name 'PLSRegression' is not defined",
+      "timestamp": "2025-08-27T19:47:18.815414"
+    }
+  ],
+  "overall_status": "FAILED"
+}

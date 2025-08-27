@@ -1,0 +1,136 @@
+{
+  "timestamp": "2025-08-27T22:19:09.562232",
+  "analyzer_version": "Enhanced_Detector_V4",
+  "configuration": {
+    "confidence_threshold": 40.0,
+    "ferrocyanide_ox_range": [
+      -0.1,
+      0.8
+    ],
+    "ferrocyanide_red_range": [
+      -0.4,
+      0.4
+    ],
+    "min_peak_height": 2.0,
+    "peak_prominence_factor": 0.1
+  },
+  "main_analysis": {
+    "file": "Test_data/Palmsens/Palmsens_0.5mM/Palmsens_0.5mM_CV_100mVpS_E1_scan_01.csv",
+    "success": true,
+    "peaks_detected": 2,
+    "baseline_quality": 80.0,
+    "overall_quality": 75.0,
+    "ideal_ferro_detection": true
+  },
+  "parameter_testing": [
+    {
+      "name": "Default V4",
+      "total_peaks": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "status": "Perfect",
+      "config": {
+        "confidence_threshold": 40.0,
+        "ferrocyanide_ox_range": [
+          -0.1,
+          0.8
+        ],
+        "ferrocyanide_red_range": [
+          -0.4,
+          0.4
+        ],
+        "min_peak_height": 2.0,
+        "peak_prominence_factor": 0.1
+      }
+    },
+    {
+      "name": "Sensitive V4",
+      "total_peaks": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "status": "Perfect",
+      "config": {
+        "confidence_threshold": 40.0,
+        "ferrocyanide_ox_range": [
+          -0.1,
+          0.8
+        ],
+        "ferrocyanide_red_range": [
+          -0.4,
+          0.4
+        ],
+        "min_peak_height": 1.0,
+        "peak_prominence_factor": 0.05
+      }
+    },
+    {
+      "name": "Conservative V4",
+      "total_peaks": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "status": "Perfect",
+      "config": {
+        "confidence_threshold": 40.0,
+        "ferrocyanide_ox_range": [
+          -0.1,
+          0.8
+        ],
+        "ferrocyanide_red_range": [
+          -0.4,
+          0.4
+        ],
+        "min_peak_height": 4.0,
+        "peak_prominence_factor": 0.15
+      }
+    },
+    {
+      "name": "Ultra-sensitive V4",
+      "total_peaks": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "status": "Perfect",
+      "config": {
+        "confidence_threshold": 40.0,
+        "ferrocyanide_ox_range": [
+          -0.1,
+          0.8
+        ],
+        "ferrocyanide_red_range": [
+          -0.4,
+          0.4
+        ],
+        "min_peak_height": 0.5,
+        "peak_prominence_factor": 0.02
+      }
+    }
+  ],
+  "batch_testing": [
+    {
+      "file": "Palmsens_0.5mM_CV_100mVpS_E1_scan_01.csv",
+      "total_peaks": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "baseline_quality": 80.0,
+      "overall_quality": 75.0,
+      "ideal_detection": true
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_200mVpS_E5_scan_05.csv",
+      "total_peaks": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "baseline_quality": 80.0,
+      "overall_quality": 75.0,
+      "ideal_detection": true
+    },
+    {
+      "file": "Palmsens_0.5mM_CV_20mVpS_E1_scan_02.csv",
+      "total_peaks": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "baseline_quality": 80.0,
+      "overall_quality": 75.0,
+      "ideal_detection": true
+    }
+  ]
+}

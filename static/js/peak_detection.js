@@ -116,7 +116,9 @@ const detectionManager = {
         return {
             'ml': 'ml-analysis',
             'prominence': 'traditional-analysis',
-            'derivative': 'hybrid-analysis'
+            'derivative': 'hybrid-analysis',
+            'enhanced_v4': 'enhanced_v4-analysis',
+            'enhanced_v4_improved': 'enhanced_v4_improved-analysis'
         }[method];
     }, // Added comma here
 
@@ -173,11 +175,11 @@ const detectionManager = {
                 console.log(`[${method}] Sending single-file payload`);
             }
             // Call backend peak detection API
-            console.log(`[${method}] Making API call to /peak_detection/get-peaks/${method}`);
+            console.log(`[${method}] Making API call to /get-peaks/${method}`);
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout for large datasets
             
-            const response = await fetch(`/peak_detection/get-peaks/${method}`, {
+            const response = await fetch(`/get-peaks/${method}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -415,9 +417,18 @@ const detectionManager = {
         if (previewData.peaks && previewData.peaks.length > 0) {
             conf = Math.round(previewData.peaks.reduce((sum, p) => sum + (p.confidence || 50), 0) / previewData.peaks.length);
         }
-        grid.querySelector('.confidence-value').textContent = conf + '%';
-        // Processing time: ใช้ results.processingTime เดิม
-        grid.querySelector('.processing-time').textContent = results.processingTime + 's';
+        
+        // Safely update confidence value if element exists
+        const confidenceElement = grid.querySelector('.confidence-value');
+        if (confidenceElement) {
+            confidenceElement.textContent = conf + '%';
+        }
+        
+        // Safely update processing time if element exists
+        const processingTimeElement = grid.querySelector('.processing-time');
+        if (processingTimeElement) {
+            processingTimeElement.textContent = results.processingTime + 's';
+        }
         // Update preview graph
         const previewCanvas = grid.querySelector('.preview-canvas');
         if (previewCanvas) {
