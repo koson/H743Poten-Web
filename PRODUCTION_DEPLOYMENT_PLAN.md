@@ -20,11 +20,12 @@
 - Comprehensive baseline detection with voltage-based segmentation
 - Advanced peak validation with confidence scoring
 
-### 2. 🔄 API Integration (IN PROGRESS)
-- [ ] Update main API endpoints to use Enhanced V5
-- [ ] Replace old detection methods with V5
-- [ ] Add V5-specific response formatting
-- [ ] Update error handling for V5 results
+### 2. ✅ API Integration (COMPLETE)
+- ✅ Updated main API endpoints to use Enhanced V5
+- ✅ Added `enhanced_v5` method to `/peak_detection/get-peaks/<method>`
+- ✅ Enhanced V5-specific response formatting with confidence scores
+- ✅ Updated error handling with fallback to Enhanced V3
+- ✅ Added production-ready API testing suite
 
 ### 3. 📊 Web Interface Updates (PENDING)
 - [ ] Update frontend to display V5 results
@@ -47,6 +48,8 @@
 - ✅ Peak detection with confidence scoring
 - ✅ Baseline analysis and segmentation
 - ✅ Multi-method validation system
+- ✅ `src/routes/peak_detection.py` - Updated API endpoints
+- ✅ `test_enhanced_v5_production_api.py` - Production testing suite
 
 ### Needs Update:
 - 🔄 API endpoints (`app.py` or main API file)
