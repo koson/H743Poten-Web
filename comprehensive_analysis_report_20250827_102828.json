@@ -1,0 +1,26 @@
+[
+  {
+    "filename": "Pipot_Ferro_0_5mM_100mVpS_E1_scan_08.csv",
+    "issue": "baseline segment ไม่ถูก (ไม่อยู่ช่วงยาว)",
+    "expected": "ควรมี baseline segment ที่ยาวกว่า",
+    "data_info": {
+      "voltage_range": [
+        -0.4006,
+        0.6967
+      ],
+      "current_range": [
+        -2.7896,
+        1.4998
+      ],
+      "data_points": 220,
+      "turning_point": 2
+    },
+    "baseline_analysis": {
+      "low_voltage": {
+        "voltage_range": [
+          -0.1911,
+          -0.0913
+        ],
+        "current_mean": -0.3747811111111111,
+        "current_std": 0.35137859355668855,
+        "point_count": 

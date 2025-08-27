@@ -1,0 +1,2085 @@
+{
+  "test_metadata": {
+    "timestamp": "2025-08-27T12:05:02.782468",
+    "detector_version": "Enhanced V5.0",
+    "test_parameters": {
+      "max_files_per_group": 15,
+      "success_criteria": "OX peaks > 0 AND RED peaks > 0"
+    }
+  },
+  "raw_results": {
+    "overall_stats": {
+      "total_files": 183,
+      "successful_files": 0,
+      "failed_files": 183,
+      "success_rate": 0.0
+    },
+    "concentration_results": [
+      {
+        "concentration": "Pipot_Ferro_0_5mM",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E1_scan_01.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E1_scan_02.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E1_scan_03.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E1_scan_04.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E1_scan_05.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E1_scan_06.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E1_scan_07.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E1_scan_08.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E1_scan_09.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E1_scan_10.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E1_scan_11.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E2_scan_01.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E2_scan_02.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E2_scan_03.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E2_scan_04.csv",
+            "concentration": "Pipot_Ferro_0_5mM"
+          }
+        ]
+      },
+      {
+        "concentration": "others",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_100mVpS_E1_scan_01.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_100mVpS_E1_scan_02.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_100mVpS_E1_scan_03.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_100mVpS_E1_scan_04.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_100mVpS_E1_scan_05.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_100mVpS_E1_scan_06.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_100mVpS_E1_scan_07.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_100mVpS_E1_scan_08.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_100mVpS_E1_scan_09.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_100mVpS_E1_scan_10.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_100mVpS_E1_scan_11.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_200mVpS_E1_scan_01.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_200mVpS_E1_scan_02.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_200mVpS_E1_scan_03.csv",
+            "concentration": "others"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_10mM/Pipot_Ferro-10mM_200mVpS_E1_scan_04.csv",
+            "concentration": "others"
+          }
+        ]
+      },
+      {
+        "concentration": "Pipot_Ferro-1_0mM",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_100mVpS_E1_scan_01.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_100mVpS_E1_scan_02.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_100mVpS_E1_scan_03.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_100mVpS_E1_scan_04.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_100mVpS_E1_scan_05.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_100mVpS_E1_scan_06.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_100mVpS_E1_scan_07.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_100mVpS_E1_scan_08.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_100mVpS_E1_scan_09.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_100mVpS_E1_scan_10.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_100mVpS_E1_scan_11.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_200mVpS_E1_scan_01.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_200mVpS_E1_scan_02.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_200mVpS_E1_scan_03.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro-1_0mM_200mVpS_E1_scan_04.csv",
+            "concentration": "Pipot_Ferro-1_0mM"
+          }
+        ]
+      },
+      {
+        "concentration": "Pipot_Ferro_1_0mM",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E1_scan_05.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E3_scan_01.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E3_scan_02.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E3_scan_03.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E3_scan_04.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E3_scan_05.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E3_scan_06.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E3_scan_07.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E3_scan_08.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E3_scan_09.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E3_scan_10.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E3_scan_11.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E4_scan_01.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E4_scan_02.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_1_0mM/Pipot_Ferro_1_0mM_100mVpS_E4_scan_03.csv",
+            "concentration": "Pipot_Ferro_1_0mM"
+          }
+        ]
+      },
+      {
+        "concentration": "Pipot_Ferro-20mM",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_100mVpS_E1_scan_01.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_100mVpS_E1_scan_02.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_100mVpS_E1_scan_03.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_100mVpS_E1_scan_04.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_100mVpS_E1_scan_05.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_100mVpS_E1_scan_06.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_100mVpS_E1_scan_07.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_100mVpS_E1_scan_08.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_100mVpS_E1_scan_09.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_100mVpS_E1_scan_10.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_100mVpS_E1_scan_11.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_200mVpS_E1_scan_01.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_200mVpS_E1_scan_02.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_200mVpS_E1_scan_03.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro-20mM_200mVpS_E1_scan_04.csv",
+            "concentration": "Pipot_Ferro-20mM"
+          }
+        ]
+      },
+      {
+        "concentration": "Pipot_Ferro_20mM",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E1_scan_01.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E1_scan_02.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E1_scan_03.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E1_scan_04.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E1_scan_05.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E1_scan_06.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E1_scan_07.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E1_scan_08.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E1_scan_09.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E1_scan_10.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E1_scan_11.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E2_scan_01.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E2_scan_02.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E2_scan_03.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_20mM/Pipot_Ferro_20mM_100mVpS_E2_scan_04.csv",
+            "concentration": "Pipot_Ferro_20mM"
+          }
+        ]
+      },
+      {
+        "concentration": "Pipot_Ferro-5_0mM",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_100mVpS_E1_scan_01.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_100mVpS_E1_scan_02.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_100mVpS_E1_scan_03.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_100mVpS_E1_scan_04.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_100mVpS_E1_scan_05.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_100mVpS_E1_scan_06.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_100mVpS_E1_scan_07.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_100mVpS_E1_scan_08.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_100mVpS_E1_scan_09.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_100mVpS_E1_scan_10.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_100mVpS_E1_scan_11.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_200mVpS_E1_scan_01.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_200mVpS_E1_scan_02.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_200mVpS_E1_scan_03.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro-5_0mM_200mVpS_E1_scan_04.csv",
+            "concentration": "Pipot_Ferro-5_0mM"
+          }
+        ]
+      },
+      {
+        "concentration": "Pipot_Ferro_5_0mM",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E2_scan_01.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E2_scan_02.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E2_scan_03.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E2_scan_04.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E2_scan_05.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E2_scan_06.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E2_scan_07.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E2_scan_08.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E2_scan_09.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E2_scan_10.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E2_scan_11.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E3_scan_01.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E3_scan_02.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E3_scan_03.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Stm32/Pipot_Ferro_5_0mM/Pipot_Ferro_5_0mM_100mVpS_E3_scan_04.csv",
+            "concentration": "Pipot_Ferro_5_0mM"
+          }
+        ]
+      },
+      {
+        "concentration": "Palmsens_10mM",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E1_scan_01.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E1_scan_02.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E1_scan_03.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E1_scan_04.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E1_scan_05.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E1_scan_06.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E1_scan_07.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E1_scan_08.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E1_scan_09.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E1_scan_10.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E1_scan_11.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E2_scan_01.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E2_scan_02.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E2_scan_03.csv",
+            "concentration": "Palmsens_10mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_10mM/Palmsens_10mM_CV_100mVpS_E2_scan_04.csv",
+            "concentration": "Palmsens_10mM"
+          }
+        ]
+      },
+      {
+        "concentration": "Palmsens_20mM",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E1_scan_01.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E1_scan_02.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E1_scan_03.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E1_scan_04.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E1_scan_05.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E1_scan_06.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E1_scan_07.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E1_scan_08.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E1_scan_09.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E1_scan_10.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E1_scan_11.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E2_scan_01.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E2_scan_02.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E2_scan_03.csv",
+            "concentration": "Palmsens_20mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_100mVpS_E2_scan_04.csv",
+            "concentration": "Palmsens_20mM"
+          }
+        ]
+      },
+      {
+        "concentration": "Palmsens_50mM",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E1_scan_01.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E1_scan_02.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E1_scan_03.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E1_scan_04.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E1_scan_05.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E1_scan_06.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E1_scan_07.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E1_scan_08.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E1_scan_09.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E1_scan_10.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E1_scan_11.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E2_scan_01.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E2_scan_02.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E2_scan_03.csv",
+            "concentration": "Palmsens_50mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_50mM/Palmsens_50mM_CV_100mVpS_E2_scan_04.csv",
+            "concentration": "Palmsens_50mM"
+          }
+        ]
+      },
+      {
+        "concentration": "Palmsens_5mM",
+        "total_files": 15,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E1_scan_01.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E1_scan_02.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E1_scan_03.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E1_scan_04.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E1_scan_05.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E1_scan_06.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E1_scan_07.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E1_scan_08.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E1_scan_09.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E1_scan_10.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E1_scan_11.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E2_scan_01.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E2_scan_02.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E2_scan_03.csv",
+            "concentration": "Palmsens_5mM"
+          },
+          {
+            "success": false,
+            "error": "'list' object has no attribute 'get'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/Palmsens/Palmsens_5mM/Palmsens_5mM_CV_100mVpS_E2_scan_04.csv",
+            "concentration": "Palmsens_5mM"
+          }
+        ]
+      },
+      {
+        "concentration": "test_stm32",
+        "total_files": 3,
+        "successful_files": 0,
+        "success_rate": 0.0,
+        "results": [
+          {
+            "success": false,
+            "error": "'V'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/raw_stm32/test_stm32_A_units.csv",
+            "concentration": "test_stm32"
+          },
+          {
+            "success": false,
+            "error": "'V'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/raw_stm32/test_stm32_I_A_format.csv",
+            "concentration": "test_stm32"
+          },
+          {
+            "success": false,
+            "error": "'V'",
+            "ox_peaks": 0,
+            "red_peaks": 0,
+            "total_peaks": 0,
+            "baseline_quality": 0.0,
+            "file_path": "Test_data/raw_stm32/test_stm32_uA_units.csv",
+            "concentration": "test_stm32"
+          }
+        ]
+      }
+    ],
+    "timestamp": "2025-08-27T12:05:02.782468",
+    "detector_version": "Enhanced V5.0",
+    "test_parameters": {
+      "max_files_per_group": 15,
+      "success_criteria": "OX peaks > 0 AND RED peaks > 0"
+    }
+  },
+  "analysis": {
+    "summary": {
+      "total_files": 183,
+      "successful_files": 0,
+      "failed_files": 183,
+      "success_rate": 0.0
+    },
+    "concentration_analysis": [
+      {
+        "concentration": "Pipot_Ferro_0_5mM",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "others",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "Pipot_Ferro-1_0mM",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "Pipot_Ferro_1_0mM",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "Pipot_Ferro-20mM",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "Pipot_Ferro_20mM",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "Pipot_Ferro-5_0mM",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "Pipot_Ferro_5_0mM",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "Palmsens_10mM",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "Palmsens_20mM",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "Palmsens_50mM",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "Palmsens_5mM",
+        "performance": {
+          "total_files": 15,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      },
+      {
+        "concentration": "test_stm32",
+        "performance": {
+          "total_files": 3,
+          "successful_files": 0,
+          "success_rate": 0.0
+        }
+      }
+    ],
+    "performance_metrics": {
+      "overall_grade": "D",
+      "production_ready": false,
+      "total_files_tested": 183
+    },
+    "recommendations": [
+      "🔧 Significant improvement needed",
+      "🔍 Deep analysis of failure modes required",
+      "⚙️ Algorithm parameters need adjustment",
+      "🧪 Extended testing with diverse datasets"
+    ]
+  }
+}

@@ -550,7 +550,7 @@
         
         <!-- Method Selection Cards -->
         <div class="row">
-            <div class="col-md-4 mb-4">
+            <div class="col-md-3 mb-4">
                 <div class="method-card">
                     <div class="method-header">
                         <img src="/static/img/brain.svg" alt="DeepCV" class="method-icon">
@@ -623,7 +623,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4 mb-4">
+            <div class="col-md-3 mb-4">
                 <div class="method-card">
                     <div class="method-header">
                         <img src="/static/img/graph.svg" alt="TraditionalCV" class="method-icon">
@@ -696,7 +696,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4 mb-4">
+            <div class="col-md-3 mb-4">
                 <div class="method-card">
                     <div class="method-header">
                         <img src="/static/img/hybrid.svg" alt="HybridCV" class="method-icon">
@@ -739,6 +739,80 @@
                     </div>
                     <!-- Analysis Results Grid -->
                     <div class="analysis-grid mt-4" id="hybrid-analysis" style="display: none;">
+                        <div class="method-results">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="peaks-count">0</h4>
+                                    <small class="text-muted">P</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="confidence-value">0%</h4>
+                                    <small class="text-muted">A</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="processing-time">0s</h4>
+                                    <small class="text-muted">T</small>
+                                </div>
+                            </div>
+                            <!-- Preview Graph -->
+                            <div class="preview-graph mb-3">
+                                <canvas class="preview-canvas" width="400" height="200"></canvas>
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <button class="btn btn-outline-primary w-100 view-details-btn" disabled>
+                                View Detailed Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="method-card">
+                    <div class="method-header">
+                        <img src="/static/img/enhanced.svg" alt="Enhanced V3" class="method-icon">
+                        <h3>Enhanced V3</h3>
+                        <div class="quality-badge" style="background: linear-gradient(45deg, #28a745, #20c997);">Latest</div>
+                    </div>
+                    <div class="method-content text-center">
+                        <p class="text-muted mb-3">Enhanced Algorithm V3.0</p>
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="enhanced_v3" onclick="showInlineProgress('enhanced_v3'); window.startDetection && window.startDetection('enhanced_v3')" id="enhanced_v3-start-btn">
+                            Start Detection
+                        </button>
+                        
+                        <!-- Inline Progress Bar -->
+                        <div class="progress-container" id="enhanced_v3-progress" style="display: none;">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     style="background: linear-gradient(45deg, #28a745, #20c997);"
+                                     role="progressbar" style="width: 0%" id="enhanced_v3-progressBar">
+                                    <small id="enhanced_v3-progressPercent">0%</small>
+                                </div>
+                            </div>
+                            <div class="row text-center" style="margin: 2px 0 0 0;">
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <strong id="enhanced_v3-currentFile">0</strong>/<span id="enhanced_v3-totalFiles">0</span> files
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> <span id="enhanced_v3-elapsedTime">0s</span>
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-success">
+                                        <i class="fas fa-rocket"></i> V3.0
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-center" id="enhanced_v3-progressMessage" style="margin-top: 2px;">Initializing...</small>
+                        </div>
+                    </div>
+                    <!-- Analysis Results Grid -->
+                    <div class="analysis-grid mt-4" id="enhanced_v3-analysis" style="display: none;">
                         <div class="method-results">
                             <div class="d-flex justify-content-between align-items-center gap-2">
                                 <div class="analysis-box border rounded flex-grow-1">

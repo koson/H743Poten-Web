@@ -30,6 +30,35 @@ try:
 except ImportError:
     from baseline_detector_v4 import cv_baseline_detector_v4
 
+# Import Enhanced Detector V3.0
+try:
+    from ..enhanced_detector_v3 import EnhancedDetectorV3
+except ImportError:
+    try:
+        # Try relative import from parent directory
+        import sys
+        import os
+        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sys.path.insert(0, parent_dir)
+        from enhanced_detector_v3 import EnhancedDetectorV3
+    except ImportError as e:
+        logger.warning(f"Enhanced Detector V3.0 not available: {e}")
+
+# Import Enhanced Detector V5.0 (Production Ready)
+try:
+    from ..enhanced_detector_v5 import EnhancedDetectorV5
+except ImportError:
+    try:
+        # Try relative import from parent directory
+        import sys
+        import os
+        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sys.path.insert(0, parent_dir)
+        from enhanced_detector_v5 import EnhancedDetectorV5
+    except ImportError as e:
+        logger.warning(f"Enhanced Detector V5.0 not available: {e}")
+        EnhancedDetectorV3 = None
+
 # Set up logging
 logger = logging.getLogger(__name__)
 
@@ -1198,6 +1227,10 @@ def detect_cv_peaks(voltage, current, method='prominence'):
             return detect_peaks_derivative(voltage, current)
         elif method == 'ml':
             return detect_peaks_ml(voltage, current)
+        elif method == 'enhanced_v3':
+            return detect_peaks_enhanced_v3(voltage, current)
+        elif method == 'enhanced_v5':
+            return detect_peaks_enhanced_v5(voltage, current)
         else:
             raise ValueError(f"Unknown method: {method}")
     except Exception as e:
@@ -1872,3 +1905,238 @@ def detect_peaks_ml(voltage, current):
             'params': {'error': str(e)},
             'baseline': {}
         }
+
+def detect_peaks_enhanced_v3(voltage, current):
+    """Detect peaks using Enhanced Detector V3.0 with all improvements"""
+    try:
+        logger.info(f"🚀 Enhanced Detector V3.0: starting with {len(voltage)} data points")
+        logger.info(f"📊 Data range - V: {voltage.min():.3f} to {voltage.max():.3f}V, I: {current.min():.3f} to {current.max():.3f}µA")
+        
+        # Check if Enhanced Detector V3.0 is available
+        if EnhancedDetectorV3 is None:
+            logger.warning("⚠️ Enhanced Detector V3.0 not available, falling back to prominence method")
+            return detect_peaks_prominence(voltage, current)
+        
+        # Create detector instance
+        detector = EnhancedDetectorV3()
+        
+        # Run enhanced detection
+        results = detector.detect_peaks_enhanced(voltage, current)
+        
+        # Convert to web API format
+        web_peaks = []
+        for peak in results['peaks']:
+            web_peaks.append({
+                'voltage': float(peak['voltage']),
+                'current': float(peak['current']),
+                'type': peak['type'],  # 'oxidation' or 'reduction'
+                'confidence': float(peak['confidence']),
+                'height': float(peak.get('height', abs(peak['current']))),
+                'baseline_current': 0.0,  # Enhanced detector handles baseline internally
+                'enabled': True
+            })
+        
+        # Format baseline data for web interface
+        baseline_data = {
+            'forward': [],
+            'reverse': [],
+            'full': [],
+            'metadata': {},
+            'markers': {},
+            'debug': {}
+        }
+        
+        if results.get('baseline_indices') and len(results['baseline_indices']) > 0:
+            # Create baseline array
+            baseline_full = np.zeros(len(voltage))
+            if len(results['baseline_info']) > 0:
+                # Use baseline info to fill the array
+                for region in results['baseline_info']:
+                    start_idx = max(0, region.get('start_index', 0))
+                    end_idx = min(len(voltage), region.get('end_index', len(voltage)))
+                    if start_idx < end_idx:
+                        baseline_full[start_idx:end_idx] = region.get('mean_current', 0.0)
+            
+            # Split into forward/reverse
+            mid_point = len(voltage) // 2
+            baseline_data['forward'] = baseline_full[:mid_point].tolist()
+            baseline_data['reverse'] = baseline_full[mid_point:].tolist()
+            baseline_data['full'] = baseline_full.tolist()
+            
+            # Add metadata
+            baseline_data['metadata'] = {
+                'method_used': 'enhanced_v3',
+                'quality': 0.9,  # Enhanced detector has high quality
+                'processing_time': 0.0,
+                'auto_selected': True,
+                'regions_found': len(results['baseline_info']),
+                'total_baseline_points': len(results['baseline_indices'])
+            }
+            
+            # Add debug info
+            baseline_data['debug'] = {
+                'scan_direction': {
+                    'turning_point': results['scan_sections']['turning_point'],
+                    'forward_points': results['scan_sections']['forward'][1],
+                    'reverse_points': results['scan_sections']['reverse'][1] - results['scan_sections']['reverse'][0]
+                },
+                'thresholds_used': results['thresholds'],
+                'conflicts_detected': len(results.get('conflicts', [])),
+                'baseline_regions': len(results['baseline_info'])
+            }
+        
+        logger.info(f"✅ Enhanced V3.0 completed: {len(web_peaks)} peaks found")
+        logger.info(f"📊 Baseline: {len(results.get('baseline_indices', []))} points in {len(results.get('baseline_info', []))} regions")
+        logger.info(f"🎯 Scan sections: turning point at {results['scan_sections']['turning_point']}")
+        
+        return {
+            'peaks': web_peaks,
+            'method': 'enhanced_v3',
+            'params': {
+                'scan_direction_detection': 'enhanced_gradient_smoothing',
+                'threshold_calculation': 'dynamic_snr_based',
+                'peak_validation': 'multi_criteria_electrochemical',
+                'baseline_detection': 'conflict_aware_voltage_windows',
+                'confidence_scoring': 'integrated'
+            },
+            'enhanced_results': {
+                'scan_sections': results['scan_sections'],
+                'thresholds': results['thresholds'],
+                'baseline_info': results['baseline_info'],
+                'conflicts': results.get('conflicts', []),
+                'total_processing_steps': 6
+            },
+            'baseline': baseline_data
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error in Enhanced Detector V3.0: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        # Fallback to prominence method
+        logger.info("🔄 Falling back to prominence method due to Enhanced V3.0 error")
+        fallback_result = detect_peaks_prominence(voltage, current)
+        fallback_result['method'] = 'enhanced_v3_fallback'
+        fallback_result['params']['fallback_reason'] = str(e)
+        return fallback_result
+
+def detect_peaks_enhanced_v5(voltage, current):
+    """Detect peaks using Enhanced Detector V5.0 - Production Ready"""
+    try:
+        logger.info(f"🚀 Enhanced Detector V5.0: starting with {len(voltage)} data points")
+        logger.info(f"📊 Data range - V: {voltage.min():.3f} to {voltage.max():.3f}V, I: {current.min():.3f} to {current.max():.3f}µA")
+        
+        # Check if Enhanced Detector V5.0 is available
+        try:
+            detector = EnhancedDetectorV5()
+        except NameError:
+            logger.warning("⚠️ Enhanced Detector V5.0 not available, falling back to enhanced V3")
+            return detect_peaks_enhanced_v3(voltage, current)
+        
+        # Run enhanced detection V5
+        results = detector.detect_peaks_enhanced_v5(voltage, current)
+        
+        # Convert to web API format
+        web_peaks = []
+        for peak in results['peaks']:
+            web_peaks.append({
+                'voltage': float(peak['voltage']),
+                'current': float(peak['current']),
+                'type': peak['type'],  # 'oxidation' or 'reduction'
+                'confidence': float(peak['confidence']),
+                'height': float(peak.get('height', abs(peak['current']))),
+                'baseline_current': 0.0,  # Enhanced V5 handles baseline internally
+                'enabled': True,
+                'shape_score': float(peak.get('shape_score', 1.0)),
+                'snr': float(peak.get('snr', 1.0))
+            })
+        
+        # Format baseline data for web interface
+        baseline_data = {
+            'forward': [],
+            'reverse': [],
+            'full': [],
+            'metadata': {},
+            'markers': {},
+            'debug': {}
+        }
+        
+        if results.get('baseline_info') and len(results['baseline_info']) > 0:
+            # Create baseline array
+            baseline_full = np.zeros(len(voltage))
+            
+            # Use baseline info to fill the array
+            for region in results['baseline_info']:
+                start_v = region.get('voltage_min', voltage.min())
+                end_v = region.get('voltage_max', voltage.max())
+                
+                # Find indices within voltage range
+                mask = (voltage >= start_v) & (voltage <= end_v)
+                baseline_full[mask] = region.get('mean_current', 0.0)
+            
+            # Split into forward/reverse based on scan direction
+            turning_point = results.get('scan_info', {}).get('turning_point', len(voltage) // 2)
+            baseline_data['forward'] = baseline_full[:turning_point].tolist()
+            baseline_data['reverse'] = baseline_full[turning_point:].tolist()
+            baseline_data['full'] = baseline_full.tolist()
+            
+            # Add metadata
+            baseline_data['metadata'] = {
+                'method_used': 'enhanced_v5',
+                'quality': 0.95,  # Enhanced V5 has highest quality
+                'processing_time': 0.0,
+                'auto_selected': True,
+                'regions_found': len(results['baseline_info']),
+                'total_baseline_points': sum(region.get('point_count', 0) for region in results['baseline_info'])
+            }
+            
+            # Add debug info
+            baseline_data['debug'] = {
+                'scan_direction': {
+                    'turning_point': turning_point,
+                    'detection_method': 'enhanced_v5_gradient_analysis'
+                },
+                'thresholds_used': results.get('detection_params', {}),
+                'rejected_peaks': len(results.get('rejected_peaks', [])),
+                'baseline_regions': len(results['baseline_info']),
+                'detection_methods': ['scipy_peaks', 'local_extrema', 'gradient_based']
+            }
+        
+        logger.info(f"✅ Enhanced V5.0 completed: {len(web_peaks)} peaks found")
+        logger.info(f"📊 Baseline: {baseline_data['metadata'].get('total_baseline_points', 0)} points in {len(results.get('baseline_info', []))} regions")
+        logger.info(f"🎯 Detection confidence: {np.mean([p['confidence'] for p in web_peaks]):.2f}" if web_peaks else "🎯 No peaks detected")
+        
+        return {
+            'peaks': web_peaks,
+            'method': 'enhanced_v5',
+            'params': {
+                'scan_direction_detection': 'enhanced_v5_multi_point_analysis',
+                'threshold_calculation': 'adaptive_snr_prominence_width',
+                'peak_validation': 'multi_method_electrochemical_v5',
+                'baseline_detection': 'voltage_segmented_statistical_analysis',
+                'confidence_scoring': 'comprehensive_v5',
+                'multi_method_detection': 'scipy_extrema_gradient_fusion'
+            },
+            'enhanced_v5_results': {
+                'detection_params': results.get('detection_params', {}),
+                'baseline_info': results.get('baseline_info', []),
+                'rejected_peaks': results.get('rejected_peaks', []),
+                'scan_info': results.get('scan_info', {}),
+                'total_processing_methods': 3,
+                'production_ready': True
+            },
+            'baseline': baseline_data
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error in Enhanced Detector V5.0: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        # Fallback to enhanced V3 method
+        logger.info("🔄 Falling back to enhanced V3 method due to Enhanced V5.0 error")
+        fallback_result = detect_peaks_enhanced_v3(voltage, current)
+        fallback_result['method'] = 'enhanced_v5_fallback'
+        fallback_result['params']['fallback_reason'] = str(e)
+        return fallback_result

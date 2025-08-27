@@ -1,0 +1,1597 @@
+{
+  "timestamp": "2025-08-27T10:40:51.885228",
+  "total_files_tested": 15,
+  "categories_tested": 3,
+  "overall_analysis": {
+    "avg_score": 9.933333333333334,
+    "success_rate": 100.0,
+    "performance_distribution": {
+      "excellent": 15,
+      "good": 0,
+      "poor": 0
+    },
+    "top_issues": [],
+    "recommendations": []
+  },
+  "category_summaries": [
+    {
+      "category_name": "Low Concentration (0.5mM)",
+      "files_tested": 5,
+      "avg_score": 10.0,
+      "success_rate": 100.0,
+      "main_issues": [
+        "Moderate SNR (2)",
+        "Very high current range (1)",
+        "No reduction peaks (1)"
+      ],
+      "avg_snr": 3.656655677360155,
+      "avg_scan_balance": 0.9642857142857142
+    },
+    {
+      "category_name": "High Concentration (50mM)",
+      "files_tested": 5,
+      "avg_score": 9.8,
+      "success_rate": 100.0,
+      "main_issues": [
+        "No reduction peaks (5)",
+        "Moderate SNR (4)",
+        "Very high current range (3)",
+        "Unbalanced scan direction (1)",
+        "Low SNR (1)"
+      ],
+      "avg_snr": 2.143630885680595,
+      "avg_scan_balance": 0.8056531703590528
+    },
+    {
+      "category_name": "Palmsens Device",
+      "files_tested": 5,
+      "avg_score": 10.0,
+      "success_rate": 100.0,
+      "main_issues": [
+        "Moderate SNR (4)",
+        "Low SNR (1)",
+        "No reduction peaks (1)",
+        "Very high current range (1)"
+      ],
+      "avg_snr": 2.388724938283551,
+      "avg_scan_balance": 1.0
+    }
+  ],
+  "detailed_results": [
+    {
+      "filename": "Pipot_Ferro_0_5mM_200mVpS_E1_scan_03.csv",
+      "filepath": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_200mVpS_E1_scan_03.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.4006,
+        0.6967
+      ],
+      "current_range": [
+        -3.0106,
+        2.584
+      ],
+      "peaks_found": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "baseline_regions": 3,
+      "baseline_points": 55,
+      "snr": 2.171618636844369,
+      "scan_balance": 0.9642857142857143,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [
+        "Moderate SNR"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.1584,
+            "current": 2.4548,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 2.4285265000000003,
+            "prominence": 0.33345512522420784,
+            "snr": 1.751754935052955,
+            "enabled": true,
+            "scan_section": "forward"
+          },
+          {
+            "voltage": 0.0683,
+            "current": -2.459,
+            "type": "reduction",
+            "confidence": 70.0,
+            "height": 2.4852735,
+            "prominence": 0.3579685112602139,
+            "snr": 1.7926879194364689,
+            "enabled": true,
+            "scan_section": "reverse"
+          }
+        ],
+        "baseline_indices": "[ 25  26  27  28  29  30  31  32  33  34  35  36  37  77  78  79  80  81\n  82  83  84  85  86  87  88  89 141 142 143 144 145 146 147 148 149 150\n 151 152 153 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207\n 208]",
+        "baseline_info": {
+          "low": {
+            "voltage_range": [
+              -0.2606,
+              -0.0511
+            ],
+            "current_mean": -0.754709824137931,
+            "current_std": 0.7324518055598892,
+            "point_count": "29",
+            "indices": "[ 25  26  27  28  29  30  31  32  33  34  35  36  37 193 194 195 196 197\n 198 199 200 201 202 203 204 205 206 207 208]"
+          },
+          "mid": {
+            "voltage_range": [
+              0.2881,
+              0.3277
+            ],
+            "current_mean": -0.14053999999999997,
+            "current_std": 0.009979633259794684,
+            "point_count": "5",
+            "indices": "[149 150 151 152 153]"
+          },
+          "high": {
+            "voltage_range": [
+              0.338,
+              0.4678
+            ],
+            "current_mean": 0.8765890000000001,
+            "current_std": 0.7528617004026955,
+            "point_count": "21",
+            "indices": "[ 77  78  79  80  81  82  83  84  85  86  87  88  89 141 142 143 144 145\n 146 147 148]"
+          }
+        },
+        "turning_point": "112",
+        "thresholds": {
+          "prominence": 0.45159,
+          "width": 3,
+          "height": 2.7726783597462354,
+          "snr": 2.171618636844369,
+          "noise_level": 1.3863391798731177
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "112"
+          ],
+          "reverse": [
+            "112",
+            220
+          ]
+        }
+      },
+      "category": "Low Concentration (0.5mM)",
+      "expected_issues": [
+        "signal \u0e2d\u0e48\u0e2d\u0e19",
+        "SNR \u0e15\u0e48\u0e33",
+        "baseline \u0e44\u0e21\u0e48\u0e40\u0e2a\u0e16\u0e35\u0e22\u0e23"
+      ]
+    },
+    {
+      "filename": "Pipot_Ferro_0_5mM_100mVpS_E2_scan_02.csv",
+      "filepath": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_100mVpS_E2_scan_02.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.4006,
+        0.6967
+      ],
+      "current_range": [
+        -18.666,
+        25.249
+      ],
+      "peaks_found": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "baseline_regions": 3,
+      "baseline_points": 55,
+      "snr": 2.2674970311097247,
+      "scan_balance": 0.9642857142857143,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [
+        "Moderate SNR"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.1779,
+            "current": 18.581,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 17.48765,
+            "prominence": 0.2715355063566874,
+            "snr": 1.5704857402703465,
+            "enabled": true,
+            "scan_section": "forward"
+          },
+          {
+            "voltage": 0.0884,
+            "current": -18.666,
+            "type": "reduction",
+            "confidence": 70.0,
+            "height": 19.75935,
+            "prominence": 0.4248603905105152,
+            "snr": 1.7744967112225414,
+            "enabled": true,
+            "scan_section": "reverse"
+          }
+        ],
+        "baseline_indices": "[ 18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35\n  36  37  75  76  77  78  79  80  81  82  83 141 142 143 144 145 146 147\n 148 149 150 151 152 196 197 198 199 200 201 202 203 204 205 206 207 208\n 209]",
+        "baseline_info": {
+          "low": {
+            "voltage_range": [
+              -0.2709,
+              -0.0511
+            ],
+            "current_mean": -5.285385294117647,
+            "current_std": 2.6995014300174187,
+            "point_count": "34",
+            "indices": "[ 18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35\n  36  37 196 197 198 199 200 201 202 203 204 205 206 207 208 209]"
+          },
+          "mid": {
+            "voltage_range": [
+              0.2979,
+              0.3277
+            ],
+            "current_mean": 4.51532,
+            "current_std": 3.7210267880787957,
+            "point_count": "5",
+            "indices": "[ 75 149 150 151 152]"
+          },
+          "high": {
+            "voltage_range": [
+              0.338,
+              0.4075
+            ],
+            "current_mean": 7.55665625,
+            "current_std": 4.357747780529632,
+            "point_count": "16",
+            "indices": "[ 76  77  78  79  80  81  82  83 141 142 143 144 145 146 147 148]"
+          }
+        },
+        "turning_point": "112",
+        "thresholds": {
+          "prominence": 3.7873499999999996,
+          "width": 3,
+          "height": 22.270370945220606,
+          "snr": 2.2674970311097247,
+          "noise_level": 11.135185472610303
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "112"
+          ],
+          "reverse": [
+            "112",
+            220
+          ]
+        }
+      },
+      "category": "Low Concentration (0.5mM)",
+      "expected_issues": [
+        "signal \u0e2d\u0e48\u0e2d\u0e19",
+        "SNR \u0e15\u0e48\u0e33",
+        "baseline \u0e44\u0e21\u0e48\u0e40\u0e2a\u0e16\u0e35\u0e22\u0e23"
+      ]
+    },
+    {
+      "filename": "Pipot_Ferro_0_5mM_20mVpS_E3_scan_09.csv",
+      "filepath": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_20mVpS_E3_scan_09.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.4006,
+        0.6967
+      ],
+      "current_range": [
+        -24.23,
+        7.9375
+      ],
+      "peaks_found": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "baseline_regions": 3,
+      "baseline_points": 55,
+      "snr": 4.180279581520952,
+      "scan_balance": 0.9642857142857143,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.1682,
+            "current": 7.9375,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 8.192985,
+            "prominence": 0.9483904250928601,
+            "snr": 1.4134943420225932,
+            "enabled": true,
+            "scan_section": "forward"
+          },
+          {
+            "voltage": 0.0683,
+            "current": -9.7604,
+            "type": "reduction",
+            "confidence": 70.0,
+            "height": 9.504915,
+            "prominence": 0.1607882789929839,
+            "snr": 1.6398350020054566,
+            "enabled": true,
+            "scan_section": "reverse"
+          }
+        ],
+        "baseline_indices": "[ 28  29  32  33  34  35  36  83  84  85  86  87  88  89  90  91  92  93\n  94  95  96  97  98  99 100 101 102 103 130 131 132 133 134 135 136 137\n 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 194 195 196\n 197]",
+        "baseline_info": {
+          "low": {
+            "voltage_range": [
+              -0.1509,
+              -0.0614
+            ],
+            "current_mean": -3.5948272727272728,
+            "current_std": 2.319284504125007,
+            "point_count": "11",
+            "indices": "[ 28  29  32  33  34  35  36 194 195 196 197]"
+          },
+          "mid": {
+            "voltage_range": [
+              0.2979,
+              0.3277
+            ],
+            "current_mean": 0.20859499999999997,
+            "current_std": 0.05261017700977634,
+            "point_count": "4",
+            "indices": "[149 150 151 152]"
+          },
+          "high": {
+            "voltage_range": [
+              0.338,
+              0.6072
+            ],
+            "current_mean": 2.3933265,
+            "current_std": 1.7624362902975388,
+            "point_count": "40",
+            "indices": "[ 83  84  85  86  87  88  89  90  91  92  93  94  95  96  97  98  99 100\n 101 102 103 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144\n 145 146 147 148]"
+          }
+        },
+        "turning_point": "112",
+        "thresholds": {
+          "prominence": 3.6345,
+          "width": 3,
+          "height": 11.59252606314153,
+          "snr": 4.180279581520952,
+          "noise_level": 5.796263031570765
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "112"
+          ],
+          "reverse": [
+            "112",
+            220
+          ]
+        }
+      },
+      "category": "Low Concentration (0.5mM)",
+      "expected_issues": [
+        "signal \u0e2d\u0e48\u0e2d\u0e19",
+        "SNR \u0e15\u0e48\u0e33",
+        "baseline \u0e44\u0e21\u0e48\u0e40\u0e2a\u0e16\u0e35\u0e22\u0e23"
+      ]
+    },
+    {
+      "filename": "Pipot_Ferro_0_5mM_20mVpS_E2_scan_05.csv",
+      "filepath": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_20mVpS_E2_scan_05.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.4006,
+        0.6967
+      ],
+      "current_range": [
+        -1250.1,
+        505.1
+      ],
+      "peaks_found": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "baseline_regions": 3,
+      "baseline_points": 55,
+      "snr": 3.9670381490652438,
+      "scan_balance": 0.9642857142857143,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [
+        "Very high current range"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.1584,
+            "current": 505.1,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 459.726,
+            "prominence": 1.0355091592672587,
+            "snr": 1.4588837533934633,
+            "enabled": true,
+            "scan_section": "forward"
+          },
+          {
+            "voltage": 0.0683,
+            "current": -566.5699999999999,
+            "type": "reduction",
+            "confidence": 70.0,
+            "height": 611.944,
+            "prominence": 0.23998880089592828,
+            "snr": 1.9419288001692518,
+            "enabled": true,
+            "scan_section": "reverse"
+          }
+        ],
+        "baseline_indices": "[ 24  25  26  27  28  29  30  31  32  86  87  88  89  90  91  92  93  94\n  95  96  97  98  99 100 101 102 103 104 128 129 130 131 132 133 134 135\n 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153\n 154]",
+        "baseline_info": {
+          "low": {
+            "voltage_range": [
+              -0.1808,
+              -0.101
+            ],
+            "current_mean": -148.86777777777777,
+            "current_std": 7.435630105225004,
+            "point_count": "9",
+            "indices": "[24 25 26 27 28 29 30 31 32]"
+          },
+          "mid": {
+            "voltage_range": [
+              0.2778,
+              0.3277
+            ],
+            "current_mean": 69.88783333333333,
+            "current_std": 4.382688764395159,
+            "point_count": "6",
+            "indices": "[149 150 151 152 153 154]"
+          },
+          "high": {
+            "voltage_range": [
+              0.338,
+              0.6169
+            ],
+            "current_mean": 137.992875,
+            "current_std": 56.37839121693146,
+            "point_count": "40",
+            "indices": "[ 86  87  88  89  90  91  92  93  94  95  96  97  98  99 100 101 102 103\n 104 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144\n 145 146 147 148]"
+          }
+        },
+        "turning_point": "112",
+        "thresholds": {
+          "prominence": 187.515,
+          "width": 3,
+          "height": 630.2434980589042,
+          "snr": 3.9670381490652438,
+          "noise_level": 315.1217490294521
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "112"
+          ],
+          "reverse": [
+            "112",
+            220
+          ]
+        }
+      },
+      "category": "Low Concentration (0.5mM)",
+      "expected_issues": [
+        "signal \u0e2d\u0e48\u0e2d\u0e19",
+        "SNR \u0e15\u0e48\u0e33",
+        "baseline \u0e44\u0e21\u0e48\u0e40\u0e2a\u0e16\u0e35\u0e22\u0e23"
+      ]
+    },
+    {
+      "filename": "Pipot_Ferro_0_5mM_20mVpS_E1_scan_05.csv",
+      "filepath": "Test_data/Stm32/Pipot_Ferro_0_5mM/Pipot_Ferro_0_5mM_20mVpS_E1_scan_05.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.4006,
+        0.6967
+      ],
+      "current_range": [
+        -2.5738,
+        0.42448
+      ],
+      "peaks_found": 1,
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "baseline_regions": 3,
+      "baseline_points": 55,
+      "snr": 5.696844988260485,
+      "scan_balance": 0.9642857142857143,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [
+        "No reduction peaks"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.1584,
+            "current": 0.42448,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 0.4518445,
+            "prominence": 0.7676120910715674,
+            "snr": 1.0001119260618792,
+            "enabled": true,
+            "scan_section": "forward"
+          }
+        ],
+        "baseline_indices": "[ 27  28  29  30  31  32  33  34  35  36  37  38  39  40  80  81  82  83\n  84  85  86  87  88  89  92  94  95 128 129 130 131 132 133 134 135 136\n 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154\n 155]",
+        "baseline_info": {
+          "low": {
+            "voltage_range": [
+              -0.1509,
+              -0.0413
+            ],
+            "current_mean": -0.1464925,
+            "current_std": 0.014854794470136563,
+            "point_count": "12",
+            "indices": "[27 28 29 30 31 32 33 34 35 36 37 38]"
+          },
+          "mid": {
+            "voltage_range": [
+              -0.0316,
+              0.3277
+            ],
+            "current_mean": -0.03544081111111109,
+            "current_std": 0.04546242756427052,
+            "point_count": "9",
+            "indices": "[ 39  40 149 150 151 152 153 154 155]"
+          },
+          "high": {
+            "voltage_range": [
+              0.338,
+              0.5372
+            ],
+            "current_mean": 0.07391350000000001,
+            "current_std": 0.0881532222107521,
+            "point_count": "34",
+            "indices": "[ 80  81  82  83  84  85  86  87  88  89  92  94  95 128 129 130 131 132\n 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148]"
+          }
+        },
+        "turning_point": "112",
+        "thresholds": {
+          "prominence": 0.25738,
+          "width": 3,
+          "height": 0.9035878649687122,
+          "snr": 5.696844988260485,
+          "noise_level": 0.4517939324843561
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "112"
+          ],
+          "reverse": [
+            "112",
+            220
+          ]
+        }
+      },
+      "category": "Low Concentration (0.5mM)",
+      "expected_issues": [
+        "signal \u0e2d\u0e48\u0e2d\u0e19",
+        "SNR \u0e15\u0e48\u0e33",
+        "baseline \u0e44\u0e21\u0e48\u0e40\u0e2a\u0e16\u0e35\u0e22\u0e23"
+      ]
+    },
+    {
+      "filename": "Pipot_Ferro_50mM_100mVpS_E3_scan_06.csv",
+      "filepath": "Test_data/Stm32/Pipot_Ferro_50mM/Pipot_Ferro_50mM_100mVpS_E3_scan_06.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.4006,
+        0.6967
+      ],
+      "current_range": [
+        -997.46,
+        765.03
+      ],
+      "peaks_found": 1,
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "baseline_regions": 2,
+      "baseline_points": 49,
+      "snr": 2.2524159087428184,
+      "scan_balance": 0.9642857142857143,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [
+        "Moderate SNR",
+        "No reduction peaks",
+        "Very high current range"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.3076,
+            "current": 765.03,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 626.51,
+            "prominence": 1.7147053515930464,
+            "snr": 1.414754567588137,
+            "enabled": true,
+            "scan_section": "forward"
+          }
+        ],
+        "baseline_indices": "[105 106 107 108 109 110 113 114 116 117 118 119 120 121 122 123 124 125\n 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143\n 144 145 146 147 148 155 156 157 158 159 160 161 162]",
+        "baseline_info": {
+          "mid": {
+            "voltage_range": [
+              0.198,
+              0.268
+            ],
+            "current_mean": 128.06625,
+            "current_std": 4.579991641640849,
+            "point_count": "8",
+            "indices": "[155 156 157 158 159 160 161 162]"
+          },
+          "high": {
+            "voltage_range": [
+              0.338,
+              0.687
+            ],
+            "current_mean": 187.99048780487806,
+            "current_std": 33.74363086794737,
+            "point_count": "41",
+            "indices": "[105 106 107 108 109 110 113 114 116 117 118 119 120 121 122 123 124 125\n 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143\n 144 145 146 147 148]"
+          }
+        },
+        "turning_point": "112",
+        "thresholds": {
+          "prominence": 149.619,
+          "width": 3,
+          "height": 885.6801233984628,
+          "snr": 2.2524159087428184,
+          "noise_level": 442.8400616992314
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "112"
+          ],
+          "reverse": [
+            "112",
+            220
+          ]
+        }
+      },
+      "category": "High Concentration (50mM)",
+      "expected_issues": [
+        "peak \u0e2a\u0e39\u0e07\u0e40\u0e01\u0e34\u0e19\u0e44\u0e1b",
+        "saturation",
+        "baseline drift"
+      ]
+    },
+    {
+      "filename": "Pipot_Ferro-50mM_50mVpS_E1_scan_09.csv",
+      "filepath": "Test_data/Stm32/Pipot_Ferro_50mM/Pipot_Ferro-50mM_50mVpS_E1_scan_09.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.4006,
+        0.6967
+      ],
+      "current_range": [
+        -815.0600000000001,
+        594.15
+      ],
+      "peaks_found": 1,
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "baseline_regions": 2,
+      "baseline_points": 49,
+      "snr": 2.408850529480434,
+      "scan_balance": 0.9642857142857143,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [
+        "Moderate SNR",
+        "No reduction peaks",
+        "Very high current range"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.2083,
+            "current": 594.15,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 513.0364999999999,
+            "prominence": 1.688599612298481,
+            "snr": 1.5162420492574638,
+            "enabled": true,
+            "scan_section": "forward"
+          }
+        ],
+        "baseline_indices": "[101 102 103 104 105 106 107 108 109 121 122 123 124 125 126 127 128 129\n 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147\n 148 149 150 151 152 153 154 155 156 157 164 165 166]",
+        "baseline_info": {
+          "mid": {
+            "voltage_range": [
+              0.1584,
+              0.3277
+            ],
+            "current_mean": 74.12025,
+            "current_std": 4.976729801871239,
+            "point_count": "12",
+            "indices": "[149 150 151 152 153 154 155 156 157 164 165 166]"
+          },
+          "high": {
+            "voltage_range": [
+              0.338,
+              0.6669
+            ],
+            "current_mean": 108.69175675675676,
+            "current_std": 25.49867868373788,
+            "point_count": "37",
+            "indices": "[101 102 103 104 105 106 107 108 109 121 122 123 124 125 126 127 128 129\n 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147\n 148]"
+          }
+        },
+        "turning_point": "112",
+        "thresholds": {
+          "prominence": 122.259,
+          "width": 3,
+          "height": 676.7211082837927,
+          "snr": 2.408850529480434,
+          "noise_level": 338.36055414189633
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "112"
+          ],
+          "reverse": [
+            "112",
+            220
+          ]
+        }
+      },
+      "category": "High Concentration (50mM)",
+      "expected_issues": [
+        "peak \u0e2a\u0e39\u0e07\u0e40\u0e01\u0e34\u0e19\u0e44\u0e1b",
+        "saturation",
+        "baseline drift"
+      ]
+    },
+    {
+      "filename": "Pipot_Ferro-50mM_50mVpS_E1_scan_01.csv",
+      "filepath": "Test_data/Stm32/Pipot_Ferro_50mM/Pipot_Ferro-50mM_50mVpS_E1_scan_01.csv",
+      "data_points": 219,
+      "voltage_range": [
+        -0.3903,
+        0.6967
+      ],
+      "current_range": [
+        -1073.3,
+        686.06
+      ],
+      "peaks_found": 1,
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "baseline_regions": 3,
+      "baseline_points": 48,
+      "snr": 2.086471882670788,
+      "scan_balance": 0.1711229946524064,
+      "conflicts": 0,
+      "issues": [
+        "Unbalanced scan direction"
+      ],
+      "warnings": [
+        "Moderate SNR",
+        "No reduction peaks",
+        "Very high current range"
+      ],
+      "performance_score": 9.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.2278,
+            "current": 686.06,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 568.68,
+            "prominence": 1.3626479083201342,
+            "snr": 1.1055015654870248,
+            "enabled": true,
+            "scan_section": "reverse"
+          }
+        ],
+        "baseline_indices": "[  7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24\n  25  26 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144\n 145 146 147 148 149 150 151 152 153 154 162 163]",
+        "baseline_info": {
+          "low": {
+            "voltage_range": [
+              -0.3409,
+              -0.1509
+            ],
+            "current_mean": -1073.2999999999997,
+            "current_std": 2.2737367544323206e-13,
+            "point_count": "20",
+            "indices": "[ 7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26]"
+          },
+          "mid": {
+            "voltage_range": [
+              0.1779,
+              0.3277
+            ],
+            "current_mean": 109.39222222222222,
+            "current_std": 6.28598262057515,
+            "point_count": "9",
+            "indices": "[148 149 150 151 152 153 154 162 163]"
+          },
+          "high": {
+            "voltage_range": [
+              0.338,
+              0.5171
+            ],
+            "current_mean": 129.46578947368423,
+            "current_std": 8.098395757828555,
+            "point_count": "19",
+            "indices": "[129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146\n 147]"
+          }
+        },
+        "turning_point": 32,
+        "thresholds": {
+          "prominence": 160.99499999999998,
+          "width": 3,
+          "height": 1028.818081771725,
+          "snr": 2.086471882670788,
+          "noise_level": 514.4090408858625
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            32
+          ],
+          "reverse": [
+            32,
+            219
+          ]
+        }
+      },
+      "category": "High Concentration (50mM)",
+      "expected_issues": [
+        "peak \u0e2a\u0e39\u0e07\u0e40\u0e01\u0e34\u0e19\u0e44\u0e1b",
+        "saturation",
+        "baseline drift"
+      ]
+    },
+    {
+      "filename": "Pipot_Ferro_50mM_400mVpS_E4_scan_08.csv",
+      "filepath": "Test_data/Stm32/Pipot_Ferro_50mM/Pipot_Ferro_50mM_400mVpS_E4_scan_08.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.4006,
+        0.6967
+      ],
+      "current_range": [
+        -621.9399999999999,
+        366.94
+      ],
+      "peaks_found": 1,
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "baseline_regions": 3,
+      "baseline_points": 55,
+      "snr": 1.7722604947001281,
+      "scan_balance": 0.9642857142857143,
+      "conflicts": 0,
+      "issues": [
+        "Low SNR"
+      ],
+      "warnings": [
+        "No reduction peaks"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.1383,
+            "current": 366.94,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 233.31,
+            "prominence": 1.547496543074895,
+            "snr": 0.6648327748954673,
+            "enabled": true,
+            "scan_section": "forward"
+          }
+        ],
+        "baseline_indices": "[  0   1  62  63  64  65  66  67  68  69  70  71  72  73  74  75  76  77\n  78  79  80  81  82  83  84  85  86  87  88  89  90  91  92  93  94  95\n  96  97  98  99 100 101 102 103 104 105 106 107 108 109 110 111 112 113\n 219]",
+        "baseline_info": {
+          "low": {
+            "voltage_range": [
+              -0.3903,
+              -0.3708
+            ],
+            "current_mean": -595.2433333333335,
+            "current_std": 1.0941460394095752,
+            "point_count": "3",
+            "indices": "[  0   1 219]"
+          },
+          "mid": {
+            "voltage_range": [
+              0.198,
+              0.3277
+            ],
+            "current_mean": 357.4957142857142,
+            "current_std": 2.812166714946515,
+            "point_count": "14",
+            "indices": "[62 63 64 65 66 67 68 69 70 71 72 73 74 75]"
+          },
+          "high": {
+            "voltage_range": [
+              0.338,
+              0.6967
+            ],
+            "current_mean": 342.7457894736843,
+            "current_std": 6.430311292939068,
+            "point_count": "38",
+            "indices": "[ 76  77  78  79  80  81  82  83  84  85  86  87  88  89  90  91  92  93\n  94  95  96  97  98  99 100 101 102 103 104 105 106 107 108 109 110 111\n 112 113]"
+          }
+        },
+        "turning_point": "112",
+        "thresholds": {
+          "prominence": 155.48499999999999,
+          "width": 3,
+          "height": 701.8607048567475,
+          "snr": 1.7722604947001281,
+          "noise_level": 350.93035242837374
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "112"
+          ],
+          "reverse": [
+            "112",
+            220
+          ]
+        }
+      },
+      "category": "High Concentration (50mM)",
+      "expected_issues": [
+        "peak \u0e2a\u0e39\u0e07\u0e40\u0e01\u0e34\u0e19\u0e44\u0e1b",
+        "saturation",
+        "baseline drift"
+      ]
+    },
+    {
+      "filename": "Pipot_Ferro-50mM_200mVpS_E1_scan_06.csv",
+      "filepath": "Test_data/Stm32/Pipot_Ferro_50mM/Pipot_Ferro-50mM_200mVpS_E1_scan_06.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.4006,
+        0.6967
+      ],
+      "current_range": [
+        -0.0011305,
+        0.00091593
+      ],
+      "peaks_found": 1,
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "baseline_regions": 2,
+      "baseline_points": 48,
+      "snr": 2.198155612808807,
+      "scan_balance": 0.9642857142857143,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [
+        "Moderate SNR",
+        "No reduction peaks",
+        "Very low current range"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.318,
+            "current": 0.00091593,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 0.0007458300000000001,
+            "prominence": 1.7460681114551084,
+            "snr": 1.4501993814252037,
+            "enabled": true,
+            "scan_section": "forward"
+          }
+        ],
+        "baseline_indices": "[101 102 103 104 105 106 107 108 109 120 121 122 123 124 125 126 127 128\n 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146\n 154 155 156 157 158 159 160 161 162 163 164 165]",
+        "baseline_info": {
+          "mid": {
+            "voltage_range": [
+              0.1682,
+              0.2778
+            ],
+            "current_mean": 0.00015486583333333332,
+            "current_std": 9.043690672077537e-06,
+            "point_count": "12",
+            "indices": "[154 155 156 157 158 159 160 161 162 163 164 165]"
+          },
+          "high": {
+            "voltage_range": [
+              0.3575,
+              0.6669
+            ],
+            "current_mean": 0.00024888916666666666,
+            "current_std": 6.323385100715e-05,
+            "point_count": "36",
+            "indices": "[101 102 103 104 105 106 107 108 109 120 121 122 123 124 125 126 127 128\n 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146]"
+          }
+        },
+        "turning_point": "112",
+        "thresholds": {
+          "prominence": 0.000169575,
+          "width": 3,
+          "height": 0.0010285895988550557,
+          "snr": 2.198155612808807,
+          "noise_level": 0.0005142947994275279
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "112"
+          ],
+          "reverse": [
+            "112",
+            220
+          ]
+        }
+      },
+      "category": "High Concentration (50mM)",
+      "expected_issues": [
+        "peak \u0e2a\u0e39\u0e07\u0e40\u0e01\u0e34\u0e19\u0e44\u0e1b",
+        "saturation",
+        "baseline drift"
+      ]
+    },
+    {
+      "filename": "Palmsens_0.5mM_CV_200mVpS_E1_scan_07.csv",
+      "filepath": "Test_data/Palmsens/Palmsens_0.5mM/Palmsens_0.5mM_CV_200mVpS_E1_scan_07.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.40001,
+        0.700844
+      ],
+      "current_range": [
+        -49.179728,
+        32.64557
+      ],
+      "peaks_found": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "baseline_regions": 3,
+      "baseline_points": 55,
+      "snr": 2.9501613880864697,
+      "scan_balance": 1.0,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [
+        "Moderate SNR"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.200455,
+            "current": 32.64557,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 33.032572,
+            "prominence": 1.537344858841025,
+            "snr": 1.9815363448855647,
+            "enabled": true,
+            "scan_section": "forward"
+          },
+          {
+            "voltage": 0.110385808,
+            "current": -32.382526,
+            "type": "reduction",
+            "confidence": 70.0,
+            "height": 31.995524,
+            "prominence": 0.35262655377028523,
+            "snr": 1.9193265870928355,
+            "enabled": true,
+            "scan_section": "reverse"
+          }
+        ],
+        "baseline_indices": "[ 24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  88  89  90\n  91  92  93  94  95  96  97  98  99 100 101 131 132 133 134 135 136 137\n 138 139 140 141 142 143 144 145 146 147 148 195 196 197 198 199 200 201\n 202]",
+        "baseline_info": {
+          "low": {
+            "voltage_range": [
+              -0.21987,
+              -0.039730884
+            ],
+            "current_mean": -6.619062857142857,
+            "current_std": 6.8515465950222705,
+            "point_count": "21",
+            "indices": "[ 24  25  26  27  28  29  30  31  32  33  34  35  36 195 196 197 198 199\n 200 201 202]"
+          },
+          "mid": {
+            "voltage_range": [
+              -0.029723104,
+              0.330556
+            ],
+            "current_mean": -0.369505298,
+            "current_std": 0.23760622518065982,
+            "point_count": "4",
+            "indices": "[ 37  38 147 148]"
+          },
+          "high": {
+            "voltage_range": [
+              0.340564,
+              0.610774
+            ],
+            "current_mean": 7.153866993533332,
+            "current_std": 6.88443515031577,
+            "point_count": "30",
+            "indices": "[ 88  89  90  91  92  93  94  95  96  97  98  99 100 101 131 132 133 134\n 135 136 137 138 139 140 141 142 143 144 145 146]"
+          }
+        },
+        "turning_point": "110",
+        "thresholds": {
+          "prominence": 7.376959199999999,
+          "width": 3,
+          "height": 33.340364495719264,
+          "snr": 2.9501613880864697,
+          "noise_level": 16.670182247859632
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "110"
+          ],
+          "reverse": [
+            "110",
+            220
+          ]
+        }
+      },
+      "category": "Palmsens Device",
+      "expected_issues": [
+        "format \u0e15\u0e48\u0e32\u0e07",
+        "unit \u0e15\u0e48\u0e32\u0e07",
+        "voltage range \u0e15\u0e48\u0e32\u0e07"
+      ]
+    },
+    {
+      "filename": "Palmsens_0.5mM_CV_400mVpS_E3_scan_05.csv",
+      "filepath": "Test_data/Palmsens/Palmsens_0.5mM/Palmsens_0.5mM_CV_400mVpS_E3_scan_05.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.40001,
+        0.700844
+      ],
+      "current_range": [
+        -53.839356,
+        48.944868
+      ],
+      "peaks_found": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "baseline_regions": 3,
+      "baseline_points": 55,
+      "snr": 1.982790452849087,
+      "scan_balance": 1.0,
+      "conflicts": 0,
+      "issues": [
+        "Low SNR"
+      ],
+      "warnings": [],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.190448,
+            "current": 48.944868,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 50.4738075,
+            "prominence": 1.8625021443421426,
+            "snr": 1.858844367119522,
+            "enabled": true,
+            "scan_section": "forward"
+          },
+          {
+            "voltage": 0.080362472,
+            "current": -51.331048,
+            "type": "reduction",
+            "confidence": 70.0,
+            "height": 49.8021085,
+            "prominence": 0.3805617957243025,
+            "snr": 1.8341071030930305,
+            "enabled": true,
+            "scan_section": "reverse"
+          }
+        ],
+        "baseline_indices": "[ 28  29  30  31  32  33  34  35  36  37  38  80  81  82  83  84  85  86\n  87  88  89  90  91  92  93  94  95 138 139 140 141 142 143 144 145 146\n 147 148 149 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205\n 206]",
+        "baseline_info": {
+          "low": {
+            "voltage_range": [
+              -0.259902,
+              -0.039730884
+            ],
+            "current_mean": -16.57402892,
+            "current_std": 19.3149765829469,
+            "point_count": "25",
+            "indices": "[ 28  29  30  31  32  33  34  35  36 191 192 193 194 195 196 197 198 199\n 200 201 202 203 204 205 206]"
+          },
+          "mid": {
+            "voltage_range": [
+              -0.029723104,
+              0.330556
+            ],
+            "current_mean": -2.3243643999999994,
+            "current_std": 9.866157648626858,
+            "point_count": "5",
+            "indices": "[ 37  38 147 148 149]"
+          },
+          "high": {
+            "voltage_range": [
+              0.340564,
+              0.550728
+            ],
+            "current_mean": 14.794878160000001,
+            "current_std": 18.149515186822175,
+            "point_count": "25",
+            "indices": "[ 80  81  82  83  84  85  86  87  88  89  90  91  92  93  94  95 138 139\n 140 141 142 143 144 145 146]"
+          }
+        },
+        "turning_point": "110",
+        "thresholds": {
+          "prominence": 13.459839,
+          "width": 3,
+          "height": 54.30665244795567,
+          "snr": 1.982790452849087,
+          "noise_level": 27.153326223977835
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "110"
+          ],
+          "reverse": [
+            "110",
+            220
+          ]
+        }
+      },
+      "category": "Palmsens Device",
+      "expected_issues": [
+        "format \u0e15\u0e48\u0e32\u0e07",
+        "unit \u0e15\u0e48\u0e32\u0e07",
+        "voltage range \u0e15\u0e48\u0e32\u0e07"
+      ]
+    },
+    {
+      "filename": "Palmsens_1.0mM_CV_400mVpS_E1_scan_08.csv",
+      "filepath": "Test_data/Palmsens/Palmsens_1.0mM/Palmsens_1.0mM_CV_400mVpS_E1_scan_08.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.40001,
+        0.700844
+      ],
+      "current_range": [
+        -67.292152,
+        68.137648
+      ],
+      "peaks_found": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "baseline_regions": 2,
+      "baseline_points": 55,
+      "snr": 2.2343810973015747,
+      "scan_balance": 1.0,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [
+        "Moderate SNR"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.220471,
+            "current": 68.137648,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 69.28141649999999,
+            "prominence": 1.9056941912641305,
+            "snr": 2.2718877443770498,
+            "enabled": true,
+            "scan_section": "forward"
+          },
+          {
+            "voltage": 0.100378032,
+            "current": -67.292152,
+            "type": "reduction",
+            "confidence": 70.0,
+            "height": 66.14838350000001,
+            "prominence": 0.6029229538419054,
+            "snr": 2.1691488046293497,
+            "enabled": true,
+            "scan_section": "reverse"
+          }
+        ],
+        "baseline_indices": "[ 23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  91  92\n  93  94  95  96  97  98  99 100 101 102 103 104 129 130 131 132 133 134\n 135 136 137 138 139 140 141 142 143 144 145 146 198 199 200 201 202 203\n 204]",
+        "baseline_info": {
+          "low": {
+            "voltage_range": [
+              -0.239886,
+              -0.039730884
+            ],
+            "current_mean": -12.701866619047617,
+            "current_std": 9.884909232571774,
+            "point_count": "21",
+            "indices": "[ 23  24  25  26  27  28  29  30  31  32  33  34  35  36 198 199 200 201\n 202 203 204]"
+          },
+          "high": {
+            "voltage_range": [
+              0.340564,
+              0.640798
+            ],
+            "current_mean": 14.893308093749999,
+            "current_std": 9.793606025131526,
+            "point_count": "32",
+            "indices": "[ 91  92  93  94  95  96  97  98  99 100 101 102 103 104 129 130 131 132\n 133 134 135 136 137 138 139 140 141 142 143 144 145 146]"
+          }
+        },
+        "turning_point": "110",
+        "thresholds": {
+          "prominence": 10.2206472,
+          "width": 3,
+          "height": 60.99017583194623,
+          "snr": 2.2343810973015747,
+          "noise_level": 30.495087915973116
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "110"
+          ],
+          "reverse": [
+            "110",
+            220
+          ]
+        }
+      },
+      "category": "Palmsens Device",
+      "expected_issues": [
+        "format \u0e15\u0e48\u0e32\u0e07",
+        "unit \u0e15\u0e48\u0e32\u0e07",
+        "voltage range \u0e15\u0e48\u0e32\u0e07"
+      ]
+    },
+    {
+      "filename": "Palmsens_1.0mM_CV_400mVpS_E4_scan_04.csv",
+      "filepath": "Test_data/Palmsens/Palmsens_1.0mM/Palmsens_1.0mM_CV_400mVpS_E4_scan_04.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.40001,
+        0.700844
+      ],
+      "current_range": [
+        -68.043696,
+        66.29634
+      ],
+      "peaks_found": 2,
+      "ox_peaks": 1,
+      "red_peaks": 1,
+      "baseline_regions": 3,
+      "baseline_points": 55,
+      "snr": 2.1953422233657705,
+      "scan_balance": 1.0,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [
+        "Moderate SNR"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.210463,
+            "current": 66.29634,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 66.0206615,
+            "prominence": 1.6548392668146659,
+            "snr": 2.1300716205287986,
+            "enabled": true,
+            "scan_section": "forward"
+          },
+          {
+            "voltage": 0.070354688,
+            "current": -68.043696,
+            "type": "reduction",
+            "confidence": 70.0,
+            "height": 68.3193745,
+            "prominence": 0.5322379607362892,
+            "snr": 2.2042366351438156,
+            "enabled": true,
+            "scan_section": "reverse"
+          }
+        ],
+        "baseline_indices": "[ 26  27  28  29  30  31  32  33  34  35  36  37  88  89  90  91  92  93\n  94  95  96  97  98  99 100 101 102 103 104 134 135 136 137 138 139 140\n 141 142 143 144 145 146 147 148 198 199 200 201 202 203 204 205 206 207\n 208]",
+        "baseline_info": {
+          "low": {
+            "voltage_range": [
+              -0.279917,
+              -0.039730884
+            ],
+            "current_mean": -16.23553645909091,
+            "current_std": 16.252070707891583,
+            "point_count": "22",
+            "indices": "[ 26  27  28  29  30  31  32  33  34  35  36 198 199 200 201 202 203 204\n 205 206 207 208]"
+          },
+          "mid": {
+            "voltage_range": [
+              -0.029723104,
+              0.330556
+            ],
+            "current_mean": -0.17742866666666665,
+            "current_std": 0.8407345924806209,
+            "point_count": "3",
+            "indices": "[ 37 147 148]"
+          },
+          "high": {
+            "voltage_range": [
+              0.340564,
+              0.640798
+            ],
+            "current_mean": 16.8726114756,
+            "current_std": 14.08598799835302,
+            "point_count": "30",
+            "indices": "[ 88  89  90  91  92  93  94  95  96  97  98  99 100 101 102 103 104 134\n 135 136 137 138 139 140 141 142 143 144 145 146]"
+          }
+        },
+        "turning_point": "110",
+        "thresholds": {
+          "prominence": 10.2065544,
+          "width": 3,
+          "height": 61.98914709131716,
+          "snr": 2.1953422233657705,
+          "noise_level": 30.99457354565858
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "110"
+          ],
+          "reverse": [
+            "110",
+            220
+          ]
+        }
+      },
+      "category": "Palmsens Device",
+      "expected_issues": [
+        "format \u0e15\u0e48\u0e32\u0e07",
+        "unit \u0e15\u0e48\u0e32\u0e07",
+        "voltage range \u0e15\u0e48\u0e32\u0e07"
+      ]
+    },
+    {
+      "filename": "Palmsens_20mM_CV_400mVpS_E5_scan_01.csv",
+      "filepath": "Test_data/Palmsens/Palmsens_20mM/Palmsens_20mM_CV_400mVpS_E5_scan_01.csv",
+      "data_points": 220,
+      "voltage_range": [
+        -0.40001,
+        0.700844
+      ],
+      "current_range": [
+        -1159.749,
+        742.926
+      ],
+      "peaks_found": 1,
+      "ox_peaks": 1,
+      "red_peaks": 0,
+      "baseline_regions": 2,
+      "baseline_points": 50,
+      "snr": 2.5809495298148555,
+      "scan_balance": 1.0,
+      "conflicts": 0,
+      "issues": [],
+      "warnings": [
+        "Moderate SNR",
+        "No reduction peaks",
+        "Very high current range"
+      ],
+      "performance_score": 10.0,
+      "raw_results": {
+        "peaks": [
+          {
+            "voltage": 0.340564,
+            "current": 742.926,
+            "type": "oxidation",
+            "confidence": 70.0,
+            "height": 627.238556,
+            "prominence": 1.3827862753061222,
+            "snr": 1.3958805363832594,
+            "enabled": true,
+            "scan_section": "forward"
+          }
+        ],
+        "baseline_indices": "[ 99 100 101 102 103 104 105 106 118 119 120 121 122 123 124 125 126 127\n 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 149 150\n 151 152 153 154 155 156 157 158 159 160 161 162 218 219]",
+        "baseline_info": {
+          "mid": {
+            "voltage_range": [
+              0.18044,
+              0.310541
+            ],
+            "current_mean": 106.02757828571427,
+            "current_std": 10.829304876715081,
+            "point_count": "14",
+            "indices": "[149 150 151 152 153 154 155 156 157 158 159 160 161 162]"
+          },
+          "high": {
+            "voltage_range": [
+              0.370588,
+              0.660813
+            ],
+            "current_mean": 202.67053341176472,
+            "current_std": 67.07294721568024,
+            "point_count": "34",
+            "indices": "[ 99 100 101 102 103 104 105 106 118 119 120 121 122 123 124 125 126 127\n 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143]"
+          }
+        },
+        "turning_point": "110",
+        "thresholds": {
+          "prominence": 173.96235,
+          "width": 3,
+          "height": 898.6994798640598,
+          "snr": 2.5809495298148555,
+          "noise_level": 449.3497399320299
+        },
+        "conflicts": [],
+        "scan_sections": {
+          "forward": [
+            0,
+            "110"
+          ],
+          "reverse": [
+            "110",
+            220
+          ]
+        }
+      },
+      "category": "Palmsens Device",
+      "expected_issues": [
+        "format \u0e15\u0e48\u0e32\u0e07",
+        "unit \u0e15\u0e48\u0e32\u0e07",
+        "voltage range \u0e15\u0e48\u0e32\u0e07"
+      ]
+    }
+  ]
+}
