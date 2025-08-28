@@ -1,0 +1,83 @@
+{
+  "metadata": {
+    "concentration": "10mM",
+    "timestamp": "20250828_193808",
+    "analysis_type": "Fair PLS Comparison",
+    "detector": "Enhanced V4 Improved",
+    "processing_time": "0:00:14.602446"
+  },
+  "data_summary": {
+    "total_samples": 142,
+    "palmsens_samples": 100,
+    "stm32_samples": 42
+  },
+  "pls_results": {
+    "r2_score": 0.6024155533133595,
+    "mse": 0.082813661777618,
+    "cv_mean": 0.09621968186142076,
+    "cv_std": 0.1924393637228415,
+    "feature_importance": {
+      "ox_voltage": 0.07236557698602547,
+      "ox_current": 0.16126140652801238,
+      "red_voltage": 0.3691293243789776,
+      "red_current": 0.1317625349853167,
+      "peak_separation": 0.15716527563810306
+    },
+    "loadings": [
+      [
+        -0.5329986641862413,
+        0.24964105860092992
+      ],
+      [
+        -0.4556527997057127,
+        0.7071413102666687
+      ],
+      [
+        0.5847474922932389,
+        0.2410171679210544
+      ],
+      [
+        0.45965503518184786,
+        -0.6922553092125027
+      ],
+      [
+        0.6006009919190034,
+        -0.007269027032946107
+      ]
+    ],
+    "total_samples": 142,
+    "concentration": "10mM"
+  },
+  "device_statistics": {
+    "Palmsens": {
+      "count": 100,
+      "ox_voltage_mean": -0.022917814999999998,
+      "ox_voltage_std": 0.02979943382268861,
+      "red_voltage_mean": 0.2885236000000001,
+      "red_voltage_std": 0.018436804386877892,
+      "peak_separation_mean": 0.31144141499999994,
+      "peak_separation_std": 0.04437644590876341,
+      "ox_current_mean": -267.90864,
+      "ox_current_std": 41.026531086854106
+    },
+    "STM32": {
+      "count": 42,
+      "ox_voltage_mean": -0.009497619047619052,
+      "ox_voltage_std": 0.038094007518597275,
+      "red_voltage_mean": 0.2427095238095238,
+      "red_voltage_std": 0.03527782976514349,
+      "peak_separation_mean": 0.2522071428571429,
+      "peak_separation_std": 0.07314912063842063,
+      "ox_current_mean": -259.2697619047619,
+      "ox_current_std": 101.92020789809405
+    }
+  },
+  "output_files": {
+    "basic_visualization": "pls_fair_results_10mM/comprehensive_pls_analysis_10mM_20250828_193808.png",
+    "advanced_pls_plots": "pls_fair_results_10mM/advanced_pls_plots_10mM_20250828_193808.png",
+    "classification_report": "pls_fair_results_10mM/classification_report_10mM_20250828_193808.png",
+    "labplot2_data": "pls_fair_results_10mM/labplot2_fair_comparison_10mM_20250828_193808.csv",
+    "palmsens_csv": "pls_fair_results_10mM/palmsens_data_10mM_20250828_193808.csv",
+    "stm32_csv": "pls_fair_results_10mM/stm32_data_10mM_20250828_193808.csv"
+  }
+}
