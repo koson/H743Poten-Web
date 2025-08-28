@@ -17,8 +17,13 @@ from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import json
 import requests
 from datetime import datetime
-import warnings
-warnings.filterwarnings('ignore')
+# Import improved visualizer
+try:
+    from improved_pls_visualizer import ImprovedPLSVisualizer, create_publication_ready_summary_table
+    IMPROVED_PLOTS_AVAILABLE = True
+except ImportError:
+    IMPROVED_PLOTS_AVAILABLE = False
+    print("⚠️ Improved visualizer not available, using basic plots")
 
 class ComprehensivePLSAnalysis:
     def __init__(self):
@@ -439,6 +444,29 @@ class ComprehensivePLSAnalysis:
         # 3. Create visualization
         plot_path = self.create_comprehensive_visualization(df, results, pls_device, pls_conc, scaler)
         
+        # 3.5. Create improved publication-ready plots
+        improved_plot_path = None
+        summary_stats = None
+        
+        if IMPROVED_PLOTS_AVAILABLE:
+            try:
+                visualizer = ImprovedPLSVisualizer()
+                
+                # Create improved device comparison plots
+                improved_fig = visualizer.create_device_comparison_plots(df, results, pls_device, pls_conc, scaler)
+                improved_plot_path = f'{self.results_dir}/publication_ready_plots_{self.timestamp}.png'
+                improved_fig.savefig(improved_plot_path, dpi=300, bbox_inches='tight')
+                plt.close(improved_fig)
+                
+                # Create summary table
+                summary_stats, model_performance = create_publication_ready_summary_table(results, df)
+                
+                print(f"📊 Publication-ready plots created: {improved_plot_path}")
+                
+            except Exception as e:
+                print(f"⚠️ Improved plots failed: {e}")
+                improved_plot_path = None
+        
         # 4. Export data
         data_path = self.export_comprehensive_data(df)
         
@@ -453,9 +481,14 @@ class ComprehensivePLSAnalysis:
             'data_summary': summary,
             'analysis_results': results,
             'output_files': {
-                'visualization': plot_path,
+                'basic_visualization': plot_path,
+                'publication_ready_plots': improved_plot_path,
                 'comprehensive_data': data_path,
                 'results_directory': self.results_dir
+            },
+            'publication_summary': {
+                'device_statistics': summary_stats,
+                'model_performance': model_performance if 'model_performance' in locals() else None
             }
         }
         

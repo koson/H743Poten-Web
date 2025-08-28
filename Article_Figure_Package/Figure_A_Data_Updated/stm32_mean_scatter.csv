@@ -1,0 +1,6 @@
+Actual_Concentration_mM,Predicted_Mean_mM,Predicted_Std_mM,SEM_mM,Upper_Error_mM,Lower_Error_mM,Upper_SEM_mM,Lower_SEM_mM,N_Samples,CV_Percent,Bias_mM,Device,Symbol,Error_Type
+0.5,0.9881,0.2836,0.0518,1.2717,0.7044999999999999,1.0399,0.9363,30,28.7015,0.4881,STM32,Triangle,Standard_Deviation
+1.0,1.2906,0.6665,0.0943,1.9571,0.6241,1.3849,1.1963,50,51.6426,0.2906,STM32,Triangle,Standard_Deviation
+5.0,4.805,0.2906,0.0411,5.0956,4.514399999999999,4.8461,4.7639,50,6.0479,-0.195,STM32,Triangle,Standard_Deviation
+10.0,10.4839,0.8538,0.135,11.3377,9.6301,10.6189,10.3489,40,8.1439,0.4839,STM32,Triangle,Standard_Deviation
+20.0,19.7904,1.0751,0.2982,20.8655,18.715300000000003,20.088600000000003,19.4922,13,5.4324,-0.2096,STM32,Triangle,Standard_Deviation

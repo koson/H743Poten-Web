@@ -1,0 +1,45 @@
+{
+  "extraction_timestamp": "2025-08-29T00:01:25.693844",
+  "figure_type": "PLS Score Plot (PC1 vs PC2)",
+  "source_files": [
+    "Article_Figure_Package/Figure_C_Data/pls_scores_palmsens.csv",
+    "Article_Figure_Package/Figure_C_Data/pls_scores_stm32.csv"
+  ],
+  "total_data_points": 403,
+  "palmsens_points": 220,
+  "stm32_points": 183,
+  "pc1_range_actual": [
+    -3.8520162124108985,
+    2.866452118559501
+  ],
+  "pc2_range_actual": [
+    -1.4608601744049778,
+    1.8045243309410364
+  ],
+  "pc1_range_suggested": [
+    -4,
+    3
+  ],
+  "pc2_range_suggested": [
+    -2,
+    2
+  ],
+  "color_coding": {
+    "Palmsens": "Blue Circles (\u25cf)",
+    "STM32": "Red Triangles (\u25b2)"
+  },
+  "statistical_summary": {
+    "palmsens_pc1_mean": 1.3165972784392084,
+    "palmsens_pc2_mean": -0.45731449846809163,
+    "stm32_pc1_mean": -2.4969004069891874,
+    "stm32_pc2_mean": 0.4255313433464311
+  },
+  "files_created": [
+    "palmsens_scores_labplot.csv",
+    "stm32_scores_labplot.csv",
+    "combined_scores_labplot.csv",
+    "device_summary_statistics.csv",
+    "plot_grid_references.csv",
+    "LabPlot2_Instructions_Figure_C.md"
+  ]
+}

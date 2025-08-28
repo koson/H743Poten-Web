@@ -1,0 +1,6 @@
+Actual_Concentration_mM,Predicted_Concentration_mM,Line_Type,Line_Style,Line_Color
+0.5,0.5,Perfect_Prediction,Dashed,Orange
+1.0,1.0,Perfect_Prediction,Dashed,Orange
+5.0,5.0,Perfect_Prediction,Dashed,Orange
+10.0,10.0,Perfect_Prediction,Dashed,Orange
+20.0,20.0,Perfect_Prediction,Dashed,Orange

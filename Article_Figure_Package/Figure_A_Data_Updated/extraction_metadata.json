@@ -1,0 +1,27 @@
+{
+  "extraction_timestamp": "2025-08-28T23:03:44.255565",
+  "source_file": "archive/result_folders/pls_mean_errorbar_analysis_20250828_213748/pls_detailed_statistics_20250828_213751.csv",
+  "total_samples": 403,
+  "palmsens_samples": 220,
+  "stm32_samples": 183,
+  "concentration_levels": 5,
+  "concentrations_mM": [
+    0.5,
+    1.0,
+    5.0,
+    10.0,
+    20.0
+  ],
+  "overall_r2": 0.9851,
+  "overall_mae_mM": 0.527,
+  "figure_a_files": [
+    "palmsens_predictions.csv",
+    "stm32_predictions.csv",
+    "perfect_prediction_line.csv"
+  ],
+  "figure_b_files": [
+    "palmsens_mean_errorbar.csv",
+    "stm32_mean_errorbar.csv",
+    "combined_mean_errorbar.csv"
+  ]
+}

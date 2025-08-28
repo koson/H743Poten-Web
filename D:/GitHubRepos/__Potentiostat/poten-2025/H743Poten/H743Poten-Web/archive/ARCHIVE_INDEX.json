@@ -1,0 +1,30 @@
+{
+  "cleanup_timestamp": "2025-08-28T22:54:38.450992",
+  "total_files_moved": 0,
+  "archive_structure": {
+    "test_scripts": {
+      "file_count": 0,
+      "files": []
+    },
+    "analysis_scripts": {
+      "file_count": 0,
+      "files": []
+    },
+    "debug_scripts": {
+      "file_count": 0,
+      "files": []
+    },
+    "batch_scripts": {
+      "file_count": 0,
+      "files": []
+    },
+    "output_files": {
+      "file_count": 0,
+      "files": []
+    },
+    "backup_scripts": {
+      "file_count": 0,
+      "files": []
+    }
+  }
+}

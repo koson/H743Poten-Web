@@ -1,0 +1,28 @@
+{
+  "model_performance": {
+    "classification_accuracy": "30.8%",
+    "cv_score_mean": "0.153",
+    "cv_score_std": "0.134"
+  },
+  "pc_statistics": {
+    "palmsens": {
+      "n_samples": 220,
+      "pc1_mean": 1.3165972784392084,
+      "pc1_std": 0.6049020023247725,
+      "pc2_mean": -0.45731449846809163,
+      "pc2_std": 0.6256958540183419
+    },
+    "stm32": {
+      "n_samples": 183,
+      "pc1_mean": -2.496900406989187,
+      "pc1_std": 0.7545548746039992,
+      "pc2_mean": 0.4255313433464311,
+      "pc2_std": 0.5031733003160098
+    }
+  },
+  "separation_analysis": {
+    "pc1_separation": 3.8134976854283953,
+    "pc2_separation": 0.8828458418145227,
+    "overlap_estimation": "Partial overlap observed in central region"
+  }
+}

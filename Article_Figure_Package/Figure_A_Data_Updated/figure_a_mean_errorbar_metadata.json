@@ -1,0 +1,31 @@
+{
+  "extraction_timestamp": "2025-08-28T23:12:14.298521",
+  "figure_type": "Mean \u00b1 Error Bar Scatter Plot",
+  "source_file": "archive/result_folders/pls_mean_errorbar_analysis_20250828_213748/pls_detailed_statistics_20250828_213751.csv",
+  "total_data_points": 10,
+  "palmsens_points": 5,
+  "stm32_points": 5,
+  "concentration_levels": 5,
+  "concentrations_mM": [
+    0.5,
+    1.0,
+    5.0,
+    10.0,
+    20.0
+  ],
+  "estimated_overall_r2": 0.9851,
+  "estimated_overall_mae_mM": 0.527,
+  "error_bar_type": "Standard Deviation (\u00b11 SD)",
+  "symbol_coding": {
+    "Palmsens": "Blue Circles (\u25cf)",
+    "STM32": "Red Triangles (\u25b2)"
+  },
+  "files_created": [
+    "palmsens_mean_scatter.csv",
+    "stm32_mean_scatter.csv",
+    "combined_mean_scatter.csv",
+    "perfect_prediction_line.csv",
+    "unity_line_detailed.csv",
+    "LabPlot2_Instructions_A_MeanErrorBar.md"
+  ]
+}

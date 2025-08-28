@@ -1,0 +1,7 @@
+PC1_Score,PC2_Score,Device,Color,Symbol,Label
+2.0,-0.5,Palmsens,Blue,Circle,P1
+1.5,-0.3,Palmsens,Blue,Circle,P2
+1.0,-0.7,Palmsens,Blue,Circle,P3
+-2.0,0.4,STM32,Red,Triangle,S1
+-2.5,0.2,STM32,Red,Triangle,S2
+-3.0,0.6,STM32,Red,Triangle,S3
