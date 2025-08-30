@@ -1,6 +1,0 @@
-Concentration_mM,Device,MAE_Mean_mM,MAE_Std_mM,N_Samples,REP_Mean_Percent,REP_Std_Percent
-0.5,Palmsens,0.4708,0.1856,50,94.161,37.1147
-1.0,Palmsens,0.4453,0.3364,50,44.5271,33.64
-5.0,Palmsens,0.5001,0.3024,50,10.002,6.048
-10.0,Palmsens,0.5736,0.2403,50,5.7356,2.403
-20.0,Palmsens,0.8436,0.5273,20,4.218,2.6363

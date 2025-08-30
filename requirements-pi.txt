@@ -1,0 +1,30 @@
+# 🍓 Requirements for Raspberry Pi Deployment
+# Optimized for ARM architecture and limited resources
+
+# Core Web Framework
+Flask>=2.0.0,<3.0.0
+gunicorn>=20.1.0,<21.0.0
+
+# System Communication
+pyserial>=3.5,<4.0.0
+python-dotenv>=0.19.0,<1.0.0
+requests>=2.26.0,<3.0.0
+
+# Scientific Computing (ARM optimized)
+numpy>=1.21.0,<1.25.0  # ARM compatibility
+scipy>=1.7.0,<1.11.0   # Pre-compiled ARM binaries available
+
+# Data Processing
+pandas>=1.3.0,<2.0.0   # Lightweight data handling
+
+# Basic Plotting (lightweight alternatives)
+matplotlib>=3.4.0,<3.8.0  # Core plotting, avoid memory-heavy versions
+
+# Optional: Machine Learning (comment out if too heavy for Pi)
+# scikit-learn>=1.0.0,<1.3.0  # Uncomment if ML features needed
+# plotly>=5.0.0,<6.0.0        # Interactive plots (heavy)
+
+# Development Dependencies (for local testing only)
+# pytest>=6.0.0
+# black>=21.0.0
+# flake8>=3.9.0
