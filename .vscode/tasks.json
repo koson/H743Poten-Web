@@ -3,51 +3,172 @@
 	"tasks": [
 		{
 			"label": "H743Poten: Start Development Server",
-			"type": "process",
+			"type": "shell",
 			"command": "bash",
-			"args": [
-				"-lc",
-				"cd /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web && python3 auto_dev.py start"
-			],
+			"args": ["-c", "source poten-env/bin/activate && python auto_dev.py start"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"group": "build",
-			"presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
-			"problemMatcher": [],
-			"runOptions": { "runOn": "folderOpen" }
+			"presentation": { 
+				"echo": true, 
+				"reveal": "always", 
+				"focus": false, 
+				"panel": "shared" 
+			},
+			"problemMatcher": []
 		},
 		{
 			"label": "H743Poten: Stop Development Server",
-			"type": "process",
+			"type": "shell",
 			"command": "bash",
-			"args": [
-				"-lc",
-				"cd /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web && python3 auto_dev.py stop"
-			],
+			"args": ["-c", "source poten-env/bin/activate && python auto_dev.py stop"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"group": "build",
-			"presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+			"presentation": { 
+				"echo": true, 
+				"reveal": "always", 
+				"focus": false, 
+				"panel": "shared" 
+			},
 			"problemMatcher": []
 		},
 		{
 			"label": "H743Poten: Server Status",
-			"type": "process",
+			"type": "shell",
 			"command": "bash",
-			"args": [
-				"-lc",
-				"cd /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web && python3 auto_dev.py status"
-			],
+			"args": ["-c", "source poten-env/bin/activate && python auto_dev.py status"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"group": "test",
-			"presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+			"presentation": { 
+				"echo": true, 
+				"reveal": "always", 
+				"focus": false, 
+				"panel": "shared" 
+			},
 			"problemMatcher": []
 		},
 		{
 			"label": "H743Poten: Show Logs",
-			"type": "process",
+			"type": "shell",
 			"command": "bash",
-			"args": [
-				"-lc",
-				"cd /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web && python3 auto_dev.py logs"
-			],
+			"args": ["-c", "source poten-env/bin/activate && python auto_dev.py logs"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"group": "test",
-			"presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+			"presentation": { 
+				"echo": true, 
+				"reveal": "always", 
+				"focus": false, 
+				"panel": "shared" 
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "H743Poten: Start Flask App (Production)",
+			"type": "shell",
+			"command": "bash",
+			"args": ["-c", "source poten-env/bin/activate && python main.py"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "build",
+			"presentation": { 
+				"echo": true, 
+				"reveal": "always", 
+				"focus": false, 
+				"panel": "shared" 
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "H743Poten: Start Flask App (Development)",
+			"type": "shell",
+			"command": "bash",
+			"args": ["-c", "source poten-env/bin/activate && python main_dev.py"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "build",
+			"presentation": { 
+				"echo": true, 
+				"reveal": "always", 
+				"focus": false, 
+				"panel": "shared" 
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "H743Poten: Install Dependencies",
+			"type": "shell",
+			"command": "bash",
+			"args": ["-c", "source poten-env/bin/activate && pip install -r requirements.txt"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "build",
+			"presentation": { 
+				"echo": true, 
+				"reveal": "always", 
+				"focus": false, 
+				"panel": "shared" 
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "H743Poten: Install Pi Dependencies",
+			"type": "shell",
+			"command": "bash",
+			"args": ["-c", "source poten-env/bin/activate && pip install -r requirements-pi.txt"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "build",
+			"presentation": { 
+				"echo": true, 
+				"reveal": "always", 
+				"focus": false, 
+				"panel": "shared" 
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "H743Poten: Create Virtual Environment",
+			"type": "shell",
+			"command": "python3",
+			"args": ["-m", "venv", "poten-env"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "build",
+			"presentation": { 
+				"echo": true, 
+				"reveal": "always", 
+				"focus": false, 
+				"panel": "shared" 
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "H743Poten: Check Hardware",
+			"type": "shell",
+			"command": "bash",
+			"args": ["-c", "ls -la /dev/ttyUSB* /dev/ttyACM* 2>/dev/null || echo 'No USB devices found'; whoami; groups"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "test",
+			"presentation": { 
+				"echo": true, 
+				"reveal": "always", 
+				"focus": false, 
+				"panel": "shared" 
+			},
 			"problemMatcher": []
 		}
 	]

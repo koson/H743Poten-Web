@@ -1,0 +1,30 @@
+[Unit]
+Description=H743Poten Web Interface
+After=network.target
+
+[Service]
+Type=simple
+User=potentiostat
+Group=potentiostat
+WorkingDirectory=/home/potentiostat/H743Poten-Web
+Environment=PATH=/home/potentiostat/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONPATH=/home/potentiostat/H743Poten-Web
+ExecStart=/usr/bin/python3 /home/potentiostat/H743Poten-Web/main.py
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=mixed
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Security settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/home/potentiostat/H743Poten-Web/data_logs
+ReadWritePaths=/home/potentiostat/H743Poten-Web/logs
+ReadWritePaths=/home/potentiostat/poten-data
+
+[Install]
+WantedBy=multi-user.target

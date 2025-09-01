@@ -1,5 +1,4 @@
 {
-    "terminal.integrated.cwd": "${workspaceFolder}",
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.enablePersistentSessions": false,
     "terminal.integrated.allowWorkspaceConfiguration": true,
@@ -13,21 +12,15 @@
     // รัน dev command ทุกครั้งที่เปิด terminal
     "terminal.integrated.shellIntegration.enabled": true,
     "terminal.integrated.shellIntegration.showWelcome": false,
+    
+    // Platform-specific terminal profiles
     "terminal.integrated.profiles.windows": {
         "H743Poten-WSL": {
             "path": "wsl.exe",
             "args": [
                 "bash",
                 "-ic",
-                "source /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/shell_setup.sh && cd /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web && bash"
-            ]
-        },
-        "H743Poten-Dev": {
-            "path": "wsl.exe",
-            "args": [
-                "bash",
-                "-ic",
-                "source /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/shell_setup.sh && cd /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web && python3 auto_dev.py start"
+                "cd ${workspaceFolder} && bash"
             ]
         },
         "Ubuntu (WSL)": {
@@ -36,11 +29,25 @@
             "args": ["-d", "Ubuntu"]
         }
     },
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "/bin/bash",
+            "args": ["-l"]
+        }
+    },
+    
+    // Default profiles per platform
     "terminal.integrated.defaultProfile.windows": "Ubuntu (WSL)",
+    "terminal.integrated.defaultProfile.linux": "bash",
+    
+    // Use workspace root as terminal CWD
+    "terminal.integrated.cwd": "${workspaceFolder}",
     
     // Git settings
     "git.defaultCloneDirectory": "${workspaceFolder}",
     "git.openRepositoryInParentFolders": "always",
+    
+    // Editor settings
     "editor.fontFamily": "Cascadia code, monospace",
     "editor.fontSize": 15,
     "debug.console.fontSize": 15,
@@ -49,15 +56,31 @@
     "chat.editor.fontSize": 16,
     "markdown.preview.fontSize": 15,
 
-    // Copilot settings
-    "github.copilot.enable": true,
-    "github.copilot.autocomplete.enable": true,
+    // Python settings - use workspace-relative paths
+    "python.defaultInterpreterPath": "./poten-env/bin/python",
+    "python.terminal.activateEnvironment": true,
     
-    // ถ้าต้องการปิด Copilot ในบางไฟล์
+    // GitHub Copilot settings
     "github.copilot.enable": {
         "*": true,
-        "plaintext": false,
-        "markdown": false,
+        "yaml": true,
+        "plaintext": true,
+        "markdown": true,
+        "python": true,
+        "javascript": true,
+        "bash": true,
         "scminput": false
+    },
+    "github.copilot.advanced": {
+        "debug.overrideChatEngine": "gpt-4"
+    },
+    
+    // File watcher exclusions
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/__pycache__/**": true,
+        "**/poten-env/**": true
     }
 }
