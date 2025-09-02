@@ -78,6 +78,7 @@ D:/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/archive/README.
 D/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/archive/ARCHIVE_INDEX.json
 # Additional ignores for Raspberry Pi deployment
 .env
+venv/
 poten-env/
 data_logs/
 comprehensive_pls_results_*/
