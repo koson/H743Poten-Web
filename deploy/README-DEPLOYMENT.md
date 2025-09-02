@@ -32,6 +32,33 @@ scp -r H743Poten-Web/ pi@[PI_IP]:/home/
 # 2. SSH to Pi and run deployment
 ssh pi@[PI_IP]
 cd /home/H743Poten-Web
+sudo chmod +x deploy/deploy-pi.sh
+sudo ./deploy/deploy-pi.sh
+```
+
+### What the script does:
+- ✅ Updates system packages
+- ✅ Installs Python dependencies  
+- ✅ Creates dedicated `potentiostat` user
+- ✅ Sets up hardware permissions (GPIO, SPI, I2C)
+- ✅ Configures systemd service
+- ✅ Sets up Nginx reverse proxy (optional)
+- ✅ Installs automated backups and monitoring
+- ✅ Starts the application
+
+### Alternative: Manual Two-Phase Deployment
+```
+
+## 🚀 Quick Deployment (Recommended)
+
+### Single Command Deployment
+```bash
+# 1. Copy application to Raspberry Pi
+scp -r H743Poten-Web/ pi@[PI_IP]:/home/
+
+# 2. SSH to Pi and run deployment
+ssh pi@[PI_IP]
+cd /home/H743Poten-Web
 sudo chmod +x deploy/simple-deploy.sh
 sudo ./deploy/simple-deploy.sh
 ```

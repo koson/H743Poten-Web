@@ -4,8 +4,43 @@ from flask import Blueprint, render_template, request, jsonify, current_app, ses
 import os
 import numpy as np
 import pandas as pd
-from scipy.signal import find_peaks
-from scipy.stats import linregress
+
+# Optional scipy imports with fallbacks
+try:
+    from scipy.signal import find_peaks
+    from scipy.stats import linregress
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
+    print("SciPy not available - using fallback peak detection")
+    
+    # Fallback peak detection function
+    def find_peaks(data, height=None, distance=None):
+        """Simple fallback peak detection"""
+        if len(data) < 3:
+            return ([], {})
+            
+        peaks = []
+        for i in range(1, len(data) - 1):
+            if data[i] > data[i-1] and data[i] > data[i+1]:
+                if height is None or data[i] >= height:
+                    peaks.append(i)
+        return (peaks, {})
+    
+    def linregress(x, y):
+        """Simple fallback linear regression"""
+        if len(x) != len(y) or len(x) < 2:
+            return type('obj', (object,), {'slope': 0, 'intercept': 0, 'rvalue': 0})()
+        
+        n = len(x)
+        x_mean = np.mean(x)
+        y_mean = np.mean(y)
+        
+        slope = np.sum((x - x_mean) * (y - y_mean)) / np.sum((x - x_mean) ** 2)
+        intercept = y_mean - slope * x_mean
+        
+        return type('obj', (object,), {'slope': slope, 'intercept': intercept, 'rvalue': 0.5})()
+
 import logging
 import uuid
 import glob

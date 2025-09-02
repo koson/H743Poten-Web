@@ -1,0 +1,30 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "H743Poten: Start Development Server (Windows)",
+			"type": "process",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"cd /mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web && python3 auto_dev.py start"
+			],
+			"group": "build",
+			"presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+			"problemMatcher": [],
+			"runOptions": { "runOn": "folderOpen" }
+		},
+		{
+			"label": "H743Poten: Start with WSL Python",
+			"type": "shell",
+			"command": "wsl",
+			"args": ["python3", "auto_dev.py", "start"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "build",
+			"presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+			"problemMatcher": []
+		}
+	]
+}

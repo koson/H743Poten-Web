@@ -1,0 +1,43 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "H743Poten: Start Development Server (Pi)",
+			"type": "shell",
+			"command": "/home/potentiostat/poten-env/bin/python",
+			"args": ["auto_dev.py", "start"],
+			"options": {
+				"cwd": "/home/potentiostat/H743Poten-Web"
+			},
+			"group": "build",
+			"presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+			"problemMatcher": [],
+			"runOptions": { "runOn": "folderOpen" }
+		},
+		{
+			"label": "H743Poten: Start Flask App (Pi Production)",
+			"type": "shell",
+			"command": "/home/potentiostat/poten-env/bin/python",
+			"args": ["main.py"],
+			"options": {
+				"cwd": "/home/potentiostat/H743Poten-Web",
+				"env": {
+					"FLASK_ENV": "production",
+					"USE_MOCK_HARDWARE": "False"
+				}
+			},
+			"group": "build",
+			"presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+			"problemMatcher": []
+		},
+		{
+			"label": "H743Poten: Check Hardware Permissions",
+			"type": "shell",
+			"command": "bash",
+			"args": ["-c", "ls -la /dev/ttyUSB* /dev/ttyACM* 2>/dev/null || echo 'No USB devices found'"],
+			"group": "test",
+			"presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
+			"problemMatcher": []
+		}
+	]
+}

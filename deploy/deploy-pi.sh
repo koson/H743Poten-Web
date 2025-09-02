@@ -112,6 +112,13 @@ if [ "$CURRENT_USER" = "root" ]; then
 elif [ "$CURRENT_USER" != "$USER_ACCOUNT" ]; then
     error "Please run this script as root first"
     error "Run: sudo bash deploy/deploy-pi.sh"
+    # Switch to the user and continue
+    info "Switching to user $USER_ACCOUNT to continue setup..."
+    exec sudo -u $USER_ACCOUNT bash "$0" "$@"
+    
+elif [ "$CURRENT_USER" != "$USER_ACCOUNT" ]; then
+    error "Please run this script as root first, then it will switch to user '$USER_ACCOUNT'"
+    error "Run: sudo bash deploy-pi.sh"
     exit 1
 fi
 
@@ -134,6 +141,16 @@ fi
 
 # Skip system package installation when running as potentiostat user
 # (Already done by root in previous step)
+sudo raspi-config nonint do_serial_cons 1
+
+# Add user to hardware groups
+sudo usermod -aG gpio,spi,i2c,dialout $USER_ACCOUNT
+
+# Create directories
+info "Creating directory structure..."
+mkdir -p "$DATA_DIR"/{measurements,calibrations,logs}
+mkdir -p "$BACKUP_DIR"
+mkdir -p "/home/$USER_ACCOUNT/.config/potentiostat"
 
 # Create Python virtual environment
 info "Setting up Python virtual environment..."
@@ -257,6 +274,13 @@ info "Service file prepared. Root user needs to run: sudo /tmp/install_service.s
 info "Setting up log rotation..."
 # Create log rotation config in /tmp for root to install
 cat > /tmp/potentiostat_logrotate << EOF
+sudo cp deploy/potentiostat.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable potentiostat.service
+
+# Set up log rotation
+info "Setting up log rotation..."
+sudo tee /etc/logrotate.d/potentiostat << EOF
 $DATA_DIR/logs/*.log {
     daily
     missingok
@@ -298,6 +322,41 @@ EOF
     chmod +x /tmp/install_nginx.sh
     
     info "Nginx config prepared. Root user needs to run: sudo /tmp/install_nginx.sh"
+    info "Setting up Nginx..."
+    sudo tee /etc/nginx/sites-available/potentiostat << EOF
+server {
+    listen 80;
+    server_name _;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+    
+    # Static files
+    location /static {
+        alias $INSTALL_DIR/static;
+        expires 1d;
+        add_header Cache-Control "public, immutable";
+    }
+}
+EOF
+
+    sudo ln -sf /etc/nginx/sites-available/potentiostat /etc/nginx/sites-enabled/
+    sudo rm -f /etc/nginx/sites-enabled/default
+    sudo nginx -t
+    sudo systemctl enable nginx
+    sudo systemctl restart nginx
+    
+    success "Nginx configured. Application will be available on port 80"
 fi
 
 # Set file permissions
@@ -355,6 +414,20 @@ if systemctl is-active --quiet potentiostat.service; then
     echo "🎉 Deployment completed successfully!"
     echo ""
     echo "Application URLs:"
+info "Starting H743Poten service..."
+sudo systemctl start potentiostat.service
+
+# Check service status
+sleep 3
+if sudo systemctl is-active --quiet potentiostat.service; then
+    success "H743Poten service is running!"
+    info "Service status:"
+    sudo systemctl status potentiostat.service --no-pager -l
+    
+    echo
+    success "🎉 Deployment completed successfully!"
+    echo
+    info "Application URLs:"
     echo "  - Direct: http://$(hostname -I | awk '{print $1}'):8080"
     if [ -f /etc/nginx/sites-enabled/potentiostat ]; then
         echo "  - Nginx:  http://$(hostname -I | awk '{print $1}')"
@@ -376,3 +449,15 @@ chmod +x /tmp/finish_setup.sh
 
 success "User setup completed!"
 warning "Root user must run: sudo /tmp/finish_setup.sh"
+    echo
+    info "Useful commands:"
+    echo "  - Check status:  sudo systemctl status potentiostat"
+    echo "  - View logs:     sudo journalctl -u potentiostat -f"
+    echo "  - Restart:       sudo systemctl restart potentiostat"
+    echo "  - Stop:          sudo systemctl stop potentiostat"
+    
+else
+    error "Failed to start H743Poten service"
+    error "Check logs: sudo journalctl -u potentiostat -f"
+    exit 1
+fi
