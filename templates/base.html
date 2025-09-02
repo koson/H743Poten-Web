@@ -45,6 +45,15 @@
         [aria-expanded="true"] .collapse-icon {
             transform: rotate(180deg);
         }
+        
+        .nav-pills .nav-link.active {
+            background-color: #007bff;
+        }
+        .status-connected { color: #28a745; }
+        .status-disconnected { color: #dc3545; }
+        .main-content {
+            min-height: 80vh;
+        }
     </style>
 </head>
 <body>
@@ -62,22 +71,22 @@
                             <i class="fas fa-home"></i> Dashboard
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" data-feature="measurements">
                         <a class="nav-link" href="/measurements">
                             <i class="fas fa-chart-line"></i> Measurements
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" data-feature="analysis_workflow">
                         <a class="nav-link" href="/workflow">
                             <i class="fas fa-project-diagram"></i> Analysis Workflow
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" data-feature="ai_dashboard">
                         <a class="nav-link" href="/ai-dashboard">
                             <i class="fas fa-brain"></i> AI Dashboard
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" data-feature="calibration">
                         <a class="nav-link" href="/calibration">
                             <i class="fas fa-balance-scale"></i> Calibration
                         </a>
@@ -86,6 +95,13 @@
                         <a class="nav-link" href="/settings">
                             <i class="fas fa-cog"></i> Settings
                         </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <span class="navbar-text" id="connection-status">
+                            <i class="fas fa-circle status-disconnected"></i> Disconnected
+                        </span>
                     </li>
                 </ul>
             </div>
@@ -100,6 +116,53 @@
     
     <!-- Global connection state -->
     <script src="{{ url_for('static', filename='js/connection_state.js') }}"></script>
+    
+    <!-- Dynamic Navigation Script -->
+    <script>
+        // Global connection status updater
+        function updateGlobalConnectionStatus(state) {
+            const statusElement = document.getElementById('connection-status');
+            if (statusElement) {
+                if (state.isConnected) {
+                    statusElement.innerHTML = '<i class="fas fa-circle status-connected"></i> Connected';
+                } else {
+                    statusElement.innerHTML = '<i class="fas fa-circle status-disconnected"></i> Disconnected';
+                }
+            }
+        }
+        
+        // Load feature settings and update navigation
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/api/settings/features');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const features = data.features;
+                    
+                    // Hide/show navigation items based on feature settings
+                    document.querySelectorAll('[data-feature]').forEach(item => {
+                        const featureName = item.dataset.feature;
+                        const feature = features[featureName];
+                        
+                        if (feature && !feature.enabled) {
+                            item.style.display = 'none';
+                        } else {
+                            item.style.display = '';
+                        }
+                    });
+                }
+            } catch (error) {
+                console.warn('Failed to load feature settings for navigation:', error);
+            }
+            
+            // Set up global connection status monitoring
+            if (typeof connectionState !== 'undefined') {
+                connectionState.addListener(updateGlobalConnectionStatus);
+                connectionState.initializeFromServer();
+            }
+        });
+    </script>
     
     <!-- Custom Scripts -->
     {% block scripts %}{% endblock %}

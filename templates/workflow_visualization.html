@@ -1,42 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>H743Poten Analysis Workflow - Step by Step</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+        .workflow-page * {
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .workflow-page {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
+            min-height: calc(100vh - 60px); /* Account for navbar */
+            margin-top: -20px; /* Overlap with base margin */
+            padding-top: 20px;
         }
 
-        .container {
+        .workflow-page .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        .header {
+        .workflow-page .header {
             text-align: center;
             color: white;
             margin-bottom: 30px;
         }
 
-        .header h1 {
+        .workflow-page .header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .header p {
+        .workflow-page .header p {
             font-size: 1.2em;
             opacity: 0.9;
         }
@@ -972,8 +967,8 @@
             }
         }
     </style>
-</head>
-<body>
+
+<div class="workflow-page">
     <div class="container">
         <div class="header">
             <h1>🔬 H743Poten Analysis Workflow</h1>
@@ -1476,19 +1471,21 @@
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script src="{{ url_for('static', filename='js/workflow_visualization.js') }}?v={{ range(1,10000)|random }}"></script>
-    <script src="{{ url_for('static', filename='js/export_utils.js') }}?v={{ range(1,10000)|random }}"></script>
-    <script src="{{ url_for('static', filename='js/plot_cv_data.js') }}?v={{ range(1,10000)|random }}"></script>
-    <script src="{{ url_for('static', filename='js/real_data_plotter.js') }}?v={{ range(1,10000)|random }}"></script>
-    <script>
-        // Call loadAndPlotCVData when preview tab is shown
-        document.addEventListener('DOMContentLoaded', function() {
-            const graphsTab = document.querySelector('[onclick="showPreviewTab(\'graphs\')"]');
-            if (graphsTab) {
-                graphsTab.addEventListener('click', loadAndPlotCVData);
-            }
-        });
-    </script>
-</body>
-</html>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/workflow_visualization.js') }}?v={{ range(1,10000)|random }}"></script>
+<script src="{{ url_for('static', filename='js/export_utils.js') }}?v={{ range(1,10000)|random }}"></script>
+<script src="{{ url_for('static', filename='js/plot_cv_data.js') }}?v={{ range(1,10000)|random }}"></script>
+<script src="{{ url_for('static', filename='js/real_data_plotter.js') }}?v={{ range(1,10000)|random }}"></script>
+<script>
+    // Call loadAndPlotCVData when preview tab is shown
+    document.addEventListener('DOMContentLoaded', function() {
+        const graphsTab = document.querySelector('[onclick="showPreviewTab(\'graphs\')"]');
+        if (graphsTab) {
+            graphsTab.addEventListener('click', loadAndPlotCVData);
+        }
+    });
+</script>
+{% endblock %}

@@ -198,6 +198,16 @@ def create_app():
         """Cross-instrument calibration interface"""
         return render_template('calibration.html')
     
+    @app.route('/settings')
+    def settings_view():
+        """Settings and feature management interface"""
+        return render_template('settings.html')
+    
+    @app.route('/workflow')
+    def workflow_view():
+        """Analysis workflow interface"""
+        return render_template('workflow_visualization.html')
+    
     @app.route('/favicon.ico')
     def favicon():
         """Serve favicon"""
@@ -562,6 +572,133 @@ def create_app():
                 
         except Exception as e:
             logger.error(f"Failed to seek CSV emulation: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    # Settings API routes
+    @app.route('/api/settings/features')
+    def get_feature_settings():
+        """Get current feature settings"""
+        try:
+            # Get features from config or default settings
+            default_features = {
+                'measurements': {
+                    'enabled': True,
+                    'label': 'Measurements',
+                    'description': 'Basic electrochemical measurement functionality',
+                    'category': 'core'
+                },
+                'analysis_workflow': {
+                    'enabled': True,
+                    'label': 'Analysis Workflow',
+                    'description': 'Advanced data analysis and visualization tools',
+                    'category': 'analysis'
+                },
+                'ai_dashboard': {
+                    'enabled': False,
+                    'label': 'AI Dashboard',
+                    'description': 'Machine learning-powered analysis tools',
+                    'category': 'ai'
+                },
+                'calibration': {
+                    'enabled': True,
+                    'label': 'Calibration',
+                    'description': 'Cross-instrument calibration and validation',
+                    'category': 'calibration'
+                },
+                'peak_detection': {
+                    'enabled': True,
+                    'label': 'Peak Detection',
+                    'description': 'Automated peak detection and analysis',
+                    'category': 'analysis'
+                },
+                'data_logging': {
+                    'enabled': True,
+                    'label': 'Data Logging',
+                    'description': 'Automated data logging and storage',
+                    'category': 'core'
+                },
+                'csv_emulation': {
+                    'enabled': True,
+                    'label': 'CSV Emulation',
+                    'description': 'CSV data emulation for testing',
+                    'category': 'development'
+                },
+                'hardware_diagnostics': {
+                    'enabled': False,
+                    'label': 'Hardware Diagnostics',
+                    'description': 'Advanced hardware testing and diagnostics',
+                    'category': 'development'
+                }
+            }
+            
+            # Load from config file if it exists
+            config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'features.json')
+            if os.path.exists(config_path):
+                try:
+                    with open(config_path, 'r') as f:
+                        stored_features = json.load(f)
+                    # Merge with defaults (add new features, keep existing settings)
+                    for key, value in stored_features.items():
+                        if key in default_features:
+                            default_features[key]['enabled'] = value.get('enabled', default_features[key]['enabled'])
+                except Exception as e:
+                    logger.warning(f"Failed to load feature settings: {e}")
+            
+            return jsonify({
+                'success': True,
+                'features': default_features
+            })
+            
+        except Exception as e:
+            logger.error(f"Failed to get feature settings: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/settings/features', methods=['POST'])
+    def update_feature_settings():
+        """Update feature settings"""
+        try:
+            data = request.get_json()
+            features = data.get('features', {})
+            
+            # Ensure config directory exists
+            config_dir = os.path.join(os.path.dirname(__file__), '..', 'config')
+            os.makedirs(config_dir, exist_ok=True)
+            
+            # Save to config file
+            config_path = os.path.join(config_dir, 'features.json')
+            with open(config_path, 'w') as f:
+                json.dump(features, f, indent=2)
+            
+            logger.info(f"Updated feature settings: {features}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'Feature settings updated successfully'
+            })
+            
+        except Exception as e:
+            logger.error(f"Failed to update feature settings: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/settings/system')
+    def get_system_settings():
+        """Get system configuration"""
+        try:
+            return jsonify({
+                'success': True,
+                'system': {
+                    'version': '1.0.0-rpi5',
+                    'platform': 'Raspberry Pi 5',
+                    'python_version': sys.version,
+                    'flask_debug': app.debug,
+                    'upload_max_size': app.config.get('MAX_CONTENT_LENGTH', 0) // (1024 * 1024),  # MB
+                    'data_path': str(Path(__file__).parent.parent / 'data_logs'),
+                    'temp_path': str(Path(__file__).parent.parent / 'temp_data')
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"Failed to get system settings: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     return app

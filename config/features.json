@@ -1,0 +1,50 @@
+{
+  "ai_dashboard": {
+    "category": "ai",
+    "description": "Machine learning-powered analysis tools",
+    "enabled": false,
+    "label": "AI Dashboard"
+  },
+  "analysis_workflow": {
+    "category": "analysis",
+    "description": "Advanced data analysis and visualization tools",
+    "enabled": true,
+    "label": "Analysis Workflow"
+  },
+  "calibration": {
+    "category": "calibration",
+    "description": "Cross-instrument calibration and validation",
+    "enabled": false,
+    "label": "Calibration"
+  },
+  "csv_emulation": {
+    "category": "development",
+    "description": "CSV data emulation for testing",
+    "enabled": true,
+    "label": "CSV Emulation"
+  },
+  "data_logging": {
+    "category": "core",
+    "description": "Automated data logging and storage",
+    "enabled": true,
+    "label": "Data Logging"
+  },
+  "hardware_diagnostics": {
+    "category": "development",
+    "description": "Advanced hardware testing and diagnostics",
+    "enabled": false,
+    "label": "Hardware Diagnostics"
+  },
+  "measurements": {
+    "category": "core",
+    "description": "Basic electrochemical measurement functionality",
+    "enabled": true,
+    "label": "Measurements"
+  },
+  "peak_detection": {
+    "category": "analysis",
+    "description": "Automated peak detection and analysis",
+    "enabled": true,
+    "label": "Peak Detection"
+  }
+}
