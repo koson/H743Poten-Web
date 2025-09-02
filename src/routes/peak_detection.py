@@ -12,6 +12,9 @@ import glob
 import json
 from datetime import datetime
 
+# Setup logger
+logger = logging.getLogger(__name__)
+
 def ensure_json_serializable(obj):
     """Convert numpy types to native Python types for JSON serialization"""
     if isinstance(obj, dict):
