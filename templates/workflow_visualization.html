@@ -990,7 +990,7 @@
                     </div>
                     <div class="step-content">
                         <div class="step-description">
-                            Select your instrument type and import CV data files. The system supports multiple formats including PalmSens, STM32H743, and other standard electrochemical instruments.
+                            Select your instrument type and import CV data files. The system supports multiple formats including RefPoten, H743Poten, and other standard electrochemical instruments.
                         </div>
                         
                         <div class="step-details">
@@ -998,12 +998,12 @@
                             <div class="instrument-selector">
                                 <div class="instrument-card" onclick="selectInstrument('palmsens')">
                                     <div class="instrument-icon">🔬</div>
-                                    <div><strong>PalmSens</strong></div>
+                                    <div><strong>RefPoten</strong></div>
                                     <div>Reference Standard</div>
                                 </div>
                                 <div class="instrument-card selected" onclick="selectInstrument('stm32')">
                                     <div class="instrument-icon">⚡</div>
-                                    <div><strong>STM32H743</strong></div>
+                                    <div><strong>H743Poten</strong></div>
                                     <div>Target Instrument</div>
                                 </div>
                                 <div class="instrument-card" onclick="selectInstrument('generic')">
@@ -1016,11 +1016,11 @@
                             <h4>📂 Data Import by Instrument Type</h4>
                             <!-- Instrument Grid Layout -->
                             <div class="instrument-grid">
-                                <!-- PalmSens Card -->
+                                <!-- RefPoten Card -->
                                 <div class="instrument-card" id="palmsens-card">
                                     <div class="instrument-header">
-                                        <h4>📊 PalmSens</h4>
-                                        <div class="quality-badge">Quality: 98%</div>
+                                        <h4>📊 RefPoten</h4>
+                                        <!-- <div class="quality-badge">Quality: 98%</div>-->
                                     </div>
                                     <div class="instrument-body">
                                         <input type="file" id="palmsensInput" webkitdirectory multiple class="file-input">
@@ -1044,11 +1044,11 @@
                                     </div>
                                 </div>
 
-                                <!-- STM32H743 Card -->
+                                <!-- H743Poten Card -->
                                 <div class="instrument-card" id="stm32-card">
                                     <div class="instrument-header">
-                                        <h4>⚡ STM32H743</h4>
-                                        <div class="quality-badge">Quality: 95%</div>
+                                        <h4>⚡ H743Poten</h4>
+                                       <!-- <div class="quality-badge">Quality: 95%</div>-->
                                     </div>
                                     <div class="instrument-body">
                                         <input type="file" id="stm32Input" webkitdirectory multiple class="file-input">
@@ -1076,7 +1076,7 @@
                                 <div class="instrument-card" id="generic-card">
                                     <div class="instrument-header">
                                         <h4>📁 Generic CSV</h4>
-                                        <div class="quality-badge">Quality: 85%</div>
+                                        <!--<div class="quality-badge">Quality: 85%</div>-->
                                     </div>
                                     <div class="instrument-body">
                                         <input type="file" id="genericInput" webkitdirectory multiple class="file-input">
@@ -1199,7 +1199,7 @@
                     </div>
                     <div class="step-content">
                         <div class="step-description">
-                            Apply machine learning calibration to transform STM32H743 measurements to PalmSens-equivalent accuracy.
+                            Apply machine learning calibration to transform H743Poten measurements to RefPoten accuracy.
                         </div>
                         
                         <div class="step-details">
