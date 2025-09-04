@@ -1,0 +1,45 @@
+digraph TraditionalCV {
+    rankdir=TB;
+    node [shape=box, style=rounded, fontsize=12];
+    edge [fontsize=10];
+    
+    // Start node
+    start [shape=circle, label="Start", style=filled, fillcolor=lightblue];
+    
+    // Input validation
+    input [label="CV Data Input\n(Voltage, Current)"];
+    validate [label="Data Validation"];
+    
+    // Decision point
+    valid [shape=diamond, label="Valid\nData?"];
+    error [label="Show Error\nMessage", style=filled, fillcolor=pink];
+    
+    // Traditional processing steps
+    baseline [label="Remove Baseline\n(Optional)"];
+    detect [label="Peak Detection\n(find_peaks)"];
+    prominence [label="Apply Prominence\nFilter"];
+    width [label="Apply Width\nFilter"];
+    classify [label="Basic Peak\nClassification\n(Positive/Negative)"];
+    
+    // Output
+    results [label="Return Basic\nResults"];
+    end [shape=circle, label="End", style=filled, fillcolor=lightgreen];
+    
+    // Connections
+    start -> input;
+    input -> validate;
+    validate -> valid;
+    valid -> baseline [label="Yes"];
+    valid -> error [label="No"];
+    error -> end;
+    
+    baseline -> detect;
+    detect -> prominence;
+    prominence -> width;
+    width -> classify;
+    classify -> results;
+    results -> end;
+    
+    // Styling
+    {rank=same; valid; error;}
+}

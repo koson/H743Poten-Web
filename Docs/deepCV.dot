@@ -1,0 +1,47 @@
+digraph DeepCV {
+    rankdir=TB;
+    node [shape=box, style=rounded, fontsize=12];
+    edge [fontsize=10];
+    
+    // Start node
+    start [shape=circle, label="Start", style=filled, fillcolor=lightblue];
+    
+    // Input validation
+    input [label="CV Data Input\n(Voltage, Current)"];
+    validate [label="Data Validation"];
+    
+    // Decision point
+    valid [shape=diamond, label="Valid\nData?"];
+    error [label="Show Error\nMessage", style=filled, fillcolor=pink];
+    
+    // Core processing steps
+    normalize [label="Normalize\nCurrent"];
+    detect [label="Peak Detection\n(Positive & Negative)"];
+    extract [label="Feature Extraction\n(FWHM, Asymmetry, Peak area,\nNoise level, Position score, SNR)"];
+    score [label="Confidence\nScoring"];
+    filter [label="Apply Threshold\n(>30%)"];
+    classify [label="Peak\nClassification"];
+    
+    // Output
+    results [label="Return\nResults"];
+    end [shape=circle, label="End", style=filled, fillcolor=lightgreen];
+    
+    // Connections
+    start -> input;
+    input -> validate;
+    validate -> valid;
+    valid -> normalize [label="Yes", weight=2];
+    valid -> error [label="No", constraint=false];
+    error -> end [constraint=false];
+    
+    normalize -> detect;
+    detect -> extract;
+    extract -> score;
+    score -> filter;
+    filter -> classify;
+    classify -> results;
+    results -> end;
+    
+    // Styling - place error on the right side of valid
+    {rank=same; valid; error;}
+}

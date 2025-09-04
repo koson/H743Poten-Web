@@ -1,0 +1,63 @@
+digraph HybridCV {
+    rankdir=TB;
+    node [shape=box, style=rounded, fontsize=12];
+    edge [fontsize=10];
+    
+    // Start node
+    start [shape=circle, label="Start", style=filled, fillcolor=lightblue];
+    
+    // Input validation
+    input [label="CV Data Input\n(Voltage, Current)"];
+    validate [label="Data Validation"];
+    
+    // Decision point
+    valid [shape=diamond, label="Valid\nData?"];
+    error [label="Show Error\nMessage", style=filled, fillcolor=pink];
+    
+    // Hybrid processing steps
+    baseline [label="Remove Baseline\n(Optional)"];
+    traditional [label="Traditional Detection\n(find_peaks + filters)"];
+    
+    // Decision for enhancement
+    enhance [shape=diamond, label="Need ML\nEnhancement?"];
+    
+    // Traditional path
+    basic_classify [label="Basic Peak\nClassification"];
+    basic_results [label="Return Traditional\nResults"];
+    
+    // Enhanced path
+    feature_extract [label="Feature Extraction\n(FWHM, Asymmetry, SNR)"];
+    confidence [label="Confidence Scoring\n(Selective Features)"];
+    ml_classify [label="Enhanced Peak\nClassification"];
+    enhanced_results [label="Return Enhanced\nResults"];
+    
+    // End
+    end [shape=circle, label="End", style=filled, fillcolor=lightgreen];
+    
+    // Connections
+    start -> input;
+    input -> validate;
+    validate -> valid;
+    valid -> baseline [label="Yes"];
+    valid -> error [label="No"];
+    error -> end;
+    
+    baseline -> traditional;
+    traditional -> enhance;
+    
+    // Traditional path
+    enhance -> basic_classify [label="No\n(Fast Mode)"];
+    basic_classify -> basic_results;
+    basic_results -> end;
+    
+    // Enhanced path  
+    enhance -> feature_extract [label="Yes\n(Detailed Mode)"];
+    feature_extract -> confidence;
+    confidence -> ml_classify;
+    ml_classify -> enhanced_results;
+    enhanced_results -> end;
+    
+    // Styling
+    {rank=same; valid; error;}
+    {rank=same; basic_classify; feature_extract;}
+}
