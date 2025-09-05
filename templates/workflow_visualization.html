@@ -159,7 +159,32 @@
             border-radius: 8px;
             border: 1px solid #ddd;
             margin-top: 10px;
-            min-height: 600px; /* เพิ่มการกำหนดขนาดสูงขั้นต่ำให้เท่ากัน */
+            max-width: 1200px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* จำกัดความกว้างของ peak_detection.html ใน step 3 */
+        #step3 .step-details .container-fluid {
+            max-width: 100% !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin: 0 !important;
+        }
+
+        #step3 .step-details .row {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+        }
+
+        #step3 .step-details .col-md-4 {
+            width: 33.333% !important;
+            max-width: 33.333% !important;
+            flex: 0 0 33.333% !important;
+            padding: 0 10px !important;
+            margin-bottom: 20px;
         }
 
         .file-selector {
@@ -730,7 +755,23 @@
 
         .instrument-selector {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 200px));
+            gap: 15px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+
+        /* Step 4 ใช้ขนาดเดียวกับ Step 3 */
+        #step4 .instrument-selector {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        #step4 .results-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
             gap: 15px;
             margin: 15px 0;
         }
@@ -1181,6 +1222,7 @@
                 </div>
 
                 <!-- Step 3: Peak Detection -->
+                  
                 <div class="step" id="step3">
                     <div class="step-header">
                         <div class="step-number">3</div>
@@ -1190,19 +1232,19 @@
                         <div class="step-description">
                             Apply advanced peak detection algorithms using our 3-method framework: DeepCV, TraditionalCV, and HybridCV.
                         </div>
-                        
-                        <div class="step-details">
+                        <div class="step-details" style="overflow: hidden;">
                             {% include 'peak_detection.html' %}
                         </div>
-                    </div>
-                </div>
+                     
 
                 <!-- Step 4: Cross-Instrument Calibration -->
+                 
                 <div class="step" id="step4">
                     <div class="step-header">
                         <div class="step-number">4</div>
                         <div class="step-title">🔄 Cross-Instrument Calibration</div>
                     </div>
+                                       
                     <div class="step-content">
                         <div class="step-description">
                             Apply machine learning calibration to transform H743Poten measurements to RefPoten accuracy.
@@ -1248,9 +1290,11 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
+                    </div>
+                    
+                </div>
+ 
                 <!-- Step 5: Results & Visualization -->
                 <div class="step" id="step5">
                     <div class="step-header">
