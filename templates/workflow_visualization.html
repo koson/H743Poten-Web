@@ -1341,7 +1341,8 @@
                             </div>
 
                             <div class="action-buttons">
-                                <button class="btn btn-primary" onclick="startCalibration()">🔄 Start Calibration</button>
+                                <button class="btn btn-primary" onclick="window.open('/api/calibration/dashboard', '_blank')">🔄 Open Calibration Dashboard</button>
+                                <button class="btn btn-success" onclick="startCrossInstrumentCalibration()">� Start Cross-Calibration</button>
                                 <button class="btn btn-info" onclick="viewCalibrationDetails()">📊 View Details</button>
                             </div>
 
@@ -1605,5 +1606,107 @@
             graphsTab.addEventListener('click', loadAndPlotCVData);
         }
     });
+
+    // Cross-Instrument Calibration Functions
+    async function startCrossInstrumentCalibration() {
+        try {
+            // Show loading state
+            showAlert('Starting Cross-Instrument Calibration process...', 'info');
+            
+            // Execute full calibration process
+            const response = await fetch('/api/calibration/batch/full_calibration', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                showAlert('Cross-Instrument Calibration completed successfully!', 'success');
+                
+                // Update step 4 status
+                updateStepStatus(4, 'completed');
+                
+                // Show results summary
+                const summary = `
+                    <div class="calibration-results">
+                        <h5>🎉 Calibration Completed Successfully</h5>
+                        <ul>
+                            <li>Data Loading: ✅ ${result.data.data_loading.sections_loaded.length} sections loaded</li>
+                            <li>Corrections: ✅ ${result.data.correction_calculation.instruments_processed.length} instruments processed</li>
+                            <li>Validation: ${result.data.validation.overall_status === 'PASS' ? '✅' : '❌'} ${result.data.validation.overall_status}</li>
+                            <li>Report: ✅ Generated at ${result.data.report_generation.report_path}</li>
+                        </ul>
+                        <button class="btn btn-primary" onclick="window.open('/api/calibration/dashboard', '_blank')">
+                            📊 View Full Dashboard
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('calibrationAccuracy').innerHTML = summary;
+                
+            } else {
+                showAlert('Cross-Instrument Calibration failed: ' + result.message, 'error');
+            }
+            
+        } catch (error) {
+            console.error('Error in cross-instrument calibration:', error);
+            showAlert('Error starting calibration: ' + error.message, 'error');
+        }
+    }
+
+    function viewCalibrationDetails() {
+        // Open calibration dashboard in new tab
+        window.open('/api/calibration/dashboard', '_blank');
+    }
+
+    function updateStepStatus(stepNumber, status) {
+        const step = document.getElementById(`step${stepNumber}`);
+        if (step) {
+            step.classList.remove('active', 'completed');
+            step.classList.add(status);
+            
+            const stepNumber_elem = step.querySelector('.step-number');
+            if (stepNumber_elem) {
+                if (status === 'completed') {
+                    stepNumber_elem.style.backgroundColor = '#28a745';
+                    stepNumber_elem.innerHTML = '✓';
+                } else if (status === 'active') {
+                    stepNumber_elem.style.backgroundColor = '#2196F3';
+                    stepNumber_elem.innerHTML = stepNumber;
+                }
+            }
+        }
+    }
+
+    function showAlert(message, type) {
+        // Create alert element
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            margin: 0;
+        `;
+        
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
 </script>
 {% endblock %}
