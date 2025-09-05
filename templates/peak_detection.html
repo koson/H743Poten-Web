@@ -1,3 +1,4 @@
+{# -*- mode: django-html -*- #}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -549,13 +550,13 @@
         </div>
         
         <!-- Method Selection Cards -->
-        <div class="row">
-            <div class="col-md-3 mb-4">
+        <div class="row justify-content-center">
+            <div class="col-md-4 mb-4">
                 <div class="method-card">
                     <div class="method-header">
                         <img src="/static/img/brain.svg" alt="DeepCV" class="method-icon">
                         <h3>DeepCV</h3>
-                        <div class="quality-badge">Best</div>
+                         <!-- <div class="quality-badge">Best</div>  -->
                     </div>
                     <div class="method-content text-center">
                         <p class="text-muted mb-3">AI-Enhanced (Best)</p>
@@ -623,12 +624,12 @@
                 </div>
             </div>
 
-            <div class="col-md-3 mb-4">
+            <div class="col-md-4 mb-4">
                 <div class="method-card">
                     <div class="method-header">
                         <img src="/static/img/graph.svg" alt="TraditionalCV" class="method-icon">
                         <h3>TraditionalCV</h3>
-                        <div class="quality-badge">Classic</div>
+                        <!-- <div class="quality-badge">Classic</div> -->
                     </div>
                     <div class="method-content text-center">
                         <p class="text-muted mb-3">Classical Method</p>
@@ -696,163 +697,15 @@
                 </div>
             </div>
 
-            <div class="col-md-3 mb-4">
-                <div class="method-card">
-                    <div class="method-header">
-                        <img src="/static/img/hybrid.svg" alt="HybridCV" class="method-icon">
-                        <h3>HybridCV</h3>
-                        <div class="quality-badge">Advanced</div>
-                    </div>
-                    <div class="method-content text-center">
-                        <p class="text-muted mb-3">Combined Approach</p>
-                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="derivative" onclick="showInlineProgress('derivative'); window.startDetection && window.startDetection('derivative')" id="derivative-start-btn">
-                            Start Detection
-                        </button>
-                        
-                        <!-- Inline Progress Bar -->
-                        <div class="progress-container" id="derivative-progress" style="display: none;">
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
-                                     role="progressbar" style="width: 0%" id="derivative-progressBar">
-                                    <small id="derivative-progressPercent">0%</small>
-                                </div>
-                            </div>
-                            <div class="row text-center" style="margin: 2px 0 0 0;">
-                                <div class="col-4" style="padding: 0 2px;">
-                                    <small class="text-muted">
-                                        <strong id="derivative-currentFile">0</strong>/<span id="derivative-totalFiles">0</span> files
-                                    </small>
-                                </div>
-                                <div class="col-4" style="padding: 0 2px;">
-                                    <small class="text-muted">
-                                        <i class="fas fa-clock"></i> <span id="derivative-elapsedTime">0s</span>
-                                    </small>
-                                </div>
-                                <div class="col-4" style="padding: 0 2px;">
-                                    <small class="text-warning">
-                                        <i class="fas fa-layer-group"></i> Hybrid
-                                    </small>
-                                </div>
-                            </div>
-                            <small class="text-muted d-block text-center" id="derivative-progressMessage" style="margin-top: 2px;">Initializing...</small>
-                        </div>
-                    </div>
-                    <!-- Analysis Results Grid -->
-                    <div class="analysis-grid mt-4" id="hybrid-analysis" style="display: none;">
-                        <div class="method-results">
-                            <div class="d-flex justify-content-between align-items-center gap-2">
-                                <div class="analysis-box border rounded flex-grow-1">
-                                    <h4 class="peaks-count">0</h4>
-                                    <small class="text-muted">P</small>
-                                </div>
-                                <div class="analysis-box border rounded flex-grow-1">
-                                    <h4 class="confidence-value">0%</h4>
-                                    <small class="text-muted">A</small>
-                                </div>
-                                <div class="analysis-box border rounded flex-grow-1">
-                                    <h4 class="processing-time">0s</h4>
-                                    <small class="text-muted">T</small>
-                                </div>
-                            </div>
-                            <!-- Preview Graph -->
-                            <div class="preview-graph mb-3">
-                                <canvas class="preview-canvas" width="400" height="200"></canvas>
-                            </div>
-                            <div class="progress mb-3">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
-                            </div>
-                            <button class="btn btn-outline-primary w-100 view-details-btn" disabled>
-                                View Detailed Analysis
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="col-md-3 mb-4">
-                <div class="method-card">
-                    <div class="method-header">
-                        <img src="/static/img/enhanced.svg" alt="Enhanced V4" class="method-icon">
-                        <h3>Enhanced V4</h3>
-                        <div class="quality-badge" style="background: linear-gradient(45deg, #007bff, #0056b3);">Production</div>
-                    </div>
-                    <div class="method-content text-center">
-                        <p class="text-muted mb-3">Enhanced Algorithm V4.0 - Ferrocyanide Optimized</p>
-                        <button class="btn btn-primary w-100 mb-1 start-detection" data-method="enhanced_v4" onclick="showInlineProgress('enhanced_v4'); window.startDetection && window.startDetection('enhanced_v4')" id="enhanced_v4-start-btn">
-                            Start Detection
-                        </button>
-                        
-                        <!-- Inline Progress Bar -->
-                        <div class="progress-container" id="enhanced_v4-progress" style="display: none;">
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
-                                     role="progressbar" style="width: 0%" id="enhanced_v4-progressBar">
-                                    <small id="enhanced_v4-progressPercent">0%</small>
-                                </div>
-                            </div>
-                            <div class="row text-center" style="margin: 2px 0 0 0;">
-                                <div class="col-4" style="padding: 0 2px;">
-                                    <small class="text-muted">
-                                        <strong id="enhanced_v4-currentFile">0</strong>/<span id="enhanced_v4-totalFiles">0</span> files
-                                    </small>
-                                </div>
-                                <div class="col-4" style="padding: 0 2px;">
-                                    <small class="text-muted">
-                                        <i class="fas fa-clock"></i> <span id="enhanced_v4-elapsedTime">0s</span>
-                                    </small>
-                                </div>
-                                <div class="col-4" style="padding: 0 2px;">
-                                    <small class="text-primary">
-                                        <i class="fas fa-cogs"></i> V4 Pro
-                                    </small>
-                                </div>
-                            </div>
-                            <small class="text-muted d-block text-center" id="enhanced_v4-progressMessage" style="margin-top: 2px;">Initializing...</small>
-                        </div>
-                    </div>
-                    <!-- Analysis Results Grid -->
-                    <div class="analysis-grid mt-4" id="enhanced_v4-analysis" style="display: none;">
-                        <div class="method-results">
-                            <div class="d-flex justify-content-between align-items-center gap-2">
-                                <div class="analysis-box border rounded flex-grow-1">
-                                    <h4 class="peaks-count">0</h4>
-                                    <small class="text-muted">P</small>
-                                </div>
-                                <div class="analysis-box border rounded flex-grow-1">
-                                    <h4 class="confidence-value">0%</h4>
-                                    <small class="text-muted">A</small>
-                                </div>
-                                <div class="analysis-box border rounded flex-grow-1">
-                                    <h4 class="processing-time">0s</h4>
-                                    <small class="text-muted">T</small>
-                                </div>
-                            </div>
-                            <!-- Preview Graph -->
-                            <div class="preview-graph mb-3">
-                                <canvas class="preview-canvas" width="400" height="200"></canvas>
-                            </div>
-                            <div class="progress mb-3">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
-                            </div>
-                            <button class="btn btn-outline-primary w-100 view-details-btn" disabled>
-                                View Detailed Analysis
-                            </button>
-                            <!-- V4 Specific Export Button -->
-                            <button class="btn btn-success w-100 mt-2 export-pls-btn" style="display: none;" onclick="exportPLSData('enhanced_v4')">
-                                <i class="fas fa-download"></i> Export for PLS Analysis
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Enhanced V4 Improved Method Card -->
-            <div class="col-md-3 mb-4">
+            <div class="col-md-4 mb-4">
                 <div class="method-card">
                     <div class="method-header">
                         <img src="/static/img/enhanced.svg" alt="Enhanced V4 Improved" class="method-icon">
                         <h3>Enhanced V4+</h3>
-                        <div class="quality-badge" style="background: linear-gradient(45deg, #28a745, #1e7e34);">Improved</div>
+                        <!--<div class="quality-badge" style="background: linear-gradient(45deg, #28a745, #1e7e34);">Improved</div>-->
                     </div>
                     <div class="method-content text-center">
                         <p class="text-muted mb-3">Enhanced V4 + Better Reduction Detection</p>
