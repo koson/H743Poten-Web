@@ -1,0 +1,10 @@
+[33mec9b047[m[33m ([m[1;36mHEAD -> [m[1;32mfeature/Baseline-detect-algo-2[m[33m, [m[1;31morigin/feature/Baseline-detect-algo-2[m[33m)[m Update peak detection layout and adjust workflow visualization height
+[33ma023a34[m Update instrument references in workflow visualization
+[33maa70238[m[33m ([m[1;33mtag: peak-plotly-multitrace[m[33m)[m feat: migrate peak analysis to Plotly.js, add multi-trace select, show peaks per trace
+[33me6a4691[m revert UI to commit 0b5fbd59, keep new real data features
+[33m3f46151[m[33m ([m[1;33mtag: v2.0.0-peak-detection-complete[m[33m)[m feat: Complete real data integration for peak detection with workflow integration
+[33m7892eb6[m feat: integrate peak detection visualization into workflow page
+[33m8f4a89b[m[33m ([m[1;33mtag: V1.0.2-Workflow-2-Complete[m[33m, [m[1;31morigin/feature/peak-detection-framework[m[33m)[m feat(workflow): complete real data visualization and export
+[33m7c4e98d[m Add preview data CSV files and API test script
+[33ma378e47[m[33m ([m[1;33mtag: V1.0.1-Workflow-1-complete[m[33m)[m feat: Implement individual instrument file handling and enhance UI for data import
+[33m94c60dd[m Add validation scripts and framework for peak detection analysis
