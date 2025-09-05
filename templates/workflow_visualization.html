@@ -154,6 +154,7 @@
             border-radius: 8px;
             border: 1px solid #ddd;
             margin-top: 10px;
+            min-height: 600px; /* Ensure consistent height across all steps */
         }
 
         .file-selector {
@@ -608,7 +609,7 @@
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
-            .instrument-grid {
+            .instrument-grid, .instrument-selector {
                 grid-template-columns: 1fr;
                 gap: 15px;
             }
@@ -620,7 +621,7 @@
         }
 
         @media (max-width: 1024px) {
-            .instrument-grid {
+            .instrument-grid, .instrument-selector {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
@@ -724,9 +725,10 @@
 
         .instrument-selector {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 15px 0;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+            padding: 0 10px;
         }
 
         .instrument-card {
@@ -847,6 +849,35 @@
 
         .status-completed {
             background: #28a745;
+        }
+
+        /* Performance Metrics Styles */
+        .performance-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .metric-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 0.9em;
         }
 
         .status-error {
@@ -990,7 +1021,7 @@
                     </div>
                     <div class="step-content">
                         <div class="step-description">
-                            Select your instrument type and import CV data files. The system supports multiple formats including PalmSens, STM32H743, and other standard electrochemical instruments.
+                            Select your instrument type and import CV data files. The system supports multiple formats including RefPoten, H743Poten, and other standard electrochemical instruments.
                         </div>
                         
                         <div class="step-details">
@@ -998,12 +1029,12 @@
                             <div class="instrument-selector">
                                 <div class="instrument-card" onclick="selectInstrument('palmsens')">
                                     <div class="instrument-icon">🔬</div>
-                                    <div><strong>PalmSens</strong></div>
+                                    <div><strong>RefPoten</strong></div>
                                     <div>Reference Standard</div>
                                 </div>
                                 <div class="instrument-card selected" onclick="selectInstrument('stm32')">
                                     <div class="instrument-icon">⚡</div>
-                                    <div><strong>STM32H743</strong></div>
+                                    <div><strong>H743Poten</strong></div>
                                     <div>Target Instrument</div>
                                 </div>
                                 <div class="instrument-card" onclick="selectInstrument('generic')">
@@ -1016,11 +1047,11 @@
                             <h4>📂 Data Import by Instrument Type</h4>
                             <!-- Instrument Grid Layout -->
                             <div class="instrument-grid">
-                                <!-- PalmSens Card -->
+                                <!-- RefPoten Card -->
                                 <div class="instrument-card" id="palmsens-card">
                                     <div class="instrument-header">
-                                        <h4>📊 PalmSens</h4>
-                                        <div class="quality-badge">Quality: 98%</div>
+                                        <h4>📊 RefPoten</h4>
+                                        <!-- <div class="quality-badge">Quality: 98%</div>-->
                                     </div>
                                     <div class="instrument-body">
                                         <input type="file" id="palmsensInput" webkitdirectory multiple class="file-input">
@@ -1044,11 +1075,11 @@
                                     </div>
                                 </div>
 
-                                <!-- STM32H743 Card -->
+                                <!-- H743Poten Card -->
                                 <div class="instrument-card" id="stm32-card">
                                     <div class="instrument-header">
-                                        <h4>⚡ STM32H743</h4>
-                                        <div class="quality-badge">Quality: 95%</div>
+                                        <h4>⚡ H743Poten</h4>
+                                       <!-- <div class="quality-badge">Quality: 95%</div>-->
                                     </div>
                                     <div class="instrument-body">
                                         <input type="file" id="stm32Input" webkitdirectory multiple class="file-input">
@@ -1076,7 +1107,7 @@
                                 <div class="instrument-card" id="generic-card">
                                     <div class="instrument-header">
                                         <h4>📁 Generic CSV</h4>
-                                        <div class="quality-badge">Quality: 85%</div>
+                                        <!--<div class="quality-badge">Quality: 85%</div>-->
                                     </div>
                                     <div class="instrument-body">
                                         <input type="file" id="genericInput" webkitdirectory multiple class="file-input">
@@ -1199,7 +1230,7 @@
                     </div>
                     <div class="step-content">
                         <div class="step-description">
-                            Apply machine learning calibration to transform STM32H743 measurements to PalmSens-equivalent accuracy.
+                            Apply machine learning calibration to transform H743Poten measurements to RefPoten accuracy.
                         </div>
                         
                         <div class="step-details">
@@ -1219,6 +1250,93 @@
                                     <div class="instrument-icon">🚀</div>
                                     <div><strong>Gradient Boosting</strong></div>
                                     <div>High Speed</div>
+                                </div>
+                            </div>
+
+                            <h4>📊 Calibration Training & Validation</h4>
+                            <!-- Calibration Grid Layout -->
+                            <div class="instrument-grid">
+                                <!-- Training Data Card -->
+                                <div class="instrument-card" id="training-card">
+                                    <div class="instrument-header">
+                                        <h4>📚 Training Dataset</h4>
+                                    </div>
+                                    <div class="instrument-body">
+                                        <input type="file" id="trainingInput" webkitdirectory multiple class="file-input">
+                                        <label for="trainingInput" class="folder-button">
+                                            📂 Load Training Data
+                                        </label>
+                                        <div class="instrument-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">📊 Pairs:</span>
+                                                <span class="detail-value" id="trainingPairs">0</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">💾 Size:</span>
+                                                <span class="detail-value" id="trainingSize">0 MB</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">⚡ Status:</span>
+                                                <span class="detail-value status ready" id="training-status">Ready</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Validation Data Card -->
+                                <div class="instrument-card" id="validation-card">
+                                    <div class="instrument-header">
+                                        <h4>✅ Validation Dataset</h4>
+                                    </div>
+                                    <div class="instrument-body">
+                                        <input type="file" id="validationInput" webkitdirectory multiple class="file-input">
+                                        <label for="validationInput" class="folder-button">
+                                            📂 Load Validation Data
+                                        </label>
+                                        <div class="instrument-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">📊 Pairs:</span>
+                                                <span class="detail-value" id="validationPairs">0</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">💾 Size:</span>
+                                                <span class="detail-value" id="validationSize">0 MB</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">⚡ Status:</span>
+                                                <span class="detail-value status ready" id="validation-status">Ready</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Model Performance Card -->
+                                <div class="instrument-card" id="performance-card">
+                                    <div class="instrument-header">
+                                        <h4>📈 Model Performance</h4>
+                                    </div>
+                                    <div class="instrument-body">
+                                        <div class="performance-metrics">
+                                            <div class="metric-item">
+                                                <span class="metric-label">🎯 Accuracy:</span>
+                                                <span class="metric-value" id="modelAccuracy">0%</span>
+                                            </div>
+                                            <div class="metric-item">
+                                                <span class="metric-label">⚡ Speed:</span>
+                                                <span class="metric-value" id="modelSpeed">0 ms</span>
+                                            </div>
+                                            <div class="metric-item">
+                                                <span class="metric-label">🔍 R² Score:</span>
+                                                <span class="metric-value" id="modelR2">0.000</span>
+                                            </div>
+                                        </div>
+                                        <div class="instrument-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">⚡ Status:</span>
+                                                <span class="detail-value status ready" id="performance-status">Not Trained</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
