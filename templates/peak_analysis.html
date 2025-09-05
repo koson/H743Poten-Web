@@ -303,6 +303,8 @@
         const chartData = {{ data|tojson|safe }};
         const methodType = {{ method|tojson|safe }};
         const methodNameStr = {{ methodName|tojson|safe }};
+        const filenames = {{ filenames|tojson|safe }};
+        const selectedFiles = {{ selectedFiles|tojson|safe }};
         
         // Store global references for peak management
         window.chartData = chartData;
@@ -315,6 +317,21 @@
         console.log('[DEBUG] chartData:', chartData);
         console.log('[DEBUG] methodType:', methodType);
         console.log('[DEBUG] methodNameStr:', methodNameStr);
+        console.log('[DEBUG] filenames:', filenames);
+        console.log('[DEBUG] selectedFiles:', selectedFiles);
+        
+        // Debug: Check for filenames in chartData structure
+        if (Array.isArray(chartData)) {
+            console.log('[DEBUG] chartData is array, length:', chartData.length);
+            chartData.forEach((item, index) => {
+                console.log(`[DEBUG] chartData[${index}]:`, item);
+                if (item && typeof item === 'object') {
+                    console.log(`[DEBUG] chartData[${index}] keys:`, Object.keys(item));
+                }
+            });
+        } else if (chartData && typeof chartData === 'object') {
+            console.log('[DEBUG] chartData is object, keys:', Object.keys(chartData));
+        }
         
         // Debug: Check first peak data for baseline info
         if (peaksData && peaksData.length > 0) {
@@ -368,11 +385,32 @@
                 let nTraces = 1;
                 let fileLabels = [];
                 let isArrayObj = false;
-                // Detect array of object format
-                if (Array.isArray(chartData) && chartData.length > 0 && typeof chartData[0] === 'object' && chartData[0].voltage) {
+                
+                // Detect array of object format first and check for .name property
+                if (Array.isArray(chartData) && chartData.length > 0 && typeof chartData[0] === 'object') {
                     nTraces = chartData.length;
                     isArrayObj = true;
-                    fileLabels = chartData.map((d, i) => d.filename || d.label || `Trace ${i+1}`);
+                    
+                    // Use .name property from chartData if available
+                    if (chartData[0].name) {
+                        console.log('[DEBUG] Using chartData[i].name for filenames');
+                        fileLabels = chartData.map((d, i) => {
+                            const filename = d.name || `Trace ${i+1}`;
+                            console.log(`[DEBUG] chartData[${i}].name: "${filename}"`);
+                            return filename;
+                        });
+                    } else {
+                        // Fallback to other properties
+                        fileLabels = chartData.map((d, i) => d.filename || d.label || `Trace ${i+1}`);
+                    }
+                } else if (Array.isArray(filenames) && filenames.length > 0) {
+                    console.log('[DEBUG] Using filenames from session data:', filenames);
+                    fileLabels = filenames;
+                    nTraces = filenames.length;
+                } else if (Array.isArray(selectedFiles) && selectedFiles.length > 0) {
+                    console.log('[DEBUG] Using selectedFiles from session data:', selectedFiles);
+                    fileLabels = selectedFiles.map(file => file.name || file);
+                    nTraces = selectedFiles.length;
                 } else if (chartData && chartData.voltage && Array.isArray(chartData.voltage[0])) {
                     nTraces = chartData.voltage.length;
                     isArrayObj = false;
@@ -381,16 +419,21 @@
                     } else if (Array.isArray(chartData.file_labels)) {
                         fileLabels = chartData.file_labels;
                     } else {
+                        console.log('[DEBUG] Falling back to Trace numbers');
                         for (let i = 0; i < nTraces; ++i) fileLabels.push(nTraces > 1 ? `Trace ${i+1}` : 'Trace 1');
                     }
                 } else {
                     nTraces = 1;
                     isArrayObj = false;
+                    console.log('[DEBUG] Single trace mode - fallback to Trace 1');
                     fileLabels = ['Trace 1'];
                 }
                 
                 // Save for renderSingleTrace - SET THIS BEFORE CALLING renderSingleTrace
                 window._isArrayObj = isArrayObj;
+                
+                console.log('[DEBUG] fileLabels created:', fileLabels);
+                console.log('[DEBUG] nTraces:', nTraces);
                 
                 const traceSelect = document.getElementById('traceSelect');
                 traceSelect.innerHTML = '';
@@ -398,6 +441,7 @@
                     const opt = document.createElement('option');
                     opt.value = i;
                     opt.textContent = fileLabels[i];
+                    console.log(`[DEBUG] Adding option ${i}: "${fileLabels[i]}"`);
                     traceSelect.appendChild(opt);
                 }
                 
@@ -537,7 +581,7 @@
                 console.log('[DEBUG] Using array object format');
                 voltage = chartData[idx]?.voltage || [];
                 current = chartData[idx]?.current || [];
-                label = chartData[idx]?.filename || chartData[idx]?.label || `Trace ${idx+1}`;
+                label = chartData[idx]?.name || chartData[idx]?.filename || chartData[idx]?.label || `Trace ${idx+1}`;
                 console.log('[DEBUG] Array obj - voltage length:', voltage.length, 'current length:', current.length);
             } else if (chartData && chartData.voltage && Array.isArray(chartData.voltage[0])) {
                 console.log('[DEBUG] Using nested array format');

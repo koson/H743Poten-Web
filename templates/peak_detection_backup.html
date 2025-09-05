@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="view        .peak-details {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .peak-info .card-header {
+            background-color: #f8f9fa;
+            padding: 0.75rem 1rem;
+        }
+
+        .peak-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .peak-list {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .peak-item {
+            padding: 0.75rem;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .peak-item:last-child {
+            border-bottom: none;
+        }
+
+        .peak-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .peak-item.selected {
+            background-color: #e9ecef;
+        }
+
+        .peak-type {
+            margin-bottom: 0.4rem;
+        }
+
+        .type-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .type-badge.oxidation {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .type-badge.reduction {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .peak-values {
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .value-label {
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .value {
+            color: #212529;
+        }
+
+        .peak-confidence {
+            font-size: 0.75rem;
+        }
+
+        .peak-confidence .badge {
+            font-weight: 500;
+            padding: 0.2rem 0.4rem;
+        }
+
+        .text-monospace {
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            text-align: center;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .type-badge.oxidation {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .type-badge.reduction {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }ontent="width=device-width, initial-scale=1.0">
+    <title>Peak Detection Visualization</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Enhanced Modal Styling */
+        .modal-wrapper {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            will-change: opacity;
+            transform: translateZ(0);
+            -webkit-font-smoothing: subpixel-antialiased;
+            backface-visibility: hidden;
+        }
+
+        .modal-wrapper.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-wrapper .modal-dialog {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+            transform: translateZ(0);
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+
+        .modal-wrapper .modal-content {
+            position: relative;
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: translateZ(0);
+            will-change: transform;
+            backface-visibility: hidden;
+            overflow: hidden;
+        }
+
+        .modal-wrapper .modal-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8f9fa;
+            transform: translateZ(0);
+        }
+
+        .modal-wrapper .modal-body {
+            padding: 1rem;
+            max-height: calc(90vh - 120px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            transform: translateZ(0);
+            background: white;
+        }
+
+        .modal-wrapper .btn-close {
+            padding: 1rem;
+            cursor: pointer;
+            background: transparent;
+            border: 0;
+            opacity: 0.5;
+            transition: opacity 0.15s;
+            pointer-events: all;
+        }
+
+        .modal-wrapper .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* Body state when modal is open */
+        body.modal-open {
+            overflow: hidden;
+            padding-right: 0 !important;
+        }
+
+        .peak-visualization-container {
+            width: 100%;
+            height: 600px;
+            position: relative;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transform: translateZ(0);
+            will-change: transform;
+            backface-visibility: hidden;
+            overflow: hidden;
+        }
+
+        #cvPlot {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 4px;
+            transform: translateZ(0);
+            will-change: transform;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        .method-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            height: 100%;
+            transition: transform 0.2s;
+        }
+
+        .method-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .method-header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .method-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 15px;
+        }
+
+        .quality-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+
+        .method-content {
+            padding-top: 10px;
+        }
+
+        .stats {
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #6c757d;
+        }
+
+        .stat-value {
+            font-weight: 600;
+        }
+
+        .view-btn {
+            width: 100%;
+        }
+
+        .modal-xl {
+            max-width: 90%;
+        }
+
+        .data-info, .peak-details {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .progress-container {
+            margin-top: 2px;
+            padding: 4px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-container .progress {
+            margin: 0 !important;
+            background-color: #e9ecef;
+            width: 100% !important;
+            position: relative;
+        }
+        
+        .progress-container .progress-bar {
+            position: relative;
+            overflow: visible;
+            height: 20px !important;
+            min-height: 20px !important;
+            line-height: 20px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        .progress-container .row {
+            margin: 0 !important;
+            width: 100%;
+        }
+        
+        .progress-container .col-4 {
+            padding: 0 2px !important;
+        }
+
+        .controls {
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .toolbar {
+            margin-bottom: 20px;
+        }
+
+        .toolbar button {
+            margin-right: 10px;
+        }
+
+        .peak-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .peak-marker:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .peak-marker.oxidation {
+            background: #4CAF50;
+        }
+
+        .peak-marker.reduction {
+            background: #f44336;
+        }
+
+        .peak-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confidence-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.5);
+            pointer-events: none;
+        }
+        
+        .analysis-grid {
+            border-top: 1px solid #e9ecef;
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .analysis-box {
+            background-color: #f8f9fa;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 55px;
+            border-radius: 6px;
+            padding: 0.5rem !important;
+            text-align: center;
+        }
+        
+        .analysis-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: #28a745;
+        }
+        
+        .analysis-box h4 {
+            color: #28a745;
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.2rem;
+            line-height: 1;
+            text-align: center;
+            margin-bottom: 0.1rem;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .analysis-box small {
+            font-size: 0.5rem;
+            display: block;
+            text-align: center;
+            color: #6c757d;
+            font-weight: 500;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: -0.2px;
+            line-height: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            margin-top: -2px;
+        }
+        
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+        
+        .text-center .col-4 {
+            padding: 0.5rem;
+        }
+
+        .analysis-grid {
+            border-top: 1px solid #dee2e6;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+        }
+
+        .method-results {
+            background-color: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin: 0 0.5rem;
+        }
+
+        .method-content {
+            border-bottom: none;
+            margin-bottom: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .start-detection {
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+        }
+
+        .start-detection:hover {
+            box-shadow: 0 4px 6px rgba(40, 167, 69, 0.3);
+        }
+
+        .view-details-btn {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .view-details-btn:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        }
+
+        .preview-graph {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 1rem;
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .peak-marker-preview {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 4px rgba(0,0,0,0.2);
+        }
+
+        .peak-marker-preview.oxidation {
+            background: #4CAF50;
+        }
+
+        .peak-marker-preview.reduction {
+            background: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>Peak Detection Analysis</h2>
+                <p class="text-muted">Advanced peak detection using multiple algorithms</p>
+            </div>
+        </div>
+        
+        <!-- Include Peak Detection Content -->
+        <div class="row">
+            <div class="col-12">
+                {% include 'peak_detection_original_content.html' %}
+            </div>
+        </div>
+    </div>
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="method-card">
+                    <div class="method-header">
+                        <img src="/static/img/brain.svg" alt="DeepCV" class="method-icon">
+                        <h3>DeepCV</h3>
+                        <!-- <div class="quality-badge">Best</div> -->
+                    </div>
+                    <div class="method-content text-center">
+                        <p class="text-muted mb-3">AI-Enhanced (Best)</p>
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="ml" onclick="showInlineProgress('ml'); window.startDetection && window.startDetection('ml')" id="ml-start-btn">
+                            Start Detection
+                        </button>
+                        
+                        <!-- Inline Progress Bar -->
+                        <div class="progress-container" id="ml-progress" style="display: none;">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                     role="progressbar" style="width: 0%" id="ml-progressBar">
+                                    <small id="ml-progressPercent">0%</small>
+                                </div>
+                            </div>
+                            <div class="row text-center" style="margin: 2px 0 0 0;">
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <strong id="ml-currentFile">0</strong>/<span id="ml-totalFiles">0</span> files
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> <span id="ml-elapsedTime">0s</span>
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-success">
+                                        <i class="fas fa-brain"></i> AI Processing
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-center" id="ml-progressMessage" style="margin-top: 2px;">Initializing...</small>
+                        </div>
+                    </div>
+                    <!-- Analysis Results Grid -->
+                    <div class="analysis-grid mt-4" id="ml-analysis" style="display: none;">
+                        <div class="method-results">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="peaks-count">0</h4>
+                                    <small class="text-muted">P</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="confidence-value">0%</h4>
+                                    <small class="text-muted">A</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="processing-time">0s</h4>
+                                    <small class="text-muted">T</small>
+                                </div>
+                            </div>
+                            <!-- Preview Graph -->
+                            <div class="preview-graph mb-3">
+                                <canvas class="preview-canvas" width="400" height="200"></canvas>
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <button class="btn btn-outline-primary w-100 view-details-btn" disabled>
+                                View Detailed Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="method-card">
+                    <div class="method-header">
+                        <img src="/static/img/graph.svg" alt="TraditionalCV" class="method-icon">
+                        <h3>TraditionalCV</h3>
+                        <!-- <div class="quality-badge">Classic</div> -->
+                    </div>
+                    <div class="method-content text-center">
+                        <p class="text-muted mb-3">Classical Method</p>
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="prominence" onclick="showInlineProgress('prominence'); window.startDetection && window.startDetection('prominence')" id="prominence-start-btn">
+                            Start Detection
+                        </button>
+                        
+                        <!-- Inline Progress Bar -->
+                        <div class="progress-container" id="prominence-progress" style="display: none;">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
+                                     role="progressbar" style="width: 0%" id="prominence-progressBar">
+                                    <small id="prominence-progressPercent">0%</small>
+                                </div>
+                            </div>
+                            <div class="row text-center" style="margin: 2px 0 0 0;">
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <strong id="prominence-currentFile">0</strong>/<span id="prominence-totalFiles">0</span> files
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> <span id="prominence-elapsedTime">0s</span>
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-info">
+                                        <i class="fas fa-chart-line"></i> Traditional
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-center" id="prominence-progressMessage" style="margin-top: 2px;">Initializing...</small>
+                        </div>
+                    </div>
+                    <!-- Analysis Results Grid -->
+                    <div class="analysis-grid mt-4" id="traditional-analysis" style="display: none;">
+                        <div class="method-results">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="peaks-count">0</h4>
+                                    <small class="text-muted">P</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="confidence-value">0%</h4>
+                                    <small class="text-muted">A</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="processing-time">0s</h4>
+                                    <small class="text-muted">T</small>
+                                </div>
+                            </div>
+                            <!-- Preview Graph -->
+                            <div class="preview-graph mb-3">
+                                <canvas class="preview-canvas" width="400" height="200"></canvas>
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <button class="btn btn-outline-primary w-100 view-details-btn" disabled>
+                                View Detailed Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="method-card">
+                    <div class="method-header">
+                        <img src="/static/img/hybrid.svg" alt="HybridCV" class="method-icon">
+                        <h3>HybridCV</h3>
+                        <!-- <div class="quality-badge">Advanced</div> -->
+                    </div>
+                    <div class="method-content text-center">
+                        <p class="text-muted mb-3">Combined Approach</p>
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="derivative" onclick="showInlineProgress('derivative'); window.startDetection && window.startDetection('derivative')" id="derivative-start-btn">
+                            Start Detection
+                        </button>
+                        
+                        <!-- Inline Progress Bar -->
+                        <div class="progress-container" id="derivative-progress" style="display: none;">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
+                                     role="progressbar" style="width: 0%" id="derivative-progressBar">
+                                    <small id="derivative-progressPercent">0%</small>
+                                </div>
+                            </div>
+                            <div class="row text-center" style="margin: 2px 0 0 0;">
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <strong id="derivative-currentFile">0</strong>/<span id="derivative-totalFiles">0</span> files
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> <span id="derivative-elapsedTime">0s</span>
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-warning">
+                                        <i class="fas fa-layer-group"></i> Hybrid
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-center" id="derivative-progressMessage" style="margin-top: 2px;">Initializing...</small>
+                        </div>
+                    </div>
+                    <!-- Analysis Results Grid -->
+                    <div class="analysis-grid mt-4" id="hybrid-analysis" style="display: none;">
+                        <div class="method-results">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="peaks-count">0</h4>
+                                    <small class="text-muted">P</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="confidence-value">0%</h4>
+                                    <small class="text-muted">A</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="processing-time">0s</h4>
+                                    <small class="text-muted">T</small>
+                                </div>
+                            </div>
+                            <!-- Preview Graph -->
+                            <div class="preview-graph mb-3">
+                                <canvas class="preview-canvas" width="400" height="200"></canvas>
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <button class="btn btn-outline-primary w-100 view-details-btn" disabled>
+                                View Detailed Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="method-card">
+                    <div class="method-header">
+                        <img src="/static/img/enhanced.svg" alt="Enhanced V4" class="method-icon">
+                        <h3>Enhanced V4</h3>
+                        <!-- <div class="quality-badge" style="background: linear-gradient(45deg, #007bff, #0056b3);">Production</div> -->
+                    </div>
+                    <div class="method-content text-center">
+                        <p class="text-muted mb-3">Enhanced Algorithm V4.0 - Ferrocyanide Optimized</p>
+                        <button class="btn btn-primary w-100 mb-1 start-detection" data-method="enhanced_v4" onclick="showInlineProgress('enhanced_v4'); window.startDetection && window.startDetection('enhanced_v4')" id="enhanced_v4-start-btn">
+                            Start Detection
+                        </button>
+                        
+                        <!-- Inline Progress Bar -->
+                        <div class="progress-container" id="enhanced_v4-progress" style="display: none;">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                     role="progressbar" style="width: 0%" id="enhanced_v4-progressBar">
+                                    <small id="enhanced_v4-progressPercent">0%</small>
+                                </div>
+                            </div>
+                            <div class="row text-center" style="margin: 2px 0 0 0;">
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <strong id="enhanced_v4-currentFile">0</strong>/<span id="enhanced_v4-totalFiles">0</span> files
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> <span id="enhanced_v4-elapsedTime">0s</span>
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-primary">
+                                        <i class="fas fa-cogs"></i> V4 Pro
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-center" id="enhanced_v4-progressMessage" style="margin-top: 2px;">Initializing...</small>
+                        </div>
+                    </div>
+                    <!-- Analysis Results Grid -->
+                    <div class="analysis-grid mt-4" id="enhanced_v4-analysis" style="display: none;">
+                        <div class="method-results">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="peaks-count">0</h4>
+                                    <small class="text-muted">P</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="confidence-value">0%</h4>
+                                    <small class="text-muted">A</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="processing-time">0s</h4>
+                                    <small class="text-muted">T</small>
+                                </div>
+                            </div>
+                            <!-- Preview Graph -->
+                            <div class="preview-graph mb-3">
+                                <canvas class="preview-canvas" width="400" height="200"></canvas>
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <button class="btn btn-outline-primary w-100 view-details-btn" disabled>
+                                View Detailed Analysis
+                            </button>
+                            <!-- V4 Specific Export Button -->
+                            <button class="btn btn-success w-100 mt-2 export-pls-btn" style="display: none;" onclick="exportPLSData('enhanced_v4')">
+                                <i class="fas fa-download"></i> Export for PLS Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+
+            <!-- Enhanced V4 Improved Method Card -->
+            <div class="col-md-3 mb-4">
+                <div class="method-card">
+                    <div class="method-header">
+                        <img src="/static/img/enhanced.svg" alt="Enhanced V4 Improved" class="method-icon">
+                        <h3>Enhanced V4+</h3>
+                        <!-- <div class="quality-badge" style="background: linear-gradient(45deg, #28a745, #1e7e34);">Improved</div> -->
+                    </div>
+                    <div class="method-content text-center">
+                        <p class="text-muted mb-3">Enhanced V4 + Better Reduction Detection</p>
+                        <button class="btn btn-success w-100 mb-1 start-detection" data-method="enhanced_v4_improved" onclick="showInlineProgress('enhanced_v4_improved'); window.startDetection && window.startDetection('enhanced_v4_improved')" id="enhanced_v4_improved-start-btn">
+                            Start Detection
+                        </button>
+                        
+                        <!-- Inline Progress Bar -->
+                        <div class="progress-container" id="enhanced_v4_improved-progress" style="display: none;">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                     role="progressbar" style="width: 0%" id="enhanced_v4_improved-progressBar">
+                                    <small id="enhanced_v4_improved-progressPercent">0%</small>
+                                </div>
+                            </div>
+                            <div class="row text-center" style="margin: 2px 0 0 0;">
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <strong id="enhanced_v4_improved-currentFile">0</strong>/<span id="enhanced_v4_improved-totalFiles">0</span> files
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> <span id="enhanced_v4_improved-elapsedTime">0s</span>
+                                    </small>
+                                </div>
+                                <div class="col-4" style="padding: 0 2px;">
+                                    <small class="text-success">
+                                        <i class="fas fa-plus-circle"></i> V4+
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block text-center" id="enhanced_v4_improved-progressMessage" style="margin-top: 2px;">Initializing...</small>
+                        </div>
+                    </div>
+                    <!-- Analysis Results Grid -->
+                    <div class="analysis-grid mt-4" id="enhanced_v4_improved-analysis" style="display: none;">
+                        <div class="method-results">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="peaks-count">0</h4>
+                                    <small class="text-muted">P</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="ox-count">0</h4>
+                                    <small class="text-danger">Ox</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="red-count">0</h4>
+                                    <small class="text-primary">Red</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="files-count">0</h4>
+                                    <small class="text-muted">F</small>
+                                </div>
+                            </div>
+                            <!-- Additional metrics row -->
+                            <div class="d-flex justify-content-between align-items-center gap-2 mt-2">
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="confidence-value">0%</h4>
+                                    <small class="text-muted">Conf</small>
+                                </div>
+                                <div class="analysis-box border rounded flex-grow-1">
+                                    <h4 class="processing-time">0s</h4>
+                                    <small class="text-muted">Time</small>
+                                </div>
+                            </div>
+                            <!-- Preview Graph -->
+                            <div class="preview-graph mb-3">
+                                <canvas class="preview-canvas" width="400" height="200"></canvas>
+                            </div>
+                            <!-- V4 Improved Action Buttons -->
+                            <div class="d-flex gap-2 mt-2">
+                                <button class="btn btn-primary flex-grow-1 view-analysis-btn" style="display: none;" onclick="createAnalysisSession('enhanced_v4_improved')">>
+                                    <i class="fas fa-chart-line"></i> View Detailed Analysis
+                                </button>
+                                <button class="btn btn-success flex-grow-1 export-pls-btn" style="display: none;" onclick="exportPLSData('enhanced_v4_improved')">
+                                    <i class="fas fa-download"></i> Export PLS Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced V5 Method Card -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Modal -->
+        <div class="modal-wrapper" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Peak Analysis</h5>
+                        <button type="button" class="btn-close" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div class="peak-visualization-container">
+                                    <canvas id="cvPlot"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="controls mb-3">
+                                    <button id="exportPeakDataBtn" class="btn btn-primary btn-sm w-100 mb-2">
+                                        <i class="bi bi-download"></i> Export Data
+                                    </button>
+                                    <button id="toggleGridBtn" class="btn btn-outline-secondary btn-sm w-100 mb-2">
+                                        <i class="bi bi-grid"></i> Toggle Grid
+                                    </button>
+                                    <button id="resetViewBtn" class="btn btn-outline-secondary btn-sm w-100">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Reset View
+                                    </button>
+                                </div>
+                                <div class="data-info mb-3">
+                                    <!-- Data information will be populated here -->
+                                </div>
+                                <div class="peak-info card mb-3">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">Peak Information</h6>
+                                        <span class="badge bg-success">Active Method</span>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="peak-list">
+                                            <!-- Peak list will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="peak-details">
+                                    <!-- Peak details will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/peak_canvas_manager.js"></script>
+    <script src="/static/js/peak_graph_utils.js"></script>
+    <script src="/static/js/peak_detection.js?v=4004"></script>
+    
+    <script>
+        // Progress tracking functionality
+        let progressInterval;
+        let currentMethod = null;
+        let lastProgress = 0; // Track last progress to prevent going backwards
+        let hideTimeout = null; // Debounce hide calls
+        
+        function showInlineProgress(method) {
+            console.log('[PROGRESS] Showing inline progress for method:', method);
+            currentMethod = method;
+            lastProgress = 0; // Reset progress tracking
+            
+            // Clear any pending hide timeout
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+            
+            // Hide button and show progress
+            const startBtn = document.getElementById(method + '-start-btn');
+            const progressContainer = document.getElementById(method + '-progress');
+            
+            if (startBtn) startBtn.style.display = 'none';
+            if (progressContainer) progressContainer.style.display = 'block';
+            
+            // Reset progress display
+            resetProgress(method);
+            startProgressPolling();
+        }
+        
+        function hideInlineProgress(method) {
+            console.log('[PROGRESS] Hiding inline progress for method:', method);
+            
+            // Debounce multiple hide calls
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+            }
+            
+            hideTimeout = setTimeout(() => {
+                // Show button and hide progress with proper selectors
+                const startBtn = document.getElementById(method + '-start-btn');
+                const progressContainer = document.getElementById(method + '-progress');
+                
+                // Also try traditional button selectors - check method is not null
+                const startButtonTraditional = method ? document.getElementById(`start-${method.toLowerCase()}`) : null;
+                
+                if (startBtn) {
+                    startBtn.style.display = 'block';
+                    startBtn.textContent = 'Start Detection';
+                    startBtn.disabled = false;
+                    startBtn.classList.remove('btn-secondary');
+                    startBtn.classList.add('btn-success');
+                }
+                
+                if (startButtonTraditional) {
+                    startButtonTraditional.textContent = 'Start Detection';
+                    startButtonTraditional.disabled = false;
+                    startButtonTraditional.classList.remove('btn-secondary');
+                    startButtonTraditional.classList.add('btn-success');
+                }
+                
+                if (progressContainer) progressContainer.style.display = 'none';
+                
+                stopProgressPolling();
+                if (currentMethod === method) {
+                    currentMethod = null;
+                    lastProgress = 0; // Reset progress tracking
+                }
+                hideTimeout = null;
+            }, 100); // Small delay to prevent rapid calls
+        }
+        
+        function resetProgress(method) {
+            const progressBar = document.getElementById(method + '-progressBar');
+            const progressPercent = document.getElementById(method + '-progressPercent');
+            const currentFile = document.getElementById(method + '-currentFile');
+            const totalFiles = document.getElementById(method + '-totalFiles');
+            const elapsedTime = document.getElementById(method + '-elapsedTime');
+            const message = document.getElementById(method + '-progressMessage');
+            
+            if (progressBar) progressBar.style.width = '0%';
+            if (progressPercent) progressPercent.textContent = '0%';
+            if (currentFile) currentFile.textContent = '0';
+            if (totalFiles) totalFiles.textContent = '0';
+            if (elapsedTime) elapsedTime.textContent = '0s';
+            if (message) message.textContent = 'Initializing...';
+        }
+        
+        function startProgressPolling() {
+            // Stop any existing polling first
+            stopProgressPolling();
+            progressInterval = setInterval(updateProgress, 1000); // Reduced frequency to 1 second
+        }
+        
+        function stopProgressPolling() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+        
+        async function updateProgress() {
+            if (!currentMethod) return;
+            
+            try {
+                const response = await fetch('/get-progress');
+                const data = await response.json();
+                
+                console.log('[PROGRESS] Update received:', data);
+                
+                if (data.success && data.progress) {
+                    const progress = data.progress;
+                    const method = currentMethod;
+                    
+                    // Only update if progress is moving forward or is complete
+                    if (progress.percent >= lastProgress || progress.percent === 100) {
+                        lastProgress = progress.percent;
+                        
+                        // Update progress bar
+                        const progressBar = document.getElementById(method + '-progressBar');
+                        const progressPercent = document.getElementById(method + '-progressPercent');
+                        if (progressBar && progressPercent) {
+                            progressBar.style.width = progress.percent + '%';
+                            progressPercent.textContent = progress.percent + '%';
+                            console.log('[PROGRESS] Updated progress bar to:', progress.percent + '%');
+                        }
+                        
+                        // Update counters
+                        const currentFileEl = document.getElementById(method + '-currentFile');
+                        const totalFilesEl = document.getElementById(method + '-totalFiles');
+                        const elapsedTimeEl = document.getElementById(method + '-elapsedTime');
+                        
+                        if (currentFileEl && progress.current_file >= 0) {
+                            currentFileEl.textContent = progress.current_file;
+                            console.log('[PROGRESS] Updated current file to:', progress.current_file);
+                        }
+                        if (totalFilesEl && progress.total_files > 0) {
+                            totalFilesEl.textContent = progress.total_files;
+                            console.log('[PROGRESS] Updated total files to:', progress.total_files);
+                        }
+                        if (elapsedTimeEl) {
+                            elapsedTimeEl.textContent = progress.elapsed_time ? progress.elapsed_time + 's' : '0s';
+                        }
+                        
+                        // Update message
+                        const messageEl = document.getElementById(method + '-progressMessage');
+                        if (messageEl) {
+                            messageEl.textContent = progress.message;
+                            console.log('[PROGRESS] Updated message to:', progress.message);
+                        }
+                    } else {
+                        console.log('[PROGRESS] Skipping backwards progress:', progress.percent, 'last:', lastProgress);
+                    }
+                    
+                    // Hide progress when complete - multiple conditions
+                    if (progress.percent === 100 || (!progress.active && progress.percent >= 100) || progress.message.includes('Completed')) {
+                        console.log('[PROGRESS] Processing complete, hiding progress in 2 seconds');
+                        setTimeout(() => {
+                            if (currentMethod === method) { // Only hide if still the current method
+                                hideInlineProgress(method);
+                            }
+                        }, 2000); // Show complete state for 2 seconds
+                    }
+                }
+            } catch (error) {
+                console.error('[PROGRESS] Error updating progress:', error);
+            }
+        }
+        
+        // Intercept peak detection start to show progress
+        const originalStartDetection = window.startDetection;
+        window.startDetection = function(method) {
+            console.log('[PROGRESS] Starting detection with method:', method);
+            showInlineProgress(method);
+            
+            // Call original function
+            if (originalStartDetection) {
+                return originalStartDetection(method);
+            }
+        };
+        
+        // Also intercept fetch calls to detect when analysis starts
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options) {
+            // Check if this is a peak detection request
+            if (url && url.includes('/get-peaks/')) {
+                console.log('[PROGRESS] Peak detection request detected:', url);
+                // Progress already shown by startDetection
+            }
+            
+            return originalFetch.apply(this, arguments).then(response => {
+                // Check if peak detection is complete
+                if (url && url.includes('/get-peaks/') && response.ok) {
+                    console.log('[PROGRESS] Peak detection response received successfully');
+                    
+                    // Force reset button state after successful response
+                    setTimeout(() => {
+                        if (currentMethod) {
+                            console.log('[PROGRESS] Force resetting button for:', currentMethod);
+                            const buttonMethod = currentMethod === 'prominence' ? 'Traditional' : currentMethod;
+                            const startBtn = document.getElementById(currentMethod + '-start-btn');
+                            
+                            if (startBtn) {
+                                startBtn.textContent = 'Start Detection';
+                                startBtn.disabled = false;
+                                startBtn.classList.remove('btn-secondary');
+                                startBtn.classList.add('btn-success');
+                            }
+                            
+                            // Hide progress and stop polling
+                            hideInlineProgress(currentMethod);
+                        }
+                    }, 2000); // Give time for final polling
+                }
+                return response;
+            }).catch(error => {
+                if (url && url.includes('/get-peaks/') && currentMethod) {
+                    console.error('[PROGRESS] Peak detection error:', error);
+                    hideInlineProgress(currentMethod);
+                }
+                throw error;
+            });
+        };
+        
+        // Remove modal-related functions since we're not using them anymore
+        function showProgressModal() {
+            console.log('[PROGRESS] Modal test - showing inline progress for ml method');
+            showInlineProgress('ml');
+            setTimeout(() => {
+                hideInlineProgress('ml');
+            }, 5000);
+        }
+        
+        // Enhanced V4 PLS Export Functions
+        let enhancedV4Results = null; // Store V4 results for export
+        let enhancedV4ImprovedResults = null; // Store V4 Improved results for export
+        
+        function exportPLSData(method) {
+            console.log('🚀 Exporting PLS data for method:', method);
+            
+            if (method === 'enhanced_v4' && enhancedV4Results) {
+                // Export Enhanced V4 results to CSV
+                const csvData = formatPLSDataAsCSV(enhancedV4Results);
+                downloadCSV(csvData, `enhanced_v4_peaks_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`);
+                
+                // Show success message
+                showToast('✅ Enhanced V4 peaks exported successfully for PLS analysis!', 'success');
+            } else if (method === 'enhanced_v4_improved' && enhancedV4ImprovedResults) {
+                // Export Enhanced V4 Improved results to CSV
+                const csvData = formatPLSDataAsCSV(enhancedV4ImprovedResults);
+                downloadCSV(csvData, `enhanced_v4_improved_peaks_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`);
+                
+                // Show success message
+                showToast('✅ Enhanced V4 Improved peaks exported successfully for PLS analysis!', 'success');
+            } else {
+                showToast(`❌ No ${method} data available for export`, 'error');
+            }
+        }
+        
+        function formatPLSDataAsCSV(results) {
+            console.log('📊 Formatting PLS data as CSV:', results);
+            
+            const headers = [
+                'filename', 'peak_type', 'peak_index', 'voltage', 'current', 'height',
+                'confidence', 'baseline_current', 'validation_score', 'peak_region',
+                'scan_section', 'peak_separation_voltage', 'peak_separation_current',
+                'current_ratio', 'midpoint_potential'
+            ];
+            
+            let csvContent = headers.join(',') + '\n';
+            
+            // Process each file's results
+            if (results.pls_ready_data) {
+                results.pls_ready_data.forEach(fileData => {
+                    const filename = fileData.filename || 'unknown';
+                    const derived = fileData.derived_features || {};
+                    
+                    // Add oxidation peaks
+                    if (fileData.oxidation_peaks) {
+                        fileData.oxidation_peaks.forEach(peak => {
+                            const row = [
+                                filename, 'oxidation', peak.peak_index || 0,
+                                peak.voltage || 0, peak.current || 0, peak.height || 0,
+                                peak.confidence || 0, peak.baseline_current || 0,
+                                peak.validation_score || 0, peak.peak_region || 'unknown',
+                                peak.scan_section || 'unknown',
+                                derived.peak_separation_voltage || 0,
+                                derived.peak_separation_current || 0,
+                                derived.current_ratio || 0,
+                                derived.midpoint_potential || 0
+                            ];
+                            csvContent += row.join(',') + '\n';
+                        });
+                    }
+                    
+                    // Add reduction peaks
+                    if (fileData.reduction_peaks) {
+                        fileData.reduction_peaks.forEach(peak => {
+                            const row = [
+                                filename, 'reduction', peak.peak_index || 0,
+                                peak.voltage || 0, peak.current || 0, peak.height || 0,
+                                peak.confidence || 0, peak.baseline_current || 0,
+                                peak.validation_score || 0, peak.peak_region || 'unknown',
+                                peak.scan_section || 'unknown',
+                                derived.peak_separation_voltage || 0,
+                                derived.peak_separation_current || 0,
+                                derived.current_ratio || 0,
+                                derived.midpoint_potential || 0
+                            ];
+                            csvContent += row.join(',') + '\n';
+                        });
+                    }
+                });
+            }
+            
+            return csvContent;
+        }
+        
+        function downloadCSV(csvContent, filename) {
+            console.log('📥 Downloading CSV file:', filename);
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+        
+        function showToast(message, type = 'info') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 5000);
+        }
+        
+        // Hook into the original peak detection success to store V4 results
+        const originalHandleAnalysisSuccess = window.handleAnalysisSuccess;
+        window.handleAnalysisSuccess = function(data, method) {
+            console.log('🔍 Analysis success for method:', method, 'Data:', data);
+            
+            // Store Enhanced V4 results for export
+            if (method === 'enhanced_v4') {
+                enhancedV4Results = data;
+                
+                // Show export button if V4 was successful
+                const exportBtn = document.querySelector('#enhanced_v4-analysis .export-pls-btn');
+                if (exportBtn && data.pls_ready_data && data.pls_ready_data.length > 0) {
+                    exportBtn.style.display = 'block';
+                    console.log('✅ Enhanced V4 export button enabled');
+                }
+            }
+            
+            // Store Enhanced V4 Improved results for export
+            if (method === 'enhanced_v4_improved') {
+                enhancedV4ImprovedResults = data;
+                
+                // Show both view analysis and export buttons if V4 Improved was successful
+                const viewBtn = document.querySelector('#enhanced_v4_improved-analysis .view-analysis-btn');
+                const exportBtn = document.querySelector('#enhanced_v4_improved-analysis .export-pls-btn');
+                
+                if (viewBtn) {
+                    viewBtn.style.display = 'block';
+                    console.log('✅ Enhanced V4 Improved view analysis button enabled');
+                }
+                
+                if (exportBtn && data.pls_ready_data && data.pls_ready_data.length > 0) {
+                    exportBtn.style.display = 'block';
+                    console.log('✅ Enhanced V4 Improved export button enabled');
+                }
+            }
+            
+            // Call original function if it exists
+            if (originalHandleAnalysisSuccess) {
+                return originalHandleAnalysisSuccess(data, method);
+            }
+        };
+    </script>
+</body>
+</html>

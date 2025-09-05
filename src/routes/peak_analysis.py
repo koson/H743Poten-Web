@@ -18,10 +18,24 @@ def create_analysis_session():
     analysis_sessions[session_id] = {
         'peaks': data['peaks'],
         'data': data['data'],
+        'method': data.get('method', 'unknown'),
+        'methodName': data.get('methodName', 'Unknown Method'),
+        'filenames': data.get('filenames', []),
+        'selectedFiles': data.get('selectedFiles', []),
         'created_at': datetime.utcnow()
     }
     
     return jsonify({'session_id': session_id})
+
+@bp.route('/peak_analysis')
+def peak_analysis_home():
+    """Render the peak analysis page without session data for general viewing"""
+    # Return with empty/default data for general viewing
+    return render_template('peak_analysis.html',
+                         peaks=[],
+                         data=[],
+                         method='general',
+                         methodName='Peak Analysis Dashboard')
 
 @bp.route('/peak_analysis/<session_id>')
 def peak_analysis(session_id):
@@ -34,7 +48,9 @@ def peak_analysis(session_id):
                          peaks=session_data['peaks'],
                          data=session_data['data'],
                          method=session_data.get('method', 'unknown'),
-                         methodName=session_data.get('methodName', 'Unknown Method'))
+                         methodName=session_data.get('methodName', 'Unknown Method'),
+                         filenames=session_data.get('filenames', []),
+                         selectedFiles=session_data.get('selectedFiles', []))
 
 # Cleanup function for old sessions
 def cleanup_old_sessions(max_age_hours=24):
