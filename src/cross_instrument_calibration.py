@@ -145,6 +145,23 @@ class CrossInstrumentCalibrator:
             calibration_data['cross_comparison'] = self._load_article_data(article_data_path)
             logger.info("Loaded cross-instrument comparison data")
         
+        # Load Test_data from historical analysis
+        test_data_path = Path("Test_data")
+        if test_data_path.exists():
+            calibration_data['test_data'] = {}
+            
+            # Load STM32 data
+            stm32_path = test_data_path / "Stm32"
+            if stm32_path.exists():
+                calibration_data['test_data']['stm32'] = self._load_stm32_test_data(str(stm32_path))
+                logger.info("Loaded STM32 test data")
+            
+            # Load PalmSens data
+            palmsens_path = test_data_path / "Palmsens"
+            if palmsens_path.exists():
+                calibration_data['test_data']['palmsens'] = self._load_palmsens_test_data(str(palmsens_path))
+                logger.info("Loaded PalmSens test data")
+        
         return calibration_data
     
     def _load_article_data(self, article_path: Path) -> Dict:
@@ -179,6 +196,251 @@ class CrossInstrumentCalibrator:
             }
         
         return comparison_data
+    
+    def _load_stm32_test_data(self, stm32_path: str) -> Dict:
+        """Load STM32 test data from Test_data directory"""
+        stm32_data = {}
+        
+        try:
+            for conc_folder in os.listdir(stm32_path):
+                conc_path = os.path.join(stm32_path, conc_folder)
+                if os.path.isdir(conc_path):
+                    csv_files = [f for f in os.listdir(conc_path) if f.endswith('.csv')]
+                    stm32_data[conc_folder] = {
+                        'file_count': len(csv_files),
+                        'files': csv_files[:5],  # Store first 5 filenames as examples
+                        'concentration': self._extract_concentration(conc_folder),
+                        'scan_rate': '100mV/s',  # Default from filename pattern
+                        'electrodes': self._count_electrodes(csv_files)
+                    }
+                    
+                    # Load a sample file for data structure analysis
+                    if csv_files:
+                        sample_file = os.path.join(conc_path, csv_files[0])
+                        try:
+                            sample_data = pd.read_csv(sample_file, skiprows=1)  # Skip header
+                            stm32_data[conc_folder]['sample_data'] = {
+                                'columns': list(sample_data.columns),
+                                'rows': len(sample_data),
+                                'voltage_range': [sample_data.iloc[:, 0].min(), sample_data.iloc[:, 0].max()] if len(sample_data.columns) > 0 else None,
+                                'current_range': [sample_data.iloc[:, 1].min(), sample_data.iloc[:, 1].max()] if len(sample_data.columns) > 1 else None
+                            }
+                        except Exception as e:
+                            stm32_data[conc_folder]['sample_data'] = {'error': str(e)}
+            
+            return stm32_data
+            
+        except Exception as e:
+            logger.error(f"Error loading STM32 test data: {e}")
+            return {}
+    
+    def _extract_concentration(self, folder_name: str) -> str:
+        """Extract concentration from folder name"""
+        # Pattern: Pipot_Ferro_0_5mM -> 0.5mM
+        parts = folder_name.split('_')
+        if len(parts) >= 3:
+            conc_part = '_'.join(parts[2:])  # Get everything after "Pipot_Ferro"
+            return conc_part.replace('_', '.')  # Convert 0_5mM to 0.5mM
+        return folder_name
+    
+    def _count_electrodes(self, csv_files: list) -> Dict:
+        """Count number of electrodes and scans from filenames"""
+        electrode_counts = {}
+        for filename in csv_files:
+            if '_E' in filename:
+                # Extract electrode number (E1, E2, etc.)
+                e_part = filename.split('_E')[1].split('_')[0]
+                electrode_counts[f'E{e_part}'] = electrode_counts.get(f'E{e_part}', 0) + 1
+        return electrode_counts
+    
+    def _load_palmsens_test_data(self, palmsens_path: str) -> Dict:
+        """Load PalmSens test data from Test_data directory"""
+        palmsens_data = {}
+        
+        try:
+            for item in os.listdir(palmsens_path):
+                item_path = os.path.join(palmsens_path, item)
+                if os.path.isdir(item_path):
+                    csv_files = [f for f in os.listdir(item_path) if f.endswith('.csv')]
+                    palmsens_data[item] = {
+                        'file_count': len(csv_files),
+                        'files': csv_files[:5]  # Store first 5 filenames as examples
+                    }
+                elif item.endswith('.csv'):
+                    # Direct CSV files in PalmSens folder
+                    if 'direct_files' not in palmsens_data:
+                        palmsens_data['direct_files'] = []
+                    palmsens_data['direct_files'].append(item)
+            
+            return palmsens_data
+            
+        except Exception as e:
+            logger.error(f"Error loading PalmSens test data: {e}")
+            return {}
+    
+    def analyze_cross_instrument_data(self) -> Dict:
+        """Analyze cross-instrument data for calibration purposes"""
+        analysis_results = {}
+        
+        try:
+            # Load all available data
+            all_data = self.load_existing_calibration_data()
+            
+            if 'test_data' in all_data:
+                # Analyze STM32 vs PalmSens comparison
+                if 'stm32' in all_data['test_data'] and 'palmsens' in all_data['test_data']:
+                    analysis_results['instrument_comparison'] = self._compare_instruments(
+                        all_data['test_data']['stm32'], 
+                        all_data['test_data']['palmsens']
+                    )
+                
+                # Analyze concentration consistency
+                if 'stm32' in all_data['test_data']:
+                    analysis_results['stm32_analysis'] = self._analyze_stm32_consistency(all_data['test_data']['stm32'])
+            
+            if 'cross_comparison' in all_data:
+                analysis_results['article_data_analysis'] = self._analyze_article_data(all_data['cross_comparison'])
+            
+            # Store analysis in database
+            self._store_analysis_results(analysis_results)
+            
+            return analysis_results
+            
+        except Exception as e:
+            logger.error(f"Error in cross-instrument analysis: {e}")
+            return {'error': str(e)}
+    
+    def _compare_instruments(self, stm32_data: Dict, palmsens_data: Dict) -> Dict:
+        """Compare STM32 and PalmSens instrument performance"""
+        comparison = {
+            'concentration_coverage': {},
+            'data_quality': {},
+            'recommended_corrections': {}
+        }
+        
+        # Compare concentration ranges
+        stm32_concentrations = list(stm32_data.keys())
+        palmsens_concentrations = list(palmsens_data.keys()) if isinstance(palmsens_data, dict) else []
+        
+        comparison['concentration_coverage'] = {
+            'stm32_concentrations': stm32_concentrations,
+            'palmsens_concentrations': palmsens_concentrations,
+            'common_concentrations': list(set(stm32_concentrations) & set(palmsens_concentrations)) if palmsens_concentrations else [],
+            'stm32_unique': list(set(stm32_concentrations) - set(palmsens_concentrations)) if palmsens_concentrations else stm32_concentrations
+        }
+        
+        # Analyze data quality for STM32
+        for conc, data in stm32_data.items():
+            if 'sample_data' in data and 'voltage_range' in data['sample_data']:
+                comparison['data_quality'][conc] = {
+                    'voltage_range': data['sample_data']['voltage_range'],
+                    'current_range': data['sample_data']['current_range'],
+                    'file_count': data['file_count'],
+                    'electrodes': data.get('electrodes', {}),
+                    'quality_score': self._calculate_quality_score(data)
+                }
+        
+        return comparison
+    
+    def _analyze_stm32_consistency(self, stm32_data: Dict) -> Dict:
+        """Analyze consistency across STM32 measurements"""
+        consistency_analysis = {
+            'electrode_performance': {},
+            'concentration_trends': {},
+            'scan_reproducibility': {}
+        }
+        
+        # Analyze electrode performance across concentrations
+        all_electrodes = set()
+        for conc, data in stm32_data.items():
+            if 'electrodes' in data:
+                all_electrodes.update(data['electrodes'].keys())
+        
+        for electrode in all_electrodes:
+            electrode_data = {}
+            for conc, data in stm32_data.items():
+                if 'electrodes' in data and electrode in data['electrodes']:
+                    electrode_data[conc] = data['electrodes'][electrode]
+            consistency_analysis['electrode_performance'][electrode] = electrode_data
+        
+        return consistency_analysis
+    
+    def _calculate_quality_score(self, data: Dict) -> float:
+        """Calculate quality score for measurement data"""
+        score = 0.0
+        
+        # File count score (more files = better statistics)
+        file_count = data.get('file_count', 0)
+        score += min(file_count / 50.0, 1.0) * 30  # Max 30 points
+        
+        # Electrode coverage score
+        electrode_count = len(data.get('electrodes', {}))
+        score += min(electrode_count / 5.0, 1.0) * 25  # Max 25 points
+        
+        # Voltage range score (wider range = better)
+        if 'sample_data' in data and 'voltage_range' in data['sample_data']:
+            v_range = data['sample_data']['voltage_range']
+            if v_range and len(v_range) == 2:
+                range_width = abs(v_range[1] - v_range[0])
+                score += min(range_width / 1.0, 1.0) * 25  # Max 25 points (assuming 1V is good range)
+        
+        # Data integrity score
+        if 'sample_data' in data and 'error' not in data['sample_data']:
+            score += 20  # 20 points for no errors
+        
+        return score
+    
+    def _analyze_article_data(self, article_data: Dict) -> Dict:
+        """Analyze data from Article Figure Package"""
+        article_analysis = {
+            'prediction_accuracy': {},
+            'error_patterns': {},
+            'instrument_bias': {}
+        }
+        
+        if 'predictions' in article_data:
+            for instrument, data in article_data['predictions'].items():
+                if data is not None and hasattr(data, 'empty') and not data.empty:
+                    article_analysis['prediction_accuracy'][instrument] = {
+                        'data_points': len(data),
+                        'columns': list(data.columns),
+                        'value_ranges': {col: [data[col].min(), data[col].max()] for col in data.select_dtypes(include=[np.number]).columns}
+                    }
+        
+        if 'error_analysis' in article_data:
+            for instrument, data in article_data['error_analysis'].items():
+                if data is not None and hasattr(data, 'empty') and not data.empty:
+                    article_analysis['error_patterns'][instrument] = {
+                        'data_points': len(data),
+                        'columns': list(data.columns)
+                    }
+        
+        return article_analysis
+    
+    def _store_analysis_results(self, results: Dict):
+        """Store analysis results in database"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Store analysis summary
+                cursor.execute("""
+                    INSERT OR REPLACE INTO cross_calibration_data 
+                    (measurement_id, instrument_id, standard_id, measurement_date, raw_data)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (
+                    f"analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                    "cross_analysis",
+                    "multi_instrument",
+                    datetime.now(),
+                    json.dumps(results)
+                ))
+                
+                conn.commit()
+                logger.info("Analysis results stored in database")
+                
+        except Exception as e:
+            logger.error(f"Error storing analysis results: {e}")
     
     def _load_csv_safe(self, filepath: Path) -> Optional[pd.DataFrame]:
         """Safely load CSV file"""
