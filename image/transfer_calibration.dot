@@ -1,0 +1,60 @@
+digraph TransferCalibration {
+    // Graph settings
+    rankdir=LR;
+    bgcolor="white";
+    fontname="Arial";
+    fontsize=12;
+    
+    // Node styles
+    node [
+        shape=box,
+        style="rounded,filled",
+        fontname="Arial",
+        fontsize=11,
+        margin=0.3,
+        penwidth=2
+    ];
+    
+    // Edge styles
+    edge [
+        fontname="Arial",
+        fontsize=10,
+        penwidth=2
+    ];
+    
+    // Define nodes with proper spacing
+    reference [
+        label="Reference\nInstrument\n(PalmSens)\l\l• Calibrated\l• Traceable\l• Validated\l• $$$\l",
+        fillcolor="#f8f8f8",
+        color="#d32f2f"
+    ];
+    
+    stm32 [
+        label="STM32\nPotentiostat\l\l• 2 x ADC\l  (V, I)\l• 1 x DAC\l  (Scan Gen)\l",
+        fillcolor="#f8f8f8",
+        color="#d32f2f"
+    ];
+    
+    cell [
+        label="Electrochemical\nCell\l\l• Working Elec.\l• Reference El.\l• Counter Elec.\l• Redox Sample\l",
+        fillcolor="#f8f8f8",
+        color="#d32f2f"
+    ];
+    
+    // Arrange nodes horizontally
+    {rank=same; reference; stm32; cell}
+    
+    // Define connections
+    reference -> cell [
+        label="Transfer Calibration",
+        color="#d32f2f",
+        fontcolor="#d32f2f",
+        fontsize=12,
+        style=bold,
+        constraint=false
+    ];
+    
+    // Invisible edges to maintain layout
+    reference -> stm32 [style=invis];
+    stm32 -> cell [style=invis];
+}

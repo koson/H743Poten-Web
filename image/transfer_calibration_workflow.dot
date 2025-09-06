@@ -1,0 +1,115 @@
+digraph TransferCalibrationWorkflow {
+    rankdir=TB;
+    bgcolor="white";
+    fontname="Arial";
+    
+    // Node styles
+    node [
+        fontname="Arial",
+        fontsize=10,
+        penwidth=2,
+        margin=0.2
+    ];
+    
+    // Edge styles
+    edge [
+        fontname="Arial",
+        fontsize=9,
+        penwidth=1.5
+    ];
+    
+    // Start
+    start [shape=ellipse, label="Start:\nTransfer Calibration\nProject", fillcolor="#e8f5e8", style=filled];
+    
+    // Phase 1: Concept Development
+    subgraph cluster_concept {
+        label="Phase 1: Concept Development";
+        style=filled;
+        color="#e3f2fd";
+        fillcolor="#e3f2fd";
+        
+        problem [shape=box, label="Problem Analysis:\n• STM32 vs PalmSens differences\n• Systematic errors\n• Calibration requirements"];
+        
+        approaches [shape=box, label="Calibration Approaches:\n• Raw Data ML\n• Feature-Based\n• Expert Validation"];
+        
+        framework [shape=box, label="Framework Design:\n• Python ML pipeline\n• STM32 integration\n• Web interface"];
+    }
+    
+    // Phase 2: Implementation Planning
+    subgraph cluster_planning {
+        label="Phase 2: Implementation Planning";
+        style=filled;
+        color="#f3e5f5";
+        fillcolor="#f3e5f5";
+        
+        stm32_analysis [shape=box, label="STM32 Firmware Analysis:\n• Existing calibration vars\n• SCPI commands\n• Hardware interfaces"];
+        
+        python_system [shape=box, label="Python System Design:\n• Feature extraction\n• ML calibration models\n• Expert validation UI"];
+        
+        integration [shape=box, label="Integration Strategy:\n• SCPI protocols\n• Flash storage\n• Real-time application"];
+    }
+    
+    // Phase 3: Proof of Concept
+    subgraph cluster_poc {
+        label="Phase 3: Proof of Concept";
+        style=filled;
+        color="#fff3e0";
+        fillcolor="#fff3e0";
+        
+        math_test [shape=box, label="Mathematical Validation:\n• R² = 0.993\n• 3.6% error\n• 90% success probability"];
+        
+        synthetic_test [shape=box, label="Synthetic Testing:\n• Simulated STM32 errors\n• ML calibration application\n• Performance validation"];
+    }
+    
+    // Phase 4: Hardware Implementation
+    subgraph cluster_hardware {
+        label="Phase 4: Hardware Implementation";
+        style=filled;
+        color="#ffebee";
+        fillcolor="#ffebee";
+        
+        firmware_mod [shape=box, label="Firmware Modifications:\n• Add calibration structures\n• Implement SCPI commands\n• Real-time application"];
+        
+        hardware_test [shape=box, label="Hardware Testing:\n• Standard solutions\n• Multiple concentrations\n• Real sample validation"];
+    }
+    
+    // Decision points
+    decision1 [shape=diamond, label="Math Test\nPassed?", fillcolor="#fff9c4", style=filled];
+    decision2 [shape=diamond, label="Hardware Test\nSuccessful?", fillcolor="#fff9c4", style=filled];
+    
+    // Outcomes
+    success [shape=ellipse, label="Success:\nProduction Ready\nSystem", fillcolor="#c8e6c9", style=filled];
+    partial [shape=ellipse, label="Partial Success:\nLimited Application\nScope", fillcolor="#ffe0b2", style=filled];
+    failure [shape=ellipse, label="Failure:\nRequires Major\nRevision", fillcolor="#ffcdd2", style=filled];
+    
+    // Flow connections
+    start -> problem;
+    problem -> approaches;
+    approaches -> framework;
+    framework -> stm32_analysis;
+    stm32_analysis -> python_system;
+    python_system -> integration;
+    integration -> math_test;
+    math_test -> decision1;
+    
+    decision1 -> synthetic_test [label="Yes\n(>80%)"];
+    decision1 -> failure [label="No\n(<50%)", color="red"];
+    
+    synthetic_test -> firmware_mod;
+    firmware_mod -> hardware_test;
+    hardware_test -> decision2;
+    
+    decision2 -> success [label="Excellent\n(>90%)", color="green"];
+    decision2 -> partial [label="Good\n(70-90%)", color="orange"];
+    decision2 -> failure [label="Poor\n(<70%)", color="red"];
+    
+    // Timeline annotations
+    week1 [shape=note, label="Week 1-2:\nConcept &\nPlanning", fillcolor="#f0f0f0", style=filled];
+    week3 [shape=note, label="Week 3:\nProof of\nConcept", fillcolor="#f0f0f0", style=filled];
+    week4 [shape=note, label="Week 4-6:\nImplementation\n& Testing", fillcolor="#f0f0f0", style=filled];
+    
+    // Invisible edges for layout
+    week1 -> approaches [style=invis];
+    week3 -> math_test [style=invis];
+    week4 -> hardware_test [style=invis];
+}

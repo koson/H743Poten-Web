@@ -1,0 +1,11 @@
+digraph TransferCalibration {
+    rankdir=LR;
+    node [shape=box, style="rounded,filled", fillcolor="#fffaf7", fontname="Consolas", fontsize=12];
+
+    Reference [label="Reference\nInstrument\n(PalmSens)\n\n• Calibrated\n• Traceable\n• Validated\n• $$$"];
+    STM32 [label="STM32\nPotentiostat\n\n• 2 x ADC (V, I)\n• 1 x DAC (Scan Gen)"];
+    Cell [label="Electrochemical\nCell\n\n• Working Elec.\n• Reference El.\n• Counter Elec.\n• Redox Sample"];
+
+    Reference -> STM32 [label="Transfer Calibration", fontsize=14, fontcolor="#b22222", color="#b22222"];
+    STM32 -> Cell;
+}

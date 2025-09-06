@@ -1,0 +1,71 @@
+digraph SystemArchitecture {
+    rankdir=TB;
+    bgcolor="white";
+    
+    node [
+        shape=box,
+        style="filled,rounded",
+        fillcolor="#f5f5f5",
+        color="#d32f2f",
+        fontname="Arial",
+        fontsize=10,
+        penwidth=2
+    ];
+    
+    edge [
+        fontname="Arial",
+        fontsize=9,
+        penwidth=1.5
+    ];
+    
+    // Top layer - User Interface
+    subgraph cluster_ui {
+        label="User Interface Layer";
+        style=filled;
+        color="#e3f2fd";
+        fillcolor="#e3f2fd";
+        
+        desktop [label="Desktop App\n(Python)"];
+        web [label="Web Interface\n(Flask)"];
+        jupyter [label="Jupyter\nNotebooks"];
+    }
+    
+    // Middle layer - Communication
+    subgraph cluster_comm {
+        label="Communication Layer";
+        style=filled;
+        color="#f3e5f5";
+        fillcolor="#f3e5f5";
+        
+        scpi [label="SCPI Commands"];
+        usb [label="USB/Serial"];
+        api [label="REST API"];
+    }
+    
+    // Hardware layer
+    subgraph cluster_hw {
+        label="Hardware Layer";
+        style=filled;
+        color="#fff3e0";
+        fillcolor="#fff3e0";
+        
+        stm32_hw [label="STM32H743\nMicrocontroller"];
+        adc_hw [label="ADC Circuits\n(V, I)"];
+        dac_hw [label="DAC Circuit\n(Scan Gen)"];
+        cell_hw [label="Electrochemical\nCell"];
+    }
+    
+    // Connections
+    desktop -> scpi;
+    web -> api;
+    jupyter -> api;
+    
+    scpi -> usb;
+    api -> usb;
+    
+    usb -> stm32_hw;
+    stm32_hw -> adc_hw;
+    stm32_hw -> dac_hw;
+    dac_hw -> cell_hw;
+    cell_hw -> adc_hw;
+}

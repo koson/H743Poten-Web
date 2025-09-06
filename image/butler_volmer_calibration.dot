@@ -1,0 +1,121 @@
+digraph ButlerVolmerEnhancedCalibration {
+    rankdir=TB;
+    bgcolor="white";
+    fontname="Arial";
+    
+    // Node styles
+    node [
+        fontname="Arial",
+        fontsize=10,
+        penwidth=2,
+        margin=0.2
+    ];
+    
+    // Edge styles
+    edge [
+        fontname="Arial",
+        fontsize=9,
+        penwidth=1.5
+    ];
+    
+    // Title
+    title [shape=none, label=<<B>Butler-Volmer Enhanced Transfer Calibration</B><BR/>Electrochemical Parameter-Based Approach>, fontsize=14];
+    
+    // Input data
+    subgraph cluster_data {
+        label="Experimental Data";
+        style=filled;
+        color="#e8f4fd";
+        fillcolor="#e8f4fd";
+        
+        cv_stm32 [shape=box, label="STM32 CV Data\nVoltage, Current\ntime series", fillcolor="#ff9800", style=filled];
+        cv_palmsens [shape=box, label="PalmSens CV Data\nVoltage, Current\ntime series", fillcolor="#03a9f4", style=filled];
+        cv_keisight [shape=box, label="Keisight Voltage\nReference\nHigh precision", fillcolor="#ffeb3b", style=filled];
+    }
+    
+    // Butler-Volmer Analysis
+    subgraph cluster_bv_analysis {
+        label="Butler-Volmer Analysis";
+        style=filled;
+        color="#f3e5f5";
+        fillcolor="#f3e5f5";
+        
+        bv_extract [shape=box, label="Parameter Extraction\ni₀, E₀, α_a, α_c\nPhysical meaning"];
+        bv_fit [shape=box, label="Butler-Volmer Fitting\ni = i₀[exp(αη/RT) - exp(-αη/RT)]\nNon-linear regression"];
+        bv_validate [shape=diamond, label="Kinetic\nValidation\nα consistent?", fillcolor="#fff9c4", style=filled];
+    }
+    
+    // Calibration Steps
+    subgraph cluster_calibration {
+        label="Enhanced Calibration Process";
+        style=filled;
+        color="#fff3e0";
+        fillcolor="#fff3e0";
+        
+        step1 [shape=box, label="1. E₀ Calibration\nStandard Potential\nCorrection"];
+        step2 [shape=box, label="2. i₀ Calibration\nExchange Current\nScaling"];
+        step3 [shape=box, label="3. Kinetic Validation\nTransfer Coefficient\nConsistency Check"];
+        step4 [shape=box, label="4. Physical QC\nParameter Range\nValidation"];
+    }
+    
+    // Implementation
+    subgraph cluster_implementation {
+        label="STM32 Implementation";
+        style=filled;
+        color="#e8f5e8";
+        fillcolor="#e8f5e8";
+        
+        scpi_bv [shape=box, label="SCPI Commands\n:CAL:BV:E0:SET\n:CAL:BV:I0:RATIO\n:CAL:BV:APPLY"];
+        firmware_bv [shape=box, label="Firmware Integration\nReal-time BV correction\nParameter storage"];
+    }
+    
+    // Results and validation
+    results [shape=box, label="Calibration Results\nE₀ offset: ±153mV\ni₀ ratio: 0.9009\nPhysical validation: ✅", fillcolor="#c8e6c9", style=filled];
+    
+    quality_check [shape=diamond, label="Quality\nAssessment\nPhysically\nreasonable?", fillcolor="#fff9c4", style=filled];
+    
+    success [shape=ellipse, label="SUCCESS\nPhysically-based\nCalibration\nComplete", fillcolor="#4caf50", style=filled, fontcolor="white"];
+    
+    refinement [shape=ellipse, label="REFINEMENT\nAdjust BV\nParameters\nRe-analyze", fillcolor="#ff9800", style=filled];
+    
+    // Flow connections
+    title -> cv_stm32 [style=invis];
+    
+    // Data to BV analysis
+    cv_stm32 -> bv_extract;
+    cv_palmsens -> bv_extract;
+    cv_keisight -> bv_extract;
+    
+    bv_extract -> bv_fit;
+    bv_fit -> bv_validate;
+    
+    // BV analysis to calibration
+    bv_validate -> step1 [label="Yes\n(α consistent)", color="green"];
+    bv_validate -> refinement [label="No\n(Different kinetics)", color="orange"];
+    
+    step1 -> step2;
+    step2 -> step3;
+    step3 -> step4;
+    
+    // Implementation
+    step4 -> scpi_bv;
+    scpi_bv -> firmware_bv;
+    
+    // Results
+    firmware_bv -> results;
+    results -> quality_check;
+    
+    quality_check -> success [label="Yes\n(Physical)", color="green"];
+    quality_check -> refinement [label="No\n(Unphysical)", color="orange"];
+    
+    refinement -> bv_extract [label="Retry", style=dashed];
+    
+    // Annotations
+    bv_equations [shape=note, label="Butler-Volmer Equations:\ni = i₀[exp(αₐnFη/RT) - exp(-αᶜnFη/RT)]\nη = E - E₀\nPhysical Parameters:\n• i₀: Exchange current\n• E₀: Standard potential\n• α: Transfer coefficient", fillcolor="#f0f0f0", style=filled];
+    
+    applications [shape=note, label="BV Applications:\n• E₀ → Potential calibration\n• i₀ → Current scaling\n• α → Kinetic validation\n• Physical QC checks", fillcolor="#f0f0f0", style=filled];
+    
+    // Layout helpers
+    bv_equations -> bv_fit [style=invis];
+    applications -> step2 [style=invis];
+}

@@ -1,0 +1,62 @@
+digraph CalibrationWorkflow {
+    rankdir=TB;
+    bgcolor="white";
+    
+    node [
+        shape=box,
+        style="filled,rounded",
+        fillcolor="#f5f5f5",
+        color="#d32f2f",
+        fontname="Arial",
+        fontsize=10,
+        penwidth=2
+    ];
+    
+    edge [
+        fontname="Arial",
+        fontsize=9,
+        penwidth=1.5,
+        color="#666666"
+    ];
+    
+    // Start
+    start [shape=ellipse, label="Start\nCalibration", fillcolor="#e8f5e8"];
+    
+    // Reference measurements
+    ref_setup [label="Setup Reference\nInstrument\n(PalmSens)"];
+    ref_measure [label="Measure Known\nStandards\n(Multiple Points)"];
+    ref_data [label="Record Reference\nData\n(V, I, Time)"];
+    
+    // STM32 measurements
+    stm32_setup [label="Setup STM32\nPotentiostat"];
+    stm32_measure [label="Measure Same\nStandards\n(Same Conditions)"];
+    stm32_data [label="Record STM32\nData\n(ADC Values)"];
+    
+    // Calibration calculation
+    compare [label="Compare\nMeasurements"];
+    calculate [label="Calculate\nCalibration\nFactors"];
+    validate [label="Validate\nCalibration\n(Test Points)"];
+    
+    // End
+    store [label="Store Calibration\nCoefficients"];
+    end [shape=ellipse, label="Calibration\nComplete", fillcolor="#ffe8e8"];
+    
+    // Flow
+    start -> ref_setup;
+    ref_setup -> ref_measure;
+    ref_measure -> ref_data;
+    
+    ref_data -> stm32_setup;
+    stm32_setup -> stm32_measure;
+    stm32_measure -> stm32_data;
+    
+    stm32_data -> compare;
+    compare -> calculate;
+    calculate -> validate;
+    
+    validate -> store;
+    store -> end;
+    
+    // Feedback loop
+    validate -> ref_measure [style=dashed, color="#ff6b6b", label="If validation fails"];
+}

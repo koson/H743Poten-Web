@@ -1,0 +1,111 @@
+digraph EnhancedTransferCalibration {
+    rankdir=TB;
+    bgcolor="white";
+    fontname="Arial";
+    
+    // Node styles
+    node [
+        fontname="Arial",
+        fontsize=10,
+        penwidth=2,
+        margin=0.2
+    ];
+    
+    // Edge styles
+    edge [
+        fontname="Arial",
+        fontsize=9,
+        penwidth=1.5
+    ];
+    
+    // Title
+    title [shape=none, label=<<B>Enhanced Multi-Reference Transfer Calibration</B><BR/>Using Keisight 34461A + PalmSens>, fontsize=14];
+    
+    // Instruments cluster
+    subgraph cluster_instruments {
+        label="Reference Instruments";
+        style=filled;
+        color="#e8f5e8";
+        fillcolor="#e8f5e8";
+        
+        keisight [shape=box, label="Keisight 34461A\nPrecision Multimeter\n±0.0035% accuracy\nVOLTAGE Reference", fillcolor="#ffeb3b", style=filled];
+        
+        palmsens [shape=box, label="PalmSens EmStat\nElectrochemical Workstation\nElectrochemical expertise\nCURRENT Reference", fillcolor="#03a9f4", style=filled];
+    }
+    
+    // Target instrument
+    stm32 [shape=box, label="STM32 H743Poten\nTarget Instrument\nVoltage + Current\nCalibration Applied", fillcolor="#ff9800", style=filled];
+    
+    // Calibration processes
+    subgraph cluster_voltage_cal {
+        label="Voltage Calibration Process";
+        style=filled;
+        color="#fff3e0";
+        fillcolor="#fff3e0";
+        
+        volt_setup [shape=box, label="1. Setup Voltage Points\n0.1V to 0.8V\n8 calibration points"];
+        volt_measure [shape=box, label="2. Simultaneous Measurement\nKeisight: Reference\nSTM32: Target"];
+        volt_calc [shape=box, label="3. Calculate Coefficients\nLinear regression\nR² > 0.999"];
+        volt_apply [shape=box, label="4. Apply to STM32\nSCPI: :CAL:VOLT:COEF"];
+    }
+    
+    subgraph cluster_current_cal {
+        label="Current Calibration Process";
+        style=filled;
+        color="#e3f2fd";
+        fillcolor="#e3f2fd";
+        
+        curr_setup [shape=box, label="5. Setup Solutions\n0.5-5.0mM Ferricyanide\nElectrochemical standard"];
+        curr_measure [shape=box, label="6. CV Measurements\nPalmSens: Reference\nSTM32: Target"];
+        curr_calc [shape=box, label="7. Extract Peak Currents\nLinear regression\nR² > 0.99"];
+        curr_apply [shape=box, label="8. Apply to STM32\nSCPI: :CAL:CURR:COEF"];
+    }
+    
+    // Python control system
+    python_control [shape=ellipse, label="Python Control System\nAutomated Calibration\nSCPI Communication\nData Analysis", fillcolor="#4caf50", style=filled];
+    
+    // Results
+    results [shape=diamond, label="Calibration\nResults\nR² > 0.995?", fillcolor="#fff9c4", style=filled];
+    
+    success [shape=ellipse, label="SUCCESS\nProduction Ready\nTraceability Established", fillcolor="#c8e6c9", style=filled];
+    
+    improvement [shape=ellipse, label="IMPROVEMENT\nAdjust Parameters\nRe-run Calibration", fillcolor="#ffe0b2", style=filled];
+    
+    // Connections
+    title -> keisight [style=invis];
+    
+    // Voltage calibration flow
+    keisight -> volt_setup;
+    stm32 -> volt_setup;
+    volt_setup -> volt_measure;
+    volt_measure -> volt_calc;
+    volt_calc -> volt_apply;
+    
+    // Current calibration flow  
+    palmsens -> curr_setup;
+    stm32 -> curr_setup;
+    curr_setup -> curr_measure;
+    curr_measure -> curr_calc;
+    curr_calc -> curr_apply;
+    
+    // Control and decision
+    python_control -> volt_measure;
+    python_control -> curr_measure;
+    
+    volt_apply -> results;
+    curr_apply -> results;
+    
+    results -> success [label="Yes\n(Excellent)", color="green"];
+    results -> improvement [label="No\n(Needs work)", color="orange"];
+    improvement -> volt_setup [label="Retry", style=dashed];
+    
+    // SCPI commands annotation
+    scpi_commands [shape=note, label="SCPI Commands:\n:CAL:VOLT:COEF slope,offset\n:CAL:CURR:COEF slope,offset\n*IDN? (Keisight)\nREAD? (Keisight)", fillcolor="#f0f0f0", style=filled];
+    
+    // Performance metrics
+    performance [shape=note, label="Performance Targets:\nVoltage: R² > 0.999\nCurrent: R² > 0.99\nOverall: R² > 0.995", fillcolor="#f0f0f0", style=filled];
+    
+    // Layout helpers
+    scpi_commands -> volt_apply [style=invis];
+    performance -> curr_apply [style=invis];
+}
