@@ -1,0 +1,148 @@
+<!-- Peak Detection Content - Optimized for Workflow Integration -->
+<h4>🤖 Algorithm Selection</h4>
+<div class="instrument-selector">
+    <div class="instrument-card selected" onclick="selectAlgorithm('ml')">
+        <div class="instrument-icon">🧠</div>
+        <div><strong>DeepCV</strong></div>
+        <div>AI-Enhanced (Best)</div>
+    </div>
+    <div class="instrument-card" onclick="selectAlgorithm('prominence')">
+        <div class="instrument-icon">📊</div>
+        <div><strong>TraditionalCV</strong></div>
+        <div>Classical Methods</div>
+    </div>
+    <div class="instrument-card" onclick="selectAlgorithm('derivative')">
+        <div class="instrument-icon">🔀</div>
+        <div><strong>HybridCV</strong></div>
+        <div>Combined Approach</div>
+    </div>
+    <div class="instrument-card" onclick="selectAlgorithm('enhanced_v4')">
+        <div class="instrument-icon">⚡</div>
+        <div><strong>Enhanced V4</strong></div>
+        <div>Production Ready</div>
+    </div>
+    <div class="instrument-card" onclick="selectAlgorithm('enhanced_v4_improved')">
+        <div class="instrument-icon">🚀</div>
+        <div><strong>Enhanced V4+</strong></div>
+        <div>Better Reduction Detection</div>
+    </div>
+</div>
+
+<h4>📊 Detection Progress</h4>
+<div class="progress-bar">
+    <div class="progress-fill" id="peakDetectionProgress" style="width: 0%">0%</div>
+</div>
+
+<div class="log-area" id="peakDetectionLog">
+    <div>> Peak detection system initialized</div>
+    <div>> Algorithm selection: DeepCV (AI-Enhanced)</div>
+    <div>> Ready to process data files</div>
+    <div>> Select data files and click 'Start Detection'</div>
+</div>
+
+<div class="action-buttons">
+    <button class="btn btn-primary" onclick="startPeakDetection()" id="startDetectionBtn">🚀 Start Detection</button>
+    <button class="btn btn-info" onclick="viewPeakDetails()" id="viewDetailsBtn">📊 View Details</button>
+    <button class="btn btn-secondary" onclick="exportPeakData()" id="exportResultsBtn">💾 Export Results</button>
+</div>
+
+<div class="results-grid">
+    <div class="result-card">
+        <div class="result-value" id="peaksDetected">0</div>
+        <div class="result-label">Peaks Detected</div>
+    </div>
+    <div class="result-card">
+        <div class="result-value" id="detectionAccuracy">0%</div>
+        <div class="result-label">Detection Accuracy</div>
+    </div>
+    <div class="result-card">
+        <div class="result-value" id="processingTime">0s</div>
+        <div class="result-label">Processing Time</div>
+    </div>
+    <div class="result-card">
+        <div class="result-value" id="oxidationPeaks">0</div>
+        <div class="result-label">Oxidation Peaks</div>
+    </div>
+    <div class="result-card">
+        <div class="result-value" id="reductionPeaks">0</div>
+        <div class="result-label">Reduction Peaks</div>
+    </div>
+</div>
+
+<h4>📈 Analysis Overview</h4>
+<div class="visualization-area" id="peakVisualizationArea">
+    <div class="visualization-placeholder">
+        <p>📈 Peak detection visualization will appear here</p>
+        <p>Run detection algorithms to see results</p>
+    </div>
+</div>
+
+<!-- Algorithm Comparison Table (Hidden for future development) -->
+<div style="display: none;">
+<h4>⚖️ Algorithm Comparison</h4>
+<div class="instrument-grid">
+    <div class="instrument-card" id="deepcv-results">
+        <div class="instrument-header">
+            <h4>🧠 DeepCV Results</h4>
+        </div>
+        <div class="instrument-body">
+            <div class="performance-metrics">
+                <div class="metric-item">
+                    <span class="metric-label">Peaks:</span>
+                    <span class="metric-value" id="deepcv-peaks">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Accuracy:</span>
+                    <span class="metric-value" id="deepcv-accuracy">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Time:</span>
+                    <span class="metric-value" id="deepcv-time">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="instrument-card" id="traditional-results">
+        <div class="instrument-header">
+            <h4>📊 TraditionalCV Results</h4>
+        </div>
+        <div class="instrument-body">
+            <div class="performance-metrics">
+                <div class="metric-item">
+                    <span class="metric-label">Peaks:</span>
+                    <span class="metric-value" id="traditional-peaks">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Accuracy:</span>
+                    <span class="metric-value" id="traditional-accuracy">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Time:</span>
+                    <span class="metric-value" id="traditional-time">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="instrument-card" id="hybrid-results">
+        <div class="instrument-header">
+            <h4>🔀 HybridCV Results</h4>
+        </div>
+        <div class="instrument-body">
+            <div class="performance-metrics">
+                <div class="metric-item">
+                    <span class="metric-label">Peaks:</span>
+                    <span class="metric-value" id="hybrid-peaks">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Accuracy:</span>
+                    <span class="metric-value" id="hybrid-accuracy">-</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Time:</span>
+                    <span class="metric-value" id="hybrid-time">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>

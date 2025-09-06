@@ -37,7 +37,7 @@
     },
     
     // Default profiles per platform
-    "terminal.integrated.defaultProfile.windows": "Ubuntu (WSL)",
+    "terminal.integrated.defaultProfile.windows": "Windows PowerShell",
     "terminal.integrated.defaultProfile.linux": "bash",
     
     // Use workspace root as terminal CWD
