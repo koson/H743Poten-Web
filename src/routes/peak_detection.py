@@ -1006,19 +1006,30 @@ def create_analysis_session():
         if isinstance(traces, list):
             # Add filename if missing
             for i, trace in enumerate(traces):
-                if 'filename' not in trace:
+                if 'filename' not in trace and 'name' not in trace:
                     # Try to get from filenames array if present
                     filenames = data.get('filenames') or data.get('file_labels')
                     if filenames and i < len(filenames):
                         trace['filename'] = filenames[i]
+                        trace['name'] = filenames[i]  # Add name property too
                     else:
                         trace['filename'] = f'Trace {i+1}'
+                        trace['name'] = f'Trace {i+1}'
+                elif 'filename' in trace and 'name' not in trace:
+                    trace['name'] = trace['filename']
+                elif 'name' in trace and 'filename' not in trace:
+                    trace['filename'] = trace['name']
         elif isinstance(traces, dict):
             # Single trace: add filename if present
-            if 'filename' not in traces:
+            if 'filename' not in traces and 'name' not in traces:
                 filename = data.get('filename') or (data.get('filenames')[0] if data.get('filenames') else None)
                 if filename:
                     traces['filename'] = filename
+                    traces['name'] = filename  # Add name property too
+            elif 'filename' in traces and 'name' not in traces:
+                traces['name'] = traces['filename']
+            elif 'name' in traces and 'filename' not in traces:
+                traces['filename'] = traces['name']
         analysis_sessions[session_id] = {
             'peaks': peaks,
             'data': traces,

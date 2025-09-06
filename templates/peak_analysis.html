@@ -372,11 +372,13 @@
                 if (Array.isArray(chartData) && chartData.length > 0 && typeof chartData[0] === 'object' && chartData[0].voltage) {
                     nTraces = chartData.length;
                     isArrayObj = true;
-                    fileLabels = chartData.map((d, i) => d.filename || d.label || `Trace ${i+1}`);
+                    fileLabels = chartData.map((d, i) => d.name || d.filename || d.label || `Trace ${i+1}`);
                 } else if (chartData && chartData.voltage && Array.isArray(chartData.voltage[0])) {
                     nTraces = chartData.voltage.length;
                     isArrayObj = false;
-                    if (Array.isArray(chartData.filenames)) {
+                    if (Array.isArray(chartData.names)) {
+                        fileLabels = chartData.names;
+                    } else if (Array.isArray(chartData.filenames)) {
                         fileLabels = chartData.filenames;
                     } else if (Array.isArray(chartData.file_labels)) {
                         fileLabels = chartData.file_labels;
@@ -537,13 +539,13 @@
                 console.log('[DEBUG] Using array object format');
                 voltage = chartData[idx]?.voltage || [];
                 current = chartData[idx]?.current || [];
-                label = chartData[idx]?.filename || chartData[idx]?.label || `Trace ${idx+1}`;
+                label = chartData[idx]?.name || chartData[idx]?.filename || chartData[idx]?.label || `Trace ${idx+1}`;
                 console.log('[DEBUG] Array obj - voltage length:', voltage.length, 'current length:', current.length);
             } else if (chartData && chartData.voltage && Array.isArray(chartData.voltage[0])) {
                 console.log('[DEBUG] Using nested array format');
                 voltage = chartData.voltage[idx] || [];
                 current = chartData.current[idx] || [];
-                label = (chartData.filenames && chartData.filenames[idx]) || (chartData.file_labels && chartData.file_labels[idx]) || `Trace ${idx+1}`;
+                label = (chartData.names && chartData.names[idx]) || (chartData.filenames && chartData.filenames[idx]) || (chartData.file_labels && chartData.file_labels[idx]) || `Trace ${idx+1}`;
                 console.log('[DEBUG] Nested array - voltage length:', voltage.length, 'current length:', current.length);
             } else {
                 console.log('[DEBUG] Using single trace format');
