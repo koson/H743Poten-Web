@@ -807,25 +807,41 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                     // Calculate midpoint for better visual separation
                     const midPoint = Math.floor((forwardEndIdx + reverseStartIdx) / 2);
                     
-                    // Forward segment baseline - extend to midpoint to reach Ox peak area
-                    baselineTraces.push({
-                        x: chartData.voltage.slice(0, midPoint + 1),
-                        y: baseline.full.slice(0, midPoint + 1),
-                        mode: 'lines',
-                        name: `Forward Baseline (R²=${baseline.markers.forward_segment.r2?.toFixed(3) || 'N/A'})`,
-                        line: { color: '#ff0000', width: 2, dash: 'dash' },
-                        hovertemplate: 'Forward Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
-                    });
+                    // Get full voltage range for extended baseline
+                    const minVoltage = Math.min(...chartData.voltage);
+                    const maxVoltage = Math.max(...chartData.voltage);
                     
-                    // Reverse segment baseline - start from midpoint to avoid overlap
-                    baselineTraces.push({
-                        x: chartData.voltage.slice(midPoint),
-                        y: baseline.full.slice(midPoint),
-                        mode: 'lines',
-                        name: `Reverse Baseline (R²=${baseline.markers.reverse_segment.r2?.toFixed(3) || 'N/A'})`,
-                        line: { color: '#00aa00', width: 2, dash: 'dash' },
-                        hovertemplate: 'Reverse Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
-                    });
+                    // Forward baseline - extend across full voltage range
+                    const fwdRegression = baseline.markers.forward_segment;
+                    if (fwdRegression && fwdRegression.slope !== undefined && fwdRegression.intercept !== undefined) {
+                        const forwardXExtended = [minVoltage, maxVoltage];
+                        const forwardYExtended = forwardXExtended.map(v => fwdRegression.slope * v + fwdRegression.intercept);
+                        
+                        baselineTraces.push({
+                            x: forwardXExtended,
+                            y: forwardYExtended,
+                            mode: 'lines',
+                            name: `Forward Baseline (R²=${fwdRegression.r2?.toFixed(3) || 'N/A'})`,
+                            line: { color: '#ff0000', width: 2, dash: 'dash' },
+                            hovertemplate: 'Forward Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
+                        });
+                    }
+                    
+                    // Reverse baseline - extend across full voltage range
+                    const revRegression = baseline.markers.reverse_segment;
+                    if (revRegression && revRegression.slope !== undefined && revRegression.intercept !== undefined) {
+                        const reverseXExtended = [minVoltage, maxVoltage];
+                        const reverseYExtended = reverseXExtended.map(v => revRegression.slope * v + revRegression.intercept);
+                        
+                        baselineTraces.push({
+                            x: reverseXExtended,
+                            y: reverseYExtended,
+                            mode: 'lines',
+                            name: `Reverse Baseline (R²=${revRegression.r2?.toFixed(3) || 'N/A'})`,
+                            line: { color: '#00aa00', width: 2, dash: 'dash' },
+                            hovertemplate: 'Reverse Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
+                        });
+                    }
                 } else {
                     // Fallback: single baseline with original color
                     baselineTraces.push({
@@ -835,6 +851,7 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                         name: 'Baseline',
                         line: { color: '#ff6b6b', width: 2, dash: 'dash' },
                         hovertemplate: 'Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
+                        connectgaps: false,
                     });
                 }
                 
@@ -898,26 +915,61 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
                 const n = chartData.voltage.length;
                 const mid = Math.floor(n / 2);
                 
-                // Forward baseline trace (first half of CV)
-                baselineTraces.push({
-                    x: chartData.voltage.slice(0, baseline.forward.length),
-                    y: baseline.forward,
-                    mode: 'lines',
-                    name: 'Forward Baseline',
-                    line: { color: '#ff0000', width: 2, dash: 'dash' },
-                    hovertemplate: 'Forward Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
-                });
+                // Get full voltage range for extended baseline
+                const minVoltage = Math.min(...chartData.voltage);
+                const maxVoltage = Math.max(...chartData.voltage);
                 
-                // Reverse baseline trace (second half of CV)
-                const reverseStartIdx = chartData.voltage.length - baseline.reverse.length;
-                baselineTraces.push({
-                    x: chartData.voltage.slice(reverseStartIdx),
-                    y: baseline.reverse,
-                    mode: 'lines',
-                    name: 'Reverse Baseline',
-                    line: { color: '#00aa00', width: 2, dash: 'dash' },
-                    hovertemplate: 'Reverse Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
-                });
+                // Forward baseline trace - extend across full voltage range using regression
+                if (baseline.forward && baseline.forward.length > 0) {
+                    // Calculate regression for forward baseline
+                    const forwardPoints = [];
+                    const n = Math.min(baseline.forward.length, chartData.voltage.length);
+                    for (let i = 0; i < n; i++) {
+                        forwardPoints.push({
+                            voltage: chartData.voltage[i],
+                            current: baseline.forward[i]
+                        });
+                    }
+                    const fwdRegression = linearRegression(forwardPoints);
+                    
+                    const forwardXExtended = [minVoltage, maxVoltage];
+                    const forwardYExtended = forwardXExtended.map(v => fwdRegression.slope * v + fwdRegression.intercept);
+                    
+                    baselineTraces.push({
+                        x: forwardXExtended,
+                        y: forwardYExtended,
+                        mode: 'lines',
+                        name: 'Forward Baseline',
+                        line: { color: '#ff0000', width: 2, dash: 'dash' },
+                        hovertemplate: 'Forward Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
+                    });
+                }
+                
+                // Reverse baseline trace - extend across full voltage range using regression
+                if (baseline.reverse && baseline.reverse.length > 0) {
+                    // Calculate regression for reverse baseline
+                    const reverseStartIdx = chartData.voltage.length - baseline.reverse.length;
+                    const reversePoints = [];
+                    for (let i = 0; i < baseline.reverse.length; i++) {
+                        reversePoints.push({
+                            voltage: chartData.voltage[reverseStartIdx + i],
+                            current: baseline.reverse[i]
+                        });
+                    }
+                    const revRegression = linearRegression(reversePoints);
+                    
+                    const reverseXExtended = [minVoltage, maxVoltage];
+                    const reverseYExtended = reverseXExtended.map(v => revRegression.slope * v + revRegression.intercept);
+                    
+                    baselineTraces.push({
+                        x: reverseXExtended,
+                        y: reverseYExtended,
+                        mode: 'lines',
+                        name: 'Reverse Baseline',
+                        line: { color: '#00aa00', width: 2, dash: 'dash' },
+                        hovertemplate: 'Reverse Baseline<br>V: %{x:.3f}<br>I: %{y:.6f}<extra></extra>',
+                    });
+                }
                 
                 // Add baseline segment markers if available
                 if (baseline.markers) {
@@ -994,6 +1046,20 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
         length: peaksData ? peaksData.length : 0,
         samplePeak: peaksData && peaksData.length > 0 ? peaksData[0] : null
     });
+    
+    // Debug: Log all peak properties
+    enabledPeaks.forEach((peak, i) => {
+        console.log(`[PEAK ${i}] Properties:`, {
+            x: peak.x,
+            y: peak.y,
+            voltage: peak.voltage,
+            current: peak.current,
+            baseline_current: peak.baseline_current,
+            height: peak.height,
+            type: peak.type,
+            enabled: peak.enabled
+        });
+    });
 
     // Enabled peaks trace
     if (enabledPeaks.length > 0) {
@@ -1065,35 +1131,75 @@ function renderPeakAnalysisPlot(chartData, peaksData, methodNameStr) {
         height: 500
     };
 
-    // Create vertical drop lines from peaks to baseline
-    const peakDropLines = [];
+    // Create vertical height lines from peaks to baseline
+    const peakHeightLines = [];
+    
     for (let i = 0; i < peaksArr.length; i++) {
         const peak = peaksArr[i];
         const peakVoltage = peak.x !== undefined ? peak.x : peak.voltage;
         const peakCurrent = peak.y !== undefined ? peak.y : peak.current;
-        const baselineCurrent = peak.baseline_current || 0;
         
-        // Only show drop line if peak is enabled
-        if (peak.enabled !== false) {
-            const dropLineTrace = {
+        // Calculate correct baseline current at peak voltage
+        let baselineCurrent = 0;
+        
+        // Try to get baseline from actual baseline data
+        if (peaksArr.length > 0 && peaksArr[0].baseline && peaksArr[0].baseline.markers) {
+            const markers = peaksArr[0].baseline.markers; // Use baseline from first peak
+            
+            // For reduction peaks, use reverse baseline; for oxidation peaks, use forward baseline
+            if (peak.type === 'reduction' && markers.reverse_segment) {
+                const rev = markers.reverse_segment;
+                if (rev.slope !== undefined && rev.intercept !== undefined) {
+                    baselineCurrent = rev.slope * peakVoltage + rev.intercept;
+                    console.log(`[BASELINE CALC] RED peak at ${peakVoltage}V: using reverse baseline = ${baselineCurrent}`);
+                }
+            } else if (peak.type === 'oxidation' && markers.forward_segment) {
+                const fwd = markers.forward_segment;
+                if (fwd.slope !== undefined && fwd.intercept !== undefined) {
+                    baselineCurrent = fwd.slope * peakVoltage + fwd.intercept;
+                    console.log(`[BASELINE CALC] OX peak at ${peakVoltage}V: using forward baseline = ${baselineCurrent}`);
+                }
+            } else {
+                // Fallback to stored baseline_current
+                baselineCurrent = peak.baseline_current !== undefined ? peak.baseline_current : 0;
+                console.log(`[BASELINE CALC] Peak at ${peakVoltage}V: no matching baseline type, using stored = ${baselineCurrent}`);
+            }
+        } else {
+            // Fallback to stored baseline_current
+            baselineCurrent = peak.baseline_current !== undefined ? peak.baseline_current : 0;
+            console.log(`[BASELINE CALC] Peak at ${peakVoltage}V: no baseline markers found, using stored = ${baselineCurrent}`);
+        }
+        
+        console.log(`[HEIGHT LINE] Peak ${i}:`, {
+            voltage: peakVoltage,
+            peakCurrent: peakCurrent,
+            baselineCurrent: baselineCurrent,
+            storedBaseline: peak.baseline_current,
+            height: Math.abs(peakCurrent - baselineCurrent),
+            type: peak.type
+        });
+        
+        // Only show height line if peak is enabled and has significant height
+        if (peak.enabled !== false && Math.abs(peakCurrent - baselineCurrent) > 1e-6) {
+            const heightLineTrace = {
                 x: [peakVoltage, peakVoltage],
-                y: [peakCurrent, baselineCurrent],
+                y: [baselineCurrent, peakCurrent],
                 mode: 'lines',
                 line: {
                     color: peak.type === 'oxidation' ? '#dc3545' : '#198754',
-                    width: 2,
+                    width: 3,
                     dash: 'dot'
                 },
                 name: `${peak.type === 'oxidation' ? 'Ox' : 'Red'} Height`,
                 showlegend: false,
-                hoverinfo: 'skip'
+                hovertemplate: `Peak Height<br>V: ${peakVoltage.toFixed(3)} V<br>Peak: ${peakCurrent.toFixed(3)} µA<br>Baseline: ${baselineCurrent.toFixed(3)} µA<br>Height: ${Math.abs(peakCurrent - baselineCurrent).toFixed(3)} µA<extra></extra>`,
             };
-            peakDropLines.push(dropLineTrace);
+            peakHeightLines.push(heightLineTrace);
         }
     }
 
-    // Combine all traces: CV data, peak traces (enabled & disabled), baseline traces, and drop lines
-    const allTraces = [cvTrace, ...peakTraces, ...baselineTraces, ...peakDropLines];
+    // Combine all traces: CV data, peak traces (enabled & disabled), baseline traces, and height lines
+    const allTraces = [cvTrace, ...peakTraces, ...baselineTraces, ...peakHeightLines];
     
     console.log('[RENDER] About to call Plotly.newPlot with', allTraces.length, 'traces');
     console.log('[RENDER] Peak traces:', peakTraces.length, 'Enabled peaks:', enabledPeaks.length, 'Disabled peaks:', disabledPeaks.length);
