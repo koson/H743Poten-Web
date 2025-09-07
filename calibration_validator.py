@@ -21,12 +21,19 @@ def convert_numpy_types(obj):
         return int(obj)
     elif isinstance(obj, np.floating):
         return float(obj)
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
     elif isinstance(obj, np.ndarray):
         return obj.tolist()
     elif isinstance(obj, dict):
         return {key: convert_numpy_types(value) for key, value in obj.items()}
     elif isinstance(obj, list):
         return [convert_numpy_types(item) for item in obj]
+    elif isinstance(obj, tuple):
+        return [convert_numpy_types(item) for item in obj]
+    # Handle regular Python bool that might be problematic in some Flask versions
+    elif isinstance(obj, bool):
+        return bool(obj)
     return obj
 
 class CalibrationValidator:
