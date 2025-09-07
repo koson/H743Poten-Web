@@ -35,6 +35,7 @@ try:
     from .routes.parameter_api import parameter_bp, parameter_api_bp
     from .routes.calibration_api import calibration_api_bp
     from .routes.production_calibration_api import calibration_bp as production_calibration_bp
+    from .routes.cross_calibration_step4 import cross_calibration_bp
     from .cross_calibration_api import cross_cal_bp, register_calibration_api
 except ImportError:
     # Fall back to absolute imports (when run directly)
@@ -49,6 +50,7 @@ except ImportError:
     from routes.data_logging_routes import data_logging_bp
     from routes.workflow_routes import workflow_bp
     from routes.preview_data import preview_bp
+    from routes.cross_calibration_step4 import cross_calibration_bp
     from cross_calibration_api import cross_cal_bp, register_calibration_api
     from routes.workflow_api import workflow_api_bp
     from routes.peak_detection import peak_detection_bp
@@ -129,14 +131,15 @@ def create_app():
     app.register_blueprint(parameter_api_bp)
     app.register_blueprint(calibration_api_bp)
     app.register_blueprint(production_calibration_bp)  # Production cross-sample calibration
+    app.register_blueprint(cross_calibration_bp)  # Step 4 Cross-Instrument Calibration
     
-    # Register Cross-Instrument Calibration API
-    try:
-        app.register_blueprint(cross_cal_bp)
-        register_calibration_api(app)
-        logging.info("Cross-Instrument Calibration API registered successfully")
-    except Exception as e:
-        logging.warning(f"Failed to register Cross-Instrument Calibration API: {e}")
+    # Register Cross-Instrument Calibration API (Legacy - commented out to avoid conflicts)
+    # try:
+    #     app.register_blueprint(cross_cal_bp)
+    #     register_calibration_api(app)
+    #     logging.info("Cross-Instrument Calibration API registered successfully")
+    # except Exception as e:
+    #     logging.warning(f"Failed to register Cross-Instrument Calibration API: {e}")
     
     # Error handlers
     @app.errorhandler(413)
