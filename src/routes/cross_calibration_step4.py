@@ -23,6 +23,21 @@ try:
 except ImportError as e:
     logging.warning(f"Some ML libraries not available: {e}")
 
+# Import validation system
+try:
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    from calibration_validator import CalibrationValidator
+except ImportError as e:
+    logging.warning(f"CalibrationValidator not available: {e}")
+    try:
+        from simple_validator import SimpleCalibrationValidator as CalibrationValidator
+        logging.info("Using SimpleCalibrationValidator as fallback")
+    except ImportError as e2:
+        logging.warning(f"SimpleCalibrationValidator also not available: {e2}")
+        CalibrationValidator = None
+
 logger = logging.getLogger(__name__)
 
 # Create blueprint
@@ -38,6 +53,82 @@ ml_models = {}
 scaler = StandardScaler()
 training_data = {}
 calibration_results = {}
+
+def extract_concentration_from_filename(filename: str) -> str:
+    """Extract concentration from filename with improved pattern matching"""
+    import re
+    
+    logger.info(f"Extracting concentration from: {filename}")
+    
+    # Handle different filename patterns - ordered by specificity
+    patterns = [
+        # Dot notation patterns (highest priority)
+        r'(\d+\.\d+)mM',           # 1.0mM, 5.0mM, 0.5mM
+        r'(\d+\.\d+)\s*mM',        # 1.0 mM with space
+        
+        # Underscore patterns (legacy support)
+        r'(\d+)_(\d+)mM',          # 1_0mM, 5_0mM, 0_5mM
+        r'(\d+)_(\d+)\s*mM',       # 1_0 mM with space
+        
+        # Simple integer patterns
+        r'(\d+)mM',                # 1mM, 5mM, 10mM
+        r'(\d+)\s*mM',             # 1 mM with space
+        
+        # Dash patterns
+        r'(\d+)-(\d+)mM',          # 1-0mM
+        r'(\d+\.\d*)-mM',          # 1.0-mM
+        
+        # Fallback patterns
+        r'(\d+\.?\d*)_mM',         # Any number_mM
+        r'(\d+\.?\d*)-mM',         # Any number-mM
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, filename, re.IGNORECASE)
+        if match:
+            if len(match.groups()) == 2:  # Two groups: handle X_Y format
+                whole_part = match.group(1)
+                decimal_part = match.group(2)
+                result = f"{whole_part}.{decimal_part}mM"
+                logger.info(f"Pattern match: {pattern} -> {result}")
+                return result
+            else:  # One group: direct match
+                concentration = match.group(1)
+                # If it's a whole number, add .0
+                if '.' not in concentration and concentration.isdigit():
+                    result = f"{concentration}.0mM"
+                else:
+                    result = f"{concentration}mM"
+                logger.info(f"Pattern match: {pattern} -> {result}")
+                return result
+    
+    # Enhanced fallback cases with more specific checks
+    filename_lower = filename.lower()
+    
+    # Specific concentration fallbacks
+    if '0_5mm' in filename_lower or '0.5mm' in filename_lower:
+        logger.info("Fallback: Found 0.5mM")
+        return '0.5mM'
+    elif '1_0mm' in filename_lower or '1.0mm' in filename_lower:
+        logger.info("Fallback: Found 1.0mM") 
+        return '1.0mM'
+    elif '5_0mm' in filename_lower or '5.0mm' in filename_lower:
+        logger.info("Fallback: Found 5.0mM")
+        return '5.0mM'
+    elif '10mm' in filename_lower:
+        logger.info("Fallback: Found 10.0mM")
+        return '10.0mM'
+        logger.info("Special case: 10mM")
+        return '10mM'
+    elif '_20mM' in filename:
+        logger.info("Special case: 20mM")
+        return '20mM'
+    elif '_50mM' in filename:
+        logger.info("Special case: 50mM")
+        return '50mM'
+    
+    logger.warning(f"No concentration pattern found in: {filename}")
+    return 'unknown'
 
 @cross_calibration_bp.route('/')
 def dashboard():
@@ -87,7 +178,7 @@ def upload_multi_instrument_data():
                     data = pd.read_csv(file)
                 elif file.filename.endswith('.txt'):
                     # Try to read as space/tab separated
-                    data = pd.read_csv(file, sep='\s+', header=None)
+                    data = pd.read_csv(file, sep=r'\s+', header=None)
                     # Add generic column names
                     if data.shape[1] == 2:
                         data.columns = ['voltage', 'current']
@@ -116,9 +207,11 @@ def upload_multi_instrument_data():
                     continue
                 
                 # Store processed data
+                concentration = extract_concentration_from_filename(file.filename)
                 training_data[file_id] = {
                     'instrument': instrument_type,
                     'filename': file.filename,
+                    'concentration': concentration,
                     'data': data.to_dict('records'),
                     'upload_time': datetime.now().isoformat(),
                     'data_shape': data.shape,
@@ -164,6 +257,10 @@ def upload_multi_instrument_data():
 def get_data_status():
     """Get current status of uploaded data"""
     try:
+        # Load existing CSV files from data_logs/csv if training_data is empty
+        if not training_data:
+            load_existing_csv_files()
+        
         status = {
             'total_datasets': len(training_data),
             'instruments': {},
@@ -180,8 +277,10 @@ def get_data_status():
                 'file_id': file_id,
                 'filename': data_info['filename'],
                 'instrument': instrument,
+                'concentration': data_info.get('concentration', 'unknown'),
                 'upload_time': data_info['upload_time'],
-                'data_shape': data_info['data_shape']
+                'data_shape': data_info['data_shape'],
+                'columns': data_info.get('columns', [])
             })
         
         return jsonify(status)
@@ -189,6 +288,144 @@ def get_data_status():
     except Exception as e:
         logger.error(f"Error in get_data_status: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+def load_existing_csv_files():
+    """Load existing CSV files from data_logs/csv directory"""
+    try:
+        import os
+        csv_dir = os.path.join(os.getcwd(), 'data_logs', 'csv')
+        
+        logger.info(f"Loading CSV files from: {csv_dir}")
+        
+        if not os.path.exists(csv_dir):
+            logger.warning(f"CSV directory not found: {csv_dir}")
+            return
+        
+        csv_files = [f for f in os.listdir(csv_dir) if f.endswith('.csv')]
+        logger.info(f"Found {len(csv_files)} CSV files in {csv_dir}")
+        
+        if len(csv_files) == 0:
+            logger.warning("No CSV files found!")
+            return
+            
+        # Separate files by instrument type for balanced loading
+        palmsens_files = [f for f in csv_files if f.startswith('Palmsens')]
+        pipot_files = [f for f in csv_files if f.startswith('Pipot')]
+        other_files = [f for f in csv_files if not f.startswith('Palmsens') and not f.startswith('Pipot')]
+        
+        # Group by concentration to ensure diversity
+        def get_diverse_files(files, max_files):
+            concentration_groups = {}
+            for f in files:
+                conc = extract_concentration_from_filename(f)
+                if conc not in concentration_groups:
+                    concentration_groups[conc] = []
+                concentration_groups[conc].append(f)
+            
+            # Take files from each concentration evenly
+            selected = []
+            concentrations = list(concentration_groups.keys())
+            files_per_conc = max_files // len(concentrations) if concentrations else 0
+            remainder = max_files % len(concentrations) if concentrations else 0
+            
+            for i, conc in enumerate(concentrations):
+                take = files_per_conc + (1 if i < remainder else 0)
+                selected.extend(concentration_groups[conc][:take])
+                if len(selected) >= max_files:
+                    break
+            
+            return selected[:max_files]
+        
+        # Take diverse files from each instrument
+        selected_palmsens = get_diverse_files(palmsens_files, 25)
+        selected_pipot = get_diverse_files(pipot_files, 25)
+        
+        csv_files = selected_palmsens + selected_pipot + other_files[:10]
+        logger.info(f"Processing {len(selected_palmsens)} Palmsens + {len(selected_pipot)} Pipot + {len(other_files[:10])} other files")
+        
+        # Log concentration diversity
+        palmsens_concs = set(extract_concentration_from_filename(f) for f in selected_palmsens)
+        pipot_concs = set(extract_concentration_from_filename(f) for f in selected_pipot)
+        logger.info(f"Palmsens concentrations: {palmsens_concs}")
+        logger.info(f"Pipot concentrations: {pipot_concs}")
+        logger.info(f"Common concentrations: {palmsens_concs & pipot_concs}")
+            
+        loaded_count = 0
+        
+        for filename in csv_files:
+            try:
+                file_path = os.path.join(csv_dir, filename)
+                
+                # Determine instrument type from filename
+                if filename.startswith('Palmsens'):
+                    instrument_type = 'palmsens'
+                elif filename.startswith('Pipot') or filename.startswith('STM32'):
+                    instrument_type = 'stm32'
+                else:
+                    instrument_type = 'unknown'
+                
+                logger.info(f"Processing {filename}: detected as {instrument_type}")
+                
+                # Create file_id
+                file_id = f"{instrument_type}_{filename}"
+                
+                # Skip if already loaded
+                if file_id in training_data:
+                    logger.info(f"File {filename} already loaded, skipping")
+                    continue
+                
+                # Read the CSV file
+                if filename.startswith('Palmsens'):
+                    # Palmsens files have filename header in first line, skip it
+                    data = pd.read_csv(file_path, skiprows=1)
+                    # Rename columns to standard format
+                    if list(data.columns) == ['V', 'uA']:
+                        data.columns = ['voltage', 'current']
+                        # Convert uA to A
+                        data['current'] = data['current'] * 1e-6
+                elif filename.startswith('Pipot') or filename.startswith('STM32'):
+                    # STM32/Pipot files also have filename header in first line, skip it
+                    data = pd.read_csv(file_path, skiprows=1)
+                    # Rename columns to standard format
+                    if list(data.columns) == ['V', 'uA']:
+                        data.columns = ['voltage', 'current']
+                        # Convert uA to A
+                        data['current'] = data['current'] * 1e-6
+                else:
+                    data = pd.read_csv(file_path)
+                
+                if data.empty:
+                    logger.warning(f"File {filename} is empty, skipping")
+                    continue
+                
+                # Extract concentration
+                concentration = extract_concentration_from_filename(filename)
+                
+                # Store data
+                training_data[file_id] = {
+                    'instrument': instrument_type,
+                    'filename': filename,
+                    'concentration': concentration,
+                    'data': data.to_dict('records'),
+                    'upload_time': datetime.now().isoformat(),
+                    'data_shape': data.shape,
+                    'columns': list(data.columns),
+                    'source': 'existing_csv'
+                }
+                
+                logger.info(f"Loaded existing CSV: {filename} ({concentration}, {instrument_type})")
+                loaded_count += 1
+                
+            except Exception as e:
+                logger.error(f"Error loading {filename}: {e}")
+                continue
+        
+        logger.info(f"Successfully loaded {loaded_count}/{len(csv_files)} files into training_data")
+        logger.info(f"Total training_data size: {len(training_data)}")
+        
+    except Exception as e:
+        logger.error(f"Error in load_existing_csv_files: {e}")
+        logger.error(traceback.format_exc())
 
 @cross_calibration_bp.route('/api/remove-file', methods=['POST'])
 def remove_file():
@@ -209,6 +446,75 @@ def remove_file():
             
     except Exception as e:
         logger.error(f"Error removing file: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@cross_calibration_bp.route('/api/debug-data')
+def debug_data():
+    """Debug endpoint to check training data"""
+    try:
+        # Force reload
+        training_data.clear()
+        load_existing_csv_files()
+        
+        debug_info = {
+            'total_files': len(training_data),
+            'instruments': {},
+            'concentrations': {},
+            'sample_files': []
+        }
+        
+        for file_id, data_info in training_data.items():
+            instrument = data_info['instrument']
+            concentration = data_info.get('concentration', 'unknown')
+            
+            # Count by instrument
+            if instrument not in debug_info['instruments']:
+                debug_info['instruments'][instrument] = 0
+            debug_info['instruments'][instrument] += 1
+            
+            # Count by concentration
+            if concentration not in debug_info['concentrations']:
+                debug_info['concentrations'][concentration] = {'palmsens': 0, 'stm32': 0}
+            debug_info['concentrations'][concentration][instrument] += 1
+            
+            # Add sample files (first 5 of each type)
+            if len(debug_info['sample_files']) < 10:
+                debug_info['sample_files'].append({
+                    'file_id': file_id,
+                    'filename': data_info['filename'],
+                    'instrument': instrument,
+                    'concentration': concentration,
+                    'columns': data_info.get('columns', []),
+                    'data_shape': data_info.get('data_shape', [])
+                })
+        
+        return jsonify(debug_info)
+        
+    except Exception as e:
+        logger.error(f"Error in debug_data: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
+@cross_calibration_bp.route('/api/reload-csv-files', methods=['POST'])
+def reload_csv_files():
+    """Manual reload of CSV files"""
+    try:
+        # Clear existing data
+        training_data.clear()
+        logger.info("Cleared existing training data")
+        
+        # Reload CSV files
+        load_existing_csv_files()
+        
+        return jsonify({
+            'success': True,
+            'total_files': len(training_data),
+            'message': f'Loaded {len(training_data)} files successfully'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in reload_csv_files: {str(e)}")
+        logger.error(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
 @cross_calibration_bp.route('/api/clear-all-data', methods=['POST'])
@@ -272,13 +578,24 @@ def train_calibration_model():
                         break
         
         if len(ref_files) == 0:
+            logger.error(f"No reference data found for {reference_instrument}")
             return jsonify({'error': f'No reference data found for {reference_instrument}'}), 400
         if len(target_files) == 0:
+            logger.error(f"No target data found for {target_instruments}")
             return jsonify({'error': f'No target data found for {target_instruments}'}), 400
+        
+        logger.info(f"Found {len(ref_files)} reference files and {len(target_files)} target files")
+        
+        # Debug: Show what concentrations we have
+        ref_concentrations = [info.get('concentration', 'unknown') for _, info in ref_files]
+        target_concentrations = [info.get('concentration', 'unknown') for _, info in target_files]
+        logger.info(f"Reference concentrations: {set(ref_concentrations)}")
+        logger.info(f"Target concentrations: {set(target_concentrations)}")
         
         # Prepare training dataset - match by concentration
         X_train_list = []
         y_train_list = []
+        matched_pairs = []
         
         for target_file_id, target_info in target_files:
             target_conc = target_info.get('concentration', 'unknown')
@@ -287,7 +604,11 @@ def train_calibration_model():
             for ref_file_id, ref_info in ref_files:
                 ref_conc = ref_info.get('concentration', 'unknown')
                 
+                logger.debug(f"Comparing target '{target_conc}' with ref '{ref_conc}'")
+                
                 if target_conc == ref_conc or target_conc.replace('mM', '') == ref_conc.replace('mM', ''):
+                    logger.info(f"Found matching pair: {target_conc} (target: {target_info['filename']}, ref: {ref_info['filename']})")
+                    
                     # Extract features from both datasets
                     target_data = pd.DataFrame(target_info['data'])
                     ref_data = pd.DataFrame(ref_info['data'])
@@ -300,11 +621,23 @@ def train_calibration_model():
                             
                             X_train_list.append(target_features)
                             y_train_list.append(ref_features)
+                            matched_pairs.append(f"{target_conc}: {target_info['filename']} -> {ref_info['filename']}")
                             
                             logger.info(f"Matched {target_conc}: target={len(target_features)} features, ref={len(ref_features)} features")
                     break
         
+        logger.info(f"Total matched pairs: {len(matched_pairs)}")
+        for pair in matched_pairs:
+            logger.info(f"  - {pair}")
+        
         if len(X_train_list) == 0:
+            logger.error("No matching concentration pairs found - detailed analysis:")
+            logger.error(f"Reference files: {len(ref_files)}")
+            for i, (file_id, info) in enumerate(ref_files):
+                logger.error(f"  Ref {i+1}: {info['filename']} -> concentration: '{info.get('concentration', 'unknown')}'")
+            logger.error(f"Target files: {len(target_files)}")
+            for i, (file_id, info) in enumerate(target_files):
+                logger.error(f"  Target {i+1}: {info['filename']} -> concentration: '{info.get('concentration', 'unknown')}'")
             return jsonify({'error': 'No matching concentration pairs found for training'}), 400
         
         # Convert to numpy arrays
@@ -538,12 +871,21 @@ def apply_calibration():
         prediction_scaled = model.predict(test_features_scaled)
         prediction = scaler_y.inverse_transform(prediction_scaled)
         
-        # Create calibrated data (simplified - just adjust current values)
+        # Create calibrated data (improved calibration method)
         calibrated_data = test_data.copy()
         if 'current' in calibrated_data.columns:
-            # Apply a simple correction factor based on prediction
-            correction_factor = prediction[0][4] / test_features[4] if test_features[4] != 0 else 1.0
-            calibrated_data['current'] = calibrated_data['current'] * correction_factor
+            # Apply a more robust correction based on the difference between prediction and actual
+            predicted_mean_current = prediction[0][4]  # Mean current from prediction
+            actual_mean_current = test_features[4]     # Mean current from test data
+            
+            # Calculate offset correction (additive) instead of multiplicative
+            current_offset = predicted_mean_current - actual_mean_current
+            
+            # Apply correction with a scaling factor to avoid over-correction
+            calibrated_data['current'] = calibrated_data['current'] + (current_offset * 0.1)
+            
+            # Store correction info for debugging
+            correction_factor = current_offset
         
         return jsonify({
             'success': True,
@@ -585,19 +927,96 @@ def get_models_status():
         logger.error(f"Error in get_models_status: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@cross_calibration_bp.route('/validate_calibration', methods=['POST'])
+def validate_calibration():
+    """Comprehensive calibration validation endpoint"""
+    try:
+        # Check if CalibrationValidator is available
+        if CalibrationValidator is None:
+            return jsonify({'error': 'CalibrationValidator not available', 'success': False}), 500
+        
+        data = request.get_json()
+        original_data = pd.DataFrame(data.get('original_data', []))
+        calibrated_data = pd.DataFrame(data.get('calibrated_data', []))
+        reference_data = None
+        
+        if data.get('reference_data'):
+            reference_data = pd.DataFrame(data['reference_data'])
+        
+        validator = CalibrationValidator()
+        validation_results = validator.validate_calibration(
+            original_data, calibrated_data, reference_data
+        )
+        
+        return jsonify({
+            'success': True,
+            'validation_results': validation_results,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in validate_calibration: {str(e)}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+@cross_calibration_bp.route('/quick_validate', methods=['POST'])
+def quick_validate():
+    """Quick validation for real-time feedback"""
+    try:
+        data = request.get_json()
+        original_data = pd.DataFrame(data.get('original_data', []))
+        calibrated_data = pd.DataFrame(data.get('calibrated_data', []))
+        
+        # Quick validation metrics
+        orig_current = np.array(original_data['current']) if 'current' in original_data else np.array(original_data['Current'])
+        cal_current = np.array(calibrated_data['current']) if 'current' in calibrated_data else np.array(calibrated_data['Current'])
+        
+        # Basic metrics
+        from scipy.stats import pearsonr
+        correlation, _ = pearsonr(orig_current, cal_current)
+        rmse = np.sqrt(np.mean((orig_current - cal_current)**2))
+        relative_error = np.mean(np.abs((cal_current - orig_current) / (orig_current + 1e-12))) * 100
+        
+        # Signal preservation
+        signal_preservation = 1 - np.abs((np.std(cal_current) - np.std(orig_current)) / np.std(orig_current))
+        
+        # Quick quality score
+        quality_score = (correlation + signal_preservation + max(0, 1 - relative_error/100)) / 3 * 100
+        
+        quick_results = {
+            'correlation': float(correlation),
+            'rmse': float(rmse),
+            'relative_error': float(relative_error),
+            'signal_preservation': float(signal_preservation),
+            'quality_score': float(quality_score),
+            'status': 'excellent' if quality_score >= 80 else 'good' if quality_score >= 60 else 'fair' if quality_score >= 40 else 'poor'
+        }
+        
+        return jsonify({
+            'success': True,
+            'quick_validation': quick_results,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in quick_validate: {str(e)}")
+        return jsonify({'error': str(e), 'success': False}), 500
+
 def apply_prediction_to_cv(original_data, prediction):
     """Apply ML prediction to calibrate CV data"""
     try:
-        # This is a simplified approach - in practice, you'd want more sophisticated calibration
+        # This is a more robust calibration approach
         calibrated_data = original_data.copy()
         
-        # Apply voltage calibration (assuming prediction contains voltage and current corrections)
+        # Apply calibration using additive corrections instead of multiplicative
         if len(prediction) >= 2:
-            voltage_correction = prediction[0] - np.mean(original_data['voltage'])
-            current_correction = prediction[4] - np.mean(original_data['current'])  # Using current mean from prediction
+            # Calculate correction offsets (not ratios)
+            voltage_offset = prediction[0] - np.mean(original_data['voltage'])
+            current_offset = prediction[4] - np.mean(original_data['current'])
             
-            calibrated_data['voltage'] = original_data['voltage'] + voltage_correction * 0.1  # Scale correction
-            calibrated_data['current'] = original_data['current'] * (1 + current_correction * 0.01)  # Scale correction
+            # Apply scaled corrections to avoid over-correction
+            calibrated_data['voltage'] = original_data['voltage'] + (voltage_offset * 0.05)  # Smaller scale for voltage
+            calibrated_data['current'] = original_data['current'] + (current_offset * 0.1)   # Additive correction for current
         
         return calibrated_data
         

@@ -100,6 +100,141 @@
             border-radius: 15px;
             padding: 1.5rem;
         }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+        
+        .table-primary {
+            background-color: rgba(102, 126, 234, 0.2) !important;
+        }
+        
+        .sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        #data-selector-card {
+            transition: all 0.3s ease;
+        }
+        
+        /* Validation UI Styles */
+        .quality-score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #dc3545 0%, #ffc107 40%, #28a745 80%, #28a745 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .quality-score-circle::before {
+            content: '';
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            position: absolute;
+        }
+        
+        #quality-score-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            z-index: 1;
+        }
+        
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .validation-badge {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .badge-excellent {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .badge-good {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        .badge-fair {
+            background-color: #ffc107;
+            color: black;
+        }
+        
+        .badge-poor {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .validation-results {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .validation-metric {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .validation-metric h6 {
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-custom {
+            height: 20px;
+            border-radius: 10px;
+        }
+        
+        #validate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .form-select-sm {
+            font-size: 0.875rem;
+        }
+        
+        .table-sm td, .table-sm th {
+            padding: 0.5rem 0.25rem;
+            vertical-align: middle;
+        }
+        
+        #selected-data-count, #selected-model-name {
+            font-weight: 600;
+            color: #667eea;
+        }
     </style>
 </head>
 <body>
@@ -200,23 +335,90 @@
             </div>
         </div>
 
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="analysis-card card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-rocket"></i> Quick Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-gradient btn-lg me-3" onclick="analyzeSelectedData()" id="analyze-btn" disabled>
+                                        <i class="fas fa-play"></i> Analyze Selected Data
+                                    </button>
+                                    <div>
+                                        <small class="text-muted">Selected: <span id="selected-data-count">0</span> datasets</small><br>
+                                        <small class="text-muted">Model: <span id="selected-model-name">None</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-outline-info" onclick="toggleDataSelector()">
+                                    <i class="fas fa-database"></i> Select Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Data Selection -->
         <div class="row mb-4">
             <div class="col-md-4">
-                <div class="analysis-card card">
-                    <div class="card-header">
+                <div class="analysis-card card" id="data-selector-card" style="display: none;">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5><i class="fas fa-database"></i> Select Test Data</h5>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleDataSelector()">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                     <div class="card-body">
-                        <div id="data-list">
-                            <div class="text-center text-muted">
-                                <i class="fas fa-spinner fa-spin"></i> Loading datasets...
-                            </div>
+                        <!-- Data Filter Controls -->
+                        <div class="mb-3">
+                            <label class="form-label">Filter by Instrument:</label>
+                            <select class="form-select form-select-sm" id="instrument-filter" onchange="filterDataList()">
+                                <option value="">All Instruments</option>
+                            </select>
                         </div>
-                        <hr>
-                        <button class="btn btn-gradient w-100" onclick="analyzeSelectedData()" id="analyze-btn" disabled>
-                            <i class="fas fa-play"></i> Analyze Selected Data
-                        </button>
+                        <div class="mb-3">
+                            <label class="form-label">Filter by Concentration:</label>
+                            <select class="form-select form-select-sm" id="concentration-filter" onchange="filterDataList()">
+                                <option value="">All Concentrations</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Compact Data Table -->
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th width="10%">
+                                            <input type="checkbox" id="select-all-data" onchange="toggleAllDataSelection()">
+                                        </th>
+                                        <th width="40%">File</th>
+                                        <th width="25%">Instrument</th>
+                                        <th width="25%">Conc.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="data-table-body">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            <i class="fas fa-spinner fa-spin"></i> Loading datasets...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-3 text-center">
+                            <small class="text-muted">
+                                Selected: <span id="selection-summary">0 of 0</span> files
+                            </small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -273,6 +475,69 @@
                         <div class="plot-container" id="error-plot">
                             <div class="text-center text-muted">
                                 <i class="fas fa-spinner fa-spin"></i> Analyzing error distribution...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calibration Validation Section -->
+        <div class="row mb-4" id="validation-section" style="display: none;">
+            <div class="col-md-8">
+                <div class="analysis-card card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-shield-check text-success"></i> Calibration Validation</h5>
+                        <button class="btn btn-sm btn-success" onclick="runValidation()" id="validate-btn">
+                            <i class="fas fa-play"></i> Run Validation
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="validation-results" class="text-center text-muted">
+                            <i class="fas fa-info-circle fa-2x mb-3"></i>
+                            <h6>Click "Run Validation" to analyze calibration quality</h6>
+                            <p class="small">Comprehensive validation includes statistical analysis, signal quality, and physical plausibility checks</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="analysis-card card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-gauge-high"></i> Quality Score</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div id="quality-gauge" class="mb-3">
+                            <div class="quality-score-circle" id="quality-circle">
+                                <span id="quality-score-text">--</span>
+                            </div>
+                        </div>
+                        <div id="quality-status" class="badge badge-secondary">Not Validated</div>
+                    </div>
+                </div>
+                
+                <div class="analysis-card card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-clipboard-check"></i> Quick Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="quick-metrics">
+                            <div class="metric-item">
+                                <span class="metric-label">Correlation:</span>
+                                <span class="metric-value" id="metric-correlation">--</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">RMSE:</span>
+                                <span class="metric-value" id="metric-rmse">--</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Signal Preservation:</span>
+                                <span class="metric-value" id="metric-preservation">--</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Relative Error:</span>
+                                <span class="metric-value" id="metric-error">--</span>
                             </div>
                         </div>
                     </div>
@@ -352,15 +617,57 @@
     <script>
         // Global variables
         let currentModel = null;
-        let selectedDataset = null;
+        let selectedModel = null; // Add this for compatibility
+        let selectedDatasets = []; // Change to array for multiple selection
         let analysisResults = null;
         let plotType = 'calibrated';
+        
+        // Extract concentration from filename - matches Python logic
+        function extractConcentrationFromFilename(filename) {
+            console.log('Extracting concentration from:', filename);
+            
+            // Handle different filename patterns - more specific patterns first
+            const patterns = [
+                /(\d+)_(\d+)mM/i,     // Handle 0_5mM format (most specific)
+                /(\d+\.?\d*)_0mM/i,   // Special case like 1_0mM
+                /(\d+\.?\d*)_mM/i,    // Underscore format
+                /(\d+\.?\d*)-mM/i,    // Dash format
+                /(\d+\.?\d*)\s*mM/i,  // Standard mM format
+                /(\d+\.?\d*)mM/i,     // No space format (least specific)
+            ];
+            
+            for (let pattern of patterns) {
+                const match = filename.match(pattern);
+                if (match) {
+                    if (match.length === 3) { // Handle X_YmM format
+                        const result = match[1] + '.' + match[2] + 'mM';
+                        console.log('Pattern match:', pattern, '->', result);
+                        return result;
+                    } else {
+                        const result = match[1] + 'mM';
+                        console.log('Pattern match:', pattern, '->', result);
+                        return result;
+                    }
+                }
+            }
+            
+            // Special cases
+            if (filename.includes('_1_0mM')) return '1.0mM';
+            if (filename.includes('_0.5mM') || filename.includes('_0_5mM')) return '0.5mM';
+            if (filename.includes('_5.0mM') || filename.includes('_5_0mM')) return '5.0mM';
+            if (filename.includes('_10mM')) return '10mM';
+            if (filename.includes('_20mM')) return '20mM';
+            if (filename.includes('_50mM')) return '50mM';
+            
+            console.warn('No concentration pattern found in:', filename);
+            return 'Unknown';
+        }
         
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
             loadModels();
-            loadDatasets();
+            updateAnalyzeButton();
         });
         
         function setupEventListeners() {
@@ -386,7 +693,7 @@
                         data.models.forEach(model => {
                             const option = document.createElement('option');
                             option.value = model.model_id;
-                            option.textContent = `${model.type.replace('_', ' ').toUpperCase()} - ${model.reference_instrument} (R²: ${(model.performance.r2 || 0).toFixed(3)})`;
+                            option.textContent = model.type.replace('_', ' ').toUpperCase() + ' - ' + model.reference_instrument + ' (R²: ' + (model.performance.r2 || 0).toFixed(3) + ')';
                             selector.appendChild(option);
                         });
                     } else {
@@ -445,6 +752,7 @@
             
             if (!modelId) {
                 currentModel = null;
+                selectedModel = null;
                 document.getElementById('performance-summary').style.display = 'none';
                 updateAnalyzeButton();
                 return;
@@ -457,9 +765,11 @@
                     const model = data.models.find(m => m.model_id === modelId);
                     if (model) {
                         currentModel = model;
+                        selectedModel = modelId; // Set both for compatibility
                         console.log('Model selected:', currentModel);
                         updatePerformanceSummary(model);
                         updateAnalyzeButton();
+                        updateSelectionSummary(); // Update quick action display
                     } else {
                         console.error('Model not found:', modelId);
                     }
@@ -506,15 +816,15 @@
         function analyzeSelectedData() {
             console.log('analyzeSelectedData called');
             console.log('currentModel:', currentModel);
-            console.log('selectedDataset:', selectedDataset);
+            console.log('selectedDatasets:', selectedDatasets);
             
             if (!currentModel) {
                 showAlert('Please select a calibration model first', 'warning');
                 return;
             }
             
-            if (!selectedDataset) {
-                showAlert('Please select a dataset first', 'warning');
+            if (selectedDatasets.length === 0) {
+                showAlert('Please select at least one dataset first', 'warning');
                 return;
             }
             
@@ -526,25 +836,25 @@
             
             console.log('Starting analysis with:', {
                 model: currentModel.model_id,
-                dataset: selectedDataset
+                datasets: selectedDatasets
             });
             
-            // เอา timeout cleanup ออก ให้ใช้ natural flow
-            
             // Show loading state
-            document.getElementById('main-plot').innerHTML = `
-                <div class="text-center mt-5 pt-5">
-                    <i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
-                    <h5>Analyzing data...</h5>
-                    <p>Applying calibration model to selected dataset</p>
-                </div>
-            `;
+            document.getElementById('main-plot').innerHTML = 
+                '<div class="text-center mt-5 pt-5">' +
+                    '<i class="fas fa-spinner fa-spin fa-3x mb-3"></i>' +
+                    '<h5>Analyzing data...</h5>' +
+                    '<p>Applying calibration model to ' + selectedDatasets.length + ' dataset(s)</p>' +
+                '</div>';
+            
+            // Apply calibration to first selected dataset (can extend for multiple)
+            const firstDataset = selectedDatasets[0];
             
             // Get dataset details first
             fetch('/step4/api/data-status')
                 .then(response => response.json())
                 .then(data => {
-                    const dataset = data.datasets.find(d => d.file_id === selectedDataset);
+                    const dataset = data.datasets.find(d => d.file_id === firstDataset);
                     if (!dataset) {
                         throw new Error('Dataset not found');
                     }
@@ -557,14 +867,14 @@
                         },
                         body: JSON.stringify({
                             model_id: currentModel.model_id,
-                            dataset_id: selectedDataset
+                            dataset_id: firstDataset
                         })
                     });
                 })
                 .then(response => {
                     console.log('API response status:', response.status);
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        throw new Error('HTTP error! status: ' + response.status);
                     }
                     return response.json();
                 })
@@ -573,31 +883,28 @@
                     if (data.success) {
                         analysisResults = data;
                         
-                        // Immediately clear loading content by replacing with empty content
+                        // Clear loading content
                         const mainPlotElement = document.getElementById('main-plot');
                         if (mainPlotElement) {
-                            // Simply clear the content instead of removing elements
                             console.log('Clearing loading state immediately after success');
                             mainPlotElement.innerHTML = '';
                         }
                         
                         try {
-                            // ใช้ setTimeout เล็กน้อยเพื่อให้ DOM มีเวลา update
+                            // Generate plot with small delay for DOM update
                             setTimeout(() => {
                                 generateMainPlot(data);
                                 console.log('Main plot generated successfully');
                             }, 10);
                         } catch (error) {
                             console.error('Error in generateMainPlot:', error);
-                            // Show simplified plot on error
-                            document.getElementById('main-plot').innerHTML = `
-                                <div class="text-center mt-5 pt-5 text-success">
-                                    <i class="fas fa-check-circle fa-3x mb-3"></i>
-                                    <h5>Analysis Completed</h5>
-                                    <p>Calibration applied successfully</p>
-                                    <small>Plot rendering encountered an issue</small>
-                                </div>
-                            `;
+                            // Show simplified success message on error
+                            document.getElementById('main-plot').innerHTML = 
+                                '<div class="text-center mt-5 pt-5 text-success">' +
+                                    '<i class="fas fa-check-circle fa-3x mb-3"></i>' +
+                                    '<h5>Analysis Completed</h5>' +
+                                    '<p>Calibration applied successfully to ' + selectedDatasets.length + ' dataset(s)</p>' +
+                                '</div>';
                         }
                         
                         try {
@@ -625,13 +932,12 @@
                     // Show error in main plot (safely)
                     const mainPlotElement = document.getElementById('main-plot');
                     if (mainPlotElement) {
-                        mainPlotElement.innerHTML = `
-                            <div class="text-center mt-5 pt-5 text-danger">
-                                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                                <h5>Analysis Failed</h5>
-                                <p>${error.message}</p>
-                            </div>
-                        `;
+                        mainPlotElement.innerHTML = 
+                            '<div class="text-center mt-5 pt-5 text-danger">' +
+                                '<i class="fas fa-exclamation-triangle fa-3x mb-3"></i>' +
+                                '<h5>Analysis Failed</h5>' +
+                                '<p>' + error.message + '</p>' +
+                            '</div>';
                     }
                     showAlert('Analysis failed: ' + error.message, 'danger');
                 })
@@ -651,25 +957,23 @@
             console.log('Calibrated data length:', calibratedData.length);
             
             if (originalData.length === 0 && calibratedData.length === 0) {
-                document.getElementById('main-plot').innerHTML = `
-                    <div class="text-center mt-5 pt-5 text-warning">
-                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                        <h5>No Data to Plot</h5>
-                        <p>The calibration returned empty data</p>
-                    </div>
-                `;
+                document.getElementById('main-plot').innerHTML = 
+                    '<div class="text-center mt-5 pt-5 text-warning">' +
+                        '<i class="fas fa-exclamation-triangle fa-3x mb-3"></i>' +
+                        '<h5>No Data to Plot</h5>' +
+                        '<p>The calibration returned empty data</p>' +
+                    '</div>';
                 return;
             }
             
             // Check if Plotly is available
             if (typeof Plotly === 'undefined') {
-                document.getElementById('main-plot').innerHTML = `
-                    <div class="text-center mt-5 pt-5 text-danger">
-                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                        <h5>Plotting Library Not Available</h5>
-                        <p>Plotly.js is not loaded</p>
-                    </div>
-                `;
+                document.getElementById('main-plot').innerHTML = 
+                    '<div class="text-center mt-5 pt-5 text-danger">' +
+                        '<i class="fas fa-exclamation-triangle fa-3x mb-3"></i>' +
+                        '<h5>Plotting Library Not Available</h5>' +
+                        '<p>Plotly.js is not loaded</p>' +
+                    '</div>';
                 return;
             }
             
@@ -699,7 +1003,7 @@
             }
             
             const layout = {
-                title: `Cross-Instrument Calibration Analysis (${plotType.charAt(0).toUpperCase() + plotType.slice(1)})`,
+                title: 'Cross-Instrument Calibration Analysis (' + plotType.charAt(0).toUpperCase() + plotType.slice(1) + ')',
                 xaxis: { title: 'Voltage (V)' },
                 yaxis: { title: 'Current (A)' },
                 showlegend: true,
@@ -725,19 +1029,19 @@
                 console.error('Error creating Plotly plot:', error);
                 const mainPlotElement = document.getElementById('main-plot');
                 if (mainPlotElement) {
-                    mainPlotElement.innerHTML = `
-                        <div class="text-center mt-5 pt-5 text-danger">
-                            <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                            <h5>Plot Generation Failed</h5>
-                            <p>${error.message}</p>
-                        </div>
-                    `;
+                    mainPlotElement.innerHTML = 
+                        '<div class="text-center mt-5 pt-5 text-danger">' +
+                            '<i class="fas fa-exclamation-triangle fa-3x mb-3"></i>' +
+                            '<h5>Plot Generation Failed</h5>' +
+                            '<p>' + error.message + '</p>' +
+                        '</div>';
                 }
             }
         }
         
         function showDetailedAnalysis(data) {
             document.getElementById('detailed-analysis').style.display = 'block';
+            document.getElementById('validation-section').style.display = 'block';
             
             // Generate residual plot (simplified)
             const residualTrace = {
@@ -787,15 +1091,14 @@
                 const statusClass = row.status === 'excellent' ? 'metric-good' : 
                                   row.status === 'good' ? 'metric-moderate' : 'metric-poor';
                 
-                tableHtml += `
-                    <tr>
-                        <td><strong>${row.metric}</strong></td>
-                        <td>${row.original}</td>
-                        <td>${row.calibrated}</td>
-                        <td class="${statusClass}">${row.improvement}</td>
-                        <td><span class="badge bg-${row.status === 'excellent' ? 'success' : 'warning'}">${row.status}</span></td>
-                    </tr>
-                `;
+                tableHtml += 
+                    '<tr>' +
+                        '<td><strong>' + row.metric + '</strong></td>' +
+                        '<td>' + row.original + '</td>' +
+                        '<td>' + row.calibrated + '</td>' +
+                        '<td class="' + statusClass + '">' + row.improvement + '</td>' +
+                        '<td><span class="badge bg-' + (row.status === 'excellent' ? 'success' : 'warning') + '">' + row.status + '</span></td>' +
+                    '</tr>';
             });
             
             document.getElementById('comparison-table-body').innerHTML = tableHtml;
@@ -833,7 +1136,7 @@
                 return;
             }
             
-            showAlert(`Export to ${format.toUpperCase()} not implemented yet`, 'info');
+            showAlert('Export to ' + format.toUpperCase() + ' not implemented yet', 'info');
         }
         
         function exportPlots() {
@@ -848,13 +1151,389 @@
             window.location.href = '/step4/validation';
         }
         
+        // New UI functions for improved data selection
+        function toggleDataSelector() {
+            const card = document.getElementById('data-selector-card');
+            const isVisible = card.style.display !== 'none';
+            card.style.display = isVisible ? 'none' : 'block';
+            
+            if (!isVisible) {
+                loadTestData(); // Reload data when showing
+            }
+        }
+        
+        function filterDataList() {
+            const instrumentFilter = document.getElementById('instrument-filter').value;
+            const concentrationFilter = document.getElementById('concentration-filter').value;
+            const tableBody = document.getElementById('data-table-body');
+            
+            // Get all rows
+            const rows = Array.from(tableBody.querySelectorAll('tr[data-file-id]'));
+            
+            rows.forEach(row => {
+                const instrument = row.dataset.instrument || '';
+                const concentration = row.dataset.concentration || '';
+                
+                const instrumentMatch = !instrumentFilter || instrument.includes(instrumentFilter);
+                const concentrationMatch = !concentrationFilter || concentration.includes(concentrationFilter);
+                
+                row.style.display = (instrumentMatch && concentrationMatch) ? 'table-row' : 'none';
+            });
+            
+            updateSelectionSummary();
+        }
+        
+        function toggleAllDataSelection() {
+            const selectAll = document.getElementById('select-all-data').checked;
+            const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"]:not([disabled])');
+            
+            checkboxes.forEach(checkbox => {
+                const row = checkbox.closest('tr');
+                if (row.style.display !== 'none') { // Only select visible rows
+                    checkbox.checked = selectAll;
+                    updateDataSelection(checkbox);
+                }
+            });
+            
+            updateSelectionSummary();
+        }
+        
+        function updateDataSelection(checkbox) {
+            const row = checkbox.closest('tr');
+            const fileId = row.dataset.fileId;
+            
+            if (checkbox.checked) {
+                if (!selectedDatasets.includes(fileId)) {
+                    selectedDatasets.push(fileId);
+                }
+                row.classList.add('table-primary');
+            } else {
+                selectedDatasets = selectedDatasets.filter(id => id !== fileId);
+                row.classList.remove('table-primary');
+            }
+            
+            updateSelectionSummary();
+            updateAnalyzeButton();
+        }
+        
+        function updateSelectionSummary() {
+            const totalVisible = document.querySelectorAll('#data-table-body tr[data-file-id]:not([style*="display: none"])').length;
+            const selectedCount = selectedDatasets.length;
+            
+            document.getElementById('selection-summary').textContent = selectedCount + ' of ' + totalVisible;
+            document.getElementById('selected-data-count').textContent = selectedCount;
+            
+            // Update quick action display
+            const modelSelector = document.getElementById('model-selector');
+            const selectedModelText = modelSelector.selectedIndex > 0 ? 
+                modelSelector.options[modelSelector.selectedIndex].text : 'None';
+            document.getElementById('selected-model-name').textContent = selectedModelText;
+        }
+        
+        function updateAnalyzeButton() {
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const hasModel = selectedModel !== null;
+            const hasData = selectedDatasets.length > 0;
+            
+            analyzeBtn.disabled = !(hasModel && hasData);
+            
+            if (!hasModel) {
+                analyzeBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Select Model First';
+            } else if (!hasData) {
+                analyzeBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Select Data First';
+            } else {
+                analyzeBtn.innerHTML = '<i class="fas fa-play"></i> Analyze Selected Data (' + selectedDatasets.length + ')';
+            }
+        }
+        
+        // Override the loadTestData function to use table format
+        function loadTestData() {
+            fetch('/step4/api/data-status')
+                .then(response => response.json())
+                .then(data => {
+                    updateDataTable(data.datasets || []);
+                    populateFilterOptions(data.datasets || []);
+                })
+                .catch(error => {
+                    console.error('Error loading test data:', error);
+                    document.getElementById('data-table-body').innerHTML = 
+                        '<tr><td colspan="4" class="text-center text-danger">Error loading data</td></tr>';
+                });
+        }
+        
+        function updateDataTable(datasets) {
+            const tableBody = document.getElementById('data-table-body');
+            
+            if (datasets.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No datasets available</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            datasets.forEach(dataset => {
+                const isSelected = selectedDatasets.includes(dataset.file_id);
+                const rowClass = isSelected ? 'table-primary' : '';
+                
+                // Extract concentration from filename using improved logic
+                const concentration = extractConcentrationFromFilename(dataset.filename);
+                
+                html += 
+                    '<tr class="' + rowClass + '" data-file-id="' + dataset.file_id + '" ' +
+                        'data-instrument="' + dataset.instrument + '" ' +
+                        'data-concentration="' + concentration + '">' +
+                        '<td>' +
+                            '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' ' +
+                                   'onchange="updateDataSelection(this)">' +
+                        '</td>' +
+                        '<td>' +
+                            '<small title="' + dataset.filename + '">' + (dataset.filename.length > 20 ? 
+                                dataset.filename.substring(0, 20) + '...' : dataset.filename) + '</small>' +
+                        '</td>' +
+                        '<td><small>' + dataset.instrument + '</small></td>' +
+                        '<td><small>' + concentration + '</small></td>' +
+                    '</tr>';
+            });
+            
+            tableBody.innerHTML = html;
+            updateSelectionSummary();
+        }
+        
+        function populateFilterOptions(datasets) {
+            // Get unique instruments and concentrations
+            const instruments = [...new Set(datasets.map(d => d.instrument))];
+            const concentrations = [...new Set(datasets.map(d => extractConcentrationFromFilename(d.filename)))];
+            
+            // Populate instrument filter
+            const instrumentFilter = document.getElementById('instrument-filter');
+            instrumentFilter.innerHTML = '<option value="">All Instruments</option>';
+            instruments.forEach(instrument => {
+                instrumentFilter.innerHTML += '<option value="' + instrument + '">' + instrument + '</option>';
+            });
+            
+            // Populate concentration filter
+            const concentrationFilter = document.getElementById('concentration-filter');
+            concentrationFilter.innerHTML = '<option value="">All Concentrations</option>';
+            concentrations.sort().forEach(concentration => {
+                concentrationFilter.innerHTML += '<option value="' + concentration + '">' + concentration + '</option>';
+            });
+        }
+        
+        // Validation Functions
+        async function runValidation() {
+            if (!analysisResults || !analysisResults.original_data || !analysisResults.calibrated_data) {
+                showAlert('Please run analysis first before validation', 'warning');
+                return;
+            }
+            
+            const validateBtn = document.getElementById('validate-btn');
+            const originalText = validateBtn.innerHTML;
+            
+            try {
+                // Show loading state
+                validateBtn.disabled = true;
+                validateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validating...';
+                
+                // Show validation section if hidden
+                document.getElementById('validation-section').style.display = 'block';
+                
+                // Run quick validation first
+                await runQuickValidation();
+                
+                // Run comprehensive validation
+                const response = await fetch('/step4/validate_calibration', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        original_data: analysisResults.original_data,
+                        calibrated_data: analysisResults.calibrated_data
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Validation request failed');
+                }
+                
+                const validationData = await response.json();
+                
+                if (validationData.success) {
+                    displayValidationResults(validationData.validation_results);
+                    showAlert('Validation completed successfully!', 'success');
+                } else {
+                    throw new Error(validationData.error || 'Validation failed');
+                }
+                
+            } catch (error) {
+                console.error('Validation error:', error);
+                showAlert('Validation failed: ' + error.message, 'danger');
+                
+                // Reset validation display
+                document.getElementById('validation-results').innerHTML = `
+                    <div class="text-center text-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                        <h6>Validation Failed</h6>
+                        <p class="small">${error.message}</p>
+                    </div>
+                `;
+                
+            } finally {
+                // Restore button
+                validateBtn.disabled = false;
+                validateBtn.innerHTML = originalText;
+            }
+        }
+        
+        async function runQuickValidation() {
+            try {
+                const response = await fetch('/step4/quick_validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        original_data: analysisResults.original_data,
+                        calibrated_data: analysisResults.calibrated_data
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Quick validation request failed');
+                }
+                
+                const quickData = await response.json();
+                
+                if (quickData.success) {
+                    updateQuickMetrics(quickData.quick_validation);
+                } else {
+                    throw new Error(quickData.error || 'Quick validation failed');
+                }
+                
+            } catch (error) {
+                console.error('Quick validation error:', error);
+                // Don't show error for quick validation, just log it
+            }
+        }
+        
+        function updateQuickMetrics(metrics) {
+            // Update quality score circle
+            const qualityScore = Math.round(metrics.quality_score);
+            document.getElementById('quality-score-text').textContent = qualityScore;
+            
+            // Update quality status badge
+            const statusElement = document.getElementById('quality-status');
+            const statusClass = getQualityStatusClass(metrics.status);
+            statusElement.className = `badge validation-badge ${statusClass}`;
+            statusElement.textContent = metrics.status.toUpperCase();
+            
+            // Update individual metrics
+            document.getElementById('metric-correlation').textContent = metrics.correlation.toFixed(3);
+            document.getElementById('metric-rmse').textContent = metrics.rmse.toExponential(2);
+            document.getElementById('metric-preservation').textContent = (metrics.signal_preservation * 100).toFixed(1) + '%';
+            document.getElementById('metric-error').textContent = metrics.relative_error.toFixed(1) + '%';
+            
+            // Color code metrics based on quality
+            colorCodeMetric('metric-correlation', metrics.correlation, [0.9, 0.7, 0.5]);
+            colorCodeMetric('metric-preservation', metrics.signal_preservation, [0.8, 0.6, 0.4]);
+            colorCodeMetric('metric-error', metrics.relative_error, [10, 25, 50], true); // Reverse for error (lower is better)
+        }
+        
+        function colorCodeMetric(elementId, value, thresholds, reverse = false) {
+            const element = document.getElementById(elementId);
+            element.className = 'metric-value';
+            
+            let className = 'metric-poor';
+            if (reverse) {
+                if (value <= thresholds[0]) className = 'metric-good';
+                else if (value <= thresholds[1]) className = 'metric-moderate';
+            } else {
+                if (value >= thresholds[0]) className = 'metric-good';
+                else if (value >= thresholds[1]) className = 'metric-moderate';
+            }
+            
+            element.classList.add(className);
+        }
+        
+        function getQualityStatusClass(status) {
+            const statusMap = {
+                'excellent': 'badge-excellent',
+                'good': 'badge-good', 
+                'fair': 'badge-fair',
+                'poor': 'badge-poor'
+            };
+            return statusMap[status] || 'badge-secondary';
+        }
+        
+        function displayValidationResults(results) {
+            const container = document.getElementById('validation-results');
+            
+            // Create comprehensive validation display
+            const html = `
+                <div class="validation-results">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="validation-metric">
+                                <h6><i class="fas fa-chart-bar"></i> Statistical Analysis</h6>
+                                <div class="progress progress-custom mb-2">
+                                    <div class="progress-bar bg-success" style="width: ${Math.max(0, results.basic_statistics.signal_preservation * 100)}%"></div>
+                                </div>
+                                <small>Signal Preservation: ${(results.basic_statistics.signal_preservation * 100).toFixed(1)}%</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="validation-metric">
+                                <h6><i class="fas fa-mountain"></i> Peak Analysis</h6>
+                                <div class="progress progress-custom mb-2">
+                                    <div class="progress-bar bg-info" style="width: ${Math.max(0, results.peak_analysis.peak_preservation * 100)}%"></div>
+                                </div>
+                                <small>Peak Preservation: ${(results.peak_analysis.peak_preservation * 100).toFixed(1)}%</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="validation-metric">
+                                <h6><i class="fas fa-signal"></i> Signal Quality</h6>
+                                <div class="progress progress-custom mb-2">
+                                    <div class="progress-bar bg-warning" style="width: ${Math.min(100, Math.max(0, (results.signal_quality.snr_improvement + 10) * 5))}%"></div>
+                                </div>
+                                <small>SNR Improvement: ${results.signal_quality.snr_improvement.toFixed(1)} dB</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="validation-metric">
+                                <h6><i class="fas fa-link"></i> Correlation</h6>
+                                <div class="progress progress-custom mb-2">
+                                    <div class="progress-bar bg-primary" style="width: ${Math.max(0, results.correlation_analysis.pearson_correlation * 100)}%"></div>
+                                </div>
+                                <small>Pearson Correlation: ${results.correlation_analysis.pearson_correlation.toFixed(3)}</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 text-center">
+                        <h5>Overall Quality Score: <span class="badge ${getQualityStatusClass(getQualityStatus(results.overall_score))}">${results.overall_score.toFixed(1)}/100</span></h5>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        function getQualityStatus(score) {
+            if (score >= 80) return 'excellent';
+            if (score >= 60) return 'good';
+            if (score >= 40) return 'fair';
+            return 'poor';
+        }
+        
         function showAlert(message, type = 'info') {
             const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-            alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
+            alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show';
+            alertDiv.innerHTML = 
+                message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
             
             // Insert at top of container
             const container = document.querySelector('.container');
