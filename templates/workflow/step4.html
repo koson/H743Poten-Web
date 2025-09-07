@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Workflow Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/workflow">Workflow</a></li>
+                    <li class="breadcrumb-item active">Step 4: Cross-Instrument Calibration</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Step Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4><i class="fas fa-balance-scale"></i> Step 4: Cross-Instrument Calibration</h4>
+                            <p class="mb-0">Advanced machine learning-based calibration system for instrument standardization</p>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-light" onclick="window.location.href='/workflow/step3'">
+                                <i class="fas fa-arrow-left"></i> Back to Step 3
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-pills justify-content-center">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/workflow/step4">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workflow/step4/upload">
+                                <i class="fas fa-upload"></i> Data Upload
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workflow/step4/calibration">
+                                <i class="fas fa-cogs"></i> Model Training
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workflow/step4/analysis">
+                                <i class="fas fa-chart-line"></i> Analysis
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Quick Start -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-rocket"></i> Quick Start Guide</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6><i class="fas fa-upload text-info"></i> 1. Upload Data</h6>
+                                <p class="small text-muted">Upload CV data from different instruments</p>
+                                <button class="btn btn-outline-info btn-sm w-100" onclick="window.location.href='/workflow/step4/upload'">
+                                    Start Upload
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6><i class="fas fa-cogs text-warning"></i> 2. Train Model</h6>
+                                <p class="small text-muted">Create calibration models using ML</p>
+                                <button class="btn btn-outline-warning btn-sm w-100" onclick="window.location.href='/workflow/step4/calibration'">
+                                    Train Model
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6><i class="fas fa-chart-line text-success"></i> 3. Analyze</h6>
+                                <p class="small text-muted">Validate and analyze calibration results</p>
+                                <button class="btn btn-outline-success btn-sm w-100" onclick="window.location.href='/workflow/step4/analysis'">
+                                    View Analysis
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6><i class="fas fa-download text-primary"></i> 4. Export</h6>
+                                <p class="small text-muted">Download calibration models and results</p>
+                                <button class="btn btn-outline-primary btn-sm w-100" onclick="exportResults()">
+                                    Export Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history"></i> Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline" id="activity-timeline">
+                        <!-- Activity items will be loaded here -->
+                        <div class="text-center text-muted">
+                            <i class="fas fa-clock fa-2x mb-2"></i>
+                            <p>No recent activity</p>
+                            <small>Start by uploading data or training a model</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Status Panel -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie"></i> System Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-2">
+                                <h3 id="datasets-count" class="text-info mb-0">0</h3>
+                                <small>Datasets</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-2">
+                                <h3 id="models-count" class="text-warning mb-0">0</h3>
+                                <small>Models</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-2">
+                                <h3 id="analyses-count" class="text-success mb-0">0</h3>
+                                <small>Analyses</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-2">
+                                <h3 id="exports-count" class="text-primary mb-0">0</h3>
+                                <small>Exports</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="refreshStatus()">
+                            <i class="fas fa-refresh"></i> Refresh Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" onclick="loadSampleData()">
+                            <i class="fas fa-download"></i> Load Sample Data
+                        </button>
+                        <button class="btn btn-success" onclick="runQuickCalibration()">
+                            <i class="fas fa-magic"></i> Quick Calibration
+                        </button>
+                        <button class="btn btn-info" onclick="viewDocumentation()">
+                            <i class="fas fa-book"></i> View Documentation
+                        </button>
+                        <button class="btn btn-warning" onclick="clearWorkspace()">
+                            <i class="fas fa-trash"></i> Clear Workspace
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> System Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Version:</td>
+                            <td><span class="badge bg-primary">v2.0.4</span></td>
+                        </tr>
+                        <tr>
+                            <td>Status:</td>
+                            <td><span class="badge bg-success">Online</span></td>
+                        </tr>
+                        <tr>
+                            <td>Models:</td>
+                            <td>Random Forest, SVM, Neural Network</td>
+                        </tr>
+                        <tr>
+                            <td>Instruments:</td>
+                            <td>PalmSens, PiPot, Generic CV</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Navigation -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-secondary" onclick="window.location.href='/workflow/step3'">
+                            <i class="fas fa-arrow-left"></i> Step 3: Peak Analysis
+                        </button>
+                        <button class="btn btn-success" onclick="completeWorkflow()">
+                            <i class="fas fa-check"></i> Complete Workflow
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="window.location.href='/workflow'">
+                            <i class="fas fa-home"></i> Workflow Home
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding: 1rem 0;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+}
+
+.timeline-item:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    background: #007bff;
+    border-radius: 50%;
+}
+
+.nav-pills .nav-link {
+    border-radius: 25px;
+    margin: 0 0.25rem;
+    transition: all 0.3s ease;
+}
+</style>
+
+<script>
+// Dashboard functionality
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+});
+
+function loadDashboardData() {
+    // Load system status
+    refreshStatus();
+    
+    // Load recent activity
+    loadRecentActivity();
+}
+
+function refreshStatus() {
+    // Simulate loading status data
+    document.getElementById('datasets-count').textContent = '12';
+    document.getElementById('models-count').textContent = '3';
+    document.getElementById('analyses-count').textContent = '8';
+    document.getElementById('exports-count').textContent = '2';
+}
+
+function loadRecentActivity() {
+    const timeline = document.getElementById('activity-timeline');
+    // This would normally load from API
+    const activities = [
+        { time: '2 minutes ago', action: 'Model training completed', type: 'success' },
+        { time: '1 hour ago', action: 'New dataset uploaded', type: 'info' },
+        { time: '3 hours ago', action: 'Analysis exported', type: 'primary' }
+    ];
+    
+    if (activities.length > 0) {
+        timeline.innerHTML = activities.map(activity => `
+            <div class="timeline-item">
+                <div class="d-flex justify-content-between">
+                    <strong>${activity.action}</strong>
+                    <small class="text-muted">${activity.time}</small>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function loadSampleData() {
+    alert('Loading sample cross-instrument calibration data...');
+    // Implementation would go here
+}
+
+function runQuickCalibration() {
+    if (confirm('Run quick calibration with default settings?')) {
+        window.location.href = '/workflow/step4/calibration?quick=true';
+    }
+}
+
+function viewDocumentation() {
+    window.open('https://github.com/koson/H743Poten-Web/wiki', '_blank');
+}
+
+function clearWorkspace() {
+    if (confirm('Are you sure you want to clear all calibration data? This cannot be undone.')) {
+        alert('Workspace cleared successfully!');
+        refreshStatus();
+    }
+}
+
+function exportResults() {
+    alert('Exporting calibration results...');
+    // Implementation would go here
+}
+
+function completeWorkflow() {
+    // Update workflow state
+    const workflowState = JSON.parse(localStorage.getItem('h743poten_workflow_state') || '{}');
+    workflowState.step4 = { completed: true };
+    workflowState.currentStep = 4;
+    workflowState.completedSteps = workflowState.completedSteps || [];
+    if (!workflowState.completedSteps.includes(4)) {
+        workflowState.completedSteps.push(4);
+    }
+    
+    localStorage.setItem('h743poten_workflow_state', JSON.stringify(workflowState));
+    
+    alert('Congratulations! You have completed the H743Poten Analysis Workflow!');
+    window.location.href = '/workflow';
+}
+</script>
+{% endblock %}

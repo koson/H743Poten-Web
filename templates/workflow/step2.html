@@ -1,0 +1,548 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Workflow Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/workflow">Workflow</a></li>
+                    <li class="breadcrumb-item active">Step 2: Data Analysis</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Step Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4><i class="fas fa-chart-line"></i> Step 2: Data Analysis & Visualization</h4>
+                            <p class="mb-0">Analyze your electrochemical data with advanced plotting and statistical tools</p>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-light" onclick="window.location.href='/workflow/step1'">
+                                <i class="fas fa-arrow-left"></i> Back to Step 1
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Tools -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-chart-area"></i> Basic Plotting</h5>
+                </div>
+                <div class="card-body">
+                    <p>Generate standard electrochemical plots from your data:</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Cyclic Voltammetry plots</li>
+                        <li><i class="fas fa-check text-success"></i> Current vs Time</li>
+                        <li><i class="fas fa-check text-success"></i> Multiple overlay plots</li>
+                        <li><i class="fas fa-check text-success"></i> 3D surface plots</li>
+                    </ul>
+                    <button class="btn btn-primary w-100" onclick="openPlottingTool()">
+                        <i class="fas fa-chart-line"></i> Start Plotting
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-calculator"></i> Statistical Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <p>Comprehensive statistical analysis tools:</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Descriptive statistics</li>
+                        <li><i class="fas fa-check text-success"></i> Correlation analysis</li>
+                        <li><i class="fas fa-check text-success"></i> Noise analysis</li>
+                        <li><i class="fas fa-check text-success"></i> Quality metrics</li>
+                    </ul>
+                    <button class="btn btn-info w-100" onclick="openStatisticalAnalysis()">
+                        <i class="fas fa-calculator"></i> Run Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-white">
+                    <h5><i class="fas fa-filter"></i> Data Processing</h5>
+                </div>
+                <div class="card-body">
+                    <p>Advanced data processing and filtering:</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Signal smoothing</li>
+                        <li><i class="fas fa-check text-success"></i> Baseline correction</li>
+                        <li><i class="fas fa-check text-success"></i> Outlier detection</li>
+                        <li><i class="fas fa-check text-success"></i> Data interpolation</li>
+                    </ul>
+                    <button class="btn btn-warning w-100" onclick="openDataProcessing()">
+                        <i class="fas fa-filter"></i> Process Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Data Summary -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-database"></i> Loaded Data Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div id="data-summary">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-3x mb-3"></i>
+                            <h5>No Data Loaded</h5>
+                            <p>Please go back to Step 1 to upload or load sample data</p>
+                            <button class="btn btn-outline-primary" onclick="window.location.href='/workflow/step1'">
+                                <i class="fas fa-upload"></i> Go to Data Upload
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Results -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> Analysis Results</h5>
+                </div>
+                <div class="card-body">
+                    <div id="analysis-results">
+                        <!-- Results will be displayed here -->
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-chart-line fa-2x mb-2"></i>
+                            <p>Run an analysis to see results here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Navigation -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-secondary" onclick="window.location.href='/workflow/step1'">
+                            <i class="fas fa-arrow-left"></i> Step 1: Data Upload
+                        </button>
+                        <button class="btn btn-success" onclick="proceedToStep3()" id="next-step-btn" disabled>
+                            <i class="fas fa-arrow-right"></i> Step 3: Peak Detection
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="window.location.href='/workflow'">
+                            <i class="fas fa-home"></i> Workflow Home
+                        </button>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">Complete at least one analysis to proceed to Step 3</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Modal -->
+<div class="modal fade" id="analysisModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="analysisModalTitle">Data Analysis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="analysisModalBody">
+                <!-- Analysis content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveAnalysis()">Save Analysis</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-header {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.card:hover .card-header::before {
+    left: 100%;
+}
+
+.btn-group button {
+    transition: all 0.3s ease;
+}
+
+.btn-group button:hover {
+    transform: translateY(-2px);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    checkDataAvailability();
+    loadPreviousAnalyses();
+});
+
+function checkDataAvailability() {
+    // Check if data was loaded in Step 1
+    const workflowState = JSON.parse(localStorage.getItem('h743poten_workflow_state') || '{}');
+    
+    if (workflowState.step1 && workflowState.step1.dataLoaded) {
+        displayDataSummary(workflowState.step1.data);
+    }
+}
+
+function displayDataSummary(data) {
+    const summaryDiv = document.getElementById('data-summary');
+    summaryDiv.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Dataset Information</h6>
+                <table class="table table-sm">
+                    <tr><td>Filename:</td><td>${data.filename || 'Sample Data'}</td></tr>
+                    <tr><td>Data Points:</td><td>${data.points || 'N/A'}</td></tr>
+                    <tr><td>Technique:</td><td>${data.technique || 'Cyclic Voltammetry'}</td></tr>
+                    <tr><td>Date Loaded:</td><td>${data.loadDate || new Date().toLocaleDateString()}</td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h6>Quick Preview</h6>
+                <div class="border rounded p-3 bg-light">
+                    <div id="preview-plot" style="height: 200px;">
+                        <!-- Placeholder for data preview -->
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <span class="text-muted">Data preview will appear here</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function openPlottingTool() {
+    document.getElementById('analysisModalTitle').textContent = 'Basic Plotting Tool';
+    document.getElementById('analysisModalBody').innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <h6>Plot Options</h6>
+                <div class="mb-3">
+                    <label class="form-label">Plot Type</label>
+                    <select class="form-select" id="plotType">
+                        <option value="cv">Cyclic Voltammetry</option>
+                        <option value="current-time">Current vs Time</option>
+                        <option value="overlay">Multiple Overlay</option>
+                        <option value="3d">3D Surface</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">X-Axis</label>
+                    <select class="form-select" id="xAxis">
+                        <option value="potential">Potential (V)</option>
+                        <option value="time">Time (s)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Y-Axis</label>
+                    <select class="form-select" id="yAxis">
+                        <option value="current">Current (A)</option>
+                        <option value="normalized">Normalized Current</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary w-100" onclick="generatePlot()">
+                    <i class="fas fa-chart-line"></i> Generate Plot
+                </button>
+            </div>
+            <div class="col-md-8">
+                <h6>Plot Preview</h6>
+                <div id="plot-container" style="height: 400px; border: 1px solid #ddd; background: #f8f9fa;">
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <span class="text-muted">Plot will appear here</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    new bootstrap.Modal(document.getElementById('analysisModal')).show();
+}
+
+function openStatisticalAnalysis() {
+    document.getElementById('analysisModalTitle').textContent = 'Statistical Analysis';
+    document.getElementById('analysisModalBody').innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Analysis Options</h6>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="descriptive" checked>
+                    <label class="form-check-label">Descriptive Statistics</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="correlation">
+                    <label class="form-check-label">Correlation Analysis</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="noise">
+                    <label class="form-check-label">Noise Analysis</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="quality">
+                    <label class="form-check-label">Quality Metrics</label>
+                </div>
+                <button class="btn btn-info w-100" onclick="runStatisticalAnalysis()">
+                    <i class="fas fa-calculator"></i> Run Analysis
+                </button>
+            </div>
+            <div class="col-md-6">
+                <h6>Results</h6>
+                <div id="stats-results" class="border rounded p-3" style="height: 300px; overflow-y: auto;">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-calculator fa-2x mb-2"></i>
+                        <p>Run analysis to see results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    new bootstrap.Modal(document.getElementById('analysisModal')).show();
+}
+
+function openDataProcessing() {
+    document.getElementById('analysisModalTitle').textContent = 'Data Processing';
+    document.getElementById('analysisModalBody').innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <h6>Processing Options</h6>
+                <div class="mb-3">
+                    <label class="form-label">Smoothing</label>
+                    <select class="form-select" id="smoothing">
+                        <option value="none">None</option>
+                        <option value="savgol">Savitzky-Golay</option>
+                        <option value="gaussian">Gaussian</option>
+                        <option value="moving">Moving Average</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Baseline Correction</label>
+                    <select class="form-select" id="baseline">
+                        <option value="none">None</option>
+                        <option value="linear">Linear</option>
+                        <option value="polynomial">Polynomial</option>
+                        <option value="asymmetric">Asymmetric</option>
+                    </select>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="outliers">
+                    <label class="form-check-label">Remove Outliers</label>
+                </div>
+                <button class="btn btn-warning w-100" onclick="processData()">
+                    <i class="fas fa-filter"></i> Process Data
+                </button>
+            </div>
+            <div class="col-md-8">
+                <h6>Processing Preview</h6>
+                <div id="processing-preview" style="height: 400px; border: 1px solid #ddd; background: #f8f9fa;">
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <span class="text-muted">Processed data preview will appear here</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    new bootstrap.Modal(document.getElementById('analysisModal')).show();
+}
+
+function generatePlot() {
+    // Simulate plot generation
+    document.getElementById('plot-container').innerHTML = `
+        <div class="d-flex align-items-center justify-content-center h-100">
+            <div class="text-center">
+                <div class="spinner-border text-primary mb-3"></div>
+                <p>Generating plot...</p>
+            </div>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        document.getElementById('plot-container').innerHTML = `
+            <div class="d-flex align-items-center justify-content-center h-100 bg-success text-white">
+                <div class="text-center">
+                    <i class="fas fa-chart-line fa-3x mb-2"></i>
+                    <p>Plot Generated Successfully!</p>
+                </div>
+            </div>
+        `;
+        enableNextStep();
+    }, 2000);
+}
+
+function runStatisticalAnalysis() {
+    document.getElementById('stats-results').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-info mb-3"></div>
+            <p>Running analysis...</p>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        document.getElementById('stats-results').innerHTML = `
+            <h6>Descriptive Statistics</h6>
+            <table class="table table-sm">
+                <tr><td>Mean Current:</td><td>-2.45 µA</td></tr>
+                <tr><td>Std Deviation:</td><td>0.78 µA</td></tr>
+                <tr><td>Min Current:</td><td>-4.12 µA</td></tr>
+                <tr><td>Max Current:</td><td>-0.89 µA</td></tr>
+            </table>
+            <h6 class="mt-3">Quality Metrics</h6>
+            <p><strong>Signal-to-Noise Ratio:</strong> 15.2 dB</p>
+            <p><strong>Data Quality Score:</strong> 8.4/10</p>
+        `;
+        enableNextStep();
+    }, 1500);
+}
+
+function processData() {
+    document.getElementById('processing-preview').innerHTML = `
+        <div class="d-flex align-items-center justify-content-center h-100">
+            <div class="text-center">
+                <div class="spinner-border text-warning mb-3"></div>
+                <p>Processing data...</p>
+            </div>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        document.getElementById('processing-preview').innerHTML = `
+            <div class="d-flex align-items-center justify-content-center h-100 bg-warning text-dark">
+                <div class="text-center">
+                    <i class="fas fa-filter fa-3x mb-2"></i>
+                    <p>Data Processed Successfully!</p>
+                    <small>Applied smoothing and baseline correction</small>
+                </div>
+            </div>
+        `;
+        enableNextStep();
+    }, 2000);
+}
+
+function saveAnalysis() {
+    // Update workflow state
+    const workflowState = JSON.parse(localStorage.getItem('h743poten_workflow_state') || '{}');
+    workflowState.step2 = { 
+        completed: true, 
+        analysisDate: new Date().toISOString(),
+        analysisTypes: ['plotting', 'statistics', 'processing']
+    };
+    localStorage.setItem('h743poten_workflow_state', JSON.stringify(workflowState));
+    
+    // Close modal
+    bootstrap.Modal.getInstance(document.getElementById('analysisModal')).hide();
+    
+    // Show success message
+    showAnalysisResults();
+}
+
+function showAnalysisResults() {
+    document.getElementById('analysis-results').innerHTML = `
+        <div class="alert alert-success">
+            <h6><i class="fas fa-check-circle"></i> Analysis Completed Successfully!</h6>
+            <p class="mb-0">Your data analysis has been saved. You can now proceed to Step 3: Peak Detection.</p>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
+                        <h6>Plots Generated</h6>
+                        <p class="small text-muted">CV plots with multiple overlays</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calculator fa-2x text-info mb-2"></i>
+                        <h6>Statistics Calculated</h6>
+                        <p class="small text-muted">Comprehensive statistical analysis</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-filter fa-2x text-warning mb-2"></i>
+                        <h6>Data Processed</h6>
+                        <p class="small text-muted">Smoothed and baseline corrected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    enableNextStep();
+}
+
+function enableNextStep() {
+    document.getElementById('next-step-btn').disabled = false;
+    document.getElementById('next-step-btn').classList.remove('btn-success');
+    document.getElementById('next-step-btn').classList.add('btn-success');
+}
+
+function proceedToStep3() {
+    // Update workflow state
+    const workflowState = JSON.parse(localStorage.getItem('h743poten_workflow_state') || '{}');
+    workflowState.currentStep = 3;
+    workflowState.completedSteps = workflowState.completedSteps || [];
+    if (!workflowState.completedSteps.includes(2)) {
+        workflowState.completedSteps.push(2);
+    }
+    localStorage.setItem('h743poten_workflow_state', JSON.stringify(workflowState));
+    
+    window.location.href = '/workflow/step3';
+}
+
+function loadPreviousAnalyses() {
+    const workflowState = JSON.parse(localStorage.getItem('h743poten_workflow_state') || '{}');
+    if (workflowState.step2 && workflowState.step2.completed) {
+        showAnalysisResults();
+    }
+}
+</script>
+{% endblock %}

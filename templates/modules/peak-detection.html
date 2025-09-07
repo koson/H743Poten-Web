@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Module Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-gradient-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3><i class="fas fa-mountain"></i> Peak Detection Module</h3>
+                            <p class="mb-0">Advanced standalone peak detection and analysis tools</p>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge bg-light text-dark">Specialized Module</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Tools -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 tool-card">
+                <div class="card-body text-center">
+                    <div class="tool-icon mb-3">
+                        <i class="fas fa-search fa-3x text-primary"></i>
+                    </div>
+                    <h5>Basic Peak Finder</h5>
+                    <p class="text-muted">Simple peak detection with adjustable sensitivity</p>
+                    <button class="btn btn-primary w-100" onclick="openBasicPeakFinder()">
+                        <i class="fas fa-play"></i> Launch Tool
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 tool-card">
+                <div class="card-body text-center">
+                    <div class="tool-icon mb-3">
+                        <i class="fas fa-brain fa-3x text-success"></i>
+                    </div>
+                    <h5>Enhanced Detector</h5>
+                    <p class="text-muted">AI-powered peak detection with machine learning</p>
+                    <button class="btn btn-success w-100" onclick="openEnhancedDetector()">
+                        <i class="fas fa-magic"></i> Launch Tool
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 tool-card">
+                <div class="card-body text-center">
+                    <div class="tool-icon mb-3">
+                        <i class="fas fa-chart-line fa-3x text-info"></i>
+                    </div>
+                    <h5>Baseline Corrector</h5>
+                    <p class="text-muted">Voltage window baseline correction algorithms</p>
+                    <button class="btn btn-info w-100" onclick="openBaselineCorrector()">
+                        <i class="fas fa-level-up-alt"></i> Launch Tool
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 tool-card">
+                <div class="card-body text-center">
+                    <div class="tool-icon mb-3">
+                        <i class="fas fa-balance-scale fa-3x text-warning"></i>
+                    </div>
+                    <h5>Algorithm Comparison</h5>
+                    <p class="text-muted">Compare different detection algorithms side-by-side</p>
+                    <button class="btn btn-warning w-100" onclick="openAlgorithmComparison()">
+                        <i class="fas fa-chart-bar"></i> Launch Tool
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Tools -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-cogs"></i> Advanced Peak Detection Tools</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Multi-Peak Decomposition</h6>
+                                        <small class="text-success">Available</small>
+                                    </div>
+                                    <p class="mb-1">Separate overlapping peaks using deconvolution algorithms</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="openMultiPeakDecomposition()">
+                                        <i class="fas fa-layer-group"></i> Open Tool
+                                    </button>
+                                </div>
+                                
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Real-time Peak Tracking</h6>
+                                        <small class="text-success">Available</small>
+                                    </div>
+                                    <p class="mb-1">Live peak detection during data acquisition</p>
+                                    <button class="btn btn-sm btn-outline-success" onclick="openRealTimePeakTracking()">
+                                        <i class="fas fa-broadcast-tower"></i> Open Tool
+                                    </button>
+                                </div>
+                                
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Peak Shape Analysis</h6>
+                                        <small class="text-info">Beta</small>
+                                    </div>
+                                    <p class="mb-1">Analyze peak shapes, symmetry, and characteristics</p>
+                                    <button class="btn btn-sm btn-outline-info" onclick="openPeakShapeAnalysis()">
+                                        <i class="fas fa-shapes"></i> Open Tool
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Batch Peak Processing</h6>
+                                        <small class="text-success">Available</small>
+                                    </div>
+                                    <p class="mb-1">Process multiple datasets with consistent parameters</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="openBatchProcessing()">
+                                        <i class="fas fa-tasks"></i> Open Tool
+                                    </button>
+                                </div>
+                                
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Peak Database Manager</h6>
+                                        <small class="text-success">Available</small>
+                                    </div>
+                                    <p class="mb-1">Store and manage detected peaks for future reference</p>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="openPeakDatabase()">
+                                        <i class="fas fa-database"></i> Open Tool
+                                    </button>
+                                </div>
+                                
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Custom Algorithm Builder</h6>
+                                        <small class="text-warning">Pro</small>
+                                    </div>
+                                    <p class="mb-1">Create custom peak detection algorithms with visual editor</p>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="openAlgorithmBuilder()">
+                                        <i class="fas fa-code"></i> Open Tool
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Peak Detection Sessions -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history"></i> Recent Peak Detection Sessions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Dataset</th>
+                                    <th>Algorithm</th>
+                                    <th>Peaks Found</th>
+                                    <th>Confidence</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentSessions">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        No recent peak detection sessions
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie"></i> Module Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-2">
+                                <h4 class="text-primary">0</h4>
+                                <small>Sessions Today</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-2">
+                                <h4 class="text-success">0</h4>
+                                <small>Total Peaks</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-2">
+                                <h4 class="text-info">0</h4>
+                                <small>Datasets</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-2">
+                                <h4 class="text-warning">98%</h4>
+                                <small>Avg Confidence</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <h6>Most Used Algorithm</h6>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-primary" style="width: 65%">Enhanced v5</div>
+                        </div>
+                        <small class="text-muted">65% of sessions</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module Navigation -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary" onclick="window.location.href='/modules/calibration'">
+                            <i class="fas fa-balance-scale"></i> Calibration Module
+                        </button>
+                        <button class="btn btn-outline-success" onclick="window.location.href='/modules/analysis'">
+                            <i class="fas fa-chart-line"></i> Analysis Module
+                        </button>
+                        <button class="btn btn-outline-info" onclick="window.location.href='/modules/data-processing'">
+                            <i class="fas fa-filter"></i> Data Processing
+                        </button>
+                        <button class="btn btn-primary" onclick="window.location.href='/workflow'">
+                            <i class="fas fa-home"></i> Back to Workflow
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tool-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.tool-icon {
+    transition: all 0.3s ease;
+}
+
+.tool-card:hover .tool-icon {
+    transform: scale(1.1);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #007bff, #6610f2);
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadRecentSessions();
+    updateModuleStatistics();
+});
+
+function openBasicPeakFinder() {
+    window.location.href = '/peak_detection';
+}
+
+function openEnhancedDetector() {
+    alert('Enhanced Detector v5\n\nAdvanced AI-powered peak detection with machine learning algorithms.\n\nFeatures:\n- Adaptive baseline correction\n- Noise reduction\n- Confidence scoring\n- Multi-peak decomposition');
+}
+
+function openBaselineCorrector() {
+    alert('Baseline Corrector\n\nVoltage window baseline correction algorithms.\n\nFeatures:\n- Polynomial baseline fitting\n- Asymmetric least squares\n- Iterative baseline correction\n- Manual baseline adjustment');
+}
+
+function openAlgorithmComparison() {
+    alert('Algorithm Comparison Tool\n\nCompare different peak detection algorithms side-by-side.\n\nFeatures:\n- Performance benchmarking\n- Accuracy comparison\n- Speed analysis\n- Visual comparison plots');
+}
+
+function openMultiPeakDecomposition() {
+    alert('Multi-Peak Decomposition\n\nSeparate overlapping peaks using advanced deconvolution.\n\nFeatures:\n- Gaussian decomposition\n- Lorentzian fitting\n- Mixed model fitting\n- Peak overlap analysis');
+}
+
+function openRealTimePeakTracking() {
+    alert('Real-time Peak Tracking\n\nLive peak detection during data acquisition.\n\nFeatures:\n- Real-time processing\n- Live parameter adjustment\n- Immediate feedback\n- WebSocket integration');
+}
+
+function openPeakShapeAnalysis() {
+    alert('Peak Shape Analysis (Beta)\n\nAnalyze peak shapes and characteristics.\n\nFeatures:\n- Peak symmetry analysis\n- Width calculations\n- Shape classification\n- Tailing analysis');
+}
+
+function openBatchProcessing() {
+    alert('Batch Peak Processing\n\nProcess multiple datasets with consistent parameters.\n\nFeatures:\n- Batch upload\n- Consistent parameters\n- Progress tracking\n- Bulk export');
+}
+
+function openPeakDatabase() {
+    alert('Peak Database Manager\n\nStore and manage detected peaks.\n\nFeatures:\n- Peak library\n- Search and filter\n- Export/import\n- Version control');
+}
+
+function openAlgorithmBuilder() {
+    alert('Custom Algorithm Builder (Pro)\n\nCreate custom peak detection algorithms.\n\nFeatures:\n- Visual algorithm editor\n- Custom parameter sets\n- Algorithm testing\n- Performance optimization');
+}
+
+function loadRecentSessions() {
+    // Simulate loading recent sessions
+    const sessions = [
+        {
+            date: '2024-01-15',
+            dataset: 'CV_Sample_001.csv',
+            algorithm: 'Enhanced v5',
+            peaks: 8,
+            confidence: '94%'
+        },
+        {
+            date: '2024-01-14',
+            dataset: 'DPV_Test_data.csv',
+            algorithm: 'Baseline v4',
+            peaks: 5,
+            confidence: '87%'
+        },
+        {
+            date: '2024-01-14',
+            dataset: 'SWV_Calibration.csv',
+            algorithm: 'Enhanced v5',
+            peaks: 12,
+            confidence: '96%'
+        }
+    ];
+
+    const tbody = document.getElementById('recentSessions');
+    if (sessions.length > 0) {
+        tbody.innerHTML = sessions.map(session => `
+            <tr>
+                <td>${session.date}</td>
+                <td>${session.dataset}</td>
+                <td><span class="badge bg-primary">${session.algorithm}</span></td>
+                <td>${session.peaks}</td>
+                <td>${session.confidence}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewSession('${session.dataset}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="rerunSession('${session.dataset}')">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+}
+
+function updateModuleStatistics() {
+    // Update statistics based on usage
+    document.querySelector('.text-primary').textContent = '12';
+    document.querySelector('.text-success').textContent = '284';
+    document.querySelector('.text-info').textContent = '47';
+}
+
+function viewSession(dataset) {
+    alert(`Viewing session for ${dataset}\n\nThis would open the detailed session view with all parameters and results.`);
+}
+
+function rerunSession(dataset) {
+    if (confirm(`Rerun peak detection for ${dataset}?`)) {
+        alert('Rerunning peak detection with previous parameters...');
+    }
+}
+</script>
+{% endblock %}

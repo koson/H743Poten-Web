@@ -71,33 +71,55 @@
                             <i class="fas fa-home"></i> Dashboard
                         </a>
                     </li>
+                    
+                    <!-- Workflow Integration (Step 1-4) -->
+                    <li class="nav-item dropdown" data-feature="analysis_workflow">
+                        <a class="nav-link dropdown-toggle" href="#" id="workflowDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-project-diagram"></i> Workflow
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/workflow"><i class="fas fa-list-ol"></i> Complete Workflow</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/workflow/step1"><i class="fas fa-upload"></i> Step 1: Data Upload</a></li>
+                            <li><a class="dropdown-item" href="/workflow/step2"><i class="fas fa-chart-line"></i> Step 2: Measurement</a></li>
+                            <li><a class="dropdown-item" href="/workflow/step3"><i class="fas fa-mountain"></i> Step 3: Peak Analysis</a></li>
+                            <li><a class="dropdown-item" href="/workflow/step4"><i class="fas fa-balance-scale"></i> Step 4: Calibration</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Specialized Modules -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="modulesDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tools"></i> Modules
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/modules/peak-detection"><i class="fas fa-mountain"></i> Peak Detection</a></li>
+                            <li><a class="dropdown-item" href="/modules/calibration"><i class="fas fa-balance-scale"></i> Cross-Instrument Calibration</a></li>
+                            <li><a class="dropdown-item" href="/modules/data-browser"><i class="fas fa-database"></i> Data Browser</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/ai-dashboard" data-feature="ai_dashboard"><i class="fas fa-brain"></i> AI Dashboard</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Direct Access (Legacy) -->
                     <li class="nav-item" data-feature="measurements">
                         <a class="nav-link" href="/measurements">
                             <i class="fas fa-chart-line"></i> Measurements
                         </a>
                     </li>
-                    <li class="nav-item" data-feature="analysis_workflow">
-                        <a class="nav-link" href="/workflow">
-                            <i class="fas fa-project-diagram"></i> Analysis Workflow
-                        </a>
-                    </li>
-                    <li class="nav-item" data-feature="ai_dashboard">
-                        <a class="nav-link" href="/ai-dashboard">
-                            <i class="fas fa-brain"></i> AI Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item" data-feature="calibration">
-                        <a class="nav-link" href="/calibration">
-                            <i class="fas fa-balance-scale"></i> Calibration
-                        </a>
-                    </li>
+                    
                     <li class="nav-item">
                         <a class="nav-link" href="/parameter_dashboard">
-                            <i class="fas fa-database"></i> Parameter Database
+                            <i class="fas fa-database"></i> Parameters
                         </a>
                     </li>
+                    
                     <li class="nav-item">
                         <a class="nav-link" href="/settings">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </li>
+                </ul>
                             <i class="fas fa-cog"></i> Settings
                         </a>
                     </li>

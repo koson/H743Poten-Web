@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Workflow Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/workflow">Workflow</a></li>
+                    <li class="breadcrumb-item active">Step 1: Data Upload</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Step Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4><i class="fas fa-upload"></i> Step 1: Data Upload & Preparation</h4>
+                            <p class="mb-0">Upload and prepare your CV data files for analysis</p>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-light" onclick="showHelp()">
+                                <i class="fas fa-question-circle"></i> Help
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-file-upload"></i> File Upload</h5>
+                </div>
+                <div class="card-body">
+                    <div class="upload-area border border-dashed border-2 p-4 text-center" id="upload-area">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                        <h5>Drag & Drop CSV files here</h5>
+                        <p class="text-muted">or <button class="btn btn-outline-primary" onclick="selectFiles()">Browse Files</button></p>
+                        <input type="file" id="file-input" multiple accept=".csv" style="display: none;">
+                    </div>
+                    
+                    <!-- File List -->
+                    <div id="file-list" class="mt-4" style="display: none;">
+                        <h6>Uploaded Files:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>File Name</th>
+                                        <th>Size</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="file-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Progress Panel -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie"></i> Upload Progress</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label>Overall Progress</label>
+                        <div class="progress">
+                            <div class="progress-bar" id="overall-progress" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <h3 id="files-count" class="text-primary mb-0">0</h3>
+                                <small>Files</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <h3 id="total-size" class="text-success mb-0">0 KB</h3>
+                                <small>Total Size</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Data -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-download"></i> Sample Data</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small">Try the workflow with sample CV data</p>
+                    <button class="btn btn-outline-success w-100" onclick="loadSampleData()">
+                        <i class="fas fa-download"></i> Load Sample CV Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next Step Button -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <button class="btn btn-success btn-lg" id="next-step-btn" onclick="goToNextStep()" disabled>
+                        <i class="fas fa-arrow-right"></i> Continue to Step 2: Measurement
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.upload-area {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff !important;
+}
+
+.upload-area.dragover {
+    background-color: #e3f2fd;
+    border-color: #2196f3 !important;
+}
+</style>
+
+<script>
+let uploadedFiles = [];
+
+// File upload functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+
+    // Drag and drop handlers
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', function(e) {
+        handleFiles(e.target.files);
+    });
+});
+
+function selectFiles() {
+    document.getElementById('file-input').click();
+}
+
+function handleFiles(files) {
+    for (let file of files) {
+        if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+            uploadedFiles.push({
+                file: file,
+                name: file.name,
+                size: file.size,
+                status: 'ready'
+            });
+        }
+    }
+    
+    updateFileList();
+    updateProgress();
+    updateNextButton();
+}
+
+function updateFileList() {
+    const fileList = document.getElementById('file-list');
+    const tableBody = document.getElementById('file-table-body');
+    
+    if (uploadedFiles.length > 0) {
+        fileList.style.display = 'block';
+        
+        tableBody.innerHTML = uploadedFiles.map((fileObj, index) => `
+            <tr>
+                <td>${fileObj.name}</td>
+                <td>${formatFileSize(fileObj.size)}</td>
+                <td>
+                    <span class="badge bg-${getStatusColor(fileObj.status)}">${fileObj.status}</span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeFile(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } else {
+        fileList.style.display = 'none';
+    }
+}
+
+function removeFile(index) {
+    uploadedFiles.splice(index, 1);
+    updateFileList();
+    updateProgress();
+    updateNextButton();
+}
+
+function updateProgress() {
+    const filesCount = document.getElementById('files-count');
+    const totalSize = document.getElementById('total-size');
+    const overallProgress = document.getElementById('overall-progress');
+    
+    filesCount.textContent = uploadedFiles.length;
+    
+    const totalBytes = uploadedFiles.reduce((sum, file) => sum + file.size, 0);
+    totalSize.textContent = formatFileSize(totalBytes);
+    
+    const progress = uploadedFiles.length > 0 ? 100 : 0;
+    overallProgress.style.width = progress + '%';
+    overallProgress.textContent = progress + '%';
+}
+
+function updateNextButton() {
+    const nextBtn = document.getElementById('next-step-btn');
+    nextBtn.disabled = uploadedFiles.length === 0;
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function getStatusColor(status) {
+    const colors = {
+        'ready': 'success',
+        'uploading': 'warning',
+        'completed': 'primary',
+        'error': 'danger'
+    };
+    return colors[status] || 'secondary';
+}
+
+function loadSampleData() {
+    // Simulate loading sample data
+    const sampleFiles = [
+        { name: 'sample_cv_0.5mM.csv', size: 15420, status: 'ready' },
+        { name: 'sample_cv_1.0mM.csv', size: 16234, status: 'ready' },
+        { name: 'sample_cv_5.0mM.csv', size: 18956, status: 'ready' }
+    ];
+    
+    uploadedFiles = sampleFiles.map(file => ({
+        file: null, // Simulated
+        name: file.name,
+        size: file.size,
+        status: file.status
+    }));
+    
+    updateFileList();
+    updateProgress();
+    updateNextButton();
+    
+    alert('Sample CV data loaded successfully!');
+}
+
+function goToNextStep() {
+    // Save upload state to workflow
+    const workflowState = JSON.parse(localStorage.getItem('h743poten_workflow_state') || '{}');
+    workflowState.step1 = {
+        files: uploadedFiles.map(f => ({ name: f.name, size: f.size })),
+        completed: true
+    };
+    workflowState.currentStep = Math.max(workflowState.currentStep || 0, 1);
+    workflowState.completedSteps = workflowState.completedSteps || [];
+    if (!workflowState.completedSteps.includes(1)) {
+        workflowState.completedSteps.push(1);
+    }
+    
+    localStorage.setItem('h743poten_workflow_state', JSON.stringify(workflowState));
+    
+    window.location.href = '/workflow/step2';
+}
+
+function showHelp() {
+    alert(`Step 1: Data Upload Help
+
+• Supported formats: CSV files
+• File requirements: Voltage, Current columns
+• Sample data available for testing
+• Multiple files can be uploaded
+• Files are validated automatically`);
+}
+</script>
+{% endblock %}

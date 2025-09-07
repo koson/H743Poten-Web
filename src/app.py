@@ -186,10 +186,65 @@ def create_app():
             }
         })
     
+    # Workflow Routes
+    @app.route('/workflow')
+    def workflow_index():
+        """Workflow main page"""
+        return render_template('workflow/index.html')
+    
+    @app.route('/workflow/step1')
+    def workflow_step1():
+        """Step 1: Data Upload"""
+        return render_template('workflow/step1.html')
+    
+    @app.route('/workflow/step2')
+    def workflow_step2():
+        """Step 2: Data Analysis"""
+        return render_template('workflow/step2.html')
+    
+    @app.route('/workflow/step3')
+    def workflow_step3():
+        """Step 3: Peak Detection"""
+        return render_template('workflow/step3.html')
+    
+    @app.route('/workflow/step4')
+    def workflow_step4():
+        """Step 4: Cross-Instrument Calibration"""
+        return render_template('workflow/step4.html')
+    
+    @app.route('/workflow/step4/<path:subpage>')
+    def workflow_step4_subpages(subpage):
+        """Step 4 sub-pages"""
+        valid_subpages = ['upload', 'calibration', 'analysis']
+        if subpage in valid_subpages:
+            return render_template('workflow/step4.html')
+        return render_template('workflow/step4.html')
+    
+    # Module Routes
+    @app.route('/modules/peak-detection')
+    def modules_peak_detection():
+        """Peak Detection Module"""
+        return render_template('modules/peak-detection.html')
+    
+    @app.route('/modules/calibration')
+    def modules_calibration():
+        """Cross-Instrument Calibration Module"""
+        return render_template('modules/calibration.html')
+    
+    @app.route('/modules/analysis')
+    def modules_analysis():
+        """Analysis Module"""
+        return render_template('modules/analysis.html')
+    
+    @app.route('/modules/data-processing')
+    def modules_data_processing():
+        """Data Processing Module"""
+        return render_template('modules/data-processing.html')
+    
     @app.route('/')
     def index():
-        """Main dashboard"""
-        return render_template('index.html')
+        """Main dashboard - redirect to workflow"""
+        return render_template('workflow/index.html')
         
     @app.route('/measurements')
     def measurements():

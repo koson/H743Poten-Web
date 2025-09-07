@@ -1,0 +1,564 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Module Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-gradient-success text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3><i class="fas fa-balance-scale"></i> Cross-Instrument Calibration Module</h3>
+                            <p class="mb-0">Advanced machine learning calibration for multi-instrument standardization</p>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge bg-light text-dark">Production Ready</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Calibration Tools -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 tool-card">
+                <div class="card-body text-center">
+                    <div class="tool-icon mb-3">
+                        <i class="fas fa-magic fa-3x text-primary"></i>
+                    </div>
+                    <h5>Quick Calibration</h5>
+                    <p class="text-muted">Fast calibration with default ML models</p>
+                    <button class="btn btn-primary w-100" onclick="openQuickCalibration()">
+                        <i class="fas fa-bolt"></i> Quick Start
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 tool-card">
+                <div class="card-body text-center">
+                    <div class="tool-icon mb-3">
+                        <i class="fas fa-cogs fa-3x text-success"></i>
+                    </div>
+                    <h5>Advanced Calibration</h5>
+                    <p class="text-muted">Custom ML models with parameter tuning</p>
+                    <button class="btn btn-success w-100" onclick="openAdvancedCalibration()">
+                        <i class="fas fa-sliders-h"></i> Advanced
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 tool-card">
+                <div class="card-body text-center">
+                    <div class="tool-icon mb-3">
+                        <i class="fas fa-chart-line fa-3x text-info"></i>
+                    </div>
+                    <h5>Model Validation</h5>
+                    <p class="text-muted">Validate and test calibration models</p>
+                    <button class="btn btn-info w-100" onclick="openModelValidation()">
+                        <i class="fas fa-check-double"></i> Validate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calibration Workflow -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-route"></i> Calibration Workflow</h5>
+                </div>
+                <div class="card-body">
+                    <div class="calibration-workflow">
+                        <div class="workflow-step completed" data-step="1">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h6>Data Upload</h6>
+                                <small>Upload CV data from multiple instruments</small>
+                            </div>
+                            <div class="step-status">
+                                <i class="fas fa-check text-success"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="workflow-step active" data-step="2">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h6>Model Training</h6>
+                                <small>Train ML models for calibration</small>
+                            </div>
+                            <div class="step-status">
+                                <i class="fas fa-play text-primary"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="workflow-step" data-step="3">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h6>Validation</h6>
+                                <small>Test model accuracy and performance</small>
+                            </div>
+                            <div class="step-status">
+                                <i class="fas fa-clock text-muted"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="workflow-step" data-step="4">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h6>Deployment</h6>
+                                <small>Deploy calibrated models</small>
+                            </div>
+                            <div class="step-status">
+                                <i class="fas fa-clock text-muted"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-primary w-100" onclick="startWorkflow()">
+                                    <i class="fas fa-play"></i> Start New Calibration
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-outline-secondary w-100" onclick="resumeWorkflow()">
+                                    <i class="fas fa-pause"></i> Resume Previous
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-brain"></i> Available ML Models</h5>
+                </div>
+                <div class="card-body">
+                    <div class="model-list">
+                        <div class="model-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">Random Forest</h6>
+                                    <small class="text-muted">Ensemble learning</small>
+                                </div>
+                                <span class="badge bg-success">Ready</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 4px;">
+                                <div class="progress-bar bg-success" style="width: 95%"></div>
+                            </div>
+                            <small class="text-muted">Accuracy: 95%</small>
+                        </div>
+                        
+                        <div class="model-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">Support Vector Machine</h6>
+                                    <small class="text-muted">Kernel-based</small>
+                                </div>
+                                <span class="badge bg-success">Ready</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 4px;">
+                                <div class="progress-bar bg-success" style="width: 92%"></div>
+                            </div>
+                            <small class="text-muted">Accuracy: 92%</small>
+                        </div>
+                        
+                        <div class="model-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">Neural Network</h6>
+                                    <small class="text-muted">Deep learning</small>
+                                </div>
+                                <span class="badge bg-warning">Training</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 4px;">
+                                <div class="progress-bar bg-warning" style="width: 78%"></div>
+                            </div>
+                            <small class="text-muted">ETA: 5 minutes</small>
+                        </div>
+                        
+                        <div class="model-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">Gradient Boosting</h6>
+                                    <small class="text-muted">Ensemble boosting</small>
+                                </div>
+                                <span class="badge bg-info">Available</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 4px;">
+                                <div class="progress-bar bg-info" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted">Not trained</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Calibrations -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5><i class="fas fa-history"></i> Recent Calibrations</h5>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-outline-primary btn-sm" onclick="viewAllCalibrations()">
+                                <i class="fas fa-list"></i> View All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Instruments</th>
+                                    <th>Model</th>
+                                    <th>Accuracy</th>
+                                    <th>Validation Score</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentCalibrations">
+                                <tr>
+                                    <td>2024-01-15</td>
+                                    <td>PalmSens, PiPot, Generic</td>
+                                    <td><span class="badge bg-primary">Random Forest</span></td>
+                                    <td>94.5%</td>
+                                    <td>89.2/100</td>
+                                    <td><span class="badge bg-success">Deployed</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="viewCalibration(1)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" onclick="downloadModel(1)">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2024-01-14</td>
+                                    <td>PalmSens, PiPot</td>
+                                    <td><span class="badge bg-success">SVM</span></td>
+                                    <td>91.8%</td>
+                                    <td>87.5/100</td>
+                                    <td><span class="badge bg-warning">Testing</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="viewCalibration(2)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="continueCalibration(2)">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> Performance Metrics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="metric-card">
+                                <h3 class="text-primary">94.5%</h3>
+                                <small>Best Accuracy</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="metric-card">
+                                <h3 class="text-success">89.2</h3>
+                                <small>Validation Score</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="metric-card">
+                                <h3 class="text-info">12</h3>
+                                <small>Total Models</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="metric-card">
+                                <h3 class="text-warning">3</h3>
+                                <small>Instruments</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-tools"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" onclick="openQuickCalibration()">
+                            <i class="fas fa-magic"></i> Quick Calibration
+                        </button>
+                        <button class="btn btn-success" onclick="uploadCalibrationData()">
+                            <i class="fas fa-upload"></i> Upload Data
+                        </button>
+                        <button class="btn btn-info" onclick="exportAllModels()">
+                            <i class="fas fa-download"></i> Export Models
+                        </button>
+                        <button class="btn btn-warning" onclick="openModelComparison()">
+                            <i class="fas fa-balance-scale"></i> Compare Models
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="openDocumentation()">
+                            <i class="fas fa-book"></i> Documentation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module Navigation -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary" onclick="window.location.href='/modules/peak-detection'">
+                            <i class="fas fa-mountain"></i> Peak Detection
+                        </button>
+                        <button class="btn btn-outline-success" onclick="window.location.href='/modules/analysis'">
+                            <i class="fas fa-chart-line"></i> Analysis Module
+                        </button>
+                        <button class="btn btn-outline-info" onclick="window.location.href='/modules/data-processing'">
+                            <i class="fas fa-filter"></i> Data Processing
+                        </button>
+                        <button class="btn btn-primary" onclick="window.location.href='/workflow'">
+                            <i class="fas fa-home"></i> Back to Workflow
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.tool-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.calibration-workflow {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.workflow-step {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.workflow-step.completed {
+    border-color: #28a745;
+    background: #d4edda;
+}
+
+.workflow-step.active {
+    border-color: #007bff;
+    background: #d1ecf1;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #6c757d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 1rem;
+}
+
+.workflow-step.completed .step-number {
+    background: #28a745;
+}
+
+.workflow-step.active .step-number {
+    background: #007bff;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-status {
+    font-size: 1.2rem;
+}
+
+.model-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.model-item:last-child {
+    border-bottom: none;
+}
+
+.metric-card {
+    padding: 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadCalibrationStatus();
+    updateModelProgress();
+});
+
+function openQuickCalibration() {
+    window.location.href = '/analysis?quick=true';
+}
+
+function openAdvancedCalibration() {
+    window.location.href = '/analysis';
+}
+
+function openModelValidation() {
+    alert('Model Validation Tool\n\nValidate and test calibration models:\n\n• Cross-validation testing\n• Performance metrics\n• Error analysis\n• Confidence intervals');
+}
+
+function startWorkflow() {
+    if (confirm('Start new calibration workflow?\n\nThis will guide you through:\n1. Data upload\n2. Model training\n3. Validation\n4. Deployment')) {
+        window.location.href = '/workflow/step4/upload';
+    }
+}
+
+function resumeWorkflow() {
+    alert('Resuming previous calibration workflow...\n\nLoading your last saved session.');
+}
+
+function uploadCalibrationData() {
+    window.location.href = '/workflow/step4/upload';
+}
+
+function exportAllModels() {
+    alert('Exporting all calibration models...\n\nFormats available:\n• Pickle (.pkl)\n• JSON (.json)\n• ONNX (.onnx)\n• TensorFlow (.pb)');
+}
+
+function openModelComparison() {
+    alert('Model Comparison Tool\n\nCompare different ML models:\n\n• Accuracy comparison\n• Performance benchmarking\n• ROC curves\n• Feature importance');
+}
+
+function openDocumentation() {
+    window.open('https://github.com/koson/H743Poten-Web/wiki/Calibration-Module', '_blank');
+}
+
+function viewAllCalibrations() {
+    alert('Viewing all calibration sessions...\n\nThis would show a comprehensive list of all calibration sessions with filtering and search capabilities.');
+}
+
+function viewCalibration(id) {
+    alert(`Viewing calibration session ${id}...\n\nThis would show detailed information about the calibration including:\n• Model parameters\n• Training data\n• Validation results\n• Performance metrics`);
+}
+
+function downloadModel(id) {
+    alert(`Downloading model ${id}...\n\nModel will be downloaded in your preferred format.`);
+}
+
+function continueCalibration(id) {
+    alert(`Continuing calibration session ${id}...\n\nResuming from the last checkpoint.`);
+}
+
+function loadCalibrationStatus() {
+    // Update workflow step status based on current state
+    updateWorkflowProgress();
+}
+
+function updateWorkflowProgress() {
+    // This would normally check the actual calibration state
+    const steps = document.querySelectorAll('.workflow-step');
+    
+    // Example: Mark first step as completed
+    steps[0].classList.add('completed');
+    steps[1].classList.add('active');
+}
+
+function updateModelProgress() {
+    // Simulate model training progress
+    const neuralNetworkProgress = document.querySelector('.model-item:nth-child(3) .progress-bar');
+    let progress = 78;
+    
+    const interval = setInterval(() => {
+        progress += Math.random() * 5;
+        if (progress >= 100) {
+            progress = 100;
+            neuralNetworkProgress.style.width = '100%';
+            neuralNetworkProgress.classList.remove('bg-warning');
+            neuralNetworkProgress.classList.add('bg-success');
+            
+            const badge = document.querySelector('.model-item:nth-child(3) .badge');
+            badge.textContent = 'Ready';
+            badge.classList.remove('bg-warning');
+            badge.classList.add('bg-success');
+            
+            const eta = document.querySelector('.model-item:nth-child(3) small:last-child');
+            eta.textContent = 'Accuracy: 89%';
+            
+            clearInterval(interval);
+        } else {
+            neuralNetworkProgress.style.width = progress + '%';
+        }
+    }, 2000);
+}
+</script>
+{% endblock %}

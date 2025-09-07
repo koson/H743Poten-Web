@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - H743Poten Platform</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .upload-zone {
+            border: 3px dashed #dee2e6;
+            border-radius: 20px;
+            padding: 4rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            transform: translateY(-2px);
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .file-preview {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .instrument-card {
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .instrument-card:hover {
+            border-color: #667eea;
+            background-color: #e3f2fd;
+        }
+        
+        .instrument-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .progress-container {
+            display: none;
+            margin-top: 1rem;
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background-color: white;
+        }
+        
+        .file-item.success {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        
+        .file-item.error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        
+        .data-stats {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/step4/">Step 4</a></li>
+                        <li class="breadcrumb-item active">Data Upload</li>
+                    </ol>
+                </nav>
+                <h2><i class="fas fa-upload"></i> {{ title }}</h2>
+                <p class="text-muted">Upload CV data from multiple instruments for cross-calibration training</p>
+            </div>
+        </div>
+
+        <!-- Instrument Selection -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-microscope"></i> Select Instrument Type</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="instrument-selection">
+                            <div class="col-md-3">
+                                <div class="instrument-card" data-instrument="stm32">
+                                    <div class="instrument-icon">
+                                        <i class="fas fa-microchip fa-3x text-primary"></i>
+                                    </div>
+                                    <h6 class="mt-2">STM32 H743</h6>
+                                    <small>Main Potentiostat</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="instrument-card" data-instrument="palmsens">
+                                    <div class="instrument-icon">
+                                        <i class="fas fa-desktop fa-3x text-success"></i>
+                                    </div>
+                                    <h6 class="mt-2">PalmSens</h6>
+                                    <small>Reference System</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="instrument-card" data-instrument="keysight">
+                                    <div class="instrument-icon">
+                                        <i class="fas fa-wave-square fa-3x text-warning"></i>
+                                    </div>
+                                    <h6 class="mt-2">Keysight 34461A</h6>
+                                    <small>Voltage Reference</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="instrument-card" data-instrument="other">
+                                    <div class="instrument-icon">
+                                        <i class="fas fa-plus-circle fa-3x text-info"></i>
+                                    </div>
+                                    <h6 class="mt-2">Other</h6>
+                                    <small>Custom Instrument</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                Select the instrument type that generated your CV data files
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Upload Area -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-file-upload"></i> Upload CV Data Files</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-zone" id="upload-zone">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <h4>Drag & Drop Files Here</h4>
+                            <p class="text-muted">or click to browse files</p>
+                            <p class="text-muted">
+                                <small>Supported formats: .csv, .txt (max 10MB per file)</small>
+                            </p>
+                            <input type="file" id="file-input" multiple accept=".csv,.txt" style="display: none;">
+                            <button class="btn btn-gradient mt-2" onclick="document.getElementById('file-input').click()">
+                                <i class="fas fa-folder-open"></i> Browse Files
+                            </button>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div class="progress-container" id="progress-container" style="display: none;">
+                            <div class="progress mt-3">
+                                <div class="progress-bar" id="upload-progress" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <small class="text-muted" id="progress-text">Ready to upload...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Preview -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-list"></i> Uploaded Files</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="clearAllFiles()">
+                            <i class="fas fa-trash"></i> Clear All
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="file-list">
+                            <p class="text-muted text-center">No files uploaded yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Summary -->
+        <div class="row mb-4" id="data-summary" style="display: none;">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Data Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h3 class="text-primary" id="total-files">0</h3>
+                                    <small class="text-muted">Total Files</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h3 class="text-success" id="successful-uploads">0</h3>
+                                    <small class="text-muted">Successful</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h3 class="text-warning" id="total-instruments">0</h3>
+                                    <small class="text-muted">Instruments</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h3 class="text-info" id="total-datapoints">0</h3>
+                                    <small class="text-muted">Data Points</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <button class="btn btn-gradient btn-lg me-2" onclick="proceedToTraining()" id="proceed-btn" disabled>
+                    <i class="fas fa-arrow-right"></i> Proceed to Model Training
+                </button>
+                <button class="btn btn-outline-secondary btn-lg" onclick="window.location.href='/step4/'">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let selectedInstrument = null;
+        let uploadedFiles = [];
+        let currentUpload = null;
+        
+        // Initialize upload interface
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            loadExistingData();
+        });
+        
+        function setupEventListeners() {
+            // Instrument selection
+            document.querySelectorAll('.instrument-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    selectInstrument(this.dataset.instrument);
+                });
+            });
+            
+            // File input
+            const fileInput = document.getElementById('file-input');
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Drag and drop
+            const uploadZone = document.getElementById('upload-zone');
+            // Remove duplicate click handler - button already has onclick
+            uploadZone.addEventListener('dragover', handleDragOver);
+            uploadZone.addEventListener('dragleave', handleDragLeave);
+            uploadZone.addEventListener('drop', handleDrop);
+        }
+        
+        function selectInstrument(instrument) {
+            selectedInstrument = instrument;
+            
+            // Update UI
+            document.querySelectorAll('.instrument-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-instrument="${instrument}"]`).classList.add('selected');
+            
+            // Enable upload zone
+            const uploadZone = document.getElementById('upload-zone');
+            uploadZone.style.opacity = '1';
+            uploadZone.style.pointerEvents = 'auto';
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+        
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            
+            if (!selectedInstrument) {
+                showAlert('Please select an instrument type first', 'warning');
+                return;
+            }
+            
+            const files = Array.from(e.dataTransfer.files);
+            uploadFiles(files);
+        }
+        
+        function handleFileSelect(e) {
+            console.log('File select triggered', e.target.files.length); // Debug log
+            
+            if (!selectedInstrument) {
+                showAlert('Please select an instrument type first', 'warning');
+                return;
+            }
+            
+            const files = Array.from(e.target.files);
+            console.log('Selected files:', files.map(f => f.name)); // Debug log
+            uploadFiles(files);
+        }
+        
+        function uploadFiles(files) {
+            console.log('uploadFiles called with:', files.length, 'files'); // Debug log
+            console.log('Selected instrument:', selectedInstrument); // Debug log
+            
+            if (files.length === 0) return;
+            
+            // Validate files
+            const validFiles = files.filter(file => {
+                const extension = file.name.split('.').pop().toLowerCase();
+                const isValid = ['csv', 'txt'].includes(extension) && file.size <= 10 * 1024 * 1024; // 10MB
+                if (!isValid) {
+                    showAlert(`Invalid file: ${file.name}`, 'warning');
+                }
+                return isValid;
+            });
+            
+            if (validFiles.length === 0) return;
+            
+            // Show progress
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('upload-progress');
+            const progressText = document.getElementById('progress-text');
+            
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.textContent = 'Preparing upload...';
+            
+            // Create FormData
+            const formData = new FormData();
+            validFiles.forEach(file => {
+                formData.append('files', file);
+            });
+            formData.append('instrument_type', selectedInstrument);
+            
+            // Upload files
+            fetch('/step4/api/upload-multi-instrument', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Upload complete!';
+                
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                }, 2000);
+                
+                if (data.success) {
+                    updateFileList(data.results);
+                    updateDataSummary();
+                    showAlert(`Successfully uploaded ${data.results.length} files`, 'success');
+                } else {
+                    showAlert('Upload failed: ' + (data.error || 'Unknown error'), 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Upload error:', error);
+                progressContainer.style.display = 'none';
+                showAlert('Upload failed: ' + error.message, 'danger');
+            });
+        }
+        
+        function updateFileList(newResults) {
+            // Add new results to existing uploadedFiles array, avoiding duplicates
+            newResults.forEach(newFile => {
+                const exists = uploadedFiles.some(existing => 
+                    existing.file_id === newFile.file_id || 
+                    existing.filename === newFile.filename
+                );
+                if (!exists) {
+                    uploadedFiles.push(newFile);
+                }
+            });
+            updateFileListDisplay();
+        }
+        
+        function updateFileListDisplay() {
+            const fileList = document.getElementById('file-list');
+            
+            if (uploadedFiles.length === 0) {
+                fileList.innerHTML = '<p class="text-muted text-center">No files uploaded yet</p>';
+                return;
+            }
+            
+            fileList.innerHTML = uploadedFiles.map(result => {
+                const statusClass = result.status === 'success' ? 'success' : 'error';
+                const icon = result.status === 'success' ? 'check-circle' : 'exclamation-triangle';
+                const iconColor = result.status === 'success' ? 'text-success' : 'text-danger';
+                
+                return `
+                    <div class="file-item ${statusClass}">
+                        <div class="d-flex align-items-center flex-grow-1">
+                            <i class="fas fa-${icon} ${iconColor} me-2"></i>
+                            <div class="flex-grow-1">
+                                <strong>${result.filename}</strong>
+                                <br>
+                                <small class="text-muted">${result.instrument}</small>
+                                ${result.stats ? `
+                                    <div class="data-stats">
+                                        ${result.stats.rows} rows • 
+                                        Columns: ${result.stats.columns.join(', ')}
+                                        ${result.stats.voltage_range ? `• V: ${result.stats.voltage_range[0].toFixed(3)} to ${result.stats.voltage_range[1].toFixed(3)}` : ''}
+                                    </div>
+                                ` : ''}
+                                ${result.error ? `<div class="text-danger">${result.error}</div>` : ''}
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeFile('${result.file_id || result.filename}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateDataSummary() {
+            // Use local uploadedFiles array for immediate UI updates
+            const totalFiles = uploadedFiles.length;
+            const successfulUploads = uploadedFiles.filter(f => f.status === 'success').length;
+            
+            // Get unique instruments
+            const instruments = [...new Set(uploadedFiles.map(f => f.instrument))];
+            const totalInstruments = instruments.length;
+            
+            // Calculate total data points from local data
+            let totalPoints = 0;
+            uploadedFiles.forEach(file => {
+                if (file.stats && file.stats.rows) {
+                    totalPoints += file.stats.rows;
+                }
+            });
+            
+            // Update UI
+            document.getElementById('total-files').textContent = totalFiles;
+            document.getElementById('successful-uploads').textContent = successfulUploads;
+            document.getElementById('total-instruments').textContent = totalInstruments;
+            document.getElementById('total-datapoints').textContent = totalPoints.toLocaleString();
+            
+            // Show/hide summary and enable/disable proceed button
+            const hasSummary = totalFiles > 0;
+            document.getElementById('data-summary').style.display = hasSummary ? 'block' : 'none';
+            document.getElementById('proceed-btn').disabled = !hasSummary;
+        }
+        
+        function loadExistingData() {
+            fetch('/step4/api/data-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.datasets && data.datasets.length > 0) {
+                        // Convert server data to our format
+                        const serverFiles = data.datasets.map(dataset => ({
+                            filename: dataset.filename,
+                            instrument: dataset.instrument,
+                            status: 'success',
+                            file_id: dataset.file_id,
+                            stats: {
+                                rows: dataset.data_shape ? dataset.data_shape[0] : 0,
+                                columns: dataset.columns || ['voltage', 'current']
+                            }
+                        }));
+                        
+                        // Only update if uploadedFiles is empty (initial load)
+                        // or merge without duplicates
+                        if (uploadedFiles.length === 0) {
+                            uploadedFiles = serverFiles;
+                        } else {
+                            // Add server files that aren't already in uploadedFiles
+                            serverFiles.forEach(serverFile => {
+                                const exists = uploadedFiles.some(existing => 
+                                    existing.file_id === serverFile.file_id || 
+                                    existing.filename === serverFile.filename
+                                );
+                                if (!exists) {
+                                    uploadedFiles.push(serverFile);
+                                }
+                            });
+                        }
+                        
+                        updateFileListDisplay();
+                        updateDataSummary();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading existing data:', error);
+                });
+        }
+        
+        function removeFile(fileId) {
+            // Remove file from server and local array
+            fetch('/step4/api/remove-file', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ file_id: fileId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove from local array
+                    uploadedFiles = uploadedFiles.filter(file => 
+                        file.file_id !== fileId && file.filename !== fileId
+                    );
+                    updateFileListDisplay();
+                    updateDataSummary();
+                    showAlert('File removed successfully', 'success');
+                } else {
+                    showAlert('Failed to remove file: ' + (data.error || 'Unknown error'), 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error removing file:', error);
+                showAlert('Error removing file: ' + error.message, 'danger');
+            });
+        }
+        
+        function clearAllFiles() {
+            if (confirm('Are you sure you want to clear all uploaded files?')) {
+                fetch('/step4/api/clear-all-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        uploadedFiles = [];
+                        updateFileListDisplay();
+                        updateDataSummary();
+                        showAlert('All files cleared successfully', 'success');
+                    } else {
+                        showAlert('Failed to clear files: ' + (data.error || 'Unknown error'), 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error clearing files:', error);
+                    showAlert('Error clearing files: ' + error.message, 'danger');
+                });
+            }
+        }
+        
+        function proceedToTraining() {
+            window.location.href = '/step4/calibration';
+        }
+        
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insert at top of container
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

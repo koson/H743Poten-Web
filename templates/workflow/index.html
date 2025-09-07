@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-project-diagram"></i> H743Poten Analysis Workflow</h4>
+                    <p class="mb-0">Complete electrochemical analysis workflow - from data upload to cross-instrument calibration</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Progress -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Workflow Progress</h5>
+                    <div class="progress mb-3" style="height: 30px;">
+                        <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 0%" id="workflow-progress">
+                            Step 0 of 4
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Steps -->
+    <div class="row mt-4">
+        <!-- Step 1: Data Upload -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100 step-card" data-step="1">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-upload"></i> Step 1</h5>
+                    <small>Data Upload & Preparation</small>
+                </div>
+                <div class="card-body">
+                    <p>Upload CV data files and prepare datasets for analysis.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> CSV file support</li>
+                        <li><i class="fas fa-check text-success"></i> Data validation</li>
+                        <li><i class="fas fa-check text-success"></i> Preview capabilities</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-info w-100" onclick="goToStep(1)">
+                        <i class="fas fa-arrow-right"></i> Start Step 1
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Measurement -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100 step-card" data-step="2">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="fas fa-chart-line"></i> Step 2</h5>
+                    <small>Live Measurement</small>
+                </div>
+                <div class="card-body">
+                    <p>Perform real-time electrochemical measurements with the H743 system.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> CV, DPV, SWV support</li>
+                        <li><i class="fas fa-check text-success"></i> Real-time plotting</li>
+                        <li><i class="fas fa-check text-success"></i> Parameter control</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-warning w-100" onclick="goToStep(2)" disabled>
+                        <i class="fas fa-arrow-right"></i> Go to Step 2
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Peak Analysis -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100 step-card" data-step="3">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-mountain"></i> Step 3</h5>
+                    <small>Peak Detection & Analysis</small>
+                </div>
+                <div class="card-body">
+                    <p>Automated peak detection with AI-enhanced analysis capabilities.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> ML-based detection</li>
+                        <li><i class="fas fa-check text-success"></i> Interactive refinement</li>
+                        <li><i class="fas fa-check text-success"></i> Statistical analysis</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-success w-100" onclick="goToStep(3)" disabled>
+                        <i class="fas fa-arrow-right"></i> Go to Step 3
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Cross-Instrument Calibration -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100 step-card" data-step="4">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-balance-scale"></i> Step 4</h5>
+                    <small>Cross-Instrument Calibration</small>
+                </div>
+                <div class="card-body">
+                    <p>Advanced calibration system for instrument standardization.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> ML calibration models</li>
+                        <li><i class="fas fa-check text-success"></i> Validation system</li>
+                        <li><i class="fas fa-check text-success"></i> Quality assessment</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary w-100" onclick="goToStep(4)" disabled>
+                        <i class="fas fa-arrow-right"></i> Go to Step 4
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-rocket"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-primary w-100 mb-2" onclick="loadSampleData()">
+                                <i class="fas fa-download"></i> Load Sample Data
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-success w-100 mb-2" onclick="continueWorkflow()">
+                                <i class="fas fa-play"></i> Continue Workflow
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-info w-100 mb-2" onclick="viewResults()">
+                                <i class="fas fa-chart-bar"></i> View Results
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-warning w-100 mb-2" onclick="resetWorkflow()">
+                                <i class="fas fa-refresh"></i> Reset Workflow
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.step-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.step-card.completed {
+    border: 2px solid #28a745;
+}
+
+.step-card.active {
+    border: 2px solid #007bff;
+    box-shadow: 0 0 10px rgba(0,123,255,0.3);
+}
+
+.progress-bar {
+    transition: width 0.5s ease;
+}
+</style>
+
+<script>
+// Workflow state management
+let workflowState = {
+    currentStep: 0,
+    completedSteps: [],
+    stepData: {}
+};
+
+// Load workflow state from localStorage
+function loadWorkflowState() {
+    const saved = localStorage.getItem('h743poten_workflow_state');
+    if (saved) {
+        workflowState = {...workflowState, ...JSON.parse(saved)};
+    }
+    updateWorkflowUI();
+}
+
+// Save workflow state to localStorage
+function saveWorkflowState() {
+    localStorage.setItem('h743poten_workflow_state', JSON.stringify(workflowState));
+}
+
+// Update workflow UI based on state
+function updateWorkflowUI() {
+    // Update progress bar
+    const progress = (workflowState.currentStep / 4) * 100;
+    const progressBar = document.getElementById('workflow-progress');
+    progressBar.style.width = progress + '%';
+    progressBar.textContent = `Step ${workflowState.currentStep} of 4`;
+    
+    // Update step cards
+    document.querySelectorAll('.step-card').forEach((card, index) => {
+        const stepNum = index + 1;
+        const button = card.querySelector('button');
+        
+        // Remove all state classes
+        card.classList.remove('completed', 'active');
+        
+        if (workflowState.completedSteps.includes(stepNum)) {
+            card.classList.add('completed');
+            button.disabled = false;
+            button.innerHTML = `<i class="fas fa-check"></i> Completed`;
+            button.classList.remove('btn-info', 'btn-warning', 'btn-success', 'btn-primary');
+            button.classList.add('btn-outline-success');
+        } else if (stepNum === workflowState.currentStep + 1) {
+            card.classList.add('active');
+            button.disabled = false;
+        } else if (stepNum > workflowState.currentStep + 1) {
+            button.disabled = true;
+        } else {
+            button.disabled = false;
+        }
+    });
+}
+
+// Navigate to specific step
+function goToStep(stepNum) {
+    const routes = {
+        1: '/workflow/step1',
+        2: '/workflow/step2', 
+        3: '/workflow/step3',
+        4: '/workflow/step4'
+    };
+    
+    if (routes[stepNum]) {
+        // Update workflow state
+        if (stepNum > workflowState.currentStep) {
+            workflowState.currentStep = stepNum;
+            saveWorkflowState();
+        }
+        
+        window.location.href = routes[stepNum];
+    }
+}
+
+// Quick action functions
+function loadSampleData() {
+    // Simulate loading sample data
+    alert('Loading sample CV data for demonstration...');
+    workflowState.currentStep = Math.max(workflowState.currentStep, 1);
+    saveWorkflowState();
+    updateWorkflowUI();
+}
+
+function continueWorkflow() {
+    const nextStep = workflowState.currentStep + 1;
+    if (nextStep <= 4) {
+        goToStep(nextStep);
+    } else {
+        alert('Workflow completed! You can review results or start a new workflow.');
+    }
+}
+
+function viewResults() {
+    window.location.href = '/workflow/results';
+}
+
+function resetWorkflow() {
+    if (confirm('Are you sure you want to reset the workflow? All progress will be lost.')) {
+        workflowState = {
+            currentStep: 0,
+            completedSteps: [],
+            stepData: {}
+        };
+        saveWorkflowState();
+        updateWorkflowUI();
+    }
+}
+
+// Initialize workflow state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadWorkflowState();
+});
+</script>
+{% endblock %}

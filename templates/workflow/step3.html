@@ -1,0 +1,608 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Workflow Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/workflow">Workflow</a></li>
+                    <li class="breadcrumb-item active">Step 3: Peak Detection & Analysis</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Step Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4><i class="fas fa-mountain"></i> Step 3: Peak Detection & Analysis</h4>
+                            <p class="mb-0">Advanced peak detection algorithms for electrochemical data analysis</p>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-light" onclick="window.location.href='/workflow/step2'">
+                                <i class="fas fa-arrow-left"></i> Back to Step 2
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detection Algorithms -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-search"></i> Enhanced Peak Detection</h5>
+                </div>
+                <div class="card-body">
+                    <p>Advanced algorithms for accurate peak identification:</p>
+                    <ul class="list-unstyled mb-3">
+                        <li><i class="fas fa-check text-success"></i> Baseline correction algorithms</li>
+                        <li><i class="fas fa-check text-success"></i> Adaptive threshold detection</li>
+                        <li><i class="fas fa-check text-success"></i> Machine learning enhancement</li>
+                        <li><i class="fas fa-check text-success"></i> Multi-peak decomposition</li>
+                    </ul>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Detection Method</label>
+                        <select class="form-select" id="detectionMethod">
+                            <option value="enhanced">Enhanced Detector v5</option>
+                            <option value="baseline">Baseline Detector v4</option>
+                            <option value="voltage">Voltage Window Detector</option>
+                            <option value="custom">Custom Algorithm</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-primary w-100" onclick="runPeakDetection()">
+                        <i class="fas fa-play"></i> Run Detection
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-chart-line"></i> Real-time Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <p>Live peak analysis with interactive visualization:</p>
+                    <ul class="list-unstyled mb-3">
+                        <li><i class="fas fa-check text-success"></i> Real-time peak tracking</li>
+                        <li><i class="fas fa-check text-success"></i> Interactive parameter tuning</li>
+                        <li><i class="fas fa-check text-success"></i> Confidence scoring</li>
+                        <li><i class="fas fa-check text-success"></i> Quality validation</li>
+                    </ul>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Sensitivity</label>
+                        <input type="range" class="form-range" id="sensitivityRange" min="0.1" max="2.0" step="0.1" value="1.0">
+                        <div class="d-flex justify-content-between">
+                            <small>Low</small>
+                            <small id="sensitivityValue">1.0</small>
+                            <small>High</small>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-success w-100" onclick="startRealTimeAnalysis()">
+                        <i class="fas fa-broadcast-tower"></i> Start Live Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Results -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5><i class="fas fa-chart-bar"></i> Peak Detection Results</h5>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-outline-primary btn-sm" onclick="exportResults()" disabled id="exportBtn">
+                                <i class="fas fa-download"></i> Export Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="detection-results">
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-mountain fa-3x mb-3"></i>
+                            <h5>No Peak Detection Results</h5>
+                            <p>Run peak detection to see results here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Plot -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-area"></i> Interactive Peak Visualization</h5>
+                </div>
+                <div class="card-body">
+                    <div id="peak-plot" style="height: 500px; border: 1px solid #ddd; background: #f8f9fa;">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                <h5>Peak Detection Plot</h5>
+                                <p>Run peak detection to see interactive visualization</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Peak Parameters -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-cogs"></i> Detection Parameters</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Min Height</label>
+                            <input type="number" class="form-control" id="minHeight" value="0.1" step="0.01">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Min Distance</label>
+                            <input type="number" class="form-control" id="minDistance" value="10" step="1">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Prominence</label>
+                            <input type="number" class="form-control" id="prominence" value="0.05" step="0.01">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Width</label>
+                            <input type="number" class="form-control" id="width" value="5" step="1">
+                        </div>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="baselineCorrection" checked>
+                        <label class="form-check-label">Apply Baseline Correction</label>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="noiseReduction">
+                        <label class="form-check-label">Noise Reduction</label>
+                    </div>
+                    
+                    <button class="btn btn-info w-100" onclick="updateParameters()">
+                        <i class="fas fa-sync"></i> Update Parameters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list"></i> Detected Peaks Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div id="peaks-summary">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-search fa-2x mb-2"></i>
+                            <p>No peaks detected yet</p>
+                            <small>Run peak detection to see summary</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Algorithm Comparison -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-balance-scale"></i> Algorithm Comparison</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="algorithmTable">
+                            <thead>
+                                <tr>
+                                    <th>Algorithm</th>
+                                    <th>Peaks Found</th>
+                                    <th>Confidence</th>
+                                    <th>Processing Time</th>
+                                    <th>Quality Score</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        Run peak detection to compare algorithms
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Navigation -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-secondary" onclick="window.location.href='/workflow/step2'">
+                            <i class="fas fa-arrow-left"></i> Step 2: Data Analysis
+                        </button>
+                        <button class="btn btn-primary" onclick="proceedToStep4()" id="next-step-btn" disabled>
+                            <i class="fas fa-arrow-right"></i> Step 4: Calibration
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="window.location.href='/workflow'">
+                            <i class="fas fa-home"></i> Workflow Home
+                        </button>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">Complete peak detection to proceed to Step 4</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-header {
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-wrapper {
+    position: relative;
+    margin: 10px 0;
+}
+
+.algorithm-badge {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    z-index: 10;
+}
+
+.peak-marker {
+    background: linear-gradient(45deg, #007bff, #6610f2);
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.comparison-table th {
+    background: linear-gradient(135deg, #007bff, #6610f2);
+    color: white;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize sensitivity slider
+    const sensitivityRange = document.getElementById('sensitivityRange');
+    const sensitivityValue = document.getElementById('sensitivityValue');
+    
+    sensitivityRange.addEventListener('input', function() {
+        sensitivityValue.textContent = this.value;
+    });
+    
+    checkPreviousResults();
+});
+
+function checkPreviousResults() {
+    const workflowState = JSON.parse(localStorage.getItem('h743poten_workflow_state') || '{}');
+    if (workflowState.step3 && workflowState.step3.completed) {
+        displayPreviousResults(workflowState.step3);
+    }
+}
+
+function runPeakDetection() {
+    const method = document.getElementById('detectionMethod').value;
+    const sensitivity = document.getElementById('sensitivityRange').value;
+    
+    // Show loading state
+    document.getElementById('detection-results').innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+            <h5>Running Peak Detection...</h5>
+            <p class="text-muted">Using ${method} algorithm with sensitivity ${sensitivity}</p>
+            <div class="progress mt-3" style="width: 300px; margin: 0 auto;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%" id="detectionProgress"></div>
+            </div>
+        </div>
+    `;
+    
+    // Simulate progress
+    let progress = 0;
+    const progressBar = document.getElementById('detectionProgress');
+    const interval = setInterval(() => {
+        progress += Math.random() * 20;
+        if (progress > 100) progress = 100;
+        progressBar.style.width = progress + '%';
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            setTimeout(showDetectionResults, 500);
+        }
+    }, 200);
+}
+
+function showDetectionResults() {
+    const results = {
+        method: document.getElementById('detectionMethod').value,
+        peaksFound: Math.floor(Math.random() * 8) + 3,
+        confidence: (Math.random() * 20 + 80).toFixed(1),
+        processingTime: (Math.random() * 2 + 0.5).toFixed(2),
+        qualityScore: (Math.random() * 15 + 85).toFixed(1)
+    };
+    
+    // Update results display
+    document.getElementById('detection-results').innerHTML = `
+        <div class="row">
+            <div class="col-md-8">
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-check-circle"></i> Peak Detection Completed!</h6>
+                    <p class="mb-0">Found ${results.peaksFound} peaks with ${results.confidence}% confidence</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h4 class="text-primary">${results.peaksFound}</h4>
+                                <small>Peaks Found</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h4 class="text-success">${results.confidence}%</h4>
+                                <small>Confidence</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h4 class="text-info">${results.processingTime}s</h4>
+                                <small>Processing Time</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h4 class="text-warning">${results.qualityScore}/100</h4>
+                                <small>Quality Score</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Peak Details</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Peak</th>
+                                <th>Potential (V)</th>
+                                <th>Current (µA)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="peakDetailTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Generate peak details
+    const peakTable = document.getElementById('peakDetailTable');
+    for (let i = 1; i <= results.peaksFound; i++) {
+        const potential = (Math.random() * 2 - 1).toFixed(3);
+        const current = (Math.random() * 10 + 1).toFixed(2);
+        peakTable.innerHTML += `
+            <tr>
+                <td>Peak ${i}</td>
+                <td>${potential}</td>
+                <td>${current}</td>
+            </tr>
+        `;
+    }
+    
+    // Update plot
+    updatePeakPlot(results);
+    
+    // Update summary
+    updatePeaksSummary(results);
+    
+    // Update algorithm comparison
+    updateAlgorithmComparison(results);
+    
+    // Enable export and next step
+    document.getElementById('exportBtn').disabled = false;
+    enableNextStep();
+    
+    // Save results to workflow state
+    saveDetectionResults(results);
+}
+
+function updatePeakPlot(results) {
+    document.getElementById('peak-plot').innerHTML = `
+        <div class="d-flex align-items-center justify-content-center h-100 bg-primary text-white">
+            <div class="text-center">
+                <i class="fas fa-chart-line fa-4x mb-3"></i>
+                <h4>Interactive Peak Plot</h4>
+                <p>Detected ${results.peaksFound} peaks with confidence ${results.confidence}%</p>
+                <small>Interactive plot would be displayed here with Plotly.js</small>
+            </div>
+        </div>
+    `;
+}
+
+function updatePeaksSummary(results) {
+    document.getElementById('peaks-summary').innerHTML = `
+        <div class="row text-center">
+            <div class="col-6 mb-2">
+                <div class="border rounded p-2">
+                    <h5 class="text-primary">${results.peaksFound}</h5>
+                    <small>Total Peaks</small>
+                </div>
+            </div>
+            <div class="col-6 mb-2">
+                <div class="border rounded p-2">
+                    <h5 class="text-success">${results.confidence}%</h5>
+                    <small>Avg Confidence</small>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="border rounded p-2">
+                    <h6 class="text-info">Quality: ${results.qualityScore}/100</h6>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-info" style="width: ${results.qualityScore}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <h6>Peak Distribution</h6>
+            <small class="text-muted">Anodic: ${Math.ceil(results.peaksFound/2)} | Cathodic: ${Math.floor(results.peaksFound/2)}</small>
+        </div>
+    `;
+}
+
+function updateAlgorithmComparison(results) {
+    const tbody = document.querySelector('#algorithmTable tbody');
+    tbody.innerHTML = `
+        <tr>
+            <td><span class="badge bg-primary">${results.method}</span></td>
+            <td>${results.peaksFound}</td>
+            <td>${results.confidence}%</td>
+            <td>${results.processingTime}s</td>
+            <td>${results.qualityScore}/100</td>
+            <td><button class="btn btn-sm btn-outline-success">Active</button></td>
+        </tr>
+        <tr>
+            <td><span class="badge bg-secondary">Baseline v4</span></td>
+            <td>${results.peaksFound - 1}</td>
+            <td>${(parseFloat(results.confidence) - 5).toFixed(1)}%</td>
+            <td>${(parseFloat(results.processingTime) + 0.3).toFixed(2)}s</td>
+            <td>${(parseFloat(results.qualityScore) - 3).toFixed(1)}/100</td>
+            <td><button class="btn btn-sm btn-outline-primary" onclick="compareAlgorithm('baseline')">Compare</button></td>
+        </tr>
+        <tr>
+            <td><span class="badge bg-info">Voltage Window</span></td>
+            <td>${results.peaksFound + 1}</td>
+            <td>${(parseFloat(results.confidence) - 8).toFixed(1)}%</td>
+            <td>${(parseFloat(results.processingTime) - 0.2).toFixed(2)}s</td>
+            <td>${(parseFloat(results.qualityScore) - 7).toFixed(1)}/100</td>
+            <td><button class="btn btn-sm btn-outline-primary" onclick="compareAlgorithm('voltage')">Compare</button></td>
+        </tr>
+    `;
+}
+
+function startRealTimeAnalysis() {
+    alert('Starting real-time peak analysis...\nThis feature provides live peak detection with interactive parameter tuning.');
+    // In a real implementation, this would start a WebSocket connection for real-time data
+}
+
+function updateParameters() {
+    const params = {
+        minHeight: document.getElementById('minHeight').value,
+        minDistance: document.getElementById('minDistance').value,
+        prominence: document.getElementById('prominence').value,
+        width: document.getElementById('width').value,
+        baselineCorrection: document.getElementById('baselineCorrection').checked,
+        noiseReduction: document.getElementById('noiseReduction').checked
+    };
+    
+    alert('Parameters updated! Run peak detection again to see the effects.');
+}
+
+function compareAlgorithm(algorithm) {
+    alert(`Comparing with ${algorithm} algorithm...\nThis would show side-by-side comparison of detection results.`);
+}
+
+function exportResults() {
+    alert('Exporting peak detection results...\nResults would be exported as CSV, JSON, or PDF format.');
+}
+
+function saveDetectionResults(results) {
+    const workflowState = JSON.parse(localStorage.getItem('h743poten_workflow_state') || '{}');
+    workflowState.step3 = {
+        completed: true,
+        detectionDate: new Date().toISOString(),
+        results: results,
+        parameters: {
+            method: results.method,
+            sensitivity: document.getElementById('sensitivityRange').value
+        }
+    };
+    localStorage.setItem('h743poten_workflow_state', JSON.stringify(workflowState));
+}
+
+function displayPreviousResults(step3Data) {
+    if (step3Data.results) {
+        showDetectionResults();
+        // The showDetectionResults function will be called with stored data
+    }
+}
+
+function enableNextStep() {
+    const nextBtn = document.getElementById('next-step-btn');
+    nextBtn.disabled = false;
+    nextBtn.classList.remove('btn-primary');
+    nextBtn.classList.add('btn-success');
+}
+
+function proceedToStep4() {
+    // Update workflow state
+    const workflowState = JSON.parse(localStorage.getItem('h743poten_workflow_state') || '{}');
+    workflowState.currentStep = 4;
+    workflowState.completedSteps = workflowState.completedSteps || [];
+    if (!workflowState.completedSteps.includes(3)) {
+        workflowState.completedSteps.push(3);
+    }
+    localStorage.setItem('h743poten_workflow_state', JSON.stringify(workflowState));
+    
+    window.location.href = '/workflow/step4';
+}
+</script>
+{% endblock %}

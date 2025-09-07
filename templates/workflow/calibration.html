@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - H743Poten Platform</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <style>
+        .model-card {
+            border: 2px solid #dee2e6;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        
+        .model-card:hover {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            transform: translateY(-2px);
+        }
+        
+        .model-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .model-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .training-progress {
+            display: none;
+        }
+        
+        .performance-metric {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            margin: 0.5rem 0;
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+        
+        .config-panel {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .data-preview {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .instrument-summary {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background-color: white;
+        }
+        
+        .training-log {
+            background-color: #000;
+            color: #00ff00;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/step4/">Step 4</a></li>
+                        <li class="breadcrumb-item active">ML Training</li>
+                    </ol>
+                </nav>
+                <h2><i class="fas fa-brain"></i> {{ title }}</h2>
+                <p class="text-muted">Train machine learning models for cross-instrument calibration</p>
+            </div>
+        </div>
+
+        <!-- Training Configuration -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-cog"></i> Training Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Model Selection -->
+                        <div class="config-panel">
+                            <h6>Select ML Model Type</h6>
+                            <div class="row" id="model-selection">
+                                <div class="col-md-4">
+                                    <div class="model-card" data-model="random_forest">
+                                        <div class="model-icon">
+                                            <i class="fas fa-tree text-success"></i>
+                                        </div>
+                                        <h6>Random Forest</h6>
+                                        <small>Robust & Fast</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="model-card" data-model="gradient_boosting">
+                                        <div class="model-icon">
+                                            <i class="fas fa-chart-line text-warning"></i>
+                                        </div>
+                                        <h6>Gradient Boosting</h6>
+                                        <small>High Accuracy</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="model-card" data-model="neural_network">
+                                        <div class="model-icon">
+                                            <i class="fas fa-brain text-info"></i>
+                                        </div>
+                                        <h6>Neural Network</h6>
+                                        <small>Deep Learning</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reference Instrument -->
+                        <div class="config-panel">
+                            <h6>Reference Instrument</h6>
+                            <select class="form-select" id="reference-instrument">
+                                <option value="">Select reference instrument...</option>
+                                <option value="stm32">STM32 H743 (Main Potentiostat)</option>
+                                <option value="palmsens">PalmSens (Commercial Reference)</option>
+                                <option value="keysight">Keysight 34461A (Voltage Reference)</option>
+                            </select>
+                            <small class="text-muted">The instrument to use as calibration reference</small>
+                        </div>
+
+                        <!-- Target Instruments -->
+                        <div class="config-panel">
+                            <h6>Target Instruments</h6>
+                            <div id="target-instruments">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="stm32" id="target-stm32">
+                                    <label class="form-check-label" for="target-stm32">STM32 H743</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="palmsens" id="target-palmsens">
+                                    <label class="form-check-label" for="target-palmsens">PalmSens</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="keysight" id="target-keysight">
+                                    <label class="form-check-label" for="target-keysight">Keysight 34461A</label>
+                                </div>
+                            </div>
+                            <small class="text-muted">Select instruments to calibrate against reference</small>
+                        </div>
+
+                        <!-- Advanced Options -->
+                        <div class="config-panel">
+                            <h6>Advanced Options</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Training Split (%)</label>
+                                    <input type="range" class="form-range" id="train-split" min="60" max="90" value="80">
+                                    <small class="text-muted">Training: <span id="split-display">80%</span></small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Cross-Validation Folds</label>
+                                    <select class="form-select" id="cv-folds">
+                                        <option value="3">3-Fold</option>
+                                        <option value="5" selected>5-Fold</option>
+                                        <option value="10">10-Fold</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Summary -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-database"></i> Training Data Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="data-summary-training">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-spinner fa-spin"></i> Loading data summary...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model Performance (appears after training) -->
+                <div class="card mt-3" id="performance-card" style="display: none;">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Model Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="performance-metrics">
+                            <!-- Performance metrics will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Controls -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-play"></i> Training Controls</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-gradient btn-lg me-3" id="start-training-btn" onclick="startTraining()">
+                                        <i class="fas fa-play"></i> Start Training
+                                    </button>
+                                    <button class="btn btn-outline-secondary me-3" onclick="validateConfiguration()">
+                                        <i class="fas fa-check"></i> Validate Config
+                                    </button>
+                                    <button class="btn btn-outline-info" onclick="previewFeatures()">
+                                        <i class="fas fa-eye"></i> Preview Features
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="training-progress" id="training-progress">
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                             id="training-progress-bar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <small class="text-muted" id="progress-text">Initializing...</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Log -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-terminal"></i> Training Log</h5>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleLog()">
+                            <i class="fas fa-eye"></i> Toggle Log
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="training-log" id="training-log">
+                            <div>H743Poten Cross-Instrument Calibration Training Console</div>
+                            <div>Ready to start training...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trained Models -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-models"></i> Trained Models</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="refreshModels()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="trained-models-list">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-spinner fa-spin"></i> Loading trained models...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <button class="btn btn-gradient btn-lg me-2" onclick="proceedToAnalysis()" id="proceed-analysis-btn" disabled>
+                    <i class="fas fa-arrow-right"></i> Proceed to Analysis
+                </button>
+                <button class="btn btn-outline-secondary btn-lg" onclick="window.location.href='/step4/upload'">
+                    <i class="fas fa-arrow-left"></i> Back to Upload
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let selectedModel = null;
+        let selectedReference = null;
+        let targetInstruments = [];
+        let currentModels = [];
+        let trainingInProgress = false;
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            loadDataSummary();
+            loadTrainedModels();
+        });
+        
+        function setupEventListeners() {
+            // Model selection
+            document.querySelectorAll('.model-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    selectModel(this.dataset.model);
+                });
+            });
+            
+            // Reference instrument selection
+            document.getElementById('reference-instrument').addEventListener('change', function() {
+                selectedReference = this.value;
+                updateTargetInstruments();
+            });
+            
+            // Target instruments
+            document.querySelectorAll('#target-instruments input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateTargetInstruments);
+            });
+            
+            // Training split display
+            document.getElementById('train-split').addEventListener('input', function() {
+                document.getElementById('split-display').textContent = this.value + '%';
+            });
+        }
+        
+        function selectModel(modelType) {
+            selectedModel = modelType;
+            
+            // Update UI
+            document.querySelectorAll('.model-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-model="${modelType}"]`).classList.add('selected');
+            
+            updateTrainingButton();
+        }
+        
+        function updateTargetInstruments() {
+            selectedReference = document.getElementById('reference-instrument').value;
+            
+            // Update target instruments (exclude selected reference)
+            const checkboxes = document.querySelectorAll('#target-instruments input[type="checkbox"]');
+            targetInstruments = [];
+            
+            checkboxes.forEach(checkbox => {
+                // Disable if it's the reference instrument
+                checkbox.disabled = (checkbox.value === selectedReference);
+                if (checkbox.disabled) {
+                    checkbox.checked = false;
+                }
+                
+                if (checkbox.checked && !checkbox.disabled) {
+                    targetInstruments.push(checkbox.value);
+                }
+            });
+            
+            updateTrainingButton();
+        }
+        
+        function updateTrainingButton() {
+            const btn = document.getElementById('start-training-btn');
+            const canTrain = selectedModel && selectedReference && targetInstruments.length > 0;
+            
+            btn.disabled = !canTrain || trainingInProgress;
+            
+            if (!selectedModel) {
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Select Model Type';
+            } else if (!selectedReference) {
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Select Reference';
+            } else if (targetInstruments.length === 0) {
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Select Targets';
+            } else if (trainingInProgress) {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Training...';
+            } else {
+                btn.innerHTML = '<i class="fas fa-play"></i> Start Training';
+            }
+        }
+        
+        function loadDataSummary() {
+            fetch('/step4/api/data-status')
+                .then(response => response.json())
+                .then(data => {
+                    updateDataSummary(data);
+                })
+                .catch(error => {
+                    console.error('Error loading data summary:', error);
+                    document.getElementById('data-summary-training').innerHTML = 
+                        '<div class="alert alert-danger">Error loading data summary</div>';
+                });
+        }
+        
+        function updateDataSummary(data) {
+            const container = document.getElementById('data-summary-training');
+            
+            if (data.total_datasets === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        No training data available. Please <a href="/step4/upload">upload data</a> first.
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div class="performance-metric">
+                    <h4 class="text-primary">${data.total_datasets}</h4>
+                    <small>Total Datasets</small>
+                </div>
+                <div class="performance-metric">
+                    <h4 class="text-success">${Object.keys(data.instruments || {}).length}</h4>
+                    <small>Instruments</small>
+                </div>
+                <hr>
+                <h6>Data by Instrument:</h6>
+                <div class="data-preview">
+            `;
+            
+            for (const [instrument, count] of Object.entries(data.instruments || {})) {
+                html += `
+                    <div class="instrument-summary">
+                        <div class="flex-grow-1">
+                            <strong>${instrument}</strong>
+                            <br><small class="text-muted">${count} datasets</small>
+                        </div>
+                        <div class="badge bg-primary">${count}</div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function loadTrainedModels() {
+            fetch('/step4/api/models')
+                .then(response => response.json())
+                .then(data => {
+                    updateTrainedModelsList(data.models || []);
+                    currentModels = data.models || [];
+                    
+                    if (currentModels.length > 0) {
+                        document.getElementById('proceed-analysis-btn').disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading trained models:', error);
+                    document.getElementById('trained-models-list').innerHTML = 
+                        '<div class="alert alert-danger">Error loading trained models</div>';
+                });
+        }
+        
+        function updateTrainedModelsList(models) {
+            const container = document.getElementById('trained-models-list');
+            
+            if (models.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted">No trained models yet</div>';
+                return;
+            }
+            
+            let html = '';
+            models.forEach(model => {
+                const performance = model.performance || {};
+                html += `
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <h6>${model.type.replace('_', ' ').toUpperCase()}</h6>
+                                    <small class="text-muted">${new Date(model.training_time).toLocaleString()}</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <small>Reference: <strong>${model.reference_instrument}</strong></small>
+                                    <br><small>Targets: ${(model.target_instruments || []).join(', ')}</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center">
+                                        <strong>${(performance.r2 || 0).toFixed(3)}</strong>
+                                        <br><small class="text-muted">R² Score</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="useModel('${model.model_id}')">
+                                        <i class="fas fa-check"></i> Use
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function startTraining() {
+            if (!selectedModel || !selectedReference || targetInstruments.length === 0) {
+                showAlert('Please complete configuration before training', 'warning');
+                return;
+            }
+            
+            trainingInProgress = true;
+            updateTrainingButton();
+            
+            // Show progress and log
+            document.getElementById('training-progress').style.display = 'block';
+            document.getElementById('training-log').style.display = 'block';
+            
+            // Update progress
+            let progress = 0;
+            const progressBar = document.getElementById('training-progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            // Simulate training progress
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 90) progress = 90;
+                
+                progressBar.style.width = progress + '%';
+                progressText.textContent = `Training in progress... ${Math.round(progress)}%`;
+            }, 500);
+            
+            // Add to log
+            addToLog('Starting training process...');
+            addToLog(`Model: ${selectedModel}`);
+            addToLog(`Reference: ${selectedReference}`);
+            addToLog(`Targets: ${targetInstruments.join(', ')}`);
+            
+            // Prepare training data
+            const trainingConfig = {
+                model_type: selectedModel,
+                reference_instrument: selectedReference,
+                target_instruments: targetInstruments,
+                train_split: document.getElementById('train-split').value / 100,
+                cv_folds: parseInt(document.getElementById('cv-folds').value)
+            };
+            
+            // Send training request
+            fetch('/step4/api/train-calibration-model', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(trainingConfig)
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearInterval(progressInterval);
+                
+                if (data.success) {
+                    progressBar.style.width = '100%';
+                    progressText.textContent = 'Training completed successfully!';
+                    
+                    addToLog('Training completed successfully!');
+                    addToLog(`Model ID: ${data.model_id}`);
+                    addToLog(`R² Score: ${data.performance.r2.toFixed(4)}`);
+                    addToLog(`MSE: ${data.performance.mse.toFixed(6)}`);
+                    
+                    // Show performance metrics
+                    showPerformanceMetrics(data.performance);
+                    
+                    // Refresh models list
+                    loadTrainedModels();
+                    
+                    showAlert('Model trained successfully!', 'success');
+                } else {
+                    addToLog(`Training failed: ${data.error}`);
+                    showAlert('Training failed: ' + data.error, 'danger');
+                }
+                
+                trainingInProgress = false;
+                updateTrainingButton();
+                
+                setTimeout(() => {
+                    document.getElementById('training-progress').style.display = 'none';
+                }, 3000);
+            })
+            .catch(error => {
+                clearInterval(progressInterval);
+                console.error('Training error:', error);
+                addToLog(`Training error: ${error.message}`);
+                showAlert('Training failed: ' + error.message, 'danger');
+                
+                trainingInProgress = false;
+                updateTrainingButton();
+                document.getElementById('training-progress').style.display = 'none';
+            });
+        }
+        
+        function showPerformanceMetrics(performance) {
+            document.getElementById('performance-card').style.display = 'block';
+            
+            const metricsHtml = `
+                <div class="col-md-4">
+                    <div class="performance-metric">
+                        <h4 class="text-success">${performance.r2.toFixed(3)}</h4>
+                        <small>R² Score</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="performance-metric">
+                        <h4 class="text-info">${performance.mse.toFixed(6)}</h4>
+                        <small>MSE</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="performance-metric">
+                        <h4 class="text-warning">${performance.training_samples}</h4>
+                        <small>Training Samples</small>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('performance-metrics').innerHTML = metricsHtml;
+        }
+        
+        function addToLog(message) {
+            const log = document.getElementById('training-log');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function toggleLog() {
+            const log = document.getElementById('training-log');
+            log.style.display = log.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function validateConfiguration() {
+            const isValid = selectedModel && selectedReference && targetInstruments.length > 0;
+            
+            if (isValid) {
+                showAlert('Configuration is valid! Ready to train.', 'success');
+            } else {
+                let missing = [];
+                if (!selectedModel) missing.push('Model type');
+                if (!selectedReference) missing.push('Reference instrument');
+                if (targetInstruments.length === 0) missing.push('Target instruments');
+                
+                showAlert(`Missing: ${missing.join(', ')}`, 'warning');
+            }
+        }
+        
+        function previewFeatures() {
+            showAlert('Feature preview not implemented yet', 'info');
+        }
+        
+        function refreshModels() {
+            loadTrainedModels();
+        }
+        
+        function useModel(modelId) {
+            showAlert(`Selected model: ${modelId}`, 'success');
+            // This would typically mark the model as active
+        }
+        
+        function proceedToAnalysis() {
+            window.location.href = '/step4/analysis';
+        }
+        
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insert at top of container
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
