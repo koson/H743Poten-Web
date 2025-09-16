@@ -299,8 +299,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Data collection
+// Data collection with improved timeout handling
 function startDataCollection() {
+    let consecutiveFailures = 0;
+    const maxConsecutiveFailures = 50; // Allow 5 seconds of no data before timeout (50 * 100ms)
+    let dataReceived = false; // Track if we've received any data
+    
     const dataCollector = setInterval(async () => {
         if (!isMeasuring) {
             clearInterval(dataCollector);
@@ -309,16 +313,43 @@ function startDataCollection() {
         
         try {
             const response = await fetch('/api/measurement/data');
+            
+            // Check if response is OK
+            if (!response.ok) {
+                consecutiveFailures++;
+                console.warn(`Data fetch failed: ${response.status} ${response.statusText} (${consecutiveFailures}/${maxConsecutiveFailures})`);
+                
+                // Only timeout if we haven't received any data AND we've had many failures
+                if (!dataReceived && consecutiveFailures >= maxConsecutiveFailures) {
+                    console.error('Measurement timeout: No data received from STM32');
+                    clearInterval(dataCollector);
+                    isMeasuring = false;
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    alert('Measurement timeout: No data received from STM32. Please check connection and try again.');
+                }
+                return;
+            }
+            
             const data = await response.json();
             
+            // Reset failure counter on successful response
+            consecutiveFailures = 0;
+            
+            // Check if measurement is completed
             if (data.completed) {
+                console.log('Measurement completed by device');
                 clearInterval(dataCollector);
                 isMeasuring = false;
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
+                return;
             }
             
-            if (data.points) {
+            // Process data if available
+            if (data.points && data.points.time && data.points.time.length > 0) {
+                dataReceived = true; // Mark that we've received data
+                
                 // Append new data points
                 dataPoints.time.push(...data.points.time);
                 dataPoints.potential.push(...data.points.potential);
@@ -327,10 +358,26 @@ function startDataCollection() {
                 // Update plot and table
                 updatePlot(dataPoints);
                 updateDataTable(dataPoints);
+                
+                console.log(`Received ${data.points.time.length} new data points (total: ${dataPoints.time.length})`);
+            } else {
+                // No data in this poll, but don't immediately fail
+                console.log('No new data points in this poll (waiting for STM32...)');
             }
+            
         } catch (error) {
-            console.error('Data collection error:', error);
-            clearInterval(dataCollector);
+            consecutiveFailures++;
+            console.error(`Data collection error (${consecutiveFailures}/${maxConsecutiveFailures}):`, error);
+            
+            // Only timeout after many consecutive failures AND no data received
+            if (!dataReceived && consecutiveFailures >= maxConsecutiveFailures) {
+                console.error('Measurement timeout: Network/communication error');
+                clearInterval(dataCollector);
+                isMeasuring = false;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                alert('Measurement timeout: Communication error. Please check connection and try again.');
+            }
         }
     }, 100); // Poll every 100ms
 }

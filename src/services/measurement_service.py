@@ -95,25 +95,53 @@ class MeasurementService:
         }
 
     def get_measurement_data(self):
-        """Get current measurement data"""
+        """Get current measurement data with improved STM32 handling"""
         try:
             if not self.current_mode:
-                return {'points': []}
+                logger.debug("No measurement mode set, returning empty data")
+                return {'points': [], 'completed': False}
 
+            # First check if there's buffered data from STM32
+            buffered_data = self.scpi_handler.get_buffered_data()
+            if buffered_data:
+                logger.info(f"Found buffered data from STM32: {len(buffered_data)} characters")
+                # Parse buffered data if available
+                parsed_data = self._parse_measurement_data(buffered_data)
+                if parsed_data['points']:
+                    logger.info(f"Parsed {len(parsed_data['points'])} points from buffered data")
+                    return parsed_data
+            
+            # If no buffered data, try regular query
             command = f"POTEn:{self.current_mode}:DATA?"
             result = self.scpi_handler.send_custom_command(command)
 
             if not result['success']:
-                raise Exception(f"Failed to get measurement data: {result['error']}")
+                logger.debug(f"Data query failed: {result['error']}")
+                # Don't treat this as an error - STM32 might still be collecting data
+                return {'points': [], 'completed': False, 'status': 'collecting'}
 
             # Parse the data response
-            # Implement parsing logic based on your data format
             data = self._parse_measurement_data(result['response'])
+            
+            # Check if measurement is completed
+            if not data['points'] and self.is_measuring:
+                # Try to check measurement status
+                status_command = f"POTEn:{self.current_mode}:STATUS?"
+                status_result = self.scpi_handler.send_custom_command(status_command)
+                if status_result['success'] and 'COMPLETE' in status_result['response'].upper():
+                    logger.info(f"Measurement {self.current_mode} completed")
+                    self.is_measuring = False
+                    # Create new dict to avoid type issues
+                    completed_data = dict(data)
+                    completed_data['completed'] = True
+                    return completed_data
+            
             return data
 
         except Exception as e:
             logger.error(f"Error in get_measurement_data: {e}")
-            return {'points': []}
+            # Return empty data instead of failing completely
+            return {'points': [], 'completed': False, 'error': str(e)}
 
     def _build_setup_command(self, mode, params):
         """Build SCPI command for measurement setup"""
@@ -146,26 +174,50 @@ class MeasurementService:
             raise ValueError(f"Invalid measurement mode: {mode}")
 
     def _parse_measurement_data(self, response):
-        """Parse measurement data from SCPI response"""
+        """Parse measurement data from SCPI response with improved STM32 handling"""
         try:
-            if not response:
-                return {'points': []}
+            if not response or not response.strip():
+                return {'points': [], 'completed': False}
 
             # Basic CSV parsing (adjust based on your data format)
             points = []
             lines = response.strip().split('\n')
+            completed = False
+            
             for line in lines:
+                line = line.strip()
+                if not line or line.startswith('#'):  # Skip empty lines and comments
+                    continue
+                    
+                # Check for completion indicators
+                if 'COMPLETE' in line.upper() or 'END' in line.upper():
+                    completed = True
+                    continue
+                    
                 values = line.split(',')
                 if len(values) >= 2:
-                    points.append({
-                        'timestamp': float(values[0]),
-                        'voltage': float(values[1]),
-                        'current': float(values[2]) if len(values) > 2 else 0,
-                        'mode': self.current_mode
-                    })
+                    try:
+                        point = {
+                            'timestamp': float(values[0]) if len(values) > 0 else 0,
+                            'voltage': float(values[1]) if len(values) > 1 else 0,
+                            'current': float(values[2]) if len(values) > 2 else 0,
+                            'mode': self.current_mode or 'UNKNOWN'
+                        }
+                        points.append(point)
+                    except (ValueError, IndexError) as e:
+                        logger.warning(f"Failed to parse data line '{line}': {e}")
+                        continue
 
-            return {'points': points}
+            result = {
+                'points': points,
+                'completed': completed
+            }
+                
+            if points:
+                logger.debug(f"Parsed {len(points)} data points from STM32")
+            
+            return result
 
         except Exception as e:
             logger.error(f"Error parsing measurement data: {e}")
-            return {'points': []}
+            return {'points': [], 'completed': False, 'error': str(e)}
