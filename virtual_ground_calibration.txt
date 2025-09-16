@@ -1,0 +1,8 @@
+Virtual Ground Calibration Result
+Date: 2025-09-14 01:30:58
+Target: 1.25V
+DAC Value: 2052
+Hex: 0x804
+Measured Voltage: 1.249164V
+Error: -0.836mV
+Transfer Function: V = 0.000609 * DAC + -0.000200
