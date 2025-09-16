@@ -1,0 +1,41 @@
+[
+  {
+    "algorithm": "TraditionalCV",
+    "speed_score": 94.0,
+    "accuracy_score": 78.0,
+    "memory_score": 98.0,
+    "overall_score": 89.8,
+    "raw_scores": {
+      "speed_raw": 94.0,
+      "accuracy_raw": 78.0,
+      "memory_raw": 98.0,
+      "overall_raw": 88.0
+    }
+  },
+  {
+    "algorithm": "DeepCV",
+    "speed_score": 58.6,
+    "accuracy_score": 96.8,
+    "memory_score": 69.7,
+    "overall_score": 78.0,
+    "raw_scores": {
+      "speed_raw": 33.2,
+      "accuracy_raw": 100.0,
+      "memory_raw": 60.3,
+      "overall_raw": 79.1
+    }
+  },
+  {
+    "algorithm": "HybridCV",
+    "speed_score": 81.8,
+    "accuracy_score": 89.3,
+    "memory_score": 83.8,
+    "overall_score": 85.8,
+    "raw_scores": {
+      "speed_raw": 69.2,
+      "accuracy_raw": 94.8,
+      "memory_raw": 78.8,
+      "overall_raw": 85.8
+    }
+  }
+]

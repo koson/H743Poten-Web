@@ -1,0 +1,4 @@
+Algorithm,Speed_Score,Accuracy_Score,Memory_Score,Overall_Score
+TraditionalCV,94.0,78.0,98.0,88.0
+DeepCV,33.2,100.0,60.3,71.4
+HybridCV,69.2,94.8,78.8,83.6

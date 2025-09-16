@@ -1,0 +1,4 @@
+Algorithm,Speed_Base,Complexity_Factor,Complexity_Penalty,ML_Overhead,ML_Overhead_Penalty,Data_Points,Data_Processing_Penalty,Raw_Speed,Final_Speed,Accuracy_Base,Feature_Richness,Feature_Richness_Penalty,Noise_Handling,Noise_Handling_Penalty,ML_Enhancement,ML_Enhancement_Bonus,Raw_Accuracy,Final_Accuracy,Memory_Base,Memory_Efficiency,Memory_Efficiency_Penalty,Feature_Storage_Offset,Feature_Storage_Penalty,Buffer_Overhead,Buffer_Overhead_Penalty,Raw_Memory,Final_Memory,Overall_Score
+TraditionalCV,100.0,1.0,0.0,0.0,0.0,1000,6.0,94.0,94.0,100.0,0.2,16.0,0.6,6.0,0.0,0.0,78.0,78.0,100.0,0.98,2.0,0.2,0.0,0.0,0.0,98.0,98.0,88.0
+DeepCV,100.0,4.0,45.0,0.35,15.7,1000,6.0,33.2,33.2,100.0,1.0,0.0,0.95,0.8,0.35,8.8,108.0,100.0,100.0,0.72,28.0,0.2,6.4,0.35,5.2,60.3,60.3,71.4
+HybridCV,100.0,2.2,18.0,0.15,6.8,1000,6.0,69.2,69.2,100.0,0.7,6.0,0.8,3.0,0.15,3.8,94.8,94.8,100.0,0.85,15.0,0.2,4.0,0.15,2.2,78.8,78.8,83.6
