@@ -49,6 +49,30 @@
         .nav-pills .nav-link.active {
             background-color: #007bff;
         }
+        
+        /* User menu styles */
+        .user-menu {
+            min-width: 250px;
+        }
+        
+        .user-info {
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #dee2e6;
+            background: #f8f9fa;
+        }
+        
+        .user-role-badge {
+            font-size: 0.7rem;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+        }
+        
+        .feature-disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
         .status-connected { color: #28a745; }
         .status-disconnected { color: #dc3545; }
         .main-content {
@@ -103,6 +127,44 @@
                             <i class="fas fa-circle status-disconnected"></i> Disconnected
                         </span>
                     </li>
+                    <!-- User Menu -->
+                    <li class="nav-item dropdown" id="userMenuContainer" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> <span id="currentUsername">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end user-menu">
+                            <li class="user-info">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><strong id="userFullName">Full Name</strong></span>
+                                    <div id="userRoleBadges"></div>
+                                </div>
+                                <small class="text-muted" id="userEmail">email@example.com</small>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li data-feature="user_management">
+                                <a class="dropdown-item" href="/admin/users-page">
+                                    <i class="fas fa-users"></i> User Management
+                                </a>
+                            </li>
+                            <li data-feature="system_settings">
+                                <a class="dropdown-item" href="/admin/features-page">
+                                    <i class="fas fa-toggle-on"></i> Feature Management
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="#" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Login Button -->
+                    <li class="nav-item" id="loginBtnContainer">
+                        <a class="nav-link" href="/auth/login-page">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -116,6 +178,9 @@
     
     <!-- Global connection state -->
     <script src="{{ url_for('static', filename='js/connection_state.js') }}"></script>
+    
+    <!-- Auth and Feature Management -->
+    <script src="{{ url_for('static', filename='js/auth_manager.js') }}"></script>
     
     <!-- Dynamic Navigation Script -->
     <script>

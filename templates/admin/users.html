@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - H743Poten System{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>User Management
+                    </h5>
+                    <button class="btn btn-primary btn-sm" id="addUserBtn">
+                        <i class="fas fa-plus me-1"></i>Add User
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Groups</th>
+                                    <th>Status</th>
+                                    <th>Last Login</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Users will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addUserForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="newUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="newEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newFullName" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="newFullName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newGroups" class="form-label">Groups</label>
+                        <div id="newGroups">
+                            <!-- Group checkboxes will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Groups Modal -->
+<div class="modal fade" id="editGroupsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit User Groups</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editGroupsForm">
+                <div class="modal-body">
+                    <p>User: <strong id="editUsername"></strong></p>
+                    <div class="mb-3">
+                        <label class="form-label">Groups</label>
+                        <div id="editGroups">
+                            <!-- Group checkboxes will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Groups</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allUsers = {};
+let allGroups = {};
+let currentEditUser = null;
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    loadUsers();
+    
+    // Setup event listeners
+    document.getElementById('addUserBtn').addEventListener('click', showAddUserModal);
+    document.getElementById('addUserForm').addEventListener('submit', handleAddUser);
+    document.getElementById('editGroupsForm').addEventListener('submit', handleEditGroups);
+});
+
+// Load users and groups
+async function loadUsers() {
+    try {
+        const response = await fetch('/admin/users');
+        const data = await response.json();
+        
+        if (data.success) {
+            allUsers = data.users;
+            allGroups = data.groups;
+            renderUsersTable();
+        } else {
+            showAlert('Failed to load users: ' + data.error, 'danger');
+        }
+    } catch (error) {
+        console.error('Error loading users:', error);
+        showAlert('Error loading users', 'danger');
+    }
+}
+
+// Render users table
+function renderUsersTable() {
+    const tbody = document.querySelector('#usersTable tbody');
+    tbody.innerHTML = '';
+    
+    Object.values(allUsers).forEach(user => {
+        const row = document.createElement('tr');
+        
+        const groupBadges = user.groups.map(group => {
+            const groupInfo = allGroups[group];
+            const badgeClass = getBadgeClass(group);
+            return `<span class="badge ${badgeClass} me-1">${groupInfo ? groupInfo.name : group}</span>`;
+        }).join('');
+        
+        const statusBadge = user.active 
+            ? '<span class="badge bg-success">Active</span>'
+            : '<span class="badge bg-secondary">Inactive</span>';
+        
+        const lastLogin = user.last_login 
+            ? new Date(user.last_login).toLocaleString()
+            : 'Never';
+        
+        row.innerHTML = `
+            <td><strong>${user.username}</strong></td>
+            <td>${user.full_name}</td>
+            <td>${user.email}</td>
+            <td>${groupBadges}</td>
+            <td>${statusBadge}</td>
+            <td><small>${lastLogin}</small></td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="editUserGroups('${user.username}')">
+                    <i class="fas fa-edit"></i> Edit Groups
+                </button>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// Get badge class for group
+function getBadgeClass(groupName) {
+    const classMap = {
+        'administrators': 'bg-danger',
+        'operators': 'bg-primary',
+        'researchers': 'bg-info',
+        'viewers': 'bg-secondary'
+    };
+    return classMap[groupName] || 'bg-warning';
+}
+
+// Show add user modal
+function showAddUserModal() {
+    renderGroupCheckboxes('newGroups', []);
+    document.getElementById('addUserForm').reset();
+    new bootstrap.Modal(document.getElementById('addUserModal')).show();
+}
+
+// Handle add user
+async function handleAddUser(e) {
+    e.preventDefault();
+    
+    const formData = {
+        username: document.getElementById('newUsername').value.trim(),
+        password: document.getElementById('newPassword').value,
+        email: document.getElementById('newEmail').value.trim(),
+        full_name: document.getElementById('newFullName').value.trim(),
+        groups: getSelectedGroups('newGroups')
+    };
+    
+    try {
+        const response = await fetch('/admin/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showAlert('User created successfully', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+            loadUsers(); // Reload users
+        } else {
+            showAlert('Failed to create user: ' + data.error, 'danger');
+        }
+    } catch (error) {
+        console.error('Error creating user:', error);
+        showAlert('Error creating user', 'danger');
+    }
+}
+
+// Edit user groups
+function editUserGroups(username) {
+    currentEditUser = username;
+    const user = allUsers[username];
+    
+    document.getElementById('editUsername').textContent = username;
+    renderGroupCheckboxes('editGroups', user.groups);
+    
+    new bootstrap.Modal(document.getElementById('editGroupsModal')).show();
+}
+
+// Handle edit groups
+async function handleEditGroups(e) {
+    e.preventDefault();
+    
+    if (!currentEditUser) return;
+    
+    const selectedGroups = getSelectedGroups('editGroups');
+    
+    try {
+        const response = await fetch(`/admin/users/${currentEditUser}/groups`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                groups: selectedGroups
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showAlert('User groups updated successfully', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('editGroupsModal')).hide();
+            loadUsers(); // Reload users
+        } else {
+            showAlert('Failed to update user groups: ' + data.error, 'danger');
+        }
+    } catch (error) {
+        console.error('Error updating user groups:', error);
+        showAlert('Error updating user groups', 'danger');
+    }
+}
+
+// Render group checkboxes
+function renderGroupCheckboxes(containerId, selectedGroups) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    
+    Object.entries(allGroups).forEach(([groupId, groupInfo]) => {
+        const isChecked = selectedGroups.includes(groupId);
+        const badgeClass = getBadgeClass(groupId);
+        
+        const checkboxDiv = document.createElement('div');
+        checkboxDiv.className = 'form-check';
+        checkboxDiv.innerHTML = `
+            <input class="form-check-input" type="checkbox" value="${groupId}" 
+                   id="${containerId}_${groupId}" ${isChecked ? 'checked' : ''}>
+            <label class="form-check-label d-flex align-items-center" for="${containerId}_${groupId}">
+                <span class="badge ${badgeClass} me-2">${groupInfo.name}</span>
+                <small class="text-muted">${groupInfo.description}</small>
+            </label>
+        `;
+        
+        container.appendChild(checkboxDiv);
+    });
+}
+
+// Get selected groups from checkboxes
+function getSelectedGroups(containerId) {
+    const container = document.getElementById(containerId);
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+// Show alert
+function showAlert(message, type = 'info') {
+    // Remove existing alerts
+    const existingAlerts = document.querySelectorAll('.alert');
+    existingAlerts.forEach(alert => alert.remove());
+    
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Insert at top of page
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alert, container.firstChild);
+    
+    // Auto dismiss after 5 seconds
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

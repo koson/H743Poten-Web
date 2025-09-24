@@ -1,5 +1,12 @@
 """
-Flask application routes for H743Poten Web Interface
+Flask application routes for H74    from routes.production_calibration_api import calibration_bp as production_calibration_bp
+    from routes.auth_routes import auth_bp, admin_bp
+    from services.user_service import user_service
+    from services.feature_service import FeatureService
+    from middleware.auth import AuthMiddleware
+except ImportError:
+    # Fall back to absolute imports (when run directly)
+    from config.settings import Configen Web Interface
 """
 
 from flask import Flask, render_template, request, jsonify, send_file, send_from_directory
@@ -54,6 +61,10 @@ except ImportError:
     from routes.parameter_api import parameter_bp, parameter_api_bp
     from routes.calibration_api import calibration_api_bp
     from routes.production_calibration_api import calibration_bp as production_calibration_bp
+    from routes.auth_routes import auth_bp, admin_bp
+    from services.user_service import user_service
+    from services.feature_service import FeatureService
+    from middleware.auth import AuthMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +124,33 @@ def create_app():
     app.config['cv_service'] = cv_service
     app.config['data_logging_service'] = data_logging_service
     
+    # Initialize user and feature services if available
+    try:
+        from services.user_service import user_service
+        from services.feature_service import FeatureService
+        from middleware.auth import AuthMiddleware
+        
+        app.config['user_service'] = user_service
+        feature_service = FeatureService(project_root / 'config', user_service)
+        app.config['feature_service'] = feature_service
+        
+        # Initialize auth middleware
+        auth_middleware = AuthMiddleware(app)
+    except Exception as e:
+        logger.warning(f"Auth services not available: {e}")
+        # Create dummy services for fallback
+        app.config['user_service'] = None
+        app.config['feature_service'] = None
+    
     # Register blueprints
+    # Register auth blueprints if available
+    try:
+        from routes.auth_routes import auth_bp, admin_bp
+        app.register_blueprint(auth_bp)  # Authentication routes
+        app.register_blueprint(admin_bp)  # Admin routes
+    except Exception as e:
+        logger.warning(f"Auth blueprints not available: {e}")
+    
     app.register_blueprint(ai_bp)
     app.register_blueprint(port_bp)
     app.register_blueprint(cv_bp)
