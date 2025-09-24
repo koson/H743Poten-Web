@@ -58,7 +58,7 @@ class CVDataPoint:
     """Single CV data point"""
     timestamp: float
     potential: float    # Applied potential (V)
-    current: float      # Measured current (A)
+    current: float      # Measured current (µA)
     cycle: int          # Current cycle number
     direction: str      # Scan direction: 'forward' or 'reverse'
 
@@ -445,7 +445,7 @@ class CVMeasurementService:
                             time_ms = float(parts[1].strip())           # STM32 timestamp (ms)
                             potential = float(parts[2].strip())         # Potential (V)
                             current_ua = float(parts[3].strip())        # Current from H743 (µA)
-                            current = current_ua / 1_000_000            # Convert µA to A
+                            current = current_ua                        # Keep in µA (no conversion)
                             current_gain = float(parts[4].strip())      # Current gain
                             cycle = int(parts[5].strip())               # Cycle number
                             adc0_raw = int(parts[6].strip())            # ADC0 raw
@@ -470,7 +470,7 @@ class CVMeasurementService:
                             time_ms = float(parts[1].strip())           # STM32 timestamp
                             potential = float(parts[2].strip())         # Potential (V)
                             current_ua = float(parts[3].strip())        # Current from H743 (µA)
-                            current = current_ua / 1_000_000            # Convert µA to A
+                            current = current_ua                        # Keep in µA (no conversion)
                             cycle = int(parts[4].strip())               # Cycle number
                             direction_code = int(parts[5].strip())      # Direction (1=forward, 0=reverse)
                             direction = 'forward' if direction_code == 1 else 'reverse'
@@ -478,7 +478,11 @@ class CVMeasurementService:
                             logger.warning(f"Invalid CV data format: {line}")
                             continue
                         
-                        logger.info(f"STM32 Data: V={potential:.3f}V, I_raw={current_ua:.1f}µA, I_converted={current:.6f}A, Cycle={cycle}, Dir={direction}, Time={time_ms}ms")
+                        # Enhanced hardware debug logging
+                        if len(parts) >= 10:  # Desktop format with hardware info
+                            logger.info(f"STM32 Data: V={potential:.3f}V, I={current:.1f}µA, Gain={current_gain}, ADC0={adc0_raw}, DAC1={dac1_raw}, Cycle={cycle}, Dir={direction}, Time={time_ms}ms")
+                        else:
+                            logger.info(f"STM32 Data: V={potential:.3f}V, I={current:.1f}µA, Cycle={cycle}, Dir={direction}, Time={time_ms}ms")
                         
                         # Data validation and filtering - CONDITIONAL
                         should_filter = False
@@ -496,13 +500,13 @@ class CVMeasurementService:
                             
                             if hasattr(self, 'last_validated_current') and self.last_validated_current is not None:
                                 current_jump = abs(current - self.last_validated_current)
-                                # Only filter EXTREME current spikes - adjusted for µA scale
-                                if current_jump > 0.001:  # 1mA threshold (more reasonable for µA data)
-                                    logger.warning(f"Filtered EXTREME current spike: {current_jump:.6f}A ({current_jump*1000000:.1f}µA)")
+                                # Only filter EXTREME current spikes - thresholds in µA scale
+                                if current_jump > 1000:  # 1000µA = 1mA threshold
+                                    logger.warning(f"Filtered EXTREME current spike: {current_jump:.1f}µA")
                                     should_filter = True
-                                elif current_jump > 0.0001:  # 0.1mA = 100µA
+                                elif current_jump > 100:  # 100µA threshold
                                     # Log but don't filter moderate spikes
-                                    logger.debug(f"Large current spike detected: {current_jump:.6f}A ({current_jump*1000000:.1f}µA) (allowing)")
+                                    logger.debug(f"Large current spike detected: {current_jump:.1f}µA (allowing)")
                         else:
                             # Debug mode - accept ALL data
                             logger.debug(f"🐛 DEBUG MODE: Accepting all data without filtering")
@@ -533,7 +537,7 @@ class CVMeasurementService:
                                 direction=direction
                             )
                             self.data_points.append(data_point)
-                            logger.info(f"✅ ADDED data point #{len(self.data_points)}: V={potential:.3f}V, I={current:.6f}A")
+                            logger.info(f"✅ ADDED data point #{len(self.data_points)}: V={potential:.3f}V, I={current:.1f}µA")
                             
                         data_processed = True
                         

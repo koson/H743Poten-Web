@@ -55,15 +55,45 @@ class MeasurementService:
             if not self.current_mode:
                 raise ValueError("No measurement mode set")
 
-            command = f"POTEn:{self.current_mode}:START"
-            result = self.scpi_handler.send_custom_command(command)
+            # For CV, DPV, SWV: setup_measurement already sent the Start:ALL command
+            if self.current_mode in ['CV', 'DPV', 'SWV']:
+                # The Start:ALL command was already sent in setup, just mark as measuring
+                self.is_measuring = True
+                logger.info(f"Started {self.current_mode} measurement (via Start:ALL command)")
+                return True
+                
+            elif self.current_mode == 'CA':
+                # CA requires multiple setup commands then start
+                params = self.current_params
+                
+                # Send all CA setup commands
+                commands = [
+                    f"POTEn:CA:VOLT:INIT {params.get('initial_voltage', 0.0)}",
+                    f"POTEn:CA:VOLT:STEP {params.get('voltage', 0.5)}",
+                    f"POTEn:CA:TIME:DURation {params.get('duration', 10.0)}",
+                    f"POTEn:CA:TIME:INTerval {params.get('interval', 0.01)}",
+                    "POTEn:CA:STARt"
+                ]
+                
+                for cmd in commands:
+                    result = self.scpi_handler.send_custom_command(cmd)
+                    if not result['success']:
+                        raise Exception(f"Failed to send CA command '{cmd}': {result['error']}")
+                        
+                self.is_measuring = True
+                logger.info(f"Started {self.current_mode} measurement with multiple commands")
+                return True
+            else:
+                # Fallback for other modes
+                command = f"POTEn:{self.current_mode}:START"
+                result = self.scpi_handler.send_custom_command(command)
 
-            if not result['success']:
-                raise Exception(f"Failed to start measurement: {result['error']}")
+                if not result['success']:
+                    raise Exception(f"Failed to start measurement: {result['error']}")
 
-            self.is_measuring = True
-            logger.info(f"Started {self.current_mode} measurement")
-            return True
+                self.is_measuring = True
+                logger.info(f"Started {self.current_mode} measurement")
+                return True
 
         except Exception as e:
             logger.error(f"Error in start_measurement: {e}")
@@ -72,14 +102,24 @@ class MeasurementService:
     def stop_measurement(self):
         """Stop the current measurement"""
         try:
-            command = f"POTEn:{self.current_mode}:STOP"
+            # Use ABORT command that hardware actually supports
+            if self.current_mode == 'CV':
+                command = "POTEn:ABORt"  # CV uses generic abort
+            elif self.current_mode == 'DPV':
+                command = "POTEn:DPV:ABORt"
+            elif self.current_mode == 'SWV':
+                command = "POTEn:SWV:ABORt"
+            else:
+                # Fallback to generic abort
+                command = "POTEn:ABORt"
+                
             result = self.scpi_handler.send_custom_command(command)
 
             if not result['success']:
                 raise Exception(f"Failed to stop measurement: {result['error']}")
 
             self.is_measuring = False
-            logger.info(f"Stopped {self.current_mode} measurement")
+            logger.info(f"Stopped {self.current_mode} measurement using {command}")
             return True
 
         except Exception as e:
@@ -144,32 +184,49 @@ class MeasurementService:
             return {'points': [], 'completed': False, 'error': str(e)}
 
     def _build_setup_command(self, mode, params):
-        """Build SCPI command for measurement setup"""
+        """Build SCPI command for measurement setup based on real hardware SCPI commands"""
         if mode == 'CV':
-            return (f"POTEn:CV:SETUP "
-                   f"{params.get('start_voltage', -0.5)},"
-                   f"{params.get('end_voltage', 0.5)},"
-                   f"{params.get('scan_rate', 0.05)},"
-                   f"{params.get('step_size', 0.01)}")
+            # Use POTEn:CV:Start:ALL command that hardware actually supports
+            # Format: POTEn:CV:Start:ALL {LowerVoltage},{UpperVoltage},{BeginVoltage},{SweepRate},{NumCycles}
+            lower_v = params.get('start_voltage', -0.5)
+            upper_v = params.get('end_voltage', 0.5) 
+            begin_v = lower_v  # Start from lower voltage
+            rate = params.get('scan_rate', 0.05)
+            cycles = params.get('cycles', 1)
+            return f"POTEn:CV:Start:ALL {lower_v},{upper_v},{begin_v},{rate},{cycles}"
+            
         elif mode == 'DPV':
-            return (f"POTEn:DPV:SETUP "
-                   f"{params.get('start_voltage', -0.5)},"
-                   f"{params.get('end_voltage', 0.5)},"
-                   f"{params.get('pulse_amplitude', 0.05)},"
-                   f"{params.get('pulse_width', 0.01)},"
-                   f"{params.get('step_size', 0.01)},"
-                   f"{params.get('period', 0.1)}")
+            # Use POTEn:DPV:Start:ALL command that hardware actually supports
+            # Format: POTEn:DPV:Start:ALL {InitialPotential},{FinalPotential},{PulseHeight},{PulseIncrement},{PulseWidth},{PulsePeriod}
+            init_v = params.get('start_voltage', -0.5)
+            final_v = params.get('end_voltage', 0.5)
+            pulse_height = params.get('pulse_amplitude', 0.05)
+            pulse_incr = params.get('step_size', 0.01)
+            pulse_width = params.get('pulse_width', 0.05)
+            pulse_period = params.get('period', 0.1)
+            return f"POTEn:DPV:Start:ALL {init_v},{final_v},{pulse_height},{pulse_incr},{pulse_width},{pulse_period}"
+            
         elif mode == 'SWV':
-            return (f"POTEn:SWV:SETUP "
-                   f"{params.get('start_voltage', -0.5)},"
-                   f"{params.get('end_voltage', 0.5)},"
-                   f"{params.get('amplitude', 0.05)},"
-                   f"{params.get('frequency', 10)},"
-                   f"{params.get('step_size', 0.01)}")
+            # Use POTEn:SWV:Start:ALL command that hardware actually supports  
+            # Format: POTEn:SWV:Start:ALL {Frequency},{Amplitude},{StepPotential},{StartPotential},{EndPotential}
+            freq = params.get('frequency', 100)
+            amplitude = params.get('amplitude', 0.05)
+            step = params.get('step_size', 0.01)
+            start_v = params.get('start_voltage', -0.5)
+            end_v = params.get('end_voltage', 0.5)
+            return f"POTEn:SWV:Start:ALL {freq},{amplitude},{step},{start_v},{end_v}"
+            
         elif mode == 'CA':
-            return (f"POTEn:CA:SETUP "
-                   f"{params.get('voltage', 0.5)},"
-                   f"{params.get('duration', 10)}")
+            # For CA mode, use individual parameter setup commands then start
+            # This requires multiple commands since there's no Start:ALL for CA
+            init_v = params.get('initial_voltage', 0.0)
+            step_v = params.get('voltage', 0.5) 
+            duration = params.get('duration', 10.0)
+            interval = params.get('interval', 0.01)
+            
+            # Return first command, we'll need to handle multiple commands differently
+            return f"POTEn:CA:VOLT:INIT {init_v}"
+            
         else:
             raise ValueError(f"Invalid measurement mode: {mode}")
 

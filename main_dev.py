@@ -35,16 +35,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def create_dev_app():
-    """Create Flask app with mock SCPI handler"""
-    from hardware.mock_scpi_handler import MockSCPIHandler
+    """Create Flask app with REAL SCPI handler"""
+    from hardware.scpi_handler import SCPIHandler  # REAL HARDWARE
     from services.measurement_service import MeasurementService
     from services.data_service import DataService
     
-    # Import the create_app function and modify it for development
+    # Import the create_app function and modify it for production
     app = create_app()
     
-    # Replace the real SCPI handler with mock version
-    app.scpi_handler = MockSCPIHandler()
+    # Use REAL SCPI handler (NOT mock)
+    app.scpi_handler = SCPIHandler()  # REAL STM32 CONNECTION
     app.measurement_service = MeasurementService(app.scpi_handler)
     app.data_service = DataService()
     
@@ -56,8 +56,9 @@ def main():
         # Create and run Flask app with mock handler
         app = create_dev_app()
         
-        logger.info("Starting H743Poten Web Interface (Development Mode)")
-        logger.info("Using mock SCPI handler for testing")
+        logger.info("🚀 Starting H743Poten Web Interface (REAL HARDWARE MODE)")
+        logger.info("🔴 Using REAL SCPI handler - Will connect to STM32H743")
+        logger.info("📡 Full features: CV, SWV, Data logging, Browse - ALL with REAL hardware")
         logger.info(f"Web server: http://localhost:{Config.WEB_PORT}")
         
         app.run(

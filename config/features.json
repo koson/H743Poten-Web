@@ -8,7 +8,7 @@
   "analysis_workflow": {
     "category": "analysis",
     "description": "Advanced data analysis and visualization tools",
-    "enabled": true,
+    "enabled": false,
     "label": "Analysis Workflow"
   },
   "calibration": {
@@ -20,7 +20,7 @@
   "csv_emulation": {
     "category": "development",
     "description": "CSV data emulation for testing",
-    "enabled": true,
+    "enabled": false,
     "label": "CSV Emulation"
   },
   "data_logging": {
@@ -44,7 +44,7 @@
   "peak_detection": {
     "category": "analysis",
     "description": "Automated peak detection and analysis",
-    "enabled": true,
+    "enabled": false,
     "label": "Peak Detection"
   }
 }
