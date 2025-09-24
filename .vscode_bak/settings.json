@@ -59,21 +59,7 @@
     // Python settings - use workspace-relative paths
     "python.defaultInterpreterPath": "./poten-env/bin/python",
     "python.terminal.activateEnvironment": true,
-    
-    // GitHub Copilot settings
-    "github.copilot.enable": {
-        "*": true,
-        "yaml": true,
-        "plaintext": true,
-        "markdown": true,
-        "python": true,
-        "javascript": true,
-        "bash": true,
-        "scminput": false
-    },
-    "github.copilot.advanced": {
-        "debug.overrideChatEngine": "gpt-4"
-    },
+  
     
     // File watcher exclusions
     "files.watcherExclude": {

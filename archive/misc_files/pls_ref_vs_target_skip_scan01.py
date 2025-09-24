@@ -206,9 +206,9 @@ def run_pls_analysis_ref_vs_target():
     # สร้าง detector
     detector = EnhancedDetectorV4Improved(confidence_threshold=25.0)
     
-    # กำหนด directories
-    ref_dir = "Test_data/Palmsens"
-    target_dir = "Test_data/Stm32"
+    # กำหนด directories (แก้ไขเส้นทางให้ถูกต้อง)
+    ref_dir = "../../../H743Poten-Desktop/Test_Data/RefPoten"  # ข้อมูล Palmsens
+    target_dir = "../../../H743Poten-Desktop/Test_Data/H743Poten"  # ข้อมูล STM32
     
     start_time = time.time()
     

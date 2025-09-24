@@ -12,7 +12,7 @@ class Config:
     # Detect OS and set appropriate port
     import platform
     if platform.system() == 'Windows':
-        SERIAL_PORT = 'COM3'  # Default Windows port, adjust if needed
+        SERIAL_PORT = 'COM9'  # STM32H743 port
     else:
         SERIAL_PORT = '/dev/ttyACM0'  # Default for Linux/RPi
     BAUD_RATE = 115200
