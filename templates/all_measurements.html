@@ -6,19 +6,50 @@
     <title>All Measurements - H743Poten</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
     <style>
+        /* Body padding for fixed navbar */
+        body {
+            padding-top: 60px;
+        }
+        
+        /* Navbar fixed */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+        }
+        
+        /* Mode selection section - Full width top bar */
         .measurement-mode-card {
             transition: all 0.3s ease;
             cursor: pointer;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            min-height: 120px;
+            max-width: 200px;
+            margin: 0 auto;
         }
         .measurement-mode-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #007bff;
         }
         .measurement-mode-card.active {
-            border-color: #007bff;
-            box-shadow: 0 0 10px rgba(0,123,255,0.3);
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-color: #0056b3;
+            box-shadow: 0 8px 25px rgba(0,123,255,0.4);
+            transform: translateY(-3px);
+        }
+        .measurement-mode-card .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
         }
         .status-indicator {
             width: 12px;
@@ -100,19 +131,56 @@
         </div>
     </nav>
 
-    <div class="container-fluid mt-3">
-
-        <!-- Measurement Mode Selection -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <h4>Select Measurement Mode</h4>
-                <div class="row" id="measurementModes">
-                    <!-- Modes will be loaded dynamically -->
+    <!-- Measurement Mode Selection - Full Width Top Section -->
+    <div class="container-fluid bg-light border-bottom">
+        <div class="container py-4">
+            <h4 class="mb-3 text-center">
+                <i class="fas fa-flask me-2"></i>Please Select Measurement Mode
+            </h4>
+            <div class="row justify-content-center" id="measurementModes">
+                <!-- Mode Cards -->
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <div class="card measurement-mode-card" data-mode="CV">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-line fa-2x mb-2"></i>
+                            <h6 class="card-title mb-1">CV</h6>
+                            <p class="card-text small mb-0">Cyclic Voltammetry</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <div class="card measurement-mode-card" data-mode="DPV">
+                        <div class="card-body text-center">
+                            <i class="fas fa-signal fa-2x mb-2"></i>
+                            <h6 class="card-title mb-1">DPV</h6>
+                            <p class="card-text small mb-0">Differential Pulse</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <div class="card measurement-mode-card" data-mode="SWV">
+                        <div class="card-body text-center">
+                            <i class="fas fa-square fa-2x mb-2"></i>
+                            <h6 class="card-title mb-1">SWV</h6>
+                            <p class="card-text small mb-0">Square Wave</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                    <div class="card measurement-mode-card" data-mode="CA">
+                        <div class="card-body text-center">
+                            <i class="fas fa-clock fa-2x mb-2"></i>
+                            <h6 class="card-title mb-1">CA</h6>
+                            <p class="card-text small mb-0">Chronoamperometry</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Main Content Area - 3 Column Layout -->
+    <!-- Main Content Area - 3 Column Layout -->
+    <div class="container-fluid mt-3">
         <div class="row" style="height: calc(100vh - 300px); min-height: 600px;">
             <!-- Left Panel: Parameters & Controls -->
             <div class="col-xl-3 col-lg-4 col-md-12 mb-3">
@@ -192,8 +260,13 @@
                         </div>
                         <div class="card-body">
                             <div class="mb-2">
-                                <label class="form-label small">Port</label>
-                                <select class="form-select form-select-sm" id="port-select">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="form-label small mb-0">Port</label>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="portManager.loadPorts()" title="Refresh ports">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </div>
+                                <select class="form-select form-select-sm mt-1" id="port-select">
                                     <option value="">Select port...</option>
                                 </select>
                             </div>
@@ -235,6 +308,9 @@
                                     <i class="fas fa-chart-line"></i> Peak Detection Analysis
                                     <i class="fas fa-external-link-alt ms-1" style="font-size: 0.7em;"></i>
                                 </a>
+                                <button type="button" class="btn btn-outline-success btn-sm" onclick="app.showSavedSessions()">
+                                    <i class="fas fa-history"></i> Saved Sessions
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -270,14 +346,37 @@
                 this.updateInterval = null;
                 this.startTime = null;
                 
+                // 💾 Auto-save configuration
+                this.lastAutoSaveTime = null;
+                this.autoSaveInterval = 30000; // 30 seconds
+                this.sessionId = null;
+                
                 this.init();
             }
 
             async init() {
-                await this.loadAvailableModes();
+                this.setupModeCardListeners(); // Setup static card listeners first
+                // Skip dynamic loading since we have static cards
+                // await this.loadAvailableModes();
                 this.setupEventListeners();
                 this.initializePlot();
                 this.updateStatus();
+            }
+
+            setupModeCardListeners() {
+                // Add click listeners to static mode cards
+                document.querySelectorAll('.measurement-mode-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const mode = card.getAttribute('data-mode');
+                        const modeData = {
+                            mode: mode,
+                            name: card.querySelector('.card-text').textContent,
+                            description: `${mode} measurement mode`,
+                            parameters: this.getParametersForMode(mode)
+                        };
+                        this.selectMode(modeData);
+                    });
+                });
             }
 
             async loadAvailableModes() {
@@ -289,24 +388,47 @@
                         this.renderModeCards(data.modes);
                     } else {
                         console.error('Failed to load measurement modes:', data.error);
+                        this.renderFallbackModes();
                     }
                 } catch (error) {
                     console.error('Error loading modes:', error);
+                    this.renderFallbackModes();
                 }
+            }
+
+            renderFallbackModes() {
+                // Fallback modes if API fails
+                const fallbackModes = [
+                    { mode: 'CV', name: 'Cyclic Voltammetry', description: 'Triangular waveform potential sweep' },
+                    { mode: 'DPV', name: 'Differential Pulse Voltammetry', description: 'Pulsed potential measurement' },
+                    { mode: 'SWV', name: 'Square Wave Voltammetry', description: 'Square wave potential sweep' },
+                    { mode: 'CA', name: 'Chronoamperometry', description: 'Current vs time measurement' }
+                ];
+                console.log('🔧 Using fallback modes');
+                this.renderModeCards(fallbackModes);
             }
 
             renderModeCards(modes) {
                 const container = document.getElementById('measurementModes');
-                container.innerHTML = '';
+                
+                // Don't clear if we already have static cards
+                const existingCards = container.querySelectorAll('.measurement-mode-card');
+                if (existingCards.length > 0) {
+                    console.log('📋 Static mode cards already exist, skipping dynamic rendering');
+                    return; // Keep static cards
+                }
 
+                // Only render dynamic cards if no static cards exist
+                container.innerHTML = '';
                 modes.forEach(mode => {
                     const card = document.createElement('div');
-                    card.className = 'col-md-3 mb-3';
+                    card.className = 'col-lg-3 col-md-6 col-sm-6 mb-3';
                     card.innerHTML = `
                         <div class="card measurement-mode-card" data-mode="${mode.mode}">
                             <div class="card-body text-center">
-                                <h6 class="card-title">${mode.mode}</h6>
-                                <p class="card-text small">${mode.name}</p>
+                                <i class="fas fa-flask fa-2x mb-2"></i>
+                                <h6 class="card-title mb-1">${mode.mode}</h6>
+                                <p class="card-text small mb-0">${mode.name}</p>
                             </div>
                         </div>
                     `;
@@ -426,6 +548,17 @@
                 return defaults[param] || 0;
             }
 
+            getParametersForMode(mode) {
+                // Define parameters for each measurement mode
+                const modeParameters = {
+                    'CV': ['begin_voltage', 'upper_voltage', 'lower_voltage', 'scan_rate', 'cycles'],
+                    'DPV': ['start_potential', 'end_potential', 'pulse_height', 'pulse_increment', 'pulse_width', 'pulse_period'],
+                    'SWV': ['start_potential', 'end_potential', 'frequency', 'amplitude', 'step_potential'],
+                    'CA': ['step_potential', 'duration', 'sampling_interval']
+                };
+                return modeParameters[mode] || [];
+            }
+
             setupEventListeners() {
                 document.getElementById('setupBtn').addEventListener('click', () => this.setupMeasurement());
                 document.getElementById('startBtn').addEventListener('click', () => this.startMeasurement());
@@ -534,6 +667,8 @@
                         this.isRunning = true;
                         this.startTime = Date.now();
                         this.dataPoints = [];
+                        this.sessionId = null; // Reset session for new measurement
+                        this.lastAutoSaveTime = null;
                         this.updateControls();
                         this.startDataCollection();
                         this.showStatus('Measurement started', 'success');
@@ -561,6 +696,9 @@
                         this.stopDataCollection();
                         this.updateControls();
                         this.showStatus('Measurement stopped', 'info');
+                        
+                        // 💾 Auto-save when manually stopped
+                        this.autoSaveData('stopped');
                     } else {
                         this.showStatus('Stop failed: ' + data.error, 'error');
                     }
@@ -597,9 +735,17 @@
                     });
 
                     if (data.success && data.data.points) {
+                        const previousCount = this.dataPoints.length;
                         this.dataPoints = data.data.points;
                         console.log(`📡 fetchMeasurementData: Set ${this.dataPoints.length} data points`);
                         this.updatePlot();
+                        
+                        // 💾 Auto-save every 50 new points or every 30 seconds
+                        if (this.dataPoints.length > 0 && 
+                            (this.dataPoints.length - previousCount >= 50 || 
+                             this.shouldAutoSave())) {
+                            this.autoSaveData('progress');
+                        }
                         
                         if (data.data.completed) {
                             console.log('📡 fetchMeasurementData: Measurement completed, stopping collection');
@@ -607,6 +753,9 @@
                             this.stopDataCollection();
                             this.updateControls();
                             this.showStatus('Measurement completed', 'success');
+                            
+                            // 💾 Auto-save final data
+                            this.autoSaveData('completed');
                         }
                     } else {
                         console.log('📡 fetchMeasurementData: No valid data received');
@@ -759,35 +908,271 @@
                 // Could implement toast notifications here
                 console.log(`${type.toUpperCase()}: ${message}`);
             }
+            
+            // 💾 Auto-save functions
+            shouldAutoSave() {
+                if (!this.lastAutoSaveTime) return true;
+                return (Date.now() - this.lastAutoSaveTime) >= this.autoSaveInterval;
+            }
+            
+            generateSessionId() {
+                const timestamp = new Date().toISOString().replace(/[:.-]/g, '');
+                return `${this.currentMode.mode}_${timestamp}`;
+            }
+            
+            async autoSaveData(status = 'progress') {
+                if (!this.currentMode || !this.dataPoints.length) return;
+                
+                try {
+                    // Generate session ID if not exists
+                    if (!this.sessionId) {
+                        this.sessionId = this.generateSessionId();
+                    }
+                    
+                    const saveData = {
+                        sessionId: this.sessionId,
+                        mode: this.currentMode.mode,
+                        status: status, // 'progress', 'completed', 'stopped'
+                        timestamp: new Date().toISOString(),
+                        dataPoints: this.dataPoints,
+                        parameters: this.currentMode.parameters || {},
+                        pointCount: this.dataPoints.length,
+                        duration: this.startTime ? (Date.now() - this.startTime) / 1000 : 0
+                    };
+                    
+                    // Save to localStorage as backup
+                    localStorage.setItem(`measurement_${this.sessionId}`, JSON.stringify(saveData));
+                    
+                    // Also save latest session reference
+                    localStorage.setItem('latest_measurement', this.sessionId);
+                    
+                    this.lastAutoSaveTime = Date.now();
+                    
+                    const statusText = status === 'completed' ? '✅ Saved (Complete)' : 
+                                     status === 'stopped' ? '⏹️ Saved (Stopped)' : 
+                                     `💾 Auto-saved (${this.dataPoints.length} points)`;
+                    
+                    console.log(`💾 Auto-save: ${statusText}`);
+                    this.showStatus(statusText, 'info');
+                    
+                } catch (error) {
+                    console.error('Auto-save error:', error);
+                    this.showStatus('Auto-save failed', 'error');
+                }
+            }
+            
+            // Load previous session data
+            loadPreviousSession() {
+                try {
+                    const latestId = localStorage.getItem('latest_measurement');
+                    if (!latestId) return null;
+                    
+                    const dataStr = localStorage.getItem(`measurement_${latestId}`);
+                    if (!dataStr) return null;
+                    
+                    return JSON.parse(dataStr);
+                } catch (error) {
+                    console.error('Failed to load previous session:', error);
+                    return null;
+                }
+            }
+            
+            // Get all saved sessions
+            getSavedSessions() {
+                const sessions = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('measurement_')) {
+                        try {
+                            const data = JSON.parse(localStorage.getItem(key));
+                            sessions.push({
+                                id: key.replace('measurement_', ''),
+                                mode: data.mode,
+                                status: data.status,
+                                timestamp: data.timestamp,
+                                pointCount: data.pointCount,
+                                duration: data.duration
+                            });
+                        } catch (e) {
+                            console.warn(`Failed to parse session ${key}`);
+                        }
+                    }
+                }
+                return sessions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            }
 
             async exportData() {
                 if (!this.currentMode || !this.dataPoints.length) return;
 
                 try {
-                    const response = await fetch(`/api/measurement/export/${this.currentMode.mode}`);
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Create and download file
-                        const blob = new Blob([JSON.stringify(data.data, null, 2)], {type: 'application/json'});
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `${this.currentMode.mode}_data_${new Date().toISOString().slice(0,19)}.json`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                    }
+                    // 📊 Export as CSV for easy plotting
+                    const csvUrl = `/api/measurement/export/${this.currentMode.mode}/csv`;
+                    
+                    // Create invisible link to trigger CSV download
+                    const a = document.createElement('a');
+                    a.href = csvUrl;
+                    a.download = `${this.currentMode.mode}_data_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    this.showStatus('CSV file downloaded successfully', 'success');
+                    
                 } catch (error) {
                     this.showStatus('Export error: ' + error.message, 'error');
                 }
             }
+            
+            // Show saved sessions modal
+            showSavedSessions() {
+                const sessions = this.getSavedSessions();
+                
+                let html = `
+                    <div class="modal fade" id="savedSessionsModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-history"></i> Saved Measurement Sessions
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                `;
+                
+                if (sessions.length === 0) {
+                    html += '<p class="text-muted">No saved sessions found.</p>';
+                } else {
+                    html += `
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Mode</th>
+                                        <th>Date/Time</th>
+                                        <th>Status</th>
+                                        <th>Points</th>
+                                        <th>Duration</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    sessions.forEach(session => {
+                        const date = new Date(session.timestamp).toLocaleString();
+                        const duration = `${Math.floor(session.duration)}s`;
+                        const statusBadge = session.status === 'completed' ? 'success' : 
+                                          session.status === 'stopped' ? 'warning' : 'info';
+                        
+                        html += `
+                            <tr>
+                                <td><span class="badge bg-primary">${session.mode}</span></td>
+                                <td>${date}</td>
+                                <td><span class="badge bg-${statusBadge}">${session.status}</span></td>
+                                <td>${session.pointCount}</td>
+                                <td>${duration}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="app.downloadSession('${session.id}')">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="app.deleteSession('${session.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Remove existing modal if any
+                const existing = document.getElementById('savedSessionsModal');
+                if (existing) existing.remove();
+                
+                // Add modal to page
+                document.body.insertAdjacentHTML('beforeend', html);
+                
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('savedSessionsModal'));
+                modal.show();
+            }
+            
+            // Download session as CSV
+            downloadSession(sessionId) {
+                try {
+                    const dataStr = localStorage.getItem(`measurement_${sessionId}`);
+                    if (!dataStr) {
+                        this.showStatus('Session not found', 'error');
+                        return;
+                    }
+                    
+                    const sessionData = JSON.parse(dataStr);
+                    const csvContent = this.convertToCSV(sessionData.dataPoints);
+                    
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${sessionData.mode}_${sessionId}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    this.showStatus('Session downloaded', 'success');
+                } catch (error) {
+                    this.showStatus('Download failed', 'error');
+                }
+            }
+            
+            // Delete session
+            deleteSession(sessionId) {
+                if (confirm('Are you sure you want to delete this session?')) {
+                    localStorage.removeItem(`measurement_${sessionId}`);
+                    this.showSavedSessions(); // Refresh modal
+                    this.showStatus('Session deleted', 'info');
+                }
+            }
+            
+            // Convert data to CSV format
+            convertToCSV(dataPoints) {
+                const headers = ['Timestamp', 'Potential(V)', 'Current(µA)', 'Cycle', 'Direction'];
+                const rows = dataPoints.map(point => [
+                    point.timestamp || '',
+                    point.potential || 0,
+                    point.current || 0,
+                    point.cycle || 1,
+                    point.direction || 'forward'
+                ]);
+                
+                return [headers, ...rows]
+                    .map(row => row.map(field => `"${field}"`).join(','))
+                    .join('\n');
+            }
         }
+
+        // Global app instance for modal callbacks
+        let app;
 
         // Initialize app when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            new UniversalMeasurementApp();
+            app = new UniversalMeasurementApp();
         });
     </script>
 
@@ -795,11 +1180,19 @@
     <script src="/static/js/connection_state.js"></script>
     <script src="/static/js/port_manager.js"></script>
     <script>
+        // Global port manager instance
+        let portManager = null;
+        
         // Initialize connection management when page loads
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Initializing hardware connection...');
-            const portManager = new PortManager();
+            portManager = new PortManager();
             console.log('Port manager initialized');
+            
+            // Initialize the main measurement app
+            console.log('Initializing measurement app...');
+            new UniversalMeasurementApp();
+            console.log('Measurement app initialized');
         });
     </script>
 </body>

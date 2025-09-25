@@ -88,9 +88,11 @@ class CVMeasurementService:
         # Debug mode - accept all data without filtering
         self.debug_mode = True  # Enable debug mode by default to fix filtering issue
         
-        # Timeout handling
+        # Timeout handling - Extended for proper STM32 measurement completion
         self.last_data_time = None
-        self.data_timeout = 10.0  # seconds without data before considering measurement complete
+        self.data_timeout = 60.0  # Extended to 60s to allow full CV scans
+        self.completion_timeout = 300.0  # 5 minutes max for any measurement
+        self.completion_detected = False  # Flag for intelligent completion detection
         
         # Data validation filters (similar to Desktop version)
         self.last_validated_potential = None
@@ -105,14 +107,31 @@ class CVMeasurementService:
     def setup_measurement(self, params: Dict) -> Tuple[bool, str]:
         """Setup CV measurement with parameters"""
         try:
-            # Create CV parameters object
+            # �🚨🚨 URGENT DEBUG: Log received parameters to identify mapping issues
+            print(f"🚨🚨🚨 CV SETUP CALLED WITH PARAMS: {params}")
+            logger.info(f"�🚨🚨 CV SETUP - Received parameters from frontend: {params}")
+            
+            # Extract values with explicit logging
+            begin_val = params.get('begin_voltage', params.get('begin', 0.0))
+            upper_val = params.get('upper_voltage', params.get('upper', 0.5))
+            lower_val = params.get('lower_voltage', params.get('lower', -0.5))
+            rate_val = params.get('scan_rate', params.get('rate', 0.05))
+            cycles_val = params.get('cycles', 1)
+            
+            print(f"🚨 EXTRACTED VALUES: begin={begin_val}, upper={upper_val}, lower={lower_val}, rate={rate_val}, cycles={cycles_val}")
+            
+            # Create CV parameters object with correct parameter name mapping
             cv_params = CVParameters(
-                begin=float(params.get('begin', 0.0)),
-                upper=float(params.get('upper', 0.7)), 
-                lower=float(params.get('lower', -0.4)),
-                rate=float(params.get('rate', 0.1)),
-                cycles=int(params.get('cycles', 1))
+                begin=float(begin_val),
+                upper=float(upper_val), 
+                lower=float(lower_val),
+                rate=float(rate_val),
+                cycles=int(cycles_val)
             )
+            
+            # 🔍 DEBUG: Log parsed parameters
+            print(f"🚨 FINAL CV PARAMS: {cv_params}")
+            logger.info(f"🚨🚨� Final CV parameters: begin={cv_params.begin}, upper={cv_params.upper}, lower={cv_params.lower}, rate={cv_params.rate}, cycles={cv_params.cycles}")
             
             # Validate parameters
             is_valid, message = cv_params.validate()
@@ -131,10 +150,13 @@ class CVMeasurementService:
             return False, f"Setup failed: {e}"
     
     def start_measurement(self) -> Tuple[bool, str]:
-        """Start CV measurement"""
+        """Start CV measurement with enhanced validation and recovery"""
         try:
             if self.current_params is None:
                 return False, "No measurement parameters configured"
+                
+            # 🔍 DEBUG: Show current parameters before starting
+            logger.info(f"🔍 Starting CV with current_params: begin={self.current_params.begin}, upper={self.current_params.upper}, lower={self.current_params.lower}, rate={self.current_params.rate}, cycles={self.current_params.cycles}")
                 
             if self.is_measuring:
                 return False, "Measurement already in progress"
@@ -146,38 +168,197 @@ class CVMeasurementService:
                 self.scan_direction = 'forward'
                 self.current_potential = self.current_params.begin
                 
-            # 🚫 NO SIMULATION MODE - Hardware connection is MANDATORY
+            # 🔍 Enhanced connection validation
             logger.info(f"🔍 Connection check: scpi_handler={self.scpi_handler}, is_connected={getattr(self.scpi_handler, 'is_connected', 'MISSING')}")
             if not self.scpi_handler or not self.scpi_handler.is_connected:
                 logger.error("❌ Hardware not connected - Simulation mode DISABLED for data integrity")
                 return False, "Hardware not connected. Please connect STM32 device and try again."
             
-            # Send SCPI command to start measurement on real device
-            command = self.current_params.to_scpi_command()
-            logger.info(f"📡 Sending SCPI command: {command}")
-            result = self.scpi_handler.send_custom_command(command)
-            
-            if not result['success']:
-                logger.error(f"Failed to start device measurement: {result.get('error')}")
-                return False, f"Device communication failed: {result.get('error', 'Unknown error')}"
+            # 🔍 PRE-FLIGHT CHECKS: Ensure STM32 is ready
+            if not self._check_stm32_ready():
+                logger.error("❌ STM32 not responding to queries")
+                return False, "STM32 device is not responding. Please check connection and try again."
                 
-            # Device accepted command, start measurement worker
+            # 🛑 Ensure STM32 is in idle state
+            if not self._ensure_stm32_idle():
+                logger.warning("⚠️ Could not confirm STM32 idle state, proceeding anyway")
+            
+            # 🚀 ENHANCED STM32 COMMAND PROTOCOL - Multiple attempts with validation
+            command = self.current_params.to_scpi_command()
+            logger.info(f"📡 Sending CV command to STM32: {command}")
+            logger.info(f"🎛️ Expected measurement duration: ~{self._estimate_measurement_time()}s")
+            
+            # Clear any previous buffered data before starting
+            try:
+                if hasattr(self.scpi_handler, 'clear_buffer'):
+                    self.scpi_handler.clear_buffer()
+                elif hasattr(self.scpi_handler, 'get_buffered_data'):
+                    # Consume any old data
+                    old_data = self.scpi_handler.get_buffered_data()
+                    if old_data:
+                        logger.info(f"🧹 Cleared old buffer data: {len(old_data)} bytes")
+            except Exception as e:
+                logger.warning(f"Could not clear buffer: {e}")
+            
+            # 🔄 RETRY LOGIC - Try multiple times to ensure STM32 receives command
+            max_attempts = 3
+            command_success = False
+            
+            for attempt in range(max_attempts):
+                logger.info(f"📡 Attempt #{attempt + 1} sending command: {command}")
+                
+                # Send the command
+                result = self.scpi_handler.send_custom_command(command)
+                
+                if not result.get('success'):
+                    logger.warning(f"❌ Attempt #{attempt + 1} failed: {result.get('error', 'Unknown error')}")
+                    if attempt < max_attempts - 1:
+                        time.sleep(1.0)  # Wait before retry
+                        continue
+                    else:
+                        return False, f"Device communication failed after {max_attempts} attempts: {result.get('error', 'Unknown error')}"
+                
+                # 🔍 VALIDATION: Check if STM32 acknowledges the command
+                logger.info(f"✅ Command sent successfully on attempt #{attempt + 1}")
+                
+                # Give STM32 time to process and start measurement
+                time.sleep(0.5)
+                
+                # Check for immediate response or acknowledgment
+                try:
+                    if hasattr(self.scpi_handler, 'get_buffered_data'):
+                        initial_response = self.scpi_handler.get_buffered_data()
+                        if initial_response:
+                            logger.info(f"📡 STM32 initial response: '{initial_response.strip()}'")
+                            # Check for error responses
+                            if '**ERROR' in initial_response.upper() or 'FAILED' in initial_response.upper():
+                                logger.error(f"STM32 rejected command: {initial_response}")
+                                if attempt < max_attempts - 1:
+                                    continue
+                                else:
+                                    return False, f"STM32 rejected command: {initial_response.strip()}"
+                            elif any(ack in initial_response.upper() for ack in ['OK', 'STARTED', 'CV,', 'ACKNOWLEDGED']):
+                                logger.info(f"✅ STM32 acknowledged command: {initial_response.strip()}")
+                                command_success = True
+                                break
+                except Exception as e:
+                    logger.warning(f"Could not check initial STM32 response: {e}")
+                
+                # 🕐 WAIT FOR STM32 TO START - Give device time to initialize measurement
+                logger.info("⏳ Waiting for STM32 to initialize measurement...")
+                
+                # Wait up to 3 seconds for STM32 to start sending data or acknowledgment
+                start_wait_time = time.time()
+                stm32_started = False
+                
+                while (time.time() - start_wait_time) < 3.0:  # 3 second timeout
+                    time.sleep(0.1)
+                    
+                    # Check for data or acknowledgment
+                    if hasattr(self.scpi_handler, 'has_data_available') and self.scpi_handler.has_data_available():
+                        logger.info("✅ STM32 started sending data")
+                        stm32_started = True
+                        break
+                    
+                    # Check buffer for any response
+                    if hasattr(self.scpi_handler, 'get_buffered_data'):
+                        response = self.scpi_handler.get_buffered_data()
+                        if response and response.strip():
+                            logger.info(f"📡 STM32 responded: '{response.strip()}'")
+                            stm32_started = True
+                            break
+                
+                if stm32_started:
+                    logger.info("✅ STM32 confirmed measurement start")
+                    command_success = True
+                    break
+                else:
+                    logger.warning(f"⚠️ STM32 did not respond within 3s on attempt #{attempt + 1}")
+                    if attempt < max_attempts - 1:
+                        continue
+                    else:
+                        # Last attempt - proceed anyway but warn user
+                        logger.warning("⚠️ Proceeding with measurement despite no initial STM32 response")
+                        command_success = True
+                        break
+            
+            if not command_success:
+                return False, f"Failed to send command to STM32 after {max_attempts} attempts"
+                
+            # 🏁 START MEASUREMENT MONITORING
             self.is_measuring = True
             self.is_paused = False
             self.start_time = time.time()
             self.last_data_time = time.time()  # Initialize last data time
+            
+            # Reset completion detection state
+            self.completion_detected = False
+            if hasattr(self, 'completion_wait_start'):
+                delattr(self, 'completion_wait_start')
+                
+            # Start measurement worker thread
             self.measurement_thread = threading.Thread(
                 target=self._measurement_worker,
                 daemon=True
             )
             self.measurement_thread.start()
             
-            logger.info("CV measurement started on device")
-            return True, "CV measurement started successfully"
+            # 🕐 EARLY DATA VERIFICATION - Check if data starts arriving within reasonable time
+            threading.Timer(10.0, self._verify_measurement_started).start()
+            
+            logger.info("✅ CV measurement started successfully on STM32")
+            return True, "CV measurement started successfully on STM32"
             
         except Exception as e:
             logger.error(f"Failed to start CV measurement: {e}")
+            # Reset state on error
+            self.is_measuring = False
             return False, f"Failed to start measurement: {e}"
+    
+    def _verify_measurement_started(self):
+        """Verify that measurement actually started by checking for early data points"""
+        try:
+            if not self.is_measuring:
+                return  # Measurement already stopped
+                
+            with self.data_lock:
+                data_count = len(self.data_points)
+                
+            if data_count == 0:
+                logger.error(f"⚠️ MEASUREMENT NOT STARTED: No data received after 10 seconds")
+                logger.error("🔍 Possible issues:")
+                logger.error("  1. STM32 not ready when command was sent")
+                logger.error("  2. Serial communication issue")
+                logger.error("  3. STM32 firmware not responding to CV command")
+                logger.error("  4. Hardware connection unstable")
+                
+                # Try to recovery by resending command
+                if self.current_params:
+                    logger.info("🔄 Attempting to restart measurement...")
+                    try:
+                        # Clear any stale state
+                        self._ensure_stm32_idle()
+                        time.sleep(1.0)
+                        
+                        # Resend command
+                        command = self.current_params.to_scpi_command()
+                        logger.info(f"🔄 Resending command: {command}")
+                        result = self.scpi_handler.send_custom_command(command)
+                        
+                        if result.get('success'):
+                            logger.info("✅ Recovery command sent successfully")
+                            self.last_data_time = time.time()  # Reset timeout
+                        else:
+                            logger.error(f"❌ Recovery failed: {result.get('error')}")
+                            
+                    except Exception as recovery_error:
+                        logger.error(f"Recovery attempt failed: {recovery_error}")
+                        
+            else:
+                logger.info(f"✅ Measurement confirmed: {data_count} data points received")
+                
+        except Exception as e:
+            logger.error(f"Error in measurement verification: {e}")
     
     def stop_measurement(self) -> Tuple[bool, str]:
         """Stop CV measurement"""
@@ -262,6 +443,7 @@ class CVMeasurementService:
                 'elapsed_time': time.time() - self.start_time if self.start_time else 0,
                 'time_since_last_data': time_since_last_data,
                 'data_timeout': self.data_timeout,
+                'completion_detected': getattr(self, 'completion_detected', False),
                 'device_connected': getattr(self.scpi_handler, 'is_connected', False),
                 'parameters': {
                     'begin': self.current_params.begin,
@@ -307,34 +489,59 @@ class CVMeasurementService:
             return result
 
     def get_measurement_data(self) -> Dict:
-        """Get measurement data compatible with universal API"""
+        """Get current measurement data for API"""
         with self.data_lock:
-            points = []
+            # 🔍 DEBUG: Log SCPI handler type to identify mock vs real hardware
+            handler_type = type(self.scpi_handler).__name__
+            print(f"🔍 CV Service using: {handler_type}")
+            
+            # Convert internal data to API format
+            data_points = []
             
             for point in self.data_points:
-                points.append({
+                data_points.append({
                     'timestamp': point.timestamp,
                     'potential': point.potential,
                     'current': point.current,
                     'cycle': point.cycle,
-                    'direction': point.direction,
-                    'mode': 'CV'
+                    'direction': point.direction
                 })
             
-            # Check if measurement is completed
-            completed = not self.is_measuring
+            # 🔍 DEBUG: Log data structure and voltage range
+            print(f"🔍 CV get_measurement_data returning {len(data_points)} points")
             
-            # Debug logging
-            if len(points) % 5 == 0 or completed:  # Log every 5 points or when completed
-                logger.info(f"🔍 get_measurement_data: {len(points)} points, is_measuring={self.is_measuring}, completed={completed}")
+            if data_points:
+                voltages = [p['potential'] for p in data_points]
+                currents = [p['current'] for p in data_points]
+                print(f"🔍 Voltage range: {min(voltages):.4f}V to {max(voltages):.4f}V")
+                print(f"🔍 Current range: {min(currents):.2f}µA to {max(currents):.2f}µA")
+                print(f"🔍 First 5 points: {data_points[:5]}")
+                print(f"🔍 Last 5 points: {data_points[-5:]}")
             
+            # Return data structure that frontend expects
             return {
-                'points': points,
-                'completed': completed,
-                'total_points': len(points),
-                'current_cycle': getattr(self, 'current_cycle', 1),
-                'status': 'completed' if completed else 'measuring'
+                'points': data_points,
+                'completed': not self.is_measuring and len(data_points) > 0,
+                'status': {
+                    'is_measuring': self.is_measuring,
+                    'data_points_count': len(data_points),
+                    'current_cycle': self.current_cycle,
+                    'scan_direction': self.scan_direction
+                }
             }
+    
+    def _estimate_measurement_time(self) -> int:
+        """Estimate measurement duration based on parameters"""
+        if not self.current_params:
+            return 60
+            
+        # Calculate voltage range and estimate time
+        voltage_range = abs(self.current_params.upper - self.current_params.lower) * 2  # Forward + reverse
+        scan_rate = self.current_params.rate
+        cycles = self.current_params.cycles
+        
+        estimated_time = (voltage_range / scan_rate) * cycles
+        return int(estimated_time + 30)  # Add buffer time
     
     def enable_streaming(self, callback=None):
         """Enable real-time data streaming"""
@@ -425,22 +632,121 @@ class CVMeasurementService:
         finally:
             logger.info("CV measurement worker stopped")
     
+    def _check_stm32_ready(self) -> bool:
+        """Check if STM32 is ready to accept measurement commands"""
+        try:
+            if not self.scpi_handler or not self.scpi_handler.is_connected:
+                return False
+                
+            # Send a simple query to check if STM32 is responsive
+            logger.info("🔍 Checking STM32 readiness...")
+            
+            # Try a simple identification query
+            result = self.scpi_handler.send_custom_command("*IDN?")
+            
+            if result.get('success'):
+                logger.info(f"✅ STM32 is responsive: {result.get('response', 'OK')}")
+                return True
+            else:
+                logger.warning(f"⚠️ STM32 not responsive: {result.get('error', 'No response')}")
+                
+                # Try alternative ping command
+                time.sleep(0.2)
+                ping_result = self.scpi_handler.send_custom_command("POTEn:PING?")
+                if ping_result.get('success'):
+                    logger.info("✅ STM32 responded to PING")
+                    return True
+                    
+                return False
+                
+        except Exception as e:
+            logger.error(f"Failed to check STM32 readiness: {e}")
+            return False
+    
+    def _ensure_stm32_idle(self) -> bool:
+        """Ensure STM32 is in idle state before starting new measurement"""
+        try:
+            if not self.scpi_handler or not self.scpi_handler.is_connected:
+                return False
+                
+            logger.info("🛑 Ensuring STM32 is idle...")
+            
+            # Send ABORT command multiple times to ensure device is stopped
+            for i in range(3):
+                abort_result = self.scpi_handler.send_custom_command("POTEn:ABORt")
+                logger.info(f"📡 ABORT command #{i+1}: {abort_result}")
+                time.sleep(0.1)
+            
+            # Wait for device to stabilize
+            time.sleep(0.5)
+            
+            # Check status
+            status_result = self.scpi_handler.send_custom_command("POTEn:STATus?")
+            if status_result.get('success'):
+                status = status_result.get('response', '').strip()
+                logger.info(f"🔍 STM32 status after ABORT: '{status}'")
+                
+                # Check if device reports idle/ready state
+                if any(idle_keyword in status.upper() for idle_keyword in ['IDLE', 'READY', 'OK', 'STOPPED']):
+                    logger.info("✅ STM32 confirmed in idle state")
+                    return True
+            
+            # Even if status check failed, assume device is now idle after ABORT commands
+            logger.info("✅ Assumed STM32 is idle after ABORT commands")
+            return True
+            
+        except Exception as e:
+            logger.warning(f"Could not verify STM32 idle state: {e}")
+            return True  # Assume success to not block measurements
+    
     def _read_measurement_data(self) -> bool:
         """Read measurement data from device"""
         try:
-            # Check for data timeout
+            # Check for various timeout conditions
             current_time = time.time()
-            if self.last_data_time and (current_time - self.last_data_time) > self.data_timeout:
-                logger.warning(f"No data received for {self.data_timeout} seconds, stopping measurement")
+            
+            # Check for intelligent completion first
+            if self.completion_detected:
+                # Give STM32 a few seconds to send any final data/signals
+                if not hasattr(self, 'completion_wait_start'):
+                    self.completion_wait_start = current_time
+                    logger.info("🏁 Completion detected, waiting for final STM32 messages...")
                 
-                # Try to send stop command to STM32
+                if (current_time - self.completion_wait_start) > 5.0:  # Wait 5 seconds after completion
+                    logger.info("✅ CV measurement completed successfully")
+                    self.is_measuring = False
+                    return False
+                    
+                return True  # Continue waiting for final messages
+            
+            # Data timeout - no data for extended period
+            data_silence_time = (current_time - self.last_data_time) if self.last_data_time else 0
+            
+            if self.last_data_time and data_silence_time > self.data_timeout:
+                logger.warning(f"⏰ No data received for {data_silence_time:.1f}s - checking STM32 status")
+                
+                # Check one more time for data
+                final_data = getattr(self.scpi_handler, 'get_buffered_data', lambda: None)()
+                if final_data:
+                    logger.info(f"📡 Final STM32 message: '{final_data.strip()}'")
+                    # Reset timeout since we got data
+                    self.last_data_time = current_time
+                    return True
+                
+                logger.warning("🔚 STM32 appears to have stopped sending data - ending measurement")
+                self.is_measuring = False
+                return False
+                
+            # Absolute timeout - prevent infinite measurements  
+            if self.start_time and (current_time - self.start_time) > self.completion_timeout:
+                logger.error(f"🛑 Measurement exceeded {self.completion_timeout}s limit, force stopping")
+                
                 try:
                     if self.scpi_handler and self.scpi_handler.is_connected:
-                        # Use ABORT command like Desktop version
                         stop_result = self.scpi_handler.send_custom_command("POTEn:ABORt")
-                        logger.info(f"Sent ABORT command to STM32: {stop_result}")
+                        logger.info(f"📡 Sent ABORT command: {stop_result}")
                 except Exception as e:
-                    logger.warning(f"Failed to send ABORT command to STM32: {e}")
+                    logger.warning(f"Failed to send ABORT command: {e}")
                 
                 self.is_measuring = False
                 return False
@@ -474,8 +780,68 @@ class CVMeasurementService:
                 if not line:
                     continue
                     
-                logger.debug(f"Processing line: '{line}'")
+                logger.info(f"📡 STM32 → Processing: '{line}'")
                     
+                # Check for measurement completion signals from STM32
+                if any(completion_keyword in line.upper() for completion_keyword in [
+                    'MEASUREMENT COMPLETE', 'CV COMPLETE', 'FINISHED', 'END', 'DONE', 'OK'
+                ]):
+                    logger.info(f"🏁 STM32 signaled measurement completion: '{line}'")
+                    self.is_measuring = False
+                    return False
+                
+                # Detect potential completion by analyzing data patterns
+                if line.startswith('CV,') or line.startswith('CV '):
+                    parts = line.split(',')
+                    if len(parts) >= 10:
+                        try:
+                            point_no = int(parts[8].strip())
+                            cycle = int(parts[5].strip())
+                            voltage = float(parts[2].strip())
+                            
+                            # Debug early data points
+                            if len(self.data_points) <= 5:
+                                logger.info(f"📊 Early data point #{len(self.data_points)}: V={voltage}V, cycle={cycle}, point={point_no}")
+                            
+                            # Only check for completion after sufficient data points
+                            if len(self.data_points) >= 20:  # Need minimum 20 data points
+                                # Check if we're in final cycle 
+                                if cycle >= self.current_params.cycles:
+                                    # Check if voltage is returning to start AND we've had significant movement
+                                    voltage_tolerance = 0.02  # 20mV tolerance
+                                    start_voltage = self.current_params.begin
+                                    
+                                    # Check if we've moved significantly from start in recent data
+                                    recent_points = self.data_points[-10:] if len(self.data_points) >= 10 else []
+                                    has_movement = any(
+                                        abs(dp.potential - start_voltage) > 0.1 
+                                        for dp in recent_points
+                                    )
+                                    
+                                    # Detect completion: close to start + in final cycle + had movement
+                                    if (abs(voltage - start_voltage) < voltage_tolerance and 
+                                        has_movement and point_no > 30):  # Ensure substantial measurement
+                                        logger.info(f"🏁 Detected completion: returned to start voltage {voltage}V in final cycle {cycle} (point {point_no})")
+                                        self.completion_detected = True
+                                
+                        except (ValueError, IndexError) as e:
+                            logger.debug(f"Could not parse completion check: {e}")
+                    
+                # Handle completion messages from STM32 - All modes
+                completion_keywords = [
+                    "CV Operation Finished", "CV SCAN COMPLETE", "CV DONE",
+                    "DPV Operation Finished", "DPV SCAN COMPLETE", "DPV DONE", 
+                    "SWV Operation Finished", "SWV SCAN COMPLETE", "SWV DONE",
+                    "CA Operation Finished", "CA MEASUREMENT COMPLETE", "CA DONE",
+                    "MEASUREMENT COMPLETE", "SCAN COMPLETE", "Operation Finished",
+                    "CV SCAN COMPLETED", "SENDING COMPLETION MESSAGES",
+                    "END_CV_SCAN", "COMPLETION MESSAGES SENT"  # Final STM32 format
+                ]
+                if any(keyword in line.upper() for keyword in completion_keywords):
+                    logger.info(f"🏁 STM32 signaled measurement completion: {line.strip()}")
+                    self.completion_detected = True
+                    continue
+                
                 # Handle SCPI error responses
                 if line.startswith('**ERROR'):
                     logger.warning(f"STM32 SCPI error: {line}")
@@ -484,6 +850,7 @@ class CVMeasurementService:
                 # Parse CV data: Expected format from STM32
                 # Old format: "CV, timestamp, potential, current, cycle, direction, ..."
                 # New format (Desktop compatible): "CV, time_ms, voltage, current, current_gain, cycle, adc0_raw, dac1_raw, point_no, dac0_raw"
+                # Parse CV data: Standard STM32 format
                 if line.startswith('CV,') or line.startswith('CV '):
                     try:
                         parts = line.split(',')

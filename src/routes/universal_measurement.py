@@ -49,6 +49,11 @@ def setup_measurement():
         
         logger.info(f"Setup request for {mode} mode with params: {params}")
         
+        # 🔍 DEBUG: Show detailed parameter inspection
+        logger.info(f"🔍 Raw JSON data received: {data}")
+        logger.info(f"🔍 Extracted parameters: {params}")
+        logger.info(f"🔍 Parameter types: {[(k, type(v).__name__, v) for k, v in params.items()]}")
+        
         # Get appropriate service
         service = get_measurement_service(mode)
         if not service:
@@ -58,7 +63,9 @@ def setup_measurement():
             }), 400
         
         # Setup measurement
+        logger.info(f"🔍 About to call setup_measurement on service: {type(service).__name__}")
         success = service.setup_measurement(params)
+        logger.info(f"🔍 Setup result: {success}")
         
         if success:
             return jsonify({
@@ -247,6 +254,47 @@ def export_measurement_data(mode):
             'success': False,
             'error': str(e)
         }), 500
+
+@universal_measurement.route('/api/measurement/export/<mode>/csv')
+def export_measurement_csv(mode):
+    """Export measurement data as CSV file"""
+    try:
+        mode = mode.upper()
+        
+        # Get appropriate service
+        service = get_measurement_service(mode)
+        if not service:
+            return "No data available", 404
+        
+        # Get measurement data
+        data = service.get_measurement_data()
+        points = data.get('points', [])
+        
+        if not points:
+            return "No data to export", 404
+        
+        # Generate CSV content
+        csv_lines = ['Timestamp,Potential(V),Current(µA),Cycle,Direction']
+        for point in points:
+            csv_lines.append(f"{point['timestamp']:.6f},{point['potential']:.6f},{point['current']:.6f},{point['cycle']},{point['direction']}")
+        
+        csv_content = '\n'.join(csv_lines)
+        
+        # Return CSV file
+        from flask import Response
+        from datetime import datetime
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'{mode}_measurement_{timestamp}.csv'
+        
+        return Response(
+            csv_content,
+            mimetype='text/csv',
+            headers={'Content-Disposition': f'attachment; filename={filename}'}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error in export_measurement_csv: {e}")
+        return f"Export error: {e}", 500
 
 @universal_measurement.route('/api/measurement/modes')
 def get_available_modes():

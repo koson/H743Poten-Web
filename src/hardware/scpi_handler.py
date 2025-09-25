@@ -61,6 +61,7 @@ class SCPIHandler:
                         timeout=1
                     )
                     self.is_connected = True
+                    print(f"🔌 REAL SCPI Handler connected to {self.port} at {self.baud_rate} baud")
                     logger.info(f"Connected to {self.port} at {self.baud_rate} baud")
                     return True
                 except Exception as e:

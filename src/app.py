@@ -23,6 +23,9 @@ try:
     from .services.measurement_service import MeasurementService
     from .services.data_service import DataService
     from .services.cv_measurement_service import CVMeasurementService
+    from .services.dpv_measurement_service import DPVMeasurementService
+    from .services.swv_measurement_service import SWVMeasurementService
+    from .services.ca_measurement_service import CAMeasurementService
     from .services.data_logging_service import DataLoggingService
     from .routes import ai_bp, port_bp
     from .routes.cv_routes import cv_bp
@@ -42,6 +45,9 @@ except ImportError:
     from services.measurement_service import MeasurementService
     from services.data_service import DataService
     from services.cv_measurement_service import CVMeasurementService
+    from services.dpv_measurement_service import DPVMeasurementService
+    from services.swv_measurement_service import SWVMeasurementService
+    from services.ca_measurement_service import CAMeasurementService
     from services.data_logging_service import DataLoggingService
     from routes import ai_bp, port_bp
     from routes.cv_routes import cv_bp
@@ -54,6 +60,7 @@ except ImportError:
     from routes.parameter_api import parameter_bp, parameter_api_bp
     from routes.calibration_api import calibration_api_bp
     from routes.production_calibration_api import calibration_bp as production_calibration_bp
+    from routes.universal_measurement import universal_measurement
     from routes.universal_measurement import universal_measurement
 
 logger = logging.getLogger(__name__)
@@ -102,6 +109,9 @@ def create_app():
     measurement_service = MeasurementService(scpi_handler)
     data_service = DataService()
     cv_service = CVMeasurementService(scpi_handler)
+    dpv_service = DPVMeasurementService(scpi_handler)
+    swv_service = SWVMeasurementService(scpi_handler)
+    ca_service = CAMeasurementService(scpi_handler)
     
     # Initialize data logging service with correct path
     data_logs_path = project_root / "data_logs"
@@ -112,7 +122,20 @@ def create_app():
     app.config['measurement_service'] = measurement_service
     app.config['data_service'] = data_service
     app.config['cv_service'] = cv_service
+    app.config['dpv_service'] = dpv_service
+    app.config['swv_service'] = swv_service
+    app.config['ca_service'] = ca_service
     app.config['data_logging_service'] = data_logging_service
+    
+    # Also store services as app attributes for universal_measurement.py
+    app.cv_service = cv_service
+    app.dpv_service = dpv_service
+    app.swv_service = swv_service
+    app.ca_service = ca_service
+    app.scpi_handler = scpi_handler
+    app.measurement_service = measurement_service
+    app.data_service = data_service
+    app.data_logging_service = data_logging_service
     
     # Register blueprints
     app.register_blueprint(ai_bp)
