@@ -146,51 +146,34 @@ class CVMeasurementService:
                 self.scan_direction = 'forward'
                 self.current_potential = self.current_params.begin
                 
-            # Check if using real device or simulation
-            if self.simulation_mode or not self.scpi_handler.is_connected:
-                logger.info("Starting CV measurement in simulation mode")
-                # Start simulation directly
-                self.is_measuring = True
-                self.is_paused = False
-                self.start_time = time.time()
-                self.measurement_thread = threading.Thread(
-                    target=self._measurement_worker,
-                    daemon=True
-                )
-                self.measurement_thread.start()
-                return True, "CV measurement started (simulation mode)"
-            else:
-                # Send SCPI command to start measurement on real device
-                command = self.current_params.to_scpi_command()
-                result = self.scpi_handler.send_custom_command(command)
+            # 🚫 NO SIMULATION MODE - Hardware connection is MANDATORY
+            logger.info(f"🔍 Connection check: scpi_handler={self.scpi_handler}, is_connected={getattr(self.scpi_handler, 'is_connected', 'MISSING')}")
+            if not self.scpi_handler or not self.scpi_handler.is_connected:
+                logger.error("❌ Hardware not connected - Simulation mode DISABLED for data integrity")
+                return False, "Hardware not connected. Please connect STM32 device and try again."
+            
+            # Send SCPI command to start measurement on real device
+            command = self.current_params.to_scpi_command()
+            logger.info(f"📡 Sending SCPI command: {command}")
+            result = self.scpi_handler.send_custom_command(command)
+            
+            if not result['success']:
+                logger.error(f"Failed to start device measurement: {result.get('error')}")
+                return False, f"Device communication failed: {result.get('error', 'Unknown error')}"
                 
-                if not result['success']:
-                    logger.warning(f"Failed to start device measurement: {result.get('error')}")
-                    logger.info("Falling back to simulation mode")
-                    self.simulation_mode = True
-                    self.is_measuring = True
-                    self.is_paused = False
-                    self.start_time = time.time()
-                    self.measurement_thread = threading.Thread(
-                        target=self._measurement_worker,
-                        daemon=True
-                    )
-                    self.measurement_thread.start()
-                    return True, "CV measurement started (simulation mode - device not responding)"
-                
-                # Device accepted command, start measurement worker
-                self.is_measuring = True
-                self.is_paused = False
-                self.start_time = time.time()
-                self.last_data_time = time.time()  # Initialize last data time
-                self.measurement_thread = threading.Thread(
-                    target=self._measurement_worker,
-                    daemon=True
-                )
-                self.measurement_thread.start()
-                
-                logger.info("CV measurement started on device")
-                return True, "CV measurement started successfully"
+            # Device accepted command, start measurement worker
+            self.is_measuring = True
+            self.is_paused = False
+            self.start_time = time.time()
+            self.last_data_time = time.time()  # Initialize last data time
+            self.measurement_thread = threading.Thread(
+                target=self._measurement_worker,
+                daemon=True
+            )
+            self.measurement_thread.start()
+            
+            logger.info("CV measurement started on device")
+            return True, "CV measurement started successfully"
             
         except Exception as e:
             logger.error(f"Failed to start CV measurement: {e}")
@@ -322,6 +305,36 @@ class CVMeasurementService:
                 print(f"[CV SERVICE] Voltage range: {min(voltages):.4f} to {max(voltages):.4f}")
             
             return result
+
+    def get_measurement_data(self) -> Dict:
+        """Get measurement data compatible with universal API"""
+        with self.data_lock:
+            points = []
+            
+            for point in self.data_points:
+                points.append({
+                    'timestamp': point.timestamp,
+                    'potential': point.potential,
+                    'current': point.current,
+                    'cycle': point.cycle,
+                    'direction': point.direction,
+                    'mode': 'CV'
+                })
+            
+            # Check if measurement is completed
+            completed = not self.is_measuring
+            
+            # Debug logging
+            if len(points) % 5 == 0 or completed:  # Log every 5 points or when completed
+                logger.info(f"🔍 get_measurement_data: {len(points)} points, is_measuring={self.is_measuring}, completed={completed}")
+            
+            return {
+                'points': points,
+                'completed': completed,
+                'total_points': len(points),
+                'current_cycle': getattr(self, 'current_cycle', 1),
+                'status': 'completed' if completed else 'measuring'
+            }
     
     def enable_streaming(self, callback=None):
         """Enable real-time data streaming"""
@@ -332,6 +345,42 @@ class CVMeasurementService:
         """Disable real-time data streaming"""
         self.streaming_enabled = False
         self.stream_callback = None
+
+    def export_data(self) -> Dict:
+        """Export CV measurement data compatible with universal API"""
+        if not self.data_points:
+            return {'success': False, 'message': 'No data to export'}
+        
+        try:
+            from datetime import datetime
+            
+            export_data = {
+                'measurement_type': 'CV',
+                'timestamp': datetime.now().isoformat(),
+                'parameters': {
+                    'begin_voltage': self.current_params.begin if self.current_params else None,
+                    'upper_voltage': self.current_params.upper if self.current_params else None,
+                    'lower_voltage': self.current_params.lower if self.current_params else None,
+                    'scan_rate': self.current_params.rate if self.current_params else None,
+                    'cycles': self.current_params.cycles if self.current_params else None,
+                },
+                'data_points': len(self.data_points),
+                'data': []
+            }
+            
+            for point in self.data_points:
+                export_data['data'].append({
+                    'timestamp': point.timestamp,
+                    'potential_V': point.potential,
+                    'current_A': point.current,
+                    'cycle': point.cycle,
+                    'direction': point.direction
+                })
+            
+            return {'success': True, 'data': export_data}
+            
+        except Exception as e:
+            return {'success': False, 'message': str(e)}
     
     def export_data_csv(self) -> str:
         """Export data as CSV string"""
@@ -396,10 +445,11 @@ class CVMeasurementService:
                 self.is_measuring = False
                 return False
             
-            # Check if we should use simulation mode
-            if self.simulation_mode or not self.scpi_handler.is_connected:
-                logger.debug("Using simulation mode for data reading")
-                return self._simulate_measurement_data()
+            # 🚫 NO SIMULATION MODE - Only real hardware data allowed
+            if not self.scpi_handler or not self.scpi_handler.is_connected:
+                logger.error("❌ Hardware disconnected during measurement")
+                self.is_measuring = False
+                return False
             
             # For STM32 CV measurements, we don't poll for data
             # STM32 sends data automatically after POTEn:CV:Start:ALL command
@@ -569,10 +619,14 @@ class CVMeasurementService:
             current_time = time.time()
             elapsed = current_time - self.start_time
             
-            # Simulate potential progression for proper CV curve
-            # Each cycle: begin -> upper -> lower -> begin
-            cycle_duration = 2 * (abs(self.current_params.upper - self.current_params.begin) + 
-                                abs(self.current_params.lower - self.current_params.begin)) / self.current_params.rate
+            # Slower simulation - make each cycle take at least 10 seconds
+            base_cycle_duration = 10.0  # 10 seconds per cycle minimum
+            # Calculate theoretical duration based on scan rate  
+            theoretical_duration = 2 * (abs(self.current_params.upper - self.current_params.begin) + 
+                                      abs(self.current_params.lower - self.current_params.begin)) / self.current_params.rate
+            
+            # Use the longer of the two durations for better visualization
+            cycle_duration = max(base_cycle_duration, theoretical_duration)
             
             cycle_time = elapsed % cycle_duration
             half_cycle = cycle_duration / 2
@@ -606,8 +660,13 @@ class CVMeasurementService:
             # Update cycle number
             self.current_cycle = int(elapsed / cycle_duration) + 1
             
+            # Debug logging for cycle progress
+            if int(elapsed) % 2 == 0 and elapsed > 0:  # Every 2 seconds
+                logger.info(f"🔄 Simulation progress: elapsed={elapsed:.1f}s, cycle_duration={cycle_duration:.1f}s, current_cycle={self.current_cycle}/{self.current_params.cycles}")
+            
             # Stop if cycles completed
             if self.current_cycle > self.current_params.cycles:
+                logger.info(f"✅ Simulation completed: {self.current_cycle} cycles finished")
                 self.is_measuring = False
                 return False
             
@@ -640,6 +699,10 @@ class CVMeasurementService:
                     direction=self.scan_direction
                 )
                 self.data_points.append(data_point)
+                
+                # Debug logging every 10th point
+                if len(self.data_points) % 10 == 0:
+                    logger.info(f"📊 Simulation: {len(self.data_points)} points, V={self.current_potential:.3f}V, I={simulated_current:.6f}A, Cycle={self.current_cycle}, Dir={self.scan_direction}")
             
             return True
             

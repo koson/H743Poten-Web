@@ -16,13 +16,26 @@ def get_measurement_service(mode):
     mode = mode.upper()
     
     if mode == 'CV':
-        return getattr(current_app, 'cv_service', None)
+        service = getattr(current_app, 'cv_service', None)
+        # Update service to use shared scpi_handler for consistent connection state
+        if service and hasattr(current_app, 'config'):
+            service.scpi_handler = current_app.config.get('scpi_handler')
+        return service
     elif mode == 'DPV':
-        return getattr(current_app, 'dpv_service', None)
+        service = getattr(current_app, 'dpv_service', None)
+        if service and hasattr(current_app, 'config'):
+            service.scpi_handler = current_app.config.get('scpi_handler')
+        return service
     elif mode == 'SWV':
-        return getattr(current_app, 'swv_service', None)
+        service = getattr(current_app, 'swv_service', None)
+        if service and hasattr(current_app, 'config'):
+            service.scpi_handler = current_app.config.get('scpi_handler')
+        return service
     elif mode == 'CA':
-        return getattr(current_app, 'ca_service', None)
+        service = getattr(current_app, 'ca_service', None)
+        if service and hasattr(current_app, 'config'):
+            service.scpi_handler = current_app.config.get('scpi_handler')
+        return service
     else:
         return None
 

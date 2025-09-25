@@ -177,8 +177,8 @@ def create_app():
     
     @app.route('/')
     def index():
-        """Main dashboard"""
-        return render_template('index.html')
+        """Main dashboard - redirect to all measurements"""
+        return render_template('all_measurements.html')
         
     @app.route('/measurements')
     def measurements():

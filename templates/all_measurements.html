@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Measurements - H743Poten</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         .measurement-mode-card {
@@ -35,12 +36,54 @@
             100% { opacity: 1; }
         }
         #plotDiv {
-            height: 500px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            min-height: 400px;
         }
+        
+        /* Responsive layout adjustments for 3-column */
+        @media (max-width: 1200px) {
+            .row[style*="height"] {
+                height: auto !important;
+            }
+            
+            .col-xl-3, .col-xl-6 {
+                margin-bottom: 1rem;
+            }
+            
+            /* Stack vertically on smaller screens */
+            .col-xl-3:last-child {
+                order: 1;
+            }
+            
+            .col-xl-6 {
+                order: 2;
+            }
+            
+            .col-xl-3:first-child {
+                order: 3;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .row[style*="height"] {
+                height: auto !important;
+                min-height: auto !important;
+            }
+        }
+        
+        /* Compact form styling */
         .parameter-input {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .form-label.small {
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        
+        .text-sm {
+            font-size: 0.875em;
         }
     </style>
 </head>
@@ -57,7 +100,8 @@
         </div>
     </nav>
 
-    <div class="container mt-4">
+    <div class="container-fluid mt-3">
+
         <!-- Measurement Mode Selection -->
         <div class="row mb-4">
             <div class="col-12">
@@ -68,57 +112,147 @@
             </div>
         </div>
 
-        <!-- Parameters Panel -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card">
+        <!-- Main Content Area - 3 Column Layout -->
+        <div class="row" style="height: calc(100vh - 300px); min-height: 600px;">
+            <!-- Left Panel: Parameters & Controls -->
+            <div class="col-xl-3 col-lg-4 col-md-12 mb-3">
+                <div class="card h-100 d-flex flex-column">
                     <div class="card-header">
-                        <h5 class="mb-0">Parameters</h5>
+                        <h5 class="mb-0">Parameters & Controls</h5>
                         <small class="text-muted" id="selectedModeDescription">Select a measurement mode</small>
                     </div>
-                    <div class="card-body" id="parametersPanel">
-                        <p class="text-muted">Please select a measurement mode to configure parameters.</p>
-                    </div>
-                </div>
+                    <div class="card-body flex-grow-1 d-flex flex-column">
+                        <!-- Parameters Section -->
+                        <div class="flex-grow-1" style="overflow-y: auto;">
+                            <div id="parametersPanel" class="row g-2">
+                                <div class="col-12">
+                                    <p class="text-muted">Please select a measurement mode to configure parameters.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Status Info (Compact) -->
+                        <div class="mt-3 pt-2 border-top">
+                            <div class="row g-1 text-sm">
+                                <div class="col-4"><strong>Mode:</strong></div>
+                                <div class="col-8"><span id="statusMode">-</span></div>
+                                <div class="col-4"><strong>State:</strong></div>
+                                <div class="col-8"><span id="statusState">Idle</span></div>
+                                <div class="col-4"><strong>Points:</strong></div>
+                                <div class="col-8"><span id="statusDataPoints">0</span></div>
+                            </div>
+                        </div>
 
-                <!-- Controls -->
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h5 class="mb-0">Controls</h5>
-                    </div>
-                    <div class="card-body">
-                        <button id="setupBtn" class="btn btn-primary btn-sm w-100 mb-2" disabled>Setup</button>
-                        <button id="startBtn" class="btn btn-success btn-sm w-100 mb-2" disabled>Start</button>
-                        <button id="stopBtn" class="btn btn-danger btn-sm w-100 mb-2" disabled>Stop</button>
-                        <button id="exportBtn" class="btn btn-info btn-sm w-100" disabled>Export Data</button>
-                    </div>
-                </div>
-
-                <!-- Status Panel -->
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h5 class="mb-0">Status</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="statusPanel">
-                            <p><strong>Mode:</strong> <span id="statusMode">-</span></p>
-                            <p><strong>State:</strong> <span id="statusState">Idle</span></p>
-                            <p><strong>Data Points:</strong> <span id="statusDataPoints">0</span></p>
-                            <p><strong>Progress:</strong> <span id="statusProgress">-</span></p>
+                        <!-- Controls Section -->
+                        <div class="mt-3 pt-2 border-top">
+                            <div class="d-grid gap-2">
+                                <button id="setupBtn" class="btn btn-primary" disabled>
+                                    <i class="fas fa-cog"></i> Setup Measurement
+                                </button>
+                                <button id="startBtn" class="btn btn-success" disabled>
+                                    <i class="fas fa-play"></i> Start Scan
+                                </button>
+                                <div class="btn-group w-100">
+                                    <button id="stopBtn" class="btn btn-danger" disabled>
+                                        <i class="fas fa-stop"></i> Stop
+                                    </button>
+                                    <button id="exportBtn" class="btn btn-info" disabled>
+                                        <i class="fas fa-download"></i> Export
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Plot Panel -->
-            <div class="col-md-8">
-                <div class="card">
+            <!-- Center Panel: Plot -->
+            <div class="col-xl-6 col-lg-5 col-md-8 mb-3">
+                <div class="card h-100">
                     <div class="card-header">
                         <h5 class="mb-0">Real-time Plot</h5>
                         <small class="text-muted" id="plotDescription">Measurement data will appear here</small>
                     </div>
-                    <div class="card-body">
-                        <div id="plotDiv"></div>
+                    <div class="card-body p-2 h-100">
+                        <div id="plotDiv" style="width: 100%; height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Hardware Connection & Tools -->
+            <div class="col-xl-3 col-lg-3 col-md-4 mb-3">
+                <div class="d-flex flex-column h-100 gap-3">
+                    <!-- Hardware Connection Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-plug me-2"></i>Hardware Connection
+                            </h6>
+                            <small class="text-muted">Required for real measurements</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <label class="form-label small">Port</label>
+                                <select class="form-select form-select-sm" id="port-select">
+                                    <option value="">Select port...</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">Baud Rate</label>
+                                <select class="form-select form-select-sm" id="baud-select">
+                                    <option value="9600">9600</option>
+                                    <option value="19200">19200</option>
+                                    <option value="38400">38400</option>
+                                    <option value="57600">57600</option>
+                                    <option value="115200" selected>115200</option>
+                                </select>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button id="connect-btn" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-link"></i> Connect
+                                </button>
+                                <span id="connection-status" class="badge bg-secondary">
+                                    <i class="fas fa-plug"></i> Disconnected
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Tools Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-tools me-2"></i>Additional Tools
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="/data-browser" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-database"></i> Browse Data
+                                    <i class="fas fa-external-link-alt ms-1" style="font-size: 0.7em;"></i>
+                                </a>
+                                <a href="/peak-detection" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-chart-line"></i> Peak Detection Analysis
+                                    <i class="fas fa-external-link-alt ms-1" style="font-size: 0.7em;"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Measurement Info Card -->
+                    <div class="card flex-grow-1">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Measurement Info
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-sm">
+                                <p class="mb-2"><strong>Session:</strong> <span id="sessionInfo">Not started</span></p>
+                                <p class="mb-2"><strong>Duration:</strong> <span id="durationInfo">-</span></p>
+                                <p class="mb-0"><strong>Last Update:</strong> <span id="lastUpdateInfo">-</span></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -134,6 +268,7 @@
                 this.isRunning = false;
                 this.dataPoints = [];
                 this.updateInterval = null;
+                this.startTime = null;
                 
                 this.init();
             }
@@ -207,17 +342,23 @@
             renderParameters(mode) {
                 const panel = document.getElementById('parametersPanel');
                 panel.innerHTML = '';
+                panel.className = 'row g-2';
 
                 const form = document.createElement('form');
                 form.id = 'parametersForm';
+                form.className = 'row g-2';
 
-                mode.parameters.forEach(param => {
+                mode.parameters.forEach((param, index) => {
+                    // Create column div (6 columns = 2-column layout)
+                    const colDiv = document.createElement('div');
+                    colDiv.className = 'col-6';
+                    
                     const div = document.createElement('div');
-                    div.className = 'parameter-input';
+                    div.className = 'mb-2';
                     
                     const label = document.createElement('label');
                     label.textContent = this.getParameterLabel(param);
-                    label.className = 'form-label small';
+                    label.className = 'form-label small mb-1';
                     
                     const input = document.createElement('input');
                     input.type = 'number';
@@ -228,7 +369,8 @@
                     
                     div.appendChild(label);
                     div.appendChild(input);
-                    form.appendChild(div);
+                    colDiv.appendChild(div);
+                    form.appendChild(colDiv);
                 });
 
                 panel.appendChild(form);
@@ -297,6 +439,13 @@
                 const stopBtn = document.getElementById('stopBtn');
                 const exportBtn = document.getElementById('exportBtn');
 
+                console.log('🎛️ updateControls:', {
+                    currentMode: this.currentMode?.mode || 'none',
+                    isConfigured: this.isConfigured,
+                    isRunning: this.isRunning,
+                    connectionState: window.connectionState?.isConnected || false
+                });
+
                 setupBtn.disabled = !this.currentMode;
                 startBtn.disabled = !this.isConfigured || this.isRunning;
                 stopBtn.disabled = !this.isRunning;
@@ -305,6 +454,26 @@
 
             async setupMeasurement() {
                 if (!this.currentMode) return;
+
+                console.log('🔧 setupMeasurement:', {
+                    currentMode: this.currentMode.mode,
+                    connectionState: window.connectionState,
+                    isConnected: window.connectionState?.isConnected
+                });
+
+                // 🚫 NO SIMULATION MODE - Hardware connection is MANDATORY
+                // Check multiple ways to determine connection status
+                const connectionStatus = document.getElementById('connection-status');
+                const isConnectedByUI = connectionStatus && connectionStatus.textContent.includes('Connected');
+                const isConnectedByState = window.connectionState && window.connectionState.isConnected;
+                
+                if (!isConnectedByUI && !isConnectedByState) {
+                    console.log('❌ Hardware not connected - aborting setup');
+                    this.showStatus('⚠️ Hardware not connected! Please connect STM32 device first.', 'error');
+                    return;
+                }
+                
+                console.log('✅ Hardware connection detected, proceeding with setup');
 
                 const formData = new FormData(document.getElementById('parametersForm'));
                 const parameters = {};
@@ -338,6 +507,21 @@
             async startMeasurement() {
                 if (!this.currentMode || !this.isConfigured) return;
 
+                // 🚫 NO SIMULATION MODE - Hardware connection is MANDATORY
+                // Check multiple ways to determine connection status
+                const connectionStatus = document.getElementById('connection-status');
+                const isConnectedByUI = connectionStatus && connectionStatus.textContent.includes('Connected');
+                const isConnectedByState = window.connectionState && window.connectionState.isConnected;
+                
+                if (!isConnectedByUI && !isConnectedByState) {
+                    this.showStatus('❌ Hardware not connected! Please connect STM32 device before measurement.', 'error');
+                    return;
+                }
+                
+                console.log('✅ Hardware connected, starting measurement...');
+
+                console.log('✅ Hardware connected, starting measurement...');
+
                 try {
                     const response = await fetch('/api/measurement/start', {
                         method: 'POST',
@@ -348,6 +532,7 @@
                     const data = await response.json();
                     if (data.success) {
                         this.isRunning = true;
+                        this.startTime = Date.now();
                         this.dataPoints = [];
                         this.updateControls();
                         this.startDataCollection();
@@ -404,16 +589,27 @@
                     const response = await fetch(`/api/measurement/data/${this.currentMode.mode}`);
                     const data = await response.json();
 
+                    console.log(`📡 fetchMeasurementData: Response for ${this.currentMode.mode}:`, {
+                        success: data.success,
+                        points_count: data.data ? data.data.points?.length : 0,
+                        completed: data.data ? data.data.completed : false,
+                        data_sample: data.data?.points?.slice(0, 2)
+                    });
+
                     if (data.success && data.data.points) {
                         this.dataPoints = data.data.points;
+                        console.log(`📡 fetchMeasurementData: Set ${this.dataPoints.length} data points`);
                         this.updatePlot();
                         
                         if (data.data.completed) {
+                            console.log('📡 fetchMeasurementData: Measurement completed, stopping collection');
                             this.isRunning = false;
                             this.stopDataCollection();
                             this.updateControls();
                             this.showStatus('Measurement completed', 'success');
                         }
+                    } else {
+                        console.log('📡 fetchMeasurementData: No valid data received');
                     }
                 } catch (error) {
                     console.error('Error fetching data:', error);
@@ -452,7 +648,12 @@
             }
 
             updatePlot() {
-                if (!this.dataPoints.length) return;
+                if (!this.dataPoints.length) {
+                    console.log('📊 updatePlot: No data points to display');
+                    return;
+                }
+
+                console.log(`📊 updatePlot: Plotting ${this.dataPoints.length} points for ${this.currentMode.mode} mode`);
 
                 let traces = [];
                 
@@ -490,13 +691,24 @@
                     });
                 }
 
-                Plotly.redraw('plotDiv', traces);
+                console.log(`📊 updatePlot: Trace data:`, traces[0] ? {x_length: traces[0].x.length, y_length: traces[0].y.length, x_sample: traces[0].x.slice(0,3), y_sample: traces[0].y.slice(0,3)} : 'no traces');
+                
+                try {
+                    Plotly.react('plotDiv', traces);
+                    console.log('📊 updatePlot: Plotly.react successful');
+                } catch (error) {
+                    console.error('📊 updatePlot: Plotly.react failed:', error);
+                }
             }
 
             updateStatus() {
+                console.log(`📈 updateStatus: ${this.dataPoints.length} points, running=${this.isRunning}, configured=${this.isConfigured}`);
                 document.getElementById('statusMode').textContent = this.currentMode ? this.currentMode.mode : '-';
                 document.getElementById('statusState').textContent = this.isRunning ? 'Measuring' : (this.isConfigured ? 'Ready' : 'Idle');
                 document.getElementById('statusDataPoints').textContent = this.dataPoints.length;
+                
+                // Update measurement info in right panel
+                this.updateMeasurementInfo();
                 
                 // Update status indicator
                 const indicator = document.getElementById('statusIndicator');
@@ -515,6 +727,32 @@
 
                 // Update again after 1 second
                 setTimeout(() => this.updateStatus(), 1000);
+            }
+
+            updateMeasurementInfo() {
+                // Session info
+                const sessionInfo = document.getElementById('sessionInfo');
+                if (sessionInfo) {
+                    sessionInfo.textContent = this.isRunning ? 'Active' : 
+                                             this.isConfigured ? 'Ready' : 'Not started';
+                }
+                
+                // Duration info
+                const durationInfo = document.getElementById('durationInfo');
+                if (durationInfo && this.startTime) {
+                    const duration = Math.floor((Date.now() - this.startTime) / 1000);
+                    const minutes = Math.floor(duration / 60);
+                    const seconds = duration % 60;
+                    durationInfo.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                } else if (durationInfo) {
+                    durationInfo.textContent = '-';
+                }
+                
+                // Last update info
+                const lastUpdateInfo = document.getElementById('lastUpdateInfo');
+                if (lastUpdateInfo) {
+                    lastUpdateInfo.textContent = new Date().toLocaleTimeString();
+                }
             }
 
             showStatus(message, type) {
@@ -550,6 +788,18 @@
         // Initialize app when page loads
         document.addEventListener('DOMContentLoaded', () => {
             new UniversalMeasurementApp();
+        });
+    </script>
+
+    <!-- Include connection management -->
+    <script src="/static/js/connection_state.js"></script>
+    <script src="/static/js/port_manager.js"></script>
+    <script>
+        // Initialize connection management when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Initializing hardware connection...');
+            const portManager = new PortManager();
+            console.log('Port manager initialized');
         });
     </script>
 </body>
