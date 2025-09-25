@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Measurements - H743Poten</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .measurement-mode-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .measurement-mode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .measurement-mode-card.active {
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0,123,255,0.3);
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-idle { background-color: #6c757d; }
+        .status-measuring { background-color: #28a745; animation: pulse 1s infinite; }
+        .status-error { background-color: #dc3545; }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        #plotDiv {
+            height: 500px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+        }
+        .parameter-input {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <span class="navbar-brand">
+                ⚡ H743Poten - All Measurement Modes
+            </span>
+            <div class="d-flex align-items-center">
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="statusText" class="text-white-50">Ready</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Measurement Mode Selection -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4>Select Measurement Mode</h4>
+                <div class="row" id="measurementModes">
+                    <!-- Modes will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Parameters Panel -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Parameters</h5>
+                        <small class="text-muted" id="selectedModeDescription">Select a measurement mode</small>
+                    </div>
+                    <div class="card-body" id="parametersPanel">
+                        <p class="text-muted">Please select a measurement mode to configure parameters.</p>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">Controls</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="setupBtn" class="btn btn-primary btn-sm w-100 mb-2" disabled>Setup</button>
+                        <button id="startBtn" class="btn btn-success btn-sm w-100 mb-2" disabled>Start</button>
+                        <button id="stopBtn" class="btn btn-danger btn-sm w-100 mb-2" disabled>Stop</button>
+                        <button id="exportBtn" class="btn btn-info btn-sm w-100" disabled>Export Data</button>
+                    </div>
+                </div>
+
+                <!-- Status Panel -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="statusPanel">
+                            <p><strong>Mode:</strong> <span id="statusMode">-</span></p>
+                            <p><strong>State:</strong> <span id="statusState">Idle</span></p>
+                            <p><strong>Data Points:</strong> <span id="statusDataPoints">0</span></p>
+                            <p><strong>Progress:</strong> <span id="statusProgress">-</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plot Panel -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Real-time Plot</h5>
+                        <small class="text-muted" id="plotDescription">Measurement data will appear here</small>
+                    </div>
+                    <div class="card-body">
+                        <div id="plotDiv"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class UniversalMeasurementApp {
+            constructor() {
+                this.currentMode = null;
+                this.isConfigured = false;
+                this.isRunning = false;
+                this.dataPoints = [];
+                this.updateInterval = null;
+                
+                this.init();
+            }
+
+            async init() {
+                await this.loadAvailableModes();
+                this.setupEventListeners();
+                this.initializePlot();
+                this.updateStatus();
+            }
+
+            async loadAvailableModes() {
+                try {
+                    const response = await fetch('/api/measurement/modes');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.renderModeCards(data.modes);
+                    } else {
+                        console.error('Failed to load measurement modes:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Error loading modes:', error);
+                }
+            }
+
+            renderModeCards(modes) {
+                const container = document.getElementById('measurementModes');
+                container.innerHTML = '';
+
+                modes.forEach(mode => {
+                    const card = document.createElement('div');
+                    card.className = 'col-md-3 mb-3';
+                    card.innerHTML = `
+                        <div class="card measurement-mode-card" data-mode="${mode.mode}">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">${mode.mode}</h6>
+                                <p class="card-text small">${mode.name}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    card.addEventListener('click', () => this.selectMode(mode));
+                    container.appendChild(card);
+                });
+            }
+
+            selectMode(mode) {
+                // Update UI
+                document.querySelectorAll('.measurement-mode-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                document.querySelector(`[data-mode="${mode.mode}"]`).classList.add('active');
+                
+                this.currentMode = mode;
+                this.isConfigured = false;
+                
+                // Update description
+                document.getElementById('selectedModeDescription').textContent = mode.description;
+                
+                // Render parameters
+                this.renderParameters(mode);
+                
+                // Update controls
+                this.updateControls();
+                
+                // Update plot layout for mode
+                this.updatePlotLayout(mode);
+            }
+
+            renderParameters(mode) {
+                const panel = document.getElementById('parametersPanel');
+                panel.innerHTML = '';
+
+                const form = document.createElement('form');
+                form.id = 'parametersForm';
+
+                mode.parameters.forEach(param => {
+                    const div = document.createElement('div');
+                    div.className = 'parameter-input';
+                    
+                    const label = document.createElement('label');
+                    label.textContent = this.getParameterLabel(param);
+                    label.className = 'form-label small';
+                    
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.step = '0.001';
+                    input.name = param;
+                    input.value = this.getParameterDefault(param);
+                    input.className = 'form-control form-control-sm';
+                    
+                    div.appendChild(label);
+                    div.appendChild(input);
+                    form.appendChild(div);
+                });
+
+                panel.appendChild(form);
+            }
+
+            getParameterLabel(param) {
+                const labels = {
+                    'begin_voltage': 'Begin Voltage (V)',
+                    'upper_voltage': 'Upper Voltage (V)',
+                    'lower_voltage': 'Lower Voltage (V)',
+                    'scan_rate': 'Scan Rate (V/s)',
+                    'cycles': 'Cycles',
+                    'initial_potential': 'Initial Potential (V)',
+                    'final_potential': 'Final Potential (V)',
+                    'start_potential': 'Start Potential (V)',
+                    'end_potential': 'End Potential (V)',
+                    'pulse_height': 'Pulse Height (V)',
+                    'pulse_increment': 'Pulse Increment (V)',
+                    'pulse_width': 'Pulse Width (s)',
+                    'pulse_period': 'Pulse Period (s)',
+                    'frequency': 'Frequency (Hz)',
+                    'amplitude': 'Amplitude (V)',
+                    'step_potential': 'Step Potential (V)',
+                    'step_potential': 'Step Potential (V)',
+                    'duration': 'Duration (s)',
+                    'sampling_interval': 'Sampling Interval (s)'
+                };
+                return labels[param] || param;
+            }
+
+            getParameterDefault(param) {
+                const defaults = {
+                    'begin_voltage': -0.5,
+                    'upper_voltage': 0.5,
+                    'lower_voltage': -0.5,
+                    'scan_rate': 0.05,
+                    'cycles': 1,
+                    'initial_potential': -0.5,
+                    'final_potential': 0.5,
+                    'start_potential': -0.5,
+                    'end_potential': 0.5,
+                    'pulse_height': 0.05,
+                    'pulse_increment': 0.01,
+                    'pulse_width': 0.05,
+                    'pulse_period': 0.1,
+                    'frequency': 100,
+                    'amplitude': 0.05,
+                    'step_potential': 0.01,
+                    'step_potential': 0.5,
+                    'duration': 10.0,
+                    'sampling_interval': 0.01
+                };
+                return defaults[param] || 0;
+            }
+
+            setupEventListeners() {
+                document.getElementById('setupBtn').addEventListener('click', () => this.setupMeasurement());
+                document.getElementById('startBtn').addEventListener('click', () => this.startMeasurement());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stopMeasurement());
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportData());
+            }
+
+            updateControls() {
+                const setupBtn = document.getElementById('setupBtn');
+                const startBtn = document.getElementById('startBtn');
+                const stopBtn = document.getElementById('stopBtn');
+                const exportBtn = document.getElementById('exportBtn');
+
+                setupBtn.disabled = !this.currentMode;
+                startBtn.disabled = !this.isConfigured || this.isRunning;
+                stopBtn.disabled = !this.isRunning;
+                exportBtn.disabled = this.dataPoints.length === 0;
+            }
+
+            async setupMeasurement() {
+                if (!this.currentMode) return;
+
+                const formData = new FormData(document.getElementById('parametersForm'));
+                const parameters = {};
+                for (let [key, value] of formData.entries()) {
+                    parameters[key] = parseFloat(value);
+                }
+
+                try {
+                    const response = await fetch('/api/measurement/setup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            mode: this.currentMode.mode,
+                            parameters: parameters
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        this.isConfigured = true;
+                        this.updateControls();
+                        this.showStatus('Setup successful', 'success');
+                    } else {
+                        this.showStatus('Setup failed: ' + data.error, 'error');
+                    }
+                } catch (error) {
+                    this.showStatus('Setup error: ' + error.message, 'error');
+                }
+            }
+
+            async startMeasurement() {
+                if (!this.currentMode || !this.isConfigured) return;
+
+                try {
+                    const response = await fetch('/api/measurement/start', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mode: this.currentMode.mode })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        this.isRunning = true;
+                        this.dataPoints = [];
+                        this.updateControls();
+                        this.startDataCollection();
+                        this.showStatus('Measurement started', 'success');
+                    } else {
+                        this.showStatus('Start failed: ' + data.error, 'error');
+                    }
+                } catch (error) {
+                    this.showStatus('Start error: ' + error.message, 'error');
+                }
+            }
+
+            async stopMeasurement() {
+                if (!this.currentMode) return;
+
+                try {
+                    const response = await fetch('/api/measurement/stop', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mode: this.currentMode.mode })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        this.isRunning = false;
+                        this.stopDataCollection();
+                        this.updateControls();
+                        this.showStatus('Measurement stopped', 'info');
+                    } else {
+                        this.showStatus('Stop failed: ' + data.error, 'error');
+                    }
+                } catch (error) {
+                    this.showStatus('Stop error: ' + error.message, 'error');
+                }
+            }
+
+            startDataCollection() {
+                this.updateInterval = setInterval(() => {
+                    this.fetchMeasurementData();
+                }, 500); // 500ms update interval
+            }
+
+            stopDataCollection() {
+                if (this.updateInterval) {
+                    clearInterval(this.updateInterval);
+                    this.updateInterval = null;
+                }
+            }
+
+            async fetchMeasurementData() {
+                if (!this.currentMode) return;
+
+                try {
+                    const response = await fetch(`/api/measurement/data/${this.currentMode.mode}`);
+                    const data = await response.json();
+
+                    if (data.success && data.data.points) {
+                        this.dataPoints = data.data.points;
+                        this.updatePlot();
+                        
+                        if (data.data.completed) {
+                            this.isRunning = false;
+                            this.stopDataCollection();
+                            this.updateControls();
+                            this.showStatus('Measurement completed', 'success');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            }
+
+            initializePlot() {
+                const layout = {
+                    title: 'Measurement Data',
+                    xaxis: { title: 'X-axis' },
+                    yaxis: { title: 'Y-axis' },
+                    margin: { l: 50, r: 50, t: 50, b: 50 }
+                };
+
+                Plotly.newPlot('plotDiv', [], layout);
+            }
+
+            updatePlotLayout(mode) {
+                let layout = {};
+                
+                if (mode.mode === 'CV' || mode.mode === 'DPV' || mode.mode === 'SWV') {
+                    layout = {
+                        title: `${mode.mode} - Current vs Potential`,
+                        xaxis: { title: 'Potential (V)' },
+                        yaxis: { title: 'Current (µA)' }
+                    };
+                } else if (mode.mode === 'CA') {
+                    layout = {
+                        title: 'CA - Current vs Time',
+                        xaxis: { title: 'Time (s)' },
+                        yaxis: { title: 'Current (µA)' }
+                    };
+                }
+
+                Plotly.relayout('plotDiv', layout);
+            }
+
+            updatePlot() {
+                if (!this.dataPoints.length) return;
+
+                let traces = [];
+                
+                if (this.currentMode.mode === 'CV') {
+                    traces.push({
+                        x: this.dataPoints.map(p => p.potential),
+                        y: this.dataPoints.map(p => p.current),
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'CV'
+                    });
+                } else if (this.currentMode.mode === 'DPV') {
+                    traces.push({
+                        x: this.dataPoints.map(p => p.potential),
+                        y: this.dataPoints.map(p => p.current),
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        name: 'DPV'
+                    });
+                } else if (this.currentMode.mode === 'SWV') {
+                    traces.push({
+                        x: this.dataPoints.map(p => p.potential),
+                        y: this.dataPoints.map(p => p.net_current),
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'SWV Net'
+                    });
+                } else if (this.currentMode.mode === 'CA') {
+                    traces.push({
+                        x: this.dataPoints.map(p => p.time_elapsed),
+                        y: this.dataPoints.map(p => p.current),
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'CA'
+                    });
+                }
+
+                Plotly.redraw('plotDiv', traces);
+            }
+
+            updateStatus() {
+                document.getElementById('statusMode').textContent = this.currentMode ? this.currentMode.mode : '-';
+                document.getElementById('statusState').textContent = this.isRunning ? 'Measuring' : (this.isConfigured ? 'Ready' : 'Idle');
+                document.getElementById('statusDataPoints').textContent = this.dataPoints.length;
+                
+                // Update status indicator
+                const indicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+                
+                if (this.isRunning) {
+                    indicator.className = 'status-indicator status-measuring';
+                    statusText.textContent = 'Measuring';
+                } else if (this.isConfigured) {
+                    indicator.className = 'status-indicator status-idle';
+                    statusText.textContent = 'Ready';
+                } else {
+                    indicator.className = 'status-indicator status-idle';
+                    statusText.textContent = 'Idle';
+                }
+
+                // Update again after 1 second
+                setTimeout(() => this.updateStatus(), 1000);
+            }
+
+            showStatus(message, type) {
+                // Could implement toast notifications here
+                console.log(`${type.toUpperCase()}: ${message}`);
+            }
+
+            async exportData() {
+                if (!this.currentMode || !this.dataPoints.length) return;
+
+                try {
+                    const response = await fetch(`/api/measurement/export/${this.currentMode.mode}`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Create and download file
+                        const blob = new Blob([JSON.stringify(data.data, null, 2)], {type: 'application/json'});
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${this.currentMode.mode}_data_${new Date().toISOString().slice(0,19)}.json`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }
+                } catch (error) {
+                    this.showStatus('Export error: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new UniversalMeasurementApp();
+        });
+    </script>
+</body>
+</html>

@@ -35,9 +35,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def create_dev_app():
-    """Create Flask app with REAL SCPI handler"""
+    """Create Flask app with REAL SCPI handler and ALL measurement modes"""
     from hardware.scpi_handler import SCPIHandler  # REAL HARDWARE
     from services.measurement_service import MeasurementService
+    from services.cv_measurement_service import CVMeasurementService
+    from services.dpv_measurement_service import DPVMeasurementService
+    from services.swv_measurement_service import SWVMeasurementService
+    from services.ca_measurement_service import CAMeasurementService
     from services.data_service import DataService
     
     # Import the create_app function and modify it for production
@@ -45,7 +49,13 @@ def create_dev_app():
     
     # Use REAL SCPI handler (NOT mock)
     app.scpi_handler = SCPIHandler()  # REAL STM32 CONNECTION
-    app.measurement_service = MeasurementService(app.scpi_handler)
+    
+    # Initialize ALL measurement services
+    app.measurement_service = MeasurementService(app.scpi_handler)  # Legacy/fallback
+    app.cv_service = CVMeasurementService(app.scpi_handler)
+    app.dpv_service = DPVMeasurementService(app.scpi_handler)
+    app.swv_service = SWVMeasurementService(app.scpi_handler)
+    app.ca_service = CAMeasurementService(app.scpi_handler)
     app.data_service = DataService()
     
     return app
@@ -56,10 +66,11 @@ def main():
         # Create and run Flask app with mock handler
         app = create_dev_app()
         
-        logger.info("🚀 Starting H743Poten Web Interface (REAL HARDWARE MODE)")
+        logger.info("🚀 Starting H743Poten Web Interface (FULL PRODUCTION MODE)")
         logger.info("🔴 Using REAL SCPI handler - Will connect to STM32H743")
-        logger.info("📡 Full features: CV, SWV, Data logging, Browse - ALL with REAL hardware")
-        logger.info(f"Web server: http://localhost:{Config.WEB_PORT}")
+        logger.info("📡 ALL MEASUREMENT MODES: CV ✅ DPV ✅ SWV ✅ CA ✅")
+        logger.info("📊 Full features: Real-time plotting, Data export, Hardware debugging")
+        logger.info(f"🌐 Web server: http://localhost:{Config.WEB_PORT}")
         
         app.run(
             host=Config.WEB_HOST,

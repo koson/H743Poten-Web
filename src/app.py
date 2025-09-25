@@ -54,6 +54,7 @@ except ImportError:
     from routes.parameter_api import parameter_bp, parameter_api_bp
     from routes.calibration_api import calibration_api_bp
     from routes.production_calibration_api import calibration_bp as production_calibration_bp
+    from routes.universal_measurement import universal_measurement
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +128,7 @@ def create_app():
     app.register_blueprint(parameter_api_bp)
     app.register_blueprint(calibration_api_bp)
     app.register_blueprint(production_calibration_bp)  # Production cross-sample calibration
+    app.register_blueprint(universal_measurement)  # Universal measurement API for all modes
     
     # Error handlers
     @app.errorhandler(413)
@@ -182,6 +184,11 @@ def create_app():
     def measurements():
         """Measurement interface"""
         return render_template('measurement.html')
+    
+    @app.route('/all-measurements')
+    def all_measurements():
+        """Universal measurement interface for all modes"""
+        return render_template('all_measurements.html')
     
     @app.route('/data-browser')
     def data_browser():

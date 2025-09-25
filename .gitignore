@@ -76,11 +76,11 @@ validation_data/analysis_results/**/*.json
 validation_data/backup/
 D:/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/archive/README.md
 D/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Web/archive/ARCHIVE_INDEX.json
-/wsl_venv
 # Additional ignores for Raspberry Pi deployment
 .env
 venv/
 poten-env/
+/wsl_venv
 data_logs/
 comprehensive_pls_results_*/
 *.log
