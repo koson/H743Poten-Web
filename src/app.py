@@ -146,8 +146,10 @@ def create_app():
     # Register auth blueprints if available
     try:
         from routes.auth_routes import auth_bp, admin_bp
+        from routes.feature_api import feature_api_bp
         app.register_blueprint(auth_bp)  # Authentication routes
         app.register_blueprint(admin_bp)  # Admin routes
+        app.register_blueprint(feature_api_bp)  # Feature management API
     except Exception as e:
         logger.warning(f"Auth blueprints not available: {e}")
     
