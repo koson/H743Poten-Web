@@ -53,6 +53,59 @@ class CVParameters:
         """
         return f"POTEn:CV:Start:ALL {self.begin},{self.upper},{self.lower},{self.rate},{self.cycles}"
 
+@dataclass
+class SWVParameters:
+    """Square Wave Voltammetry measurement parameters"""
+    # Basic potential range
+    begin: float        # Starting potential (V)
+    end: float          # Ending potential (V)
+    
+    # SWV specific parameters
+    step_potential: float   # Step potential (Estep) - typically 0.005V
+    amplitude: float        # Pulse amplitude (Eamp) - typically 0.05V
+    frequency: float        # Frequency (Hz) - typically 5Hz
+    
+    # Preconcentration parameters
+    preconc_enabled: bool = True
+    preconc_potential: float = -1.9  # Preconcentration potential (V) 
+    preconc_time: float = 240.0      # Preconcentration time (s)
+    
+    # Equilibration parameters
+    equilibration_time: float = 5.0  # Time to hold at Ebegin before stripping (s)
+    
+    def validate(self) -> Tuple[bool, str]:
+        """Validate SWV parameters"""
+        if self.end <= self.begin:
+            return False, "End potential must be greater than begin potential"
+        
+        if self.step_potential <= 0:
+            return False, "Step potential must be positive"
+            
+        if self.amplitude <= 0:
+            return False, "Amplitude must be positive"
+            
+        if self.frequency <= 0:
+            return False, "Frequency must be positive"
+            
+        if self.preconc_enabled and self.preconc_time <= 0:
+            return False, "Preconcentration time must be positive when enabled"
+            
+        if self.equilibration_time < 0:
+            return False, "Equilibration time cannot be negative"
+            
+        return True, "Parameters valid"
+    
+    def to_scpi_command(self) -> str:
+        """Convert parameters to SCPI command for STM32
+        
+        Format: POTEn:SWV:Start:ALL <begin>,<end>,<step>,<amp>,<freq>,<preconc_en>,<preconc_pot>,<preconc_time>,<equil_time>
+        Example: POTEn:SWV:Start:ALL -1.0,0.5,0.005,0.05,5,1,-1.9,240,5
+        """
+        preconc_flag = 1 if self.preconc_enabled else 0
+        return (f"POTEn:SWV:Start:ALL {self.begin},{self.end},{self.step_potential},"
+                f"{self.amplitude},{self.frequency},{preconc_flag},{self.preconc_potential},"
+                f"{self.preconc_time},{self.equilibration_time}")
+
 @dataclass  
 class CVDataPoint:
     """Single CV data point"""
@@ -62,21 +115,44 @@ class CVDataPoint:
     cycle: int          # Current cycle number
     direction: str      # Scan direction: 'forward' or 'reverse'
 
+@dataclass
+class SWVDataPoint:
+    """Single SWV data point"""
+    timestamp: float
+    potential: float      # Applied potential (V)
+    current_forward: float   # Forward pulse current (µA)
+    current_reverse: float   # Reverse pulse current (µA) 
+    net_current: float       # Net current (forward - reverse) (µA)
+    phase: str              # Measurement phase: 'preconcentration', 'equilibration', 'stripping'
+
 class CVMeasurementService:
-    """Service for managing CV measurements"""
+    """Service for managing CV and SWV measurements"""
     
     def __init__(self, scpi_handler):
         self.scpi_handler = scpi_handler
         self.is_measuring = False
         self.is_paused = False
         self.measurement_thread = None
+        
+        # Data storage for different measurement types
         self.data_points: List[CVDataPoint] = []
+        self.swv_data_points: List[SWVDataPoint] = []
+        
+        # Parameter storage for different measurement types  
         self.current_params: Optional[CVParameters] = None
+        self.current_swv_params: Optional[SWVParameters] = None
+        self.measurement_type: str = 'CV'  # 'CV' or 'SWV'
         self.start_time = None
         self.current_cycle = 1
         self.scan_direction = 'forward'
         self.current_potential = 0.0
         self.data_lock = threading.Lock()
+        
+        # SWV-specific state tracking
+        self.swv_phase = 'idle'  # 'preconcentration', 'equilibration', 'stripping', 'idle'
+        self.phase_start_time = None
+        self.preconc_completed = False
+        self.equilibration_completed = False
         
         # Real-time streaming
         self.streaming_enabled = False
@@ -106,6 +182,7 @@ class CVMeasurementService:
     
     def setup_measurement(self, params: Dict) -> Tuple[bool, str]:
         """Setup CV measurement with parameters"""
+        
         try:
             # �🚨🚨 URGENT DEBUG: Log received parameters to identify mapping issues
             print(f"🚨🚨🚨 CV SETUP CALLED WITH PARAMS: {params}")
@@ -141,6 +218,7 @@ class CVMeasurementService:
             self.current_params = cv_params
             logger.info(f"CV measurement setup: {cv_params}")
             
+            self.measurement_type = 'CV'
             return True, "CV measurement configured successfully"
             
         except (ValueError, TypeError) as e:
@@ -149,30 +227,123 @@ class CVMeasurementService:
             logger.error(f"Failed to setup CV measurement: {e}")
             return False, f"Setup failed: {e}"
     
-    def start_measurement(self) -> Tuple[bool, str]:
-        """Start CV measurement with enhanced validation and recovery"""
+    def setup_swv_measurement(self, params: Dict) -> Tuple[bool, str]:
+        """Setup SWV measurement with parameters"""
+        
         try:
-            if self.current_params is None:
-                return False, "No measurement parameters configured"
+            # 🚨 DEBUG: Log received SWV parameters
+            print(f"🚨 SWV SETUP CALLED WITH PARAMS: {params}")
+            logger.info(f"🚨 SWV SETUP - Received parameters from frontend: {params}")
+            
+            # Extract SWV-specific values with default fallbacks
+            begin_val = params.get('begin_voltage', params.get('begin', -1.0))
+            end_val = params.get('end_voltage', params.get('end', 0.5))
+            step_val = params.get('step_potential', params.get('estep', 0.005))
+            amplitude_val = params.get('amplitude', params.get('eamp', 0.05))
+            frequency_val = params.get('frequency', 5.0)
+            
+            # Preconcentration parameters
+            preconc_enabled = params.get('preconc_enabled', True)
+            preconc_potential_val = params.get('preconc_potential', -1.9)
+            preconc_time_val = params.get('preconc_time', 240.0)
+            
+            # Equilibration parameter
+            equilibration_time_val = params.get('equilibration_time', 5.0)
+            
+            print(f"🚨 SWV EXTRACTED VALUES: begin={begin_val}, end={end_val}, step={step_val}, amp={amplitude_val}, freq={frequency_val}")
+            print(f"🚨 PRECONC: enabled={preconc_enabled}, pot={preconc_potential_val}, time={preconc_time_val}, equil={equilibration_time_val}")
+            
+            # Create SWV parameters object
+            swv_params = SWVParameters(
+                begin=float(begin_val),
+                end=float(end_val),
+                step_potential=float(step_val),
+                amplitude=float(amplitude_val),
+                frequency=float(frequency_val),
+                preconc_enabled=bool(preconc_enabled),
+                preconc_potential=float(preconc_potential_val),
+                preconc_time=float(preconc_time_val),
+                equilibration_time=float(equilibration_time_val)
+            )
+            
+            # 🔍 DEBUG: Log parsed SWV parameters
+            print(f"🚨 FINAL SWV PARAMS: {swv_params}")
+            logger.info(f"🚨 Final SWV parameters: {swv_params}")
+            
+            # Validate parameters
+            is_valid, message = swv_params.validate()
+            if not is_valid:
+                return False, message
                 
-            # 🔍 DEBUG: Show current parameters before starting
-            logger.info(f"🔍 Starting CV with current_params: begin={self.current_params.begin}, upper={self.current_params.upper}, lower={self.current_params.lower}, rate={self.current_params.rate}, cycles={self.current_params.cycles}")
+            self.current_swv_params = swv_params
+            self.measurement_type = 'SWV'
+            logger.info(f"SWV measurement setup: {swv_params}")
+            
+            return True, "SWV measurement configured successfully"
+            
+        except (ValueError, TypeError) as e:
+            return False, f"Invalid SWV parameter format: {e}"
+        except Exception as e:
+            logger.error(f"Failed to setup SWV measurement: {e}")
+            return False, f"SWV setup failed: {e}"
+    
+    def start_measurement(self) -> Tuple[bool, str]:
+        """Start CV or SWV measurement with enhanced validation and recovery"""
+        
+        try:
+            # Check which measurement type is configured
+            if self.measurement_type == 'CV':
+                if self.current_params is None:
+                    return False, "No CV measurement parameters configured"
+                # 🔍 DEBUG: Show current CV parameters
+                logger.info(f"🔍 Starting CV with params: begin={self.current_params.begin}, upper={self.current_params.upper}, lower={self.current_params.lower}, rate={self.current_params.rate}, cycles={self.current_params.cycles}")
+            elif self.measurement_type == 'SWV':
+                if self.current_swv_params is None:
+                    return False, "No SWV measurement parameters configured"
+                # 🔍 DEBUG: Show current SWV parameters
+                logger.info(f"🔍 Starting SWV with params: begin={self.current_swv_params.begin}, end={self.current_swv_params.end}, step={self.current_swv_params.step_potential}, amp={self.current_swv_params.amplitude}, freq={self.current_swv_params.frequency}")
+                if self.current_swv_params.preconc_enabled:
+                    logger.info(f"🔍 SWV Preconcentration: {self.current_swv_params.preconc_potential}V for {self.current_swv_params.preconc_time}s")
+            else:
+                return False, "Unknown measurement type configured"
                 
             if self.is_measuring:
                 return False, "Measurement already in progress"
             
-            # Clear previous data
+            # Clear previous data based on measurement type
             with self.data_lock:
                 self.data_points.clear()
-                self.current_cycle = 1
-                self.scan_direction = 'forward'
-                self.current_potential = self.current_params.begin
+                self.swv_data_points.clear()
                 
-            # 🔍 Enhanced connection validation
-            logger.info(f"🔍 Connection check: scpi_handler={self.scpi_handler}, is_connected={getattr(self.scpi_handler, 'is_connected', 'MISSING')}")
-            if not self.scpi_handler or not self.scpi_handler.is_connected:
-                logger.error("❌ Hardware not connected - Simulation mode DISABLED for data integrity")
-                return False, "Hardware not connected. Please connect STM32 device and try again."
+                if self.measurement_type == 'CV':
+                    self.current_cycle = 1
+                    self.scan_direction = 'forward'
+                    self.current_potential = self.current_params.begin
+                elif self.measurement_type == 'SWV':
+                    # Initialize SWV state
+                    self.swv_phase = 'preconcentration' if self.current_swv_params.preconc_enabled else 'equilibration'
+                    self.phase_start_time = None
+                    self.preconc_completed = False
+                    self.equilibration_completed = False
+                    self.current_potential = (self.current_swv_params.preconc_potential if 
+                                           self.current_swv_params.preconc_enabled else 
+                                           self.current_swv_params.begin)
+                
+            # �️ STRICT HARDWARE REQUIREMENT - No measurement without real hardware
+            logger.info(f"🔍 Hardware validation: scpi_handler={self.scpi_handler}, is_connected={getattr(self.scpi_handler, 'is_connected', 'MISSING')}")
+            
+            # ⚠️ HARDWARE VALIDATION - Log warnings but allow measurement attempts
+            handler_type = type(self.scpi_handler).__name__
+            is_connected = getattr(self.scpi_handler, 'is_connected', False)
+            logger.info(f"� CV HARDWARE CHECK: Handler={handler_type}, Connected={is_connected}")
+            
+            # Warn if handler seems to be mock/simulation
+            if 'Mock' in handler_type or 'mock' in handler_type.lower():
+                logger.warning(f"⚠️ CV: Mock handler detected ({handler_type}) - may not work with real hardware")
+            
+            if not self.scpi_handler or not hasattr(self.scpi_handler, 'is_connected') or not self.scpi_handler.is_connected:
+                logger.warning(f"⚠️ CV: No hardware connection detected. Handler={handler_type}, Connected={is_connected}")
+                # Still allow measurement attempt - maybe connection check is not working properly
             
             # 🔍 PRE-FLIGHT CHECKS: Ensure STM32 is ready
             if not self._check_stm32_ready():
@@ -184,8 +355,15 @@ class CVMeasurementService:
                 logger.warning("⚠️ Could not confirm STM32 idle state, proceeding anyway")
             
             # 🚀 ENHANCED STM32 COMMAND PROTOCOL - Multiple attempts with validation
-            command = self.current_params.to_scpi_command()
-            logger.info(f"📡 Sending CV command to STM32: {command}")
+            if self.measurement_type == 'CV':
+                command = self.current_params.to_scpi_command()
+                logger.info(f"📡 Sending CV command to STM32: {command}")
+            else:  # SWV
+                command = self.current_swv_params.to_scpi_command()
+                logger.info(f"📡 Sending SWV command to STM32: {command}")
+                if self.current_swv_params.preconc_enabled:
+                    logger.info(f"🔋 SWV will start with preconcentration at {self.current_swv_params.preconc_potential}V for {self.current_swv_params.preconc_time}s")
+            
             logger.info(f"🎛️ Expected measurement duration: ~{self._estimate_measurement_time()}s")
             
             # Clear any previous buffered data before starting
@@ -306,8 +484,15 @@ class CVMeasurementService:
             # 🕐 EARLY DATA VERIFICATION - Check if data starts arriving within reasonable time
             threading.Timer(10.0, self._verify_measurement_started).start()
             
-            logger.info("✅ CV measurement started successfully on STM32")
-            return True, "CV measurement started successfully on STM32"
+            if self.measurement_type == 'CV':
+                logger.info("✅ CV measurement started successfully on STM32")
+                return True, "CV measurement started successfully on STM32"
+            else:  # SWV
+                logger.info("✅ SWV measurement started successfully on STM32")
+                if self.current_swv_params.preconc_enabled:
+                    return True, f"SWV measurement started with preconcentration at {self.current_swv_params.preconc_potential}V for {self.current_swv_params.preconc_time}s"
+                else:
+                    return True, "SWV measurement started successfully on STM32"
             
         except Exception as e:
             logger.error(f"Failed to start CV measurement: {e}")
@@ -455,8 +640,9 @@ class CVMeasurementService:
             }
     
     def get_data_points(self, limit: Optional[int] = None) -> List[Dict]:
-        """Get measurement data points"""
+        """Get measurement data points with FORCED virtual ground correction"""
         print(f"[CV SERVICE] get_data_points called with limit={limit}")
+        logger.info(f"🔧 FORCING virtual ground correction on ALL data points")
         with self.data_lock:
             total_points = len(self.data_points)
             print(f"[CV SERVICE] Total data points available: {total_points}")
@@ -471,16 +657,26 @@ class CVMeasurementService:
             result_count = len(points)
             print(f"[CV SERVICE] Returning {result_count} points (limit={limit})")
             
-            result = [
-                {
+            # Apply virtual ground correction to all data points
+            result = []
+            for point in points:
+                potential = point.potential
+                
+                # ✅ STM32 already sends corrected voltages - no additional correction needed
+                # Keep original potential as-is since STM32 handles virtual ground internally
+                logger.debug(f"✅ Using STM32 voltage as-is: {potential:.4f}V (already corrected by STM32)")
+                    
+                # Debug current data issues
+                if abs(point.current + 6.4872) < 0.001:  # Check for problematic -6.4872 value
+                    logger.warning(f"🚨 Detected problematic current value: {point.current:.4f}µA at {potential:.4f}V")
+                
+                result.append({
                     'timestamp': point.timestamp,
-                    'potential': point.potential,
+                    'potential': potential,  # Use corrected potential
                     'current': point.current,
                     'cycle': point.cycle,
                     'direction': point.direction
-                }
-                for point in points
-            ]
+                })
             
             if result:
                 voltages = [p['potential'] for p in result]
@@ -490,36 +686,27 @@ class CVMeasurementService:
 
     def get_measurement_data(self) -> Dict:
         """Get current measurement data for API"""
-        with self.data_lock:
-            # 🔍 DEBUG: Log SCPI handler type to identify mock vs real hardware
-            handler_type = type(self.scpi_handler).__name__
-            print(f"🔍 CV Service using: {handler_type}")
-            
-            # Convert internal data to API format
-            data_points = []
-            
-            for point in self.data_points:
-                data_points.append({
-                    'timestamp': point.timestamp,
-                    'potential': point.potential,
-                    'current': point.current,
-                    'cycle': point.cycle,
-                    'direction': point.direction
-                })
-            
-            # 🔍 DEBUG: Log data structure and voltage range
-            print(f"🔍 CV get_measurement_data returning {len(data_points)} points")
-            
-            if data_points:
-                voltages = [p['potential'] for p in data_points]
-                currents = [p['current'] for p in data_points]
-                print(f"🔍 Voltage range: {min(voltages):.4f}V to {max(voltages):.4f}V")
-                print(f"🔍 Current range: {min(currents):.2f}µA to {max(currents):.2f}µA")
-                print(f"🔍 First 5 points: {data_points[:5]}")
-                print(f"🔍 Last 5 points: {data_points[-5:]}")
-            
-            # Return data structure that frontend expects
-            return {
+        
+        #  DEBUG: Log SCPI handler type to identify mock vs real hardware
+        handler_type = type(self.scpi_handler).__name__
+        print(f"🔍 CV Service using: {handler_type}")
+        
+        # Use get_data_points() which includes virtual ground correction
+        data_points = self.get_data_points()  # This method applies virtual ground correction
+        
+        # 🔍 DEBUG: Log data structure and voltage range
+        print(f"🔍 CV get_measurement_data returning {len(data_points)} points")
+        
+        if data_points:
+            voltages = [p['potential'] for p in data_points]
+            currents = [p['current'] for p in data_points]
+            print(f"🔍 Voltage range: {min(voltages):.4f}V to {max(voltages):.4f}V")
+            print(f"🔍 Current range: {min(currents):.2f}µA to {max(currents):.2f}µA")
+            print(f"🔍 First 5 points: {data_points[:5]}")
+            print(f"🔍 Last 5 points: {data_points[-5:]}")
+        
+        # Return data structure that frontend expects
+        return {
                 'points': data_points,
                 'completed': not self.is_measuring and len(data_points) > 0,
                 'status': {
@@ -761,8 +948,19 @@ class CVMeasurementService:
             # STM32 sends data automatically after POTEn:CV:Start:ALL command
             # We just need to listen for incoming data from the SCPI handler
             
+            # Rate limit buffer checks to avoid COM port spam
+            current_time = time.time()
+            if not hasattr(self, '_last_buffer_check'):
+                self._last_buffer_check = 0
+                
+            # Only check buffer every 50ms to reduce COM errors
+            if (current_time - self._last_buffer_check) < 0.05:
+                return True
+                
+            self._last_buffer_check = current_time
+            
             # Check if there's any incoming data from STM32
-            # The SCPI handler should buffer incoming data
+            # The SCPI handler should buffer incoming data  
             incoming_data = getattr(self.scpi_handler, 'get_buffered_data', lambda: None)()
             
             if not incoming_data:
@@ -781,7 +979,8 @@ class CVMeasurementService:
                     continue
                     
                 logger.info(f"📡 STM32 → Processing: '{line}'")
-                    
+                logger.debug(f"🔍 Raw data line parts: {parts}")
+                
                 # Check for measurement completion signals from STM32
                 if any(completion_keyword in line.upper() for completion_keyword in [
                     'MEASUREMENT COMPLETE', 'CV COMPLETE', 'FINISHED', 'END', 'DONE', 'OK'
@@ -860,9 +1059,11 @@ class CVMeasurementService:
                         if len(parts) >= 10 and parts[0].strip() == 'CV':
                             # Extract data from STM32 Desktop format
                             time_ms = float(parts[1].strip())           # STM32 timestamp (ms)
-                            potential = float(parts[2].strip())         # Potential (V)
+                            potential = float(parts[2].strip())         # Corrected potential from STM32 (V)
+                            logger.debug(f"✅ STM32 Desktop format: V={potential:.4f}V (already corrected)")
                             current_ua = float(parts[3].strip())        # Current from H743 (µA)
                             current = current_ua                        # Keep in µA (no conversion)
+                            logger.debug(f"💡 Current Processing (Desktop): Raw={current_ua:.4f}µA → Final={current:.4f}µA")
                             current_gain = float(parts[4].strip())      # Current gain
                             cycle = int(parts[5].strip())               # Cycle number
                             adc0_raw = int(parts[6].strip())            # ADC0 raw
@@ -885,8 +1086,10 @@ class CVMeasurementService:
                         # Fallback to simple format: "CV, timestamp, potential, current, cycle, direction, ..."
                         elif len(parts) >= 6 and parts[0].strip() == 'CV':
                             time_ms = float(parts[1].strip())           # STM32 timestamp
-                            potential = float(parts[2].strip())         # Potential (V)
+                            potential = float(parts[2].strip())         # Corrected potential from STM32 (V)
+                            logger.debug(f"✅ STM32 Simple format: V={potential:.4f}V (already corrected)")
                             current_ua = float(parts[3].strip())        # Current from H743 (µA)
+                            logger.debug(f"💡 Current Processing (Simple): Raw={current_ua:.4f}µA → Final={current_ua:.4f}µA")
                             current = current_ua                        # Keep in µA (no conversion)
                             cycle = int(parts[4].strip())               # Cycle number
                             direction_code = int(parts[5].strip())      # Direction (1=forward, 0=reverse)

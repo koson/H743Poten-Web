@@ -182,6 +182,41 @@ def create_app():
             'error_code': 500
         }), 500
     
+    @app.route('/health')
+    def health_check():
+        """Health check endpoint for monitoring"""
+        try:
+            # Check database connection (if applicable)
+            # db_status = check_database_connection()
+            
+            # Check serial connection
+            serial_connected = app.config['scpi_handler'].is_connected if 'scpi_handler' in app.config else False
+            
+            # Check available endpoints
+            routes_count = len([rule for rule in app.url_map.iter_rules()])
+            
+            return jsonify({
+                'status': 'healthy',
+                'timestamp': datetime.now().isoformat(),
+                'version': '1.0.0-rpi5',
+                'services': {
+                    'web': 'ok',
+                    'serial': 'connected' if serial_connected else 'disconnected',
+                    'routes': routes_count
+                },
+                'environment': {
+                    'platform': sys.platform,
+                    'python_version': sys.version.split()[0],
+                    'debug_mode': app.debug
+                }
+            }), 200
+        except Exception as e:
+            return jsonify({
+                'status': 'unhealthy',
+                'error': str(e),
+                'timestamp': datetime.now().isoformat()
+            }), 500
+
     @app.route('/debug')
     def debug():
         """Debug endpoint to check application state"""

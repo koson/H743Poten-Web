@@ -483,11 +483,22 @@
                     label.className = 'form-label small mb-1';
                     
                     const input = document.createElement('input');
-                    input.type = 'number';
-                    input.step = '0.001';
+                    
+                    // Handle checkbox for preconc_enabled
+                    if (param === 'preconc_enabled') {
+                        input.type = 'checkbox';
+                        input.checked = this.getParameterDefault(param);
+                        input.className = 'form-check-input';
+                        div.className = 'mb-2 form-check';
+                        label.className = 'form-check-label small';
+                    } else {
+                        input.type = 'number';
+                        input.step = '0.001';
+                        input.value = this.getParameterDefault(param);
+                        input.className = 'form-control form-control-sm';
+                    }
+                    
                     input.name = param;
-                    input.value = this.getParameterDefault(param);
-                    input.className = 'form-control form-control-sm';
                     
                     div.appendChild(label);
                     div.appendChild(input);
@@ -516,9 +527,13 @@
                     'frequency': 'Frequency (Hz)',
                     'amplitude': 'Amplitude (V)',
                     'step_potential': 'Step Potential (V)',
-                    'step_potential': 'Step Potential (V)',
                     'duration': 'Duration (s)',
-                    'sampling_interval': 'Sampling Interval (s)'
+                    'sampling_interval': 'Sampling Interval (s)',
+                    'preconc_enabled': 'Preconcentration',
+                    'preconc_potential': 'Preconc. Potential (V)',
+                    'preconc_time': 'Preconc. Time (s)',
+                    'equilibration_time': 'Equilibration Time (s)',
+                    'end_voltage': 'End Voltage (V)'
                 };
                 return labels[param] || param;
             }
@@ -533,6 +548,14 @@
                     'initial_potential': -0.5,
                     'final_potential': 0.5,
                     'start_potential': -0.5,
+                    'end_voltage': 0.5,
+                    'step_potential': 0.005,
+                    'amplitude': 0.05,
+                    'frequency': 5.0,
+                    'preconc_enabled': true,
+                    'preconc_potential': -1.9,
+                    'preconc_time': 240,
+                    'equilibration_time': 5.0,
                     'end_potential': 0.5,
                     'pulse_height': 0.05,
                     'pulse_increment': 0.01,
@@ -553,7 +576,7 @@
                 const modeParameters = {
                     'CV': ['begin_voltage', 'upper_voltage', 'lower_voltage', 'scan_rate', 'cycles'],
                     'DPV': ['start_potential', 'end_potential', 'pulse_height', 'pulse_increment', 'pulse_width', 'pulse_period'],
-                    'SWV': ['start_potential', 'end_potential', 'frequency', 'amplitude', 'step_potential'],
+                    'SWV': ['begin_voltage', 'end_voltage', 'step_potential', 'amplitude', 'frequency', 'preconc_enabled', 'preconc_potential', 'preconc_time', 'equilibration_time'],
                     'CA': ['step_potential', 'duration', 'sampling_interval']
                 };
                 return modeParameters[mode] || [];

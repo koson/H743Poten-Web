@@ -90,16 +90,33 @@ class DPVMeasurementService:
 
     def setup_measurement(self, params_dict: Dict) -> bool:
         """Setup DPV measurement with parameters"""
+        
         try:
-            # Convert dict to DPVParameters
+            # 🚨 DEBUG: Log received DPV parameters
+            logger.info(f"🚨 DPV SETUP - Received parameters: {params_dict}")
+            
+            # 🛡️ STRICT HARDWARE REQUIREMENT - No measurement without real hardware
+            handler_type = type(self.scpi_handler).__name__
+            if 'Mock' in handler_type or 'mock' in handler_type.lower():
+                logger.error(f"❌ DPV Mock handler detected ({handler_type}) - Real hardware required")
+                return False
+            
+            if not self.scpi_handler or not hasattr(self.scpi_handler, 'is_connected') or not self.scpi_handler.is_connected:
+                logger.error("❌ DPV STM32 hardware not connected - No measurement allowed")
+                return False
+            
+            # Convert dict to DPVParameters (handle both frontend and legacy parameter names)
             params = DPVParameters(
-                initial_potential=float(params_dict.get('initial_potential', -0.5)),
-                final_potential=float(params_dict.get('final_potential', 0.5)),
+                initial_potential=float(params_dict.get('start_potential', params_dict.get('initial_potential', -0.5))),
+                final_potential=float(params_dict.get('end_potential', params_dict.get('final_potential', 0.5))),
                 pulse_height=float(params_dict.get('pulse_height', 0.05)),
                 pulse_increment=float(params_dict.get('pulse_increment', 0.01)),
                 pulse_width=float(params_dict.get('pulse_width', 0.05)),
                 pulse_period=float(params_dict.get('pulse_period', 0.1))
             )
+            
+            # 🔍 DEBUG: Log parsed DPV parameters
+            logger.info(f"🚨 FINAL DPV PARAMS: {params}")
             
             # Validate parameters
             is_valid, message = params.validate()
@@ -128,6 +145,7 @@ class DPVMeasurementService:
 
     def start_measurement(self) -> bool:
         """Start DPV measurement"""
+        
         try:
             if not self.current_params:
                 raise ValueError("No DPV parameters set")
@@ -238,7 +256,8 @@ class DPVMeasurementService:
                     # DPV format: "DPV, time_ms, voltage, current, pulse_number, phase, ..."
                     if len(parts) >= 6 and parts[0].strip() == 'DPV':
                         time_ms = float(parts[1].strip())
-                        potential = float(parts[2].strip())
+                        potential = float(parts[2].strip())         # Corrected potential from STM32
+                        logger.debug(f"✅ DPV STM32 voltage: {potential:.4f}V (already corrected)")
                         current_ua = float(parts[3].strip())
                         current = current_ua  # Keep in µA (no conversion)
                         pulse_num = int(parts[4].strip())
@@ -273,10 +292,14 @@ class DPVMeasurementService:
                             self.data_points.append(data_point)
                             logger.info(f"✅ ADDED DPV data point #{len(self.data_points)}: V={potential:.3f}V, I={current:.1f}µA")
                             
+                            # ✅ STM32 already sends corrected voltages
+                            potential_corrected = potential  # Use STM32 voltage as-is
+                            logger.debug(f"✅ DPV API voltage: {potential:.4f}V (already corrected)")
+                            
                             # Convert to dict for JSON serialization
                             points.append({
                                 'timestamp': timestamp,
-                                'potential': potential,
+                                'potential': potential_corrected,  # Use corrected potential
                                 'current': current,
                                 'pulse_number': pulse_num,
                                 'measurement_phase': phase,

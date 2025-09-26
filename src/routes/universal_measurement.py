@@ -62,6 +62,20 @@ def setup_measurement():
                 'error': f'Unsupported measurement mode: {mode}'
             }), 400
         
+        # 🛡️ STRICT HARDWARE VALIDATION - No mock/simulation allowed
+        handler_type = type(service.scpi_handler).__name__ if hasattr(service, 'scpi_handler') else 'Unknown'
+        if 'Mock' in handler_type or 'mock' in handler_type.lower():
+            return jsonify({
+                'success': False,
+                'error': f'Mock/simulation mode disabled. Real STM32 hardware required for {mode} measurements.'
+            }), 403
+        
+        if not hasattr(service, 'scpi_handler') or not service.scpi_handler or not hasattr(service.scpi_handler, 'is_connected') or not service.scpi_handler.is_connected:
+            return jsonify({
+                'success': False,
+                'error': f'STM32 hardware not connected. Please connect real hardware before attempting {mode} measurements.'
+            }), 503
+        
         # Setup measurement
         logger.info(f"🔍 About to call setup_measurement on service: {type(service).__name__}")
         success = service.setup_measurement(params)
@@ -102,6 +116,20 @@ def start_measurement():
                 'success': False,
                 'error': f'Unsupported measurement mode: {mode}'
             }), 400
+        
+        # 🛡️ STRICT HARDWARE VALIDATION - No mock/simulation allowed
+        handler_type = type(service.scpi_handler).__name__ if hasattr(service, 'scpi_handler') else 'Unknown'
+        if 'Mock' in handler_type or 'mock' in handler_type.lower():
+            return jsonify({
+                'success': False,
+                'error': f'Mock/simulation mode disabled. Real STM32 hardware required to start {mode} measurements.'
+            }), 403
+        
+        if not hasattr(service, 'scpi_handler') or not service.scpi_handler or not hasattr(service.scpi_handler, 'is_connected') or not service.scpi_handler.is_connected:
+            return jsonify({
+                'success': False,
+                'error': f'STM32 hardware not connected. Cannot start {mode} measurement without real hardware.'
+            }), 503
         
         # Start measurement
         success = service.start_measurement()

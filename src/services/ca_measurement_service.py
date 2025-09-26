@@ -88,7 +88,18 @@ class CAMeasurementService:
 
     def setup_measurement(self, params_dict: Dict) -> bool:
         """Setup CA measurement with parameters"""
+        
         try:
+            # 🛡️ STRICT HARDWARE REQUIREMENT - No measurement without real hardware
+            handler_type = type(self.scpi_handler).__name__
+            if 'Mock' in handler_type or 'mock' in handler_type.lower():
+                logger.error(f"❌ CA Mock handler detected ({handler_type}) - Real hardware required")
+                return False
+            
+            if not self.scpi_handler or not hasattr(self.scpi_handler, 'is_connected') or not self.scpi_handler.is_connected:
+                logger.error("❌ CA STM32 hardware not connected - No measurement allowed")
+                return False
+            
             # Convert dict to CAParameters
             params = CAParameters(
                 initial_potential=float(params_dict.get('initial_potential', 0.0)),
@@ -115,6 +126,7 @@ class CAMeasurementService:
 
     def start_measurement(self) -> bool:
         """Start CA measurement"""
+        
         try:
             if not self.current_params:
                 raise ValueError("No CA parameters set")
@@ -239,7 +251,8 @@ class CAMeasurementService:
                     if len(parts) >= 6 and parts[0].strip() == 'CA':
                         time_ms = float(parts[1].strip())
                         elapsed_time = float(parts[2].strip())  # Time since step applied
-                        potential = float(parts[3].strip())
+                        potential = float(parts[3].strip())         # Corrected potential from STM32
+                        logger.debug(f"✅ CA STM32 voltage: {potential:.4f}V (already corrected)")
                         current_ua = float(parts[4].strip())
                         sample_num = int(parts[5].strip())
                         
@@ -275,11 +288,15 @@ class CAMeasurementService:
                             self.data_points.append(data_point)
                             logger.info(f"✅ ADDED CA data point #{len(self.data_points)}: t={elapsed_time:.3f}s, I={current:.1f}µA")
                             
+                            # ✅ STM32 already sends corrected voltages
+                            potential_corrected = potential  # Use STM32 voltage as-is
+                            logger.debug(f"✅ CA API voltage: {potential:.4f}V (already corrected)")
+                            
                             # Convert to dict for JSON serialization
                             points.append({
                                 'timestamp': timestamp,
                                 'time_elapsed': elapsed_time,
-                                'potential': potential,
+                                'potential': potential_corrected,  # Use corrected potential
                                 'current': current,
                                 'sample_number': sample_num,
                                 'mode': 'CA'

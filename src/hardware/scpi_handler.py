@@ -110,11 +110,18 @@ class SCPIHandler:
                     'error': 'Device not connected'
                 }
 
-            # Add newline if not present
-            if not command.endswith('\n'):
-                command += '\n'
+            # Add proper SCPI termination if not present
+            # STM32 requires \r\n termination for SCPI commands
+            if not command.endswith('\r\n'):
+                if command.endswith('\n'):
+                    command = command[:-1] + '\r\n'
+                elif command.endswith('\r'):
+                    command = command + '\n'
+                else:
+                    command += '\r\n'
 
             # Send command
+            logger.debug(f"Sending SCPI command: '{command.strip()}' (with \\r\\n)")
             self.serial.write(command.encode())
             
             # Read response if command ends with '?'
@@ -157,14 +164,22 @@ class SCPIHandler:
                 return None
                 
             # Check if there's any data waiting in the serial buffer
-            if self.serial.in_waiting > 0:
-                # Read all available data
-                raw_data = self.serial.read_all()
-                if raw_data:
-                    incoming_data = raw_data.decode('utf-8', errors='ignore')
-                    if incoming_data.strip():
-                        logger.debug(f"Received buffered data: '{incoming_data.strip()}'")
-                        return incoming_data
+            try:
+                if self.serial.in_waiting > 0:
+                    # Read all available data with timeout protection
+                    raw_data = self.serial.read_all()
+                    if raw_data:
+                        incoming_data = raw_data.decode('utf-8', errors='ignore')
+                        if incoming_data.strip():
+                            logger.debug(f"Received buffered data: '{incoming_data.strip()}'")
+                            return incoming_data
+            except (OSError, PermissionError) as com_error:
+                # Windows COM port access errors - don't spam logs
+                if "ClearCommError" in str(com_error) or "The device does not recognize the command" in str(com_error):
+                    logger.debug(f"COM port access issue (suppressed): {com_error}")
+                else:
+                    logger.warning(f"COM port error: {com_error}")
+                return None
                     
             return None
             

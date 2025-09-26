@@ -10,6 +10,7 @@ import json
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
+from flask import current_app
 
 logger = logging.getLogger(__name__)
 
@@ -88,15 +89,42 @@ class SWVMeasurementService:
         self.debug_mode = False
 
     def setup_measurement(self, params_dict: Dict) -> bool:
-        """Setup SWV measurement with parameters"""
+        """Setup SWV measurement with enhanced parameters including preconcentration"""
+        
         try:
-            # Convert dict to SWVParameters
+            # 🚨 DEBUG: Log received SWV parameters
+            logger.info(f"🚨 SWV Service received params: {params_dict}")
+            
+            # 🛡️ STRICT HARDWARE REQUIREMENT - No measurement without real hardware
+            handler_type = type(self.scpi_handler).__name__
+            if 'Mock' in handler_type or 'mock' in handler_type.lower():
+                logger.error(f"❌ SWV Mock handler detected ({handler_type}) - Real hardware required")
+                return False
+            
+            if not self.scpi_handler or not hasattr(self.scpi_handler, 'is_connected') or not self.scpi_handler.is_connected:
+                logger.error("❌ SWV STM32 hardware not connected - No measurement allowed")
+                return False
+            
+            # Use CV service's SWV setup for enhanced parameters
+            cv_service = current_app.cv_service
+            if cv_service:
+                # Setup using enhanced SWV parameters
+                success, message = cv_service.setup_swv_measurement(params_dict)
+                if success:
+                    logger.info(f"✅ SWV setup successful via CV service: {message}")
+                    return True
+                else:
+                    logger.error(f"❌ SWV setup failed via CV service: {message}")
+                    return False
+            
+            # Fallback to original SWV parameters (legacy support)
+            logger.warning("⚠️ Using legacy SWV parameter handling")
             params = SWVParameters(
-                start_potential=float(params_dict.get('start_potential', -0.5)),
-                end_potential=float(params_dict.get('end_potential', 0.5)),
-                frequency=float(params_dict.get('frequency', 100)),
+                start_potential=float(params_dict.get('start_potential', params_dict.get('begin_voltage', -0.5))),
+                end_potential=float(params_dict.get('end_potential', params_dict.get('end_voltage', 0.5))),
+                frequency=float(params_dict.get('frequency', 5.0)),
                 amplitude=float(params_dict.get('amplitude', 0.05)),
-                step_potential=float(params_dict.get('step_potential', 0.01))
+                step_potential=float(params_dict.get('step_potential', 0.005))
             )
             
             # Validate parameters
@@ -126,6 +154,7 @@ class SWVMeasurementService:
 
     def start_measurement(self) -> bool:
         """Start SWV measurement"""
+        
         try:
             if not self.current_params:
                 raise ValueError("No SWV parameters set")
@@ -236,7 +265,8 @@ class SWVMeasurementService:
                     # SWV format: "SWV, time_ms, voltage, forward_current, reverse_current, step_number, ..."
                     if len(parts) >= 6 and parts[0].strip() == 'SWV':
                         time_ms = float(parts[1].strip())
-                        potential = float(parts[2].strip())
+                        potential = float(parts[2].strip())         # Corrected potential from STM32
+                        logger.debug(f"✅ SWV STM32 voltage: {potential:.4f}V (already corrected)")
                         forward_current_ua = float(parts[3].strip())
                         reverse_current_ua = float(parts[4].strip())
                         step_num = int(parts[5].strip())
@@ -276,10 +306,14 @@ class SWVMeasurementService:
                             self.data_points.append(data_point)
                             logger.info(f"✅ ADDED SWV data point #{len(self.data_points)}: V={potential:.3f}V, I_net={net_current:.1f}µA")
                             
+                            # ✅ STM32 already sends corrected voltages
+                            potential_corrected = potential  # Use STM32 voltage as-is
+                            logger.debug(f"✅ SWV API voltage: {potential:.4f}V (already corrected)")
+                            
                             # Convert to dict for JSON serialization
                             points.append({
                                 'timestamp': timestamp,
-                                'potential': potential,
+                                'potential': potential_corrected,  # Use corrected potential
                                 'current': net_current,  # Use net current for plotting
                                 'forward_current': forward_current,
                                 'reverse_current': reverse_current,
