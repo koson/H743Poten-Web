@@ -61,7 +61,7 @@ case $TARGET in
         ;;
     "rpi-home")
         echo "🏠 Home Raspberry Pi deployment"
-        ./scripts/deploy-to-rpi.sh 192.168.1.100 $BRANCH "home"
+        ./scripts/deploy-to-rpi.sh 192.168.9.75 $BRANCH "home"
         ;;
     "rpi-office")
         echo "🏢 Office Raspberry Pi deployment"

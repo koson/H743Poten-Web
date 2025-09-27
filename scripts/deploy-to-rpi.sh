@@ -3,7 +3,7 @@
 PI_HOST="$1"
 BRANCH="$2"
 ENVIRONMENT="$3"
-PI_USER="pi"
+PI_USER="ben"
 PROJECT_DIR="h743poten-web"
 
 if [ -z "$PI_HOST" ] || [ -z "$BRANCH" ]; then

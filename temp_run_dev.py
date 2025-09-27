@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Direct entry point for running H743Poten Web Interface in development mode
-This script handles imports correctly and uses mock hardware
+This script uses REAL H743 hardware by leveraging create_app()
 """
 
 import os
@@ -28,48 +28,27 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def create_dev_app():
-    """Create Flask app with real H743 SCPI handler"""
+    """Create Flask app with REAL SCPI handler"""
     try:
         from app import create_app
-        from hardware.scpi_handler import SCPIHandler
-        
-        # Try to find and connect to real H743 hardware first
-        scpi_handler = None
-        
-        # Auto-detect STM32 ports
-        from hardware.port_scanner import find_stm32_ports
-        stm32_ports = find_stm32_ports()
-        
-        for port_info in stm32_ports:
-            port = port_info['device']
-            try:
-                logger.info(f"🔌 Trying to connect to H743 on {port}")
-                scpi_handler = SCPIHandler(port=port, baud_rate=115200)
+
+        # Create the base app (this already creates SCPIHandler and all services)
+        app = create_app()
+
+        # The app already has real SCPIHandler from create_app()
+        # Just verify it's connected
+        scpi_handler = app.config.get('scpi_handler')
+        if scpi_handler and hasattr(scpi_handler, 'connect'):
+            if not scpi_handler.is_connected:
+                logger.info(f"Attempting to connect to H743 at {scpi_handler.port}")
                 if scpi_handler.connect():
-                    logger.info(f"✅ Connected to real H743 hardware on {port}")
-                    break
+                    logger.info("✅ Successfully connected to H743")
                 else:
-                    logger.warning(f"❌ Failed to connect to {port}")
-                    scpi_handler = None
-            except Exception as e:
-                logger.warning(f"❌ H743 connection error on {port}: {e}")
-                scpi_handler = None
-        
-        if scpi_handler is None:
-            logger.warning("❌ No H743 hardware found on any STM32 port, falling back to mock")
-        
-        # If real hardware failed, use mock as fallback
-        if scpi_handler is None:
-            from hardware.mock_scpi_handler import MockSCPIHandler
-            scpi_handler = MockSCPIHandler()
-            logger.info("Using mock SCPI handler for testing")
-        
-        # Create the app with the selected handler
-        app = create_app(scpi_handler)
-        
-        logger.info("Created development app with real H743 hardware")
+                    logger.warning("⚠️ Could not connect to H743 - check connection")
+
+        logger.info("Created development app with REAL hardware")
         return app
-        
+
     except Exception as e:
         logger.error(f"Failed to create development app: {e}")
         raise
@@ -89,26 +68,26 @@ def main():
     """Main entry point for development"""
     try:
         logger.info("Starting H743Poten Web Interface (Development Mode)")
-        logger.info("🔌 FORCING REAL SCPI handler - NO MOCK DATA")
-        
+        logger.info("Using REAL SCPI handler for testing")
+
         # Find a free port
         port = find_free_port(8080, 10)
         if port is None:
             logger.error("No free ports available (tried 8080-8090)")
             sys.exit(1)
-        
+
         logger.info(f"Using port {port}")
-        
-        # Create the Flask app with mock hardware
+
+        # Create the Flask app with REAL hardware
         app = create_dev_app()
-        
+
         # Run the app
         app.run(
             host='0.0.0.0',
             port=port,
             debug=True
         )
-        
+
     except Exception as e:
         logger.error(f"Failed to start development server: {e}")
         raise

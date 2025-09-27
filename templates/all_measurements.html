@@ -747,7 +747,23 @@
                 if (!this.currentMode) return;
 
                 try {
-                    const response = await fetch(`/api/measurement/data/${this.currentMode.mode}`);
+                    // Force no cache - add timestamp to prevent any caching
+                    const timestamp = Date.now();
+                    const response = await fetch(`/api/measurement/data/${this.currentMode.mode}?t=${timestamp}`, {
+                        cache: 'no-cache',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        console.error(`🚨 API Error: ${response.status} ${response.statusText}`);
+                        console.error(`🚨 URL: ${response.url}`);
+                        return; // Don't use any fallback data - just return
+                    }
+                    
                     const data = await response.json();
 
                     console.log(`📡 fetchMeasurementData: Response for ${this.currentMode.mode}:`, {
@@ -763,12 +779,14 @@
                         console.log(`📡 fetchMeasurementData: Set ${this.dataPoints.length} data points`);
                         this.updatePlot();
                         
-                        // 💾 Auto-save every 50 new points or every 30 seconds
+                        // 💾 Auto-save DISABLED to prevent localStorage caching
+                        /*
                         if (this.dataPoints.length > 0 && 
                             (this.dataPoints.length - previousCount >= 50 || 
                              this.shouldAutoSave())) {
                             this.autoSaveData('progress');
                         }
+                        */
                         
                         if (data.data.completed) {
                             console.log('📡 fetchMeasurementData: Measurement completed, stopping collection');
@@ -777,8 +795,8 @@
                             this.updateControls();
                             this.showStatus('Measurement completed', 'success');
                             
-                            // 💾 Auto-save final data
-                            this.autoSaveData('completed');
+                            // 💾 Auto-save final data DISABLED
+                            // this.autoSaveData('completed');
                         }
                     } else {
                         console.log('📡 fetchMeasurementData: No valid data received');
@@ -984,8 +1002,11 @@
                 }
             }
             
-            // Load previous session data
+            // Load previous session data - DISABLED to prevent mock data loading
             loadPreviousSession() {
+                console.log('🚫 Previous session loading disabled - forcing fresh start');
+                return null; // Always return null to prevent cache loading
+                /*
                 try {
                     const latestId = localStorage.getItem('latest_measurement');
                     if (!latestId) return null;
@@ -998,6 +1019,7 @@
                     console.error('Failed to load previous session:', error);
                     return null;
                 }
+                */
             }
             
             // Get all saved sessions
@@ -1200,8 +1222,8 @@
     </script>
 
     <!-- Include connection management -->
-    <script src="/static/js/connection_state.js"></script>
-    <script src="/static/js/port_manager.js"></script>
+    <script src="/static/js/connection_state.js?v=20250927-2"></script>
+    <script src="/static/js/port_manager_v2.js"></script>
     <script>
         // Global port manager instance
         let portManager = null;

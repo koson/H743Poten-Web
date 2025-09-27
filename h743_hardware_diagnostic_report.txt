@@ -1,0 +1,44 @@
+
+H743 Current Range Hardware Diagnostic Report
+============================================
+
+PROBLEM SUMMARY:
+- Range 0 (±1000µA) and Range 1 (±100µA) exhibit identical slopes
+- This indicates a TIA (Transimpedance Amplifier) configuration issue
+- Expected behavior: Range 1 should be 10x more sensitive than Range 0
+
+ANALYSIS RESULTS:
+
+Slope Measurements:
+- Range 0: 200.00 µA/V
+- Range 1: 200.00 µA/V
+- Actual Ratio: 1.00:1
+- Expected Ratio: 10.00:1
+- Error: 90.0%
+
+ISSUES FOUND (1):
+- CRITICAL: Range 0 and Range 1 have nearly identical slopes (1.00:1)
+
+RECOMMENDATIONS (5):
+- Check TIA resistor values in H743 hardware
+- Verify current range switching circuitry
+- Inspect analog multiplexer/switch configuration
+- Validate ADC reference voltage stability
+- Check for hardware design/assembly errors
+
+HARDWARE VERIFICATION CHECKLIST:
+□ Check TIA resistor values (1kΩ, 10kΩ, 100kΩ, 1MΩ)
+□ Verify current range switching circuitry
+□ Test analog multiplexer/switch functionality
+□ Validate ADC reference voltage stability
+□ Inspect PCB for assembly errors
+□ Check op-amp specifications and power supply
+□ Measure noise and crosstalk between ranges
+
+FIRMWARE ACTIONS:
+□ Implement TIA configuration verification function
+□ Add diagnostic test routines
+□ Consider software compensation as temporary fix
+□ Update calibration procedures
+
+SEVERITY: {diagnosis['severity'].upper()}

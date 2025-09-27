@@ -42,7 +42,7 @@ def list_ports():
             'message': str(e)
         }), 500
 
-@port_bp.route('/api/ports/test/<port>', methods=['GET'])
+@port_bp.route('/api/ports/test/<path:port>', methods=['GET'])
 def test_port(port):
     """Test connection to specified port"""
     try:

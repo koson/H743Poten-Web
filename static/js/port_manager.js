@@ -166,6 +166,7 @@ class PortManager {
     
     async testPort(port) {
         try {
+            // Use path parameter in Flask route to handle paths like /dev/ttyACM1
             const response = await fetch(`/api/ports/test/${port}`);
             const data = await response.json();
             

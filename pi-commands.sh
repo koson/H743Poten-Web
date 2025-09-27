@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Quick SSH Commands for Raspberry Pi
+echo "🔧 Pi SSH Commands:"
+echo "=================="
+echo "ssh ben@192.168.9.75                           # SSH to Pi"
+echo "ssh ben@192.168.9.75 'cd ~/h743poten-web && python auto_dev.py status'  # Check status"
+echo "./deploy.sh rpi-home development              # Full deploy"
+echo "./simple-deploy.sh                            # Quick deploy"
+echo "./scripts/health-check.sh rpi-home            # Health check"
+echo ""
+echo "🌐 Web Interface: http://192.168.9.75:8080"
+echo ""
+echo "📊 Pi Status Commands:"
+echo "====================="
+echo "ssh ben@192.168.9.75 'cd ~/h743poten-web && python auto_dev.py logs'    # View logs"
+echo "ssh ben@192.168.9.75 'cd ~/h743poten-web && python auto_dev.py stop'    # Stop server"
+echo "ssh ben@192.168.9.75 'cd ~/h743poten-web && python auto_dev.py start'   # Start server"
+echo "ssh ben@192.168.9.75 'htop'                   # System monitor"
+echo "ssh ben@192.168.9.75 'ls -la /dev/ttyUSB* /dev/ttyACM*'  # Check serial ports"
+echo ""
+echo "🔑 SSH is now configured with key authentication!"
+echo "No more password prompts needed."

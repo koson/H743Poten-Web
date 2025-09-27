@@ -474,6 +474,13 @@ class CVMeasurementService:
             if hasattr(self, 'completion_wait_start'):
                 delattr(self, 'completion_wait_start')
                 
+            # 🚨 ENHANCED START DEBUG
+            logger.info(f"🚀🚀🚀 MEASUREMENT STARTED - Expecting {self.current_params.cycles if self.current_params else '?'} cycles 🚀🚀🚀")
+            logger.info(f"📡 STM32 Command sent: {command}")
+            logger.info(f"⏰ Start time: {time.strftime('%H:%M:%S', time.localtime(self.start_time))}")
+            logger.info(f"🔍 Debug mode: {self.debug_mode}")
+            logger.info(f"⏳ Estimated duration: ~{self._estimate_measurement_time()}s")
+                
             # Start measurement worker thread
             self.measurement_thread = threading.Thread(
                 target=self._measurement_worker,
@@ -635,6 +642,7 @@ class CVMeasurementService:
                     'upper': self.current_params.upper,
                     'lower': self.current_params.lower, 
                     'rate': self.current_params.rate,
+                    'scan_rate': self.current_params.rate,  # Add scan_rate for frontend compatibility
                     'cycles': self.current_params.cycles
                 } if self.current_params else None
             }
@@ -664,7 +672,6 @@ class CVMeasurementService:
                 
                 # ✅ STM32 already sends corrected voltages - no additional correction needed
                 # Keep original potential as-is since STM32 handles virtual ground internally
-                logger.debug(f"✅ Using STM32 voltage as-is: {potential:.4f}V (already corrected by STM32)")
                     
                 # Debug current data issues
                 if abs(point.current + 6.4872) < 0.001:  # Check for problematic -6.4872 value
@@ -979,7 +986,6 @@ class CVMeasurementService:
                     continue
                     
                 logger.info(f"📡 STM32 → Processing: '{line}'")
-                logger.debug(f"🔍 Raw data line parts: {parts}")
                 
                 # Check for measurement completion signals from STM32
                 if any(completion_keyword in line.upper() for completion_keyword in [
@@ -989,7 +995,8 @@ class CVMeasurementService:
                     self.is_measuring = False
                     return False
                 
-                # Detect potential completion by analyzing data patterns
+                # 🚫 DISABLED: Intelligent completion detection causes premature stopping
+                # Only rely on STM32 completion messages, not data pattern analysis
                 if line.startswith('CV,') or line.startswith('CV '):
                     parts = line.split(',')
                     if len(parts) >= 10:
@@ -1002,26 +1009,28 @@ class CVMeasurementService:
                             if len(self.data_points) <= 5:
                                 logger.info(f"📊 Early data point #{len(self.data_points)}: V={voltage}V, cycle={cycle}, point={point_no}")
                             
-                            # Only check for completion after sufficient data points
-                            if len(self.data_points) >= 20:  # Need minimum 20 data points
-                                # Check if we're in final cycle 
-                                if cycle >= self.current_params.cycles:
-                                    # Check if voltage is returning to start AND we've had significant movement
-                                    voltage_tolerance = 0.02  # 20mV tolerance
-                                    start_voltage = self.current_params.begin
-                                    
-                                    # Check if we've moved significantly from start in recent data
-                                    recent_points = self.data_points[-10:] if len(self.data_points) >= 10 else []
-                                    has_movement = any(
-                                        abs(dp.potential - start_voltage) > 0.1 
-                                        for dp in recent_points
-                                    )
-                                    
-                                    # Detect completion: close to start + in final cycle + had movement
-                                    if (abs(voltage - start_voltage) < voltage_tolerance and 
-                                        has_movement and point_no > 30):  # Ensure substantial measurement
-                                        logger.info(f"🏁 Detected completion: returned to start voltage {voltage}V in final cycle {cycle} (point {point_no})")
-                                        self.completion_detected = True
+                            # 🚫 DISABLED: Premature completion detection
+                            # This was causing web to stop before STM32 sends real completion signal
+                            # # Only check for completion after sufficient data points
+                            # if len(self.data_points) >= 20:  # Need minimum 20 data points
+                            #     # Check if we're in final cycle 
+                            #     if cycle >= self.current_params.cycles:
+                            #         # Check if voltage is returning to start AND we've had significant movement
+                            #         voltage_tolerance = 0.02  # 20mV tolerance
+                            #         start_voltage = self.current_params.begin
+                            #         
+                            #         # Check if we've moved significantly from start in recent data
+                            #         recent_points = self.data_points[-10:] if len(self.data_points) >= 10 else []
+                            #         has_movement = any(
+                            #             abs(dp.potential - start_voltage) > 0.1 
+                            #             for dp in recent_points
+                            #         )
+                            #         
+                            #         # Detect completion: close to start + in final cycle + had movement
+                            #         if (abs(voltage - start_voltage) < voltage_tolerance and 
+                            #             has_movement and point_no > 30):  # Ensure substantial measurement
+                            #             logger.info(f"🏁 Detected completion: returned to start voltage {voltage}V in final cycle {cycle} (point {point_no})")
+                            #             self.completion_detected = True
                                 
                         except (ValueError, IndexError) as e:
                             logger.debug(f"Could not parse completion check: {e}")
@@ -1037,7 +1046,10 @@ class CVMeasurementService:
                     "END_CV_SCAN", "COMPLETION MESSAGES SENT"  # Final STM32 format
                 ]
                 if any(keyword in line.upper() for keyword in completion_keywords):
-                    logger.info(f"🏁 STM32 signaled measurement completion: {line.strip()}")
+                    logger.info(f"🏁🏁🏁 STM32 COMPLETION SIGNAL DETECTED: '{line.strip()}' 🏁🏁🏁")
+                    logger.info(f"📊 Measurement Status: Total points collected: {len(self.data_points)}")
+                    logger.info(f"📊 Current cycle: {self.current_cycle}/{self.current_params.cycles if self.current_params else '?'}")
+                    logger.info(f"📊 Is measuring: {self.is_measuring}")
                     self.completion_detected = True
                     continue
                 
@@ -1157,7 +1169,11 @@ class CVMeasurementService:
                                 direction=direction
                             )
                             self.data_points.append(data_point)
-                            logger.info(f"✅ ADDED data point #{len(self.data_points)}: V={potential:.3f}V, I={current:.1f}µA")
+                            
+                            # Enhanced debug logging every 50 points or for important cycles
+                            if len(self.data_points) % 50 == 0 or cycle != getattr(self, '_last_logged_cycle', 0):
+                                logger.info(f"✅ ADDED data point #{len(self.data_points)}: V={potential:.3f}V, I={current:.1f}µA, Cycle={cycle}, Dir={direction}")
+                                self._last_logged_cycle = cycle
                             
                         data_processed = True
                         

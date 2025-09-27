@@ -182,19 +182,15 @@ def create_app():
             'error_code': 500
         }), 500
     
+
     @app.route('/health')
     def health_check():
         """Health check endpoint for monitoring"""
         try:
-            # Check database connection (if applicable)
-            # db_status = check_database_connection()
-            
-            # Check serial connection
+            import sys
+            from datetime import datetime
             serial_connected = app.config['scpi_handler'].is_connected if 'scpi_handler' in app.config else False
-            
-            # Check available endpoints
             routes_count = len([rule for rule in app.url_map.iter_rules()])
-            
             return jsonify({
                 'status': 'healthy',
                 'timestamp': datetime.now().isoformat(),
@@ -216,7 +212,6 @@ def create_app():
                 'error': str(e),
                 'timestamp': datetime.now().isoformat()
             }), 500
-
     @app.route('/debug')
     def debug():
         """Debug endpoint to check application state"""
@@ -267,6 +262,11 @@ def create_app():
     def settings_view():
         """Settings and feature management interface"""
         return render_template('settings.html')
+
+    @app.route('/com-port-connector')
+    def com_port_connector():
+        """COM port connection interface"""
+        return render_template('com_port_connector.html')
     
     @app.route('/workflow')
     def workflow_view():
@@ -379,6 +379,34 @@ def create_app():
         except Exception as e:
             logger.error(f"Failed to get measurement status: {e}")
             return jsonify({'error': str(e)}), 500
+    
+    @app.route('/api/measurement/data/<mode>')
+    def get_measurement_data(mode):
+        """Get measurement data for specific mode (CV, DPV, SWV, CA)"""
+        try:
+            # Get data from measurement service and update data service
+            measurement_data = app.config['measurement_service'].get_measurement_data()
+            app.config['data_service'].update_measurement_data(measurement_data)
+            
+            # Get current data
+            data = app.config['data_service'].get_current_data()
+            
+            # Return data in format expected by frontend
+            return jsonify({
+                'success': True,
+                'data': {
+                    'points': data.get('points', []),
+                    'completed': data.get('completed', False),
+                    'mode': mode
+                }
+            })
+        except Exception as e:
+            logger.error(f"Failed to get measurement data for {mode}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'data': {'points': [], 'completed': False, 'mode': mode}
+            }), 500
     
     @app.route('/api/data/current')
     def get_current_data():
