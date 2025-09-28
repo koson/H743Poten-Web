@@ -140,11 +140,25 @@ function getModeParameters() {
             break;
             
         case 'SWV':
+            // Basic SWV parameters
             params.initial = parseFloat(document.getElementById('swv-initial').value);
             params.final = parseFloat(document.getElementById('swv-final').value);
             params.amplitude = parseFloat(document.getElementById('swv-amplitude').value);
             params.step = parseFloat(document.getElementById('swv-step').value);
             params.frequency = parseFloat(document.getElementById('swv-frequency').value);
+            
+            // Enhanced SWV parameters (for CV service compatibility)
+            params.begin = params.initial;  // Map initial -> begin
+            params.end = params.final;      // Map final -> end
+            params.step_potential = params.step;
+            
+            // Preconcentration parameters
+            params.preconc_enabled = document.getElementById('swv-preconc-enabled').checked;
+            params.preconc_potential = parseFloat(document.getElementById('swv-preconc-potential').value);
+            params.preconc_time = parseFloat(document.getElementById('swv-preconc-time').value);
+            params.equilibration_time = parseFloat(document.getElementById('swv-equilibration-time').value);
+            
+            console.log('🚨 SWV Frontend Params:', params);
             break;
             
         case 'CA':
@@ -397,5 +411,39 @@ function startDataCollection() {
         }
     }, 500); // 🔧 FIXED: Reduce from 100ms to 500ms to prevent server overload in DPV mode
 }
+
+// SWV Preconcentration settings toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const preoncEnabledCheckbox = document.getElementById('swv-preconc-enabled');
+    const preoncSettings = document.getElementById('swv-preconc-settings');
+    
+    if (preoncEnabledCheckbox && preoncSettings) {
+        function togglePreoncSettings() {
+            if (preoncEnabledCheckbox.checked) {
+                preoncSettings.classList.remove('disabled');
+                preoncSettings.style.opacity = '1';
+                
+                // Enable all input fields
+                const inputs = preoncSettings.querySelectorAll('input');
+                inputs.forEach(input => input.disabled = false);
+            } else {
+                preoncSettings.classList.add('disabled');
+                preoncSettings.style.opacity = '0.5';
+                
+                // Disable all input fields
+                const inputs = preoncSettings.querySelectorAll('input');
+                inputs.forEach(input => input.disabled = true);
+            }
+        }
+        
+        // Initial state
+        togglePreoncSettings();
+        
+        // Listen for changes
+        preoncEnabledCheckbox.addEventListener('change', togglePreoncSettings);
+        
+        console.log('🚨 SWV Preconcentration toggle initialized');
+    }
+});
 
 // Note: PortManager is initialized in port_manager.js

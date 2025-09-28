@@ -54,6 +54,36 @@
         .main-content {
             min-height: 80vh;
         }
+        
+        /* Enhanced SWV Styling */
+        #swv-preconc-settings {
+            transition: all 0.3s ease;
+            border-left: 3px solid #28a745;
+            background: rgba(40, 167, 69, 0.05);
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+        }
+        
+        #swv-preconc-settings.disabled {
+            opacity: 0.5;
+            border-left-color: #6c757d;
+            background: rgba(108, 117, 125, 0.05);
+        }
+        
+        .form-check-input:checked {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        
+        .parameter-section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.25rem;
+        }
     </style>
 </head>
 <body>
