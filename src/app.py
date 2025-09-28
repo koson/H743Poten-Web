@@ -309,14 +309,32 @@ def create_app(scpi_handler=None):
             port = data.get('port')
             baud_rate = data.get('baud_rate', 115200)  # Default to 115200 if not provided
             
+            logger.info(f"Connection attempt: port={port}, baud_rate={baud_rate}")
+            
             if not port:
+                logger.error("Connection failed: No port specified")
                 return jsonify({'success': False, 'error': 'Port is required'}), 400
 
             app.config['scpi_handler'].port = port
             app.config['scpi_handler'].baud_rate = baud_rate
             success = app.config['scpi_handler'].connect()
-            return jsonify({'success': success})
+            
+            if success:
+                logger.info(f"✅ Connection successful: {port} at {baud_rate} baud")
+                return jsonify({
+                    'success': True, 
+                    'message': f'Connected to {port} at {baud_rate} baud'
+                })
+            else:
+                error_msg = f"Failed to connect to {port} at {baud_rate} baud"
+                logger.error(f"❌ Connection failed: {error_msg}")
+                return jsonify({
+                    'success': False, 
+                    'error': error_msg
+                })
+            
         except Exception as e:
+            logger.error(f"Connection exception: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     @app.route('/api/connection/disconnect', methods=['POST'])
@@ -342,7 +360,8 @@ def create_app(scpi_handler=None):
         try:
             data = request.get_json()
             mode = data.get('mode')
-            params = data.get('params', {})
+            # Support both 'params' and 'parameters' for compatibility
+            params = data.get('parameters', data.get('params', {}))
             
             success = app.config['measurement_service'].setup_measurement(mode, params)
             return jsonify({'success': success})

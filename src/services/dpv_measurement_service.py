@@ -85,6 +85,7 @@ class DPVMeasurementService:
         self.current_potential = 0.0
         self.last_validated_current = None
         self.pulse_number = 0
+        self.current_range: int = 1  # Current range setting (0-3)
         
         # DPV specific settings
         self.enable_data_filtering = True
@@ -110,14 +111,19 @@ class DPVMeasurementService:
             else:
                 logger.warning("⚠️ SCPI handler not available - using mock data for testing")
             
+            # Extract current range setting
+            current_range_val = params_dict.get('currentRange', 1)
+            self.current_range = int(current_range_val)
+            logger.info(f"⚡ DPV Current range set to: {self.current_range}")
+            
             # Convert dict to DPVParameters (handle both frontend and legacy parameter names)
             params = DPVParameters(
-                initial_potential=float(params_dict.get('start_potential', params_dict.get('initial_potential', -0.5))),
-                final_potential=float(params_dict.get('end_potential', params_dict.get('final_potential', 0.5))),
-                pulse_height=float(params_dict.get('pulse_height', 0.05)),
-                pulse_increment=float(params_dict.get('pulse_increment', 0.01)),
-                pulse_width=float(params_dict.get('pulse_width', 0.05)),
-                pulse_period=float(params_dict.get('pulse_period', 0.1))
+                initial_potential=float(params_dict.get('start_potential', params_dict.get('initial', -0.5))),
+                final_potential=float(params_dict.get('end_potential', params_dict.get('final', 0.5))),
+                pulse_height=float(params_dict.get('pulse_height', params_dict.get('amplitude', 0.05))),
+                pulse_increment=float(params_dict.get('pulse_increment', params_dict.get('step', 0.01))),
+                pulse_width=float(params_dict.get('pulse_width', params_dict.get('pulseWidth', 0.05))),
+                pulse_period=float(params_dict.get('pulse_period', params_dict.get('pulsePeriod', 0.1)))
             )
             
             # 🔍 DEBUG: Log parsed DPV parameters
@@ -169,6 +175,22 @@ class DPVMeasurementService:
             
             # DPV uses Start:ALL command (already sent in setup)
             self.is_measuring = True
+            
+            # 🎯 SEND CURRENT RANGE COMMAND (AFTER MEASUREMENT START) - ONLY IF NOT AUTO
+            if hasattr(self, 'current_range') and self.current_range is not None and self.current_range != 'auto':
+                try:
+                    current_range_cmd = f"POTEn:CURRent:RANGe {self.current_range}"
+                    logger.info(f"📡 DPV Sending current range command: {current_range_cmd} (Manual mode)")
+                    range_result = self.scpi_handler.send_custom_command(current_range_cmd)
+                    if range_result and range_result.get('success', False):
+                        logger.info(f"✅ DPV Current range locked to {self.current_range}")
+                    else:
+                        logger.warning(f"⚠️ DPV No response to current range command")
+                except Exception as e:
+                    logger.error(f"❌ DPV Failed to send current range command: {e}")
+            elif hasattr(self, 'current_range') and self.current_range == 'auto':
+                logger.info(f"🤖 DPV Using AUTO range mode - STM32 will handle range selection automatically")
+            
             logger.info(f"Started DPV measurement")
             
             return True

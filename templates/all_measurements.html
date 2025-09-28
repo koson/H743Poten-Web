@@ -482,16 +482,41 @@
                     label.textContent = this.getParameterLabel(param);
                     label.className = 'form-label small mb-1';
                     
-                    const input = document.createElement('input');
+                    let input;
                     
-                    // Handle checkbox for preconc_enabled
+                    // Handle special input types
                     if (param === 'preconc_enabled') {
+                        input = document.createElement('input');
                         input.type = 'checkbox';
                         input.checked = this.getParameterDefault(param);
                         input.className = 'form-check-input';
                         div.className = 'mb-2 form-check';
                         label.className = 'form-check-label small';
+                    } else if (param === 'current_range') {
+                        // Create dropdown for current range selection
+                        input = document.createElement('select');
+                        input.className = 'form-select form-select-sm';
+                        
+                        // Add options for current range
+                        const ranges = [
+                            { value: 'auto', text: 'Auto (STM32 selects)' },
+                            { value: '0', text: 'Range 0 (±100µA, 1kΩ)' },
+                            { value: '1', text: 'Range 1 (±10µA, 10kΩ)' },
+                            { value: '2', text: 'Range 2 (±1µA, 100kΩ)' },
+                            { value: '3', text: 'Range 3 (±100nA, 1MΩ)' }
+                        ];
+                        
+                        ranges.forEach(range => {
+                            const option = document.createElement('option');
+                            option.value = range.value;
+                            option.textContent = range.text;
+                            if (range.value === this.getParameterDefault(param)) {
+                                option.selected = true;
+                            }
+                            input.appendChild(option);
+                        });
                     } else {
+                        input = document.createElement('input');
                         input.type = 'number';
                         input.step = '0.001';
                         input.value = this.getParameterDefault(param);
@@ -533,7 +558,8 @@
                     'preconc_potential': 'Preconc. Potential (V)',
                     'preconc_time': 'Preconc. Time (s)',
                     'equilibration_time': 'Equilibration Time (s)',
-                    'end_voltage': 'End Voltage (V)'
+                    'end_voltage': 'End Voltage (V)',
+                    'current_range': 'Current Range'
                 };
                 return labels[param] || param;
             }
@@ -566,7 +592,8 @@
                     'step_potential': 0.01,
                     'step_potential': 0.5,
                     'duration': 10.0,
-                    'sampling_interval': 0.01
+                    'sampling_interval': 0.01,
+                    'current_range': 'auto'
                 };
                 return defaults[param] || 0;
             }
@@ -574,10 +601,10 @@
             getParametersForMode(mode) {
                 // Define parameters for each measurement mode
                 const modeParameters = {
-                    'CV': ['begin_voltage', 'upper_voltage', 'lower_voltage', 'scan_rate', 'cycles'],
-                    'DPV': ['start_potential', 'end_potential', 'pulse_height', 'pulse_increment', 'pulse_width', 'pulse_period'],
-                    'SWV': ['begin_voltage', 'end_voltage', 'step_potential', 'amplitude', 'frequency', 'preconc_enabled', 'preconc_potential', 'preconc_time', 'equilibration_time'],
-                    'CA': ['step_potential', 'duration', 'sampling_interval']
+                    'CV': ['begin_voltage', 'upper_voltage', 'lower_voltage', 'scan_rate', 'cycles', 'current_range'],
+                    'DPV': ['start_potential', 'end_potential', 'pulse_height', 'pulse_increment', 'pulse_width', 'pulse_period', 'current_range'],
+                    'SWV': ['begin_voltage', 'end_voltage', 'step_potential', 'amplitude', 'frequency', 'preconc_enabled', 'preconc_potential', 'preconc_time', 'equilibration_time', 'current_range'],
+                    'CA': ['step_potential', 'duration', 'sampling_interval', 'current_range']
                 };
                 return modeParameters[mode] || [];
             }

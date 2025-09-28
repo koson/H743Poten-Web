@@ -78,6 +78,7 @@ class CAMeasurementService:
         self.step_start_time: Optional[float] = None
         self.last_data_time: Optional[float] = None
         self.data_timeout = 30.0  # seconds
+        self.current_range: int = 1  # Current range setting (0-3)
         self.current_potential = 0.0
         self.last_validated_current = None
         self.sample_number = 0
@@ -100,12 +101,17 @@ class CAMeasurementService:
                 logger.error("❌ CA STM32 hardware not connected - No measurement allowed")
                 return False
             
+            # Extract current range setting
+            current_range_val = params_dict.get('currentRange', 1)
+            self.current_range = int(current_range_val)
+            logger.info(f"⚡ CA Current range set to: {self.current_range}")
+            
             # Convert dict to CAParameters
             params = CAParameters(
-                initial_potential=float(params_dict.get('initial_potential', 0.0)),
-                step_potential=float(params_dict.get('step_potential', 0.5)),
+                initial_potential=float(params_dict.get('initial_potential', params_dict.get('initial', 0.0))),
+                step_potential=float(params_dict.get('step_potential', params_dict.get('step', 0.5))),
                 duration=float(params_dict.get('duration', 10.0)),
-                sampling_interval=float(params_dict.get('sampling_interval', 0.01))
+                sampling_interval=float(params_dict.get('sampling_interval', params_dict.get('interval', 0.01)))
             )
             
             # Validate parameters
@@ -153,6 +159,22 @@ class CAMeasurementService:
             
             self.is_measuring = True
             self.step_start_time = time.time()  # Record when step was applied
+            
+            # 🎯 SEND CURRENT RANGE COMMAND (AFTER MEASUREMENT START) - ONLY IF NOT AUTO
+            if hasattr(self, 'current_range') and self.current_range is not None and self.current_range != 'auto':
+                try:
+                    current_range_cmd = f"POTEn:CURRent:RANGe {self.current_range}"
+                    logger.info(f"📡 CA Sending current range command: {current_range_cmd} (Manual mode)")
+                    range_result = self.scpi_handler.send_custom_command(current_range_cmd)
+                    if range_result and range_result.get('success', False):
+                        logger.info(f"✅ CA Current range locked to {self.current_range}")
+                    else:
+                        logger.warning(f"⚠️ CA No response to current range command")
+                except Exception as e:
+                    logger.error(f"❌ CA Failed to send current range command: {e}")
+            elif hasattr(self, 'current_range') and self.current_range == 'auto':
+                logger.info(f"🤖 CA Using AUTO range mode - STM32 will handle range selection automatically")
+            
             logger.info(f"Started CA measurement with {len(commands)} commands")
             
             return True

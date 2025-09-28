@@ -83,6 +83,18 @@ class SWVMeasurementService:
         self.current_potential = 0.0
         self.last_validated_current = None
         self.step_number = 0
+        self.current_range: int = 1  # Current range setting (0-3)
+        
+        # SWV Progress tracking
+        self.progress_data = {
+            'phase': 'READY',
+            'elapsed': 0,
+            'total': 0,
+            'potential': 0.0,
+            'current_point': 0,
+            'total_points': 200,
+            'percentage': 0
+        }
         
         # SWV specific settings
         self.enable_data_filtering = True
@@ -105,9 +117,17 @@ class SWVMeasurementService:
                 logger.error("❌ SWV STM32 hardware not connected - No measurement allowed")
                 return False
             
+            # Extract current range setting
+            current_range_val = params_dict.get('currentRange', 1)
+            self.current_range = int(current_range_val)
+            logger.info(f"⚡ SWV Current range set to: {self.current_range}")
+            
             # Use CV service's SWV setup for enhanced parameters
             cv_service = current_app.cv_service
             if cv_service:
+                # Set current range in CV service too
+                cv_service.current_range = self.current_range
+                
                 # Setup using enhanced SWV parameters
                 success, message = cv_service.setup_swv_measurement(params_dict)
                 if success:
@@ -167,6 +187,22 @@ class SWVMeasurementService:
             
             # SWV uses Start:ALL command (already sent in setup)
             self.is_measuring = True
+            
+            # 🎯 SEND CURRENT RANGE COMMAND (AFTER MEASUREMENT START) - ONLY IF NOT AUTO
+            if hasattr(self, 'current_range') and self.current_range is not None and self.current_range != 'auto':
+                try:
+                    current_range_cmd = f"POTEn:CURRent:RANGe {self.current_range}"
+                    logger.info(f"📡 SWV Sending current range command: {current_range_cmd} (Manual mode)")
+                    range_result = self.scpi_handler.send_custom_command(current_range_cmd)
+                    if range_result and range_result.get('success', False):
+                        logger.info(f"✅ SWV Current range locked to {self.current_range}")
+                    else:
+                        logger.warning(f"⚠️ SWV No response to current range command")
+                except Exception as e:
+                    logger.error(f"❌ SWV Failed to send current range command: {e}")
+            elif hasattr(self, 'current_range') and self.current_range == 'auto':
+                logger.info(f"🤖 SWV Using AUTO range mode - STM32 will handle range selection automatically")
+            
             logger.info(f"Started SWV measurement")
             
             return True
@@ -192,9 +228,115 @@ class SWVMeasurementService:
         except Exception as e:
             logger.error(f"Error in SWV stop_measurement: {e}")
             return False
+    
+    def _update_progress_from_data(self, data_string: str):
+        """Update progress tracking from STM32 data"""
+        try:
+            lines = data_string.strip().split('\n')
+            
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                
+                # Parse preconcentration progress
+                if 'PRECONCENTRATION_START' in line:
+                    self.progress_data['phase'] = 'PRECONCENTRATION'
+                    self.progress_data['elapsed'] = 0
+                    logger.info("🚨 SWV Progress: Preconcentration started")
+                    
+                elif line.startswith('PRECON_PROGRESS'):
+                    # Format: PRECON_PROGRESS,STEP1,30.0,240.0
+                    parts = line.split(',')
+                    if len(parts) >= 4:
+                        elapsed = float(parts[2])
+                        total = float(parts[3])
+                        self.progress_data.update({
+                            'phase': 'PRECONCENTRATION',
+                            'elapsed': elapsed,
+                            'total': total,
+                            'percentage': int((elapsed / total) * 100),
+                            'potential': -1.9  # Default preconc potential
+                        })
+                        logger.debug(f"🚨 Preconc progress: {elapsed}/{total}s ({self.progress_data['percentage']}%)")
+                
+                elif 'PRECONCENTRATION_COMPLETE' in line:
+                    self.progress_data.update({
+                        'phase': 'PRECONCENTRATION',
+                        'percentage': 100,
+                        'elapsed': self.progress_data.get('total', 240)
+                    })
+                    logger.info("🚨 SWV Progress: Preconcentration complete")
+                
+                elif 'EQUILIBRATION_START' in line:
+                    # Format: EQUILIBRATION_START,-0.500,10.0
+                    parts = line.split(',')
+                    if len(parts) >= 3:
+                        potential = float(parts[1])
+                        total_time = float(parts[2])
+                        self.progress_data.update({
+                            'phase': 'EQUILIBRATION',
+                            'elapsed': 0,
+                            'total': total_time,
+                            'potential': potential,
+                            'percentage': 0
+                        })
+                    logger.info("🚨 SWV Progress: Equilibration started")
+                
+                elif line.startswith('EQUIL_PROGRESS'):
+                    # Format: EQUIL_PROGRESS,1.0,10.0
+                    parts = line.split(',')
+                    if len(parts) >= 3:
+                        elapsed = float(parts[1])
+                        total = float(parts[2])
+                        self.progress_data.update({
+                            'phase': 'EQUILIBRATION',
+                            'elapsed': elapsed,
+                            'total': total,
+                            'percentage': int((elapsed / total) * 100)
+                        })
+                        logger.debug(f"🚨 Equilibration progress: {elapsed}/{total}s")
+                
+                elif 'EQUILIBRATION_COMPLETE' in line:
+                    self.progress_data.update({
+                        'phase': 'EQUILIBRATION',
+                        'percentage': 100
+                    })
+                    logger.info("🚨 SWV Progress: Equilibration complete")
+                
+                elif line.startswith('SWV,') and ',' in line:
+                    # Parse SWV data points for scanning progress
+                    parts = line.split(',')
+                    if len(parts) >= 4:
+                        try:
+                            point_num = int(parts[1])
+                            potential = float(parts[3])
+                            
+                            self.progress_data.update({
+                                'phase': 'SCANNING',
+                                'current_point': point_num,
+                                'total_points': 200,  # Typical SWV scan points
+                                'potential': potential,
+                                'percentage': int((point_num / 200) * 100)
+                            })
+                            
+                            if point_num % 20 == 0:  # Log every 20 points
+                                logger.debug(f"🚨 SWV Scanning: Point {point_num}/200 at {potential}V")
+                        except (ValueError, IndexError):
+                            pass
+                
+                elif 'SWV Operation Finished' in line:
+                    self.progress_data.update({
+                        'phase': 'COMPLETE',
+                        'percentage': 100
+                    })
+                    logger.info("🚨 SWV Progress: Complete!")
+                    
+        except Exception as e:
+            logger.error(f"Error updating SWV progress: {e}")
 
     def get_measurement_data(self) -> Dict:
-        """Get current SWV measurement data"""
+        """Get current SWV measurement data with progress tracking"""
         try:
             if not self.current_params:
                 logger.debug("No SWV measurement mode set, returning empty data")
@@ -204,9 +346,16 @@ class SWVMeasurementService:
             buffered_data = self.scpi_handler.get_buffered_data()
             if buffered_data:
                 logger.info(f"Found buffered SWV data from STM32: {len(buffered_data)} characters")
+                
+                # Update progress based on buffered data
+                self._update_progress_from_data(buffered_data)
+                
                 parsed_data = self._parse_measurement_data(buffered_data)
                 if parsed_data['points']:
                     logger.info(f"Parsed {len(parsed_data['points'])} SWV points from buffered data")
+                    
+                    # Add progress data to response
+                    parsed_data['swv_progress'] = self.progress_data.copy()
                     return parsed_data
             
             # If no buffered data, try regular query
@@ -215,10 +364,19 @@ class SWVMeasurementService:
 
             if not result['success']:
                 logger.debug(f"SWV data query failed: {result['error']}")
-                return {'points': [], 'completed': False, 'status': 'collecting'}
+                return {
+                    'points': [], 
+                    'completed': False, 
+                    'status': 'collecting',
+                    'swv_progress': self.progress_data.copy()
+                }
 
             # Parse the data response
             data = self._parse_measurement_data(result['response'])
+            
+            # Update progress from parsed data
+            if result['response']:
+                self._update_progress_from_data(result['response'])
             
             # Check if measurement is completed
             if not data['points'] and self.is_measuring:
@@ -227,15 +385,26 @@ class SWVMeasurementService:
                 if status_result['success'] and 'COMPLETE' in status_result['response'].upper():
                     logger.info(f"SWV measurement completed")
                     self.is_measuring = False
+                    self.progress_data['phase'] = 'COMPLETE'
+                    self.progress_data['percentage'] = 100
+                    
                     completed_data = dict(data)
                     completed_data['completed'] = True
+                    completed_data['swv_progress'] = self.progress_data.copy()
                     return completed_data
             
+            # Always include progress data
+            data['swv_progress'] = self.progress_data.copy()
             return data
 
         except Exception as e:
             logger.error(f"Error in SWV get_measurement_data: {e}")
-            return {'points': [], 'completed': False, 'error': str(e)}
+            return {
+                'points': [], 
+                'completed': False, 
+                'error': str(e),
+                'swv_progress': self.progress_data.copy()
+            }
 
     def _parse_measurement_data(self, response: str) -> Dict:
         """Parse SWV measurement data from SCPI response"""

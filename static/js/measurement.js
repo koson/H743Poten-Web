@@ -136,7 +136,7 @@ function getModeParameters() {
             params.amplitude = parseFloat(document.getElementById('dpv-amplitude').value);
             params.step = parseFloat(document.getElementById('dpv-step').value);
             params.pulseWidth = parseFloat(document.getElementById('dpv-pulse-width').value);
-            params.scanRate = parseFloat(document.getElementById('dpv-scan-rate').value);
+            params.pulsePeriod = parseFloat(document.getElementById('dpv-pulse-period').value);
             break;
             
         case 'SWV':
@@ -164,7 +164,7 @@ function getModeParameters() {
         case 'CA':
             params.initial = parseFloat(document.getElementById('ca-initial').value);
             params.step = parseFloat(document.getElementById('ca-step').value);
-            params.time = parseFloat(document.getElementById('ca-time').value);
+            params.duration = parseFloat(document.getElementById('ca-duration').value);
             params.interval = parseFloat(document.getElementById('ca-interval').value);
             break;
     }
@@ -243,10 +243,25 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             const params = getModeParameters();
-            const response = await fetch('/api/measurement/start', {
+            const setupResponse = await fetch('/api/measurement/universal/setup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(params)
+                body: JSON.stringify({
+                    mode: currentMode,
+                    parameters: params
+                })
+            });
+            
+            if (!setupResponse.ok) {
+                throw new Error('Setup failed');
+            }
+            
+            const response = await fetch('/api/measurement/universal/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mode: currentMode
+                })
             });
             
             const data = await response.json();
@@ -268,7 +283,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isMeasuring) return;
         
         try {
-            const response = await fetch('/api/measurement/stop', { method: 'POST' });
+            const response = await fetch('/api/measurement/universal/stop', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mode: currentMode
+                })
+            });
             const data = await response.json();
             if (data.success) {
                 isMeasuring = false;
@@ -334,7 +355,7 @@ function startDataCollection() {
         
         requestInProgress = true;
         try {
-            const response = await fetch('/api/measurement/data', {
+            const response = await fetch('/api/measurement/universal/status', {
                 timeout: 3000, // 🔧 NEW: 3 second timeout
                 headers: {
                     'Cache-Control': 'no-cache' // 🔧 NEW: Prevent caching
@@ -364,8 +385,8 @@ function startDataCollection() {
             consecutiveFailures = 0;
             
             // Check if measurement is completed
-            if (data.completed) {
-                console.log('Measurement completed by device');
+            if (!data.active && !data.is_measuring && data.data_points_count > 0) {
+                console.log('📡 Measurement completed by device');
                 clearInterval(dataCollector);
                 isMeasuring = false;
                 startBtn.disabled = false;
@@ -373,23 +394,35 @@ function startDataCollection() {
                 return;
             }
             
-            // Process data if available
-            if (data.points && data.points.time && data.points.time.length > 0) {
+            // Process SWV progress data first (if available)
+            if (data.swv_progress) {
+                updateSWVProgress(data.swv_progress);
+            }
+            
+            // Process measurement data from universal API
+            if (data.measurement_data && data.measurement_data.length > 0) {
                 dataReceived = true; // Mark that we've received data
                 
-                // Append new data points
-                dataPoints.time.push(...data.points.time);
-                dataPoints.potential.push(...data.points.potential);
-                dataPoints.current.push(...data.points.current);
+                // Clear existing data and set new data from universal API
+                dataPoints.time = [];
+                dataPoints.potential = [];
+                dataPoints.current = [];
+                
+                // Universal API provides complete dataset
+                data.measurement_data.forEach(point => {
+                    if (point.time !== undefined) dataPoints.time.push(point.time);
+                    if (point.potential !== undefined) dataPoints.potential.push(point.potential);
+                    if (point.current !== undefined) dataPoints.current.push(point.current);
+                });
                 
                 // Update plot and table
                 updatePlot(dataPoints);
                 updateDataTable(dataPoints);
                 
-                console.log(`Received ${data.points.time.length} new data points (total: ${dataPoints.time.length})`);
+                console.log(`📡 Universal API: ${data.data_points_count} total points for ${data.mode} mode`);
             } else {
                 // No data in this poll, but don't immediately fail
-                console.log('No new data points in this poll (waiting for STM32...)');
+                console.log('📡 No measurement data yet (waiting for device...)');
             }
             
         } catch (error) {
@@ -410,6 +443,78 @@ function startDataCollection() {
             requestInProgress = false;
         }
     }, 500); // 🔧 FIXED: Reduce from 100ms to 500ms to prevent server overload in DPV mode
+}
+
+// SWV Progress tracking
+function updateSWVProgress(progressData) {
+    if (!progressData) return;
+    
+    const progressContainer = document.getElementById('swv-progress-container');
+    const progressBar = document.getElementById('swv-progress-bar');
+    const progressText = document.getElementById('swv-progress-text');
+    const progressDetail = document.getElementById('swv-progress-detail');
+    
+    if (!progressContainer) return;
+    
+    // Show progress container during SWV measurement
+    if (currentMode === 'SWV' && isMeasuring) {
+        progressContainer.style.display = 'block';
+    }
+    
+    console.log('🚨 SWV Progress Update:', progressData);
+    
+    if (progressData.phase === 'PRECONCENTRATION') {
+        const percent = Math.round((progressData.elapsed / progressData.total) * 100);
+        progressBar.style.width = `${percent}%`;
+        progressBar.className = 'progress-bar bg-warning'; // Orange for preconc
+        
+        progressText.textContent = `Preconcentration: ${percent}%`;
+        progressDetail.innerHTML = `
+            <small class="text-muted">
+                ⚡ Potential: ${progressData.potential}V | 
+                ⏱️ Time: ${progressData.elapsed}s / ${progressData.total}s
+            </small>
+        `;
+        
+    } else if (progressData.phase === 'EQUILIBRATION') {
+        const percent = Math.round((progressData.elapsed / progressData.total) * 100);
+        progressBar.style.width = `${percent}%`;
+        progressBar.className = 'progress-bar bg-info'; // Blue for equilibration
+        
+        progressText.textContent = `Equilibration: ${percent}%`;
+        progressDetail.innerHTML = `
+            <small class="text-muted">
+                ⚖️ Stabilizing at ${progressData.potential}V | 
+                ⏱️ Time: ${progressData.elapsed}s / ${progressData.total}s
+            </small>
+        `;
+        
+    } else if (progressData.phase === 'SCANNING') {
+        const percent = Math.round((progressData.current_point / progressData.total_points) * 100);
+        progressBar.style.width = `${percent}%`;
+        progressBar.className = 'progress-bar bg-success'; // Green for scanning
+        
+        progressText.textContent = `SWV Scanning: ${percent}%`;
+        progressDetail.innerHTML = `
+            <small class="text-muted">
+                📊 Point ${progressData.current_point} / ${progressData.total_points} | 
+                ⚡ Current: ${progressData.potential}V
+            </small>
+        `;
+        
+    } else if (progressData.phase === 'COMPLETE') {
+        progressBar.style.width = '100%';
+        progressBar.className = 'progress-bar bg-success';
+        progressText.textContent = 'SWV Complete! ✅';
+        progressDetail.innerHTML = '<small class="text-success">Measurement finished successfully</small>';
+        
+        // Hide progress after 3 seconds
+        setTimeout(() => {
+            if (progressContainer) {
+                progressContainer.style.display = 'none';
+            }
+        }, 3000);
+    }
 }
 
 // SWV Preconcentration settings toggle

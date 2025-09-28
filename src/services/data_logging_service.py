@@ -375,3 +375,279 @@ class DataLoggingService:
                 'data_directory': str(self.base_data_dir),
                 'error': str(e)
             }
+
+    def save_dpv_measurement(self, 
+                            measurement_data: List[Dict], 
+                            parameters: Dict,
+                            session_id: Optional[str] = None,
+                            metadata: Optional[Dict] = None) -> Dict:
+        """Save DPV measurement data and generate plot"""
+        try:
+            if not measurement_data:
+                raise ValueError("No measurement data to save")
+            
+            # Generate session ID if not provided
+            if not session_id:
+                session_id = f"DPV_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            
+            # Create session directory
+            session_dir = self.base_data_dir / "sessions" / session_id
+            session_dir.mkdir(exist_ok=True)
+            
+            # Prepare data
+            df = pd.DataFrame(measurement_data)
+            
+            # File paths
+            csv_path = session_dir / f"{session_id}.csv"
+            png_path = session_dir / f"{session_id}.png"
+            metadata_path = session_dir / f"{session_id}_metadata.json"
+            
+            # Save CSV
+            self._save_dpv_csv(df, csv_path, parameters)
+            
+            # Save PNG plot
+            self._save_dpv_plot(df, png_path, parameters, session_id)
+            
+            # Save metadata
+            full_metadata = {
+                'session_id': session_id,
+                'measurement_type': 'DPV',
+                'timestamp': datetime.now().isoformat(),
+                'parameters': parameters,
+                'data_points_count': len(measurement_data),
+                'csv_file': str(csv_path.relative_to(self.base_data_dir)),
+                'png_file': str(png_path.relative_to(self.base_data_dir)),
+                **(metadata or {})
+            }
+            
+            with open(metadata_path, 'w') as f:
+                json.dump(full_metadata, f, indent=2)
+            
+            logger.info(f"✅ DPV measurement saved: {session_id}")
+            return {'success': True, 'session_id': session_id}
+            
+        except Exception as e:
+            logger.error(f"Failed to save DPV measurement: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def save_swv_measurement(self, 
+                            measurement_data: List[Dict], 
+                            parameters: Dict,
+                            session_id: Optional[str] = None,
+                            metadata: Optional[Dict] = None) -> Dict:
+        """Save SWV measurement data and generate plot"""
+        try:
+            if not measurement_data:
+                raise ValueError("No measurement data to save")
+            
+            # Generate session ID if not provided
+            if not session_id:
+                session_id = f"SWV_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            
+            # Create session directory
+            session_dir = self.base_data_dir / "sessions" / session_id
+            session_dir.mkdir(exist_ok=True)
+            
+            # Prepare data
+            df = pd.DataFrame(measurement_data)
+            
+            # File paths
+            csv_path = session_dir / f"{session_id}.csv"
+            png_path = session_dir / f"{session_id}.png"
+            metadata_path = session_dir / f"{session_id}_metadata.json"
+            
+            # Save CSV
+            self._save_swv_csv(df, csv_path, parameters)
+            
+            # Save PNG plot
+            self._save_swv_plot(df, png_path, parameters, session_id)
+            
+            # Save metadata
+            full_metadata = {
+                'session_id': session_id,
+                'measurement_type': 'SWV',
+                'timestamp': datetime.now().isoformat(),
+                'parameters': parameters,
+                'data_points_count': len(measurement_data),
+                'csv_file': str(csv_path.relative_to(self.base_data_dir)),
+                'png_file': str(png_path.relative_to(self.base_data_dir)),
+                **(metadata or {})
+            }
+            
+            with open(metadata_path, 'w') as f:
+                json.dump(full_metadata, f, indent=2)
+            
+            logger.info(f"✅ SWV measurement saved: {session_id}")
+            return {'success': True, 'session_id': session_id}
+            
+        except Exception as e:
+            logger.error(f"Failed to save SWV measurement: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def save_ca_measurement(self, 
+                           measurement_data: List[Dict], 
+                           parameters: Dict,
+                           session_id: Optional[str] = None,
+                           metadata: Optional[Dict] = None) -> Dict:
+        """Save CA measurement data and generate plot"""
+        try:
+            if not measurement_data:
+                raise ValueError("No measurement data to save")
+            
+            # Generate session ID if not provided
+            if not session_id:
+                session_id = f"CA_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            
+            # Create session directory
+            session_dir = self.base_data_dir / "sessions" / session_id
+            session_dir.mkdir(exist_ok=True)
+            
+            # Prepare data
+            df = pd.DataFrame(measurement_data)
+            
+            # File paths
+            csv_path = session_dir / f"{session_id}.csv"
+            png_path = session_dir / f"{session_id}.png"
+            metadata_path = session_dir / f"{session_id}_metadata.json"
+            
+            # Save CSV
+            self._save_ca_csv(df, csv_path, parameters)
+            
+            # Save PNG plot
+            self._save_ca_plot(df, png_path, parameters, session_id)
+            
+            # Save metadata
+            full_metadata = {
+                'session_id': session_id,
+                'measurement_type': 'CA',
+                'timestamp': datetime.now().isoformat(),
+                'parameters': parameters,
+                'data_points_count': len(measurement_data),
+                'csv_file': str(csv_path.relative_to(self.base_data_dir)),
+                'png_file': str(png_path.relative_to(self.base_data_dir)),
+                **(metadata or {})
+            }
+            
+            with open(metadata_path, 'w') as f:
+                json.dump(full_metadata, f, indent=2)
+            
+            logger.info(f"✅ CA measurement saved: {session_id}")
+            return {'success': True, 'session_id': session_id}
+            
+        except Exception as e:
+            logger.error(f"Failed to save CA measurement: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def _save_dpv_csv(self, df: pd.DataFrame, csv_path: Path, parameters: Dict) -> bool:
+        """Save DPV data as CSV with headers"""
+        try:
+            header_lines = [
+                "# DPV Measurement Data",
+                f"# Generated: {datetime.now().isoformat()}",
+                f"# Parameters: {json.dumps(parameters)}",
+                ""
+            ]
+            
+            with open(csv_path, 'w') as f:
+                f.write('\n'.join(header_lines))
+                
+            df.to_csv(csv_path, mode='a', index=False)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save DPV CSV: {e}")
+            return False
+
+    def _save_swv_csv(self, df: pd.DataFrame, csv_path: Path, parameters: Dict) -> bool:
+        """Save SWV data as CSV with headers"""
+        try:
+            header_lines = [
+                "# SWV Measurement Data",
+                f"# Generated: {datetime.now().isoformat()}",
+                f"# Parameters: {json.dumps(parameters)}",
+                ""
+            ]
+            
+            with open(csv_path, 'w') as f:
+                f.write('\n'.join(header_lines))
+                
+            df.to_csv(csv_path, mode='a', index=False)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save SWV CSV: {e}")
+            return False
+
+    def _save_ca_csv(self, df: pd.DataFrame, csv_path: Path, parameters: Dict) -> bool:
+        """Save CA data as CSV with headers"""
+        try:
+            header_lines = [
+                "# CA Measurement Data",
+                f"# Generated: {datetime.now().isoformat()}",
+                f"# Parameters: {json.dumps(parameters)}",
+                ""
+            ]
+            
+            with open(csv_path, 'w') as f:
+                f.write('\n'.join(header_lines))
+                
+            df.to_csv(csv_path, mode='a', index=False)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save CA CSV: {e}")
+            return False
+
+    def _save_dpv_plot(self, df: pd.DataFrame, png_path: Path, parameters: Dict, session_id: str) -> bool:
+        """Generate and save DPV plot"""
+        try:
+            plt.figure(figsize=(10, 8))
+            plt.plot(df['potential'], df['current'], 'b-', linewidth=2, label='DPV')
+            plt.xlabel('Potential (V)', fontsize=12)
+            plt.ylabel('Current (A)', fontsize=12)
+            plt.title(f'Differential Pulse Voltammogram - {session_id}\\n'
+                     f'Parameters: {parameters}', fontsize=14)
+            plt.grid(True, alpha=0.3)
+            plt.legend()
+            plt.tight_layout()
+            plt.savefig(png_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save DPV plot: {e}")
+            return False
+
+    def _save_swv_plot(self, df: pd.DataFrame, png_path: Path, parameters: Dict, session_id: str) -> bool:
+        """Generate and save SWV plot"""
+        try:
+            plt.figure(figsize=(10, 8))
+            plt.plot(df['potential'], df['current'], 'g-', linewidth=2, label='SWV')
+            plt.xlabel('Potential (V)', fontsize=12)
+            plt.ylabel('Current (A)', fontsize=12)
+            plt.title(f'Square Wave Voltammogram - {session_id}\\n'
+                     f'Parameters: {parameters}', fontsize=14)
+            plt.grid(True, alpha=0.3)
+            plt.legend()
+            plt.tight_layout()
+            plt.savefig(png_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save SWV plot: {e}")
+            return False
+
+    def _save_ca_plot(self, df: pd.DataFrame, png_path: Path, parameters: Dict, session_id: str) -> bool:
+        """Generate and save CA plot"""
+        try:
+            plt.figure(figsize=(10, 8))
+            plt.plot(df['time'], df['current'], 'r-', linewidth=2, label='CA')
+            plt.xlabel('Time (s)', fontsize=12)
+            plt.ylabel('Current (A)', fontsize=12)
+            plt.title(f'Chronoamperometry - {session_id}\\n'
+                     f'Parameters: {parameters}', fontsize=14)
+            plt.grid(True, alpha=0.3)
+            plt.legend()
+            plt.tight_layout()
+            plt.savefig(png_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save CA plot: {e}")
+            return False

@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Create blueprint
-universal_measurement = Blueprint('universal_measurement', __name__)
+universal_measurement = Blueprint('universal_measurement', __name__, url_prefix='/api/measurement/universal')
 
 def get_measurement_service(mode):
     """Get the appropriate measurement service for the mode"""
@@ -39,7 +39,7 @@ def get_measurement_service(mode):
     else:
         return None
 
-@universal_measurement.route('/api/measurement/setup', methods=['POST'])
+@universal_measurement.route('/setup', methods=['POST'])
 def setup_measurement():
     """Setup measurement with specified mode and parameters"""
     try:
@@ -100,7 +100,7 @@ def setup_measurement():
             'error': str(e)
         }), 500
 
-@universal_measurement.route('/api/measurement/start', methods=['POST'])
+@universal_measurement.route('/start', methods=['POST'])
 def start_measurement():
     """Start measurement for specified mode"""
     try:
@@ -153,7 +153,7 @@ def start_measurement():
             'error': str(e)
         }), 500
 
-@universal_measurement.route('/api/measurement/stop', methods=['POST'])
+@universal_measurement.route('/stop', methods=['POST'])
 def stop_measurement():
     """Stop measurement for specified mode"""
     try:
@@ -192,7 +192,7 @@ def stop_measurement():
             'error': str(e)
         }), 500
 
-@universal_measurement.route('/api/measurement/data/<mode>')
+@universal_measurement.route('/data/<mode>')
 def get_measurement_data(mode):
     """Get measurement data for specified mode"""
     try:
@@ -259,13 +259,36 @@ def get_universal_measurement_status():
                                 # Auto-save based on mode
                                 if mode == 'CV':
                                     result = data_service.save_cv_measurement(
-                                        session_id=session_id,
+                                        data_points=status.get('measurement_data', []),
+                                        parameters=status.get('parameters', {}),
+                                        session_id=session_id
+                                    )
+                                elif mode == 'DPV':
+                                    result = data_service.save_dpv_measurement(
                                         measurement_data=status.get('measurement_data', []),
                                         parameters=status.get('parameters', {}),
+                                        session_id=session_id,
                                         metadata={'auto_saved': True}
                                     )
-                                    if result.get('success'):
-                                        logger.info(f"✅ Auto-saved {mode} measurement: {session_id}")
+                                elif mode == 'SWV':
+                                    result = data_service.save_swv_measurement(
+                                        measurement_data=status.get('measurement_data', []),
+                                        parameters=status.get('parameters', {}),
+                                        session_id=session_id,
+                                        metadata={'auto_saved': True}
+                                    )
+                                elif mode == 'CA':
+                                    result = data_service.save_ca_measurement(
+                                        measurement_data=status.get('measurement_data', []),
+                                        parameters=status.get('parameters', {}),
+                                        session_id=session_id,
+                                        metadata={'auto_saved': True}
+                                    )
+                                else:
+                                    result = {'success': False, 'error': f'Unsupported mode: {mode}'}
+                                
+                                if result.get('success'):
+                                    logger.info(f"✅ Auto-saved {mode} measurement: {session_id}")
                                         
                             except Exception as auto_save_error:
                                 logger.error(f"Auto-save failed for {mode}: {auto_save_error}")

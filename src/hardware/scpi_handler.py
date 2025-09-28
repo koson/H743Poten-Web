@@ -34,45 +34,53 @@ class SCPIHandler:
         try:
             # Check if already connected
             if self.is_connected:
+                logger.info(f"Already connected to {self.port}")
                 return True
 
-            # Check if port exists
+            # Debug: Check available ports
             import serial.tools.list_ports
-            available_ports = [p.device for p in serial.tools.list_ports.comports()]
-            if self.port not in available_ports:
-                raise Exception(f"Port {self.port} not found")
-
-            # Check if port is in use
-            try:
-                temp_serial = serial.Serial(self.port)
-                temp_serial.close()
-            except:
-                raise Exception(f"Port {self.port} is in use")
-
-            # Try to connect with timeout and retries
-            max_retries = 3
-            retry_delay = 1  # seconds
+            import os
             
-            for attempt in range(max_retries):
-                try:
-                    self.serial = serial.Serial(
-                        port=self.port,
-                        baudrate=self.baud_rate,
-                        timeout=1
-                    )
-                    self.is_connected = True
-                    print(f"🔌 REAL SCPI Handler connected to {self.port} at {self.baud_rate} baud")
-                    logger.info(f"Connected to {self.port} at {self.baud_rate} baud")
-                    return True
-                except Exception as e:
-                    if attempt < max_retries - 1:
-                        logger.warning(f"Connection attempt {attempt + 1} failed: {e}")
-                        time.sleep(retry_delay)
-                    else:
-                        raise
+            available_ports = [p.device for p in serial.tools.list_ports.comports()]
+            logger.info(f"Available ports: {available_ports}")
+            logger.info(f"Trying to connect to: {self.port}")
+            
+            # Check if port file exists (more reliable than port enumeration)
+            if not os.path.exists(self.port):
+                raise Exception(f"Port device file {self.port} not found")
+            
+            # Check if port is accessible
+            if not os.access(self.port, os.R_OK | os.W_OK):
+                raise Exception(f"Port {self.port} is not accessible (permission denied)")
+
+            # Skip slow port availability check - connect directly
+            logger.info(f"🚀 Fast connect to {self.port}...")
+            
+            # Direct connection with minimal timeout
+            self.serial = serial.Serial(
+                port=self.port,
+                baudrate=self.baud_rate,
+                timeout=0.5,  # Reduced timeout for faster response
+                write_timeout=0.5,  # Write timeout to prevent hanging
+                rtscts=False,  # Disable flow control for speed
+                dsrdtr=False   # Disable DTR/DSR for speed
+            )
+            
+            # Quick connection verification
+            if self.serial.is_open:
+                self.is_connected = True
+                print(f"⚡ FAST connect to {self.port} at {self.baud_rate} baud - Ready!")
+                logger.info(f"Fast connected to {self.port} at {self.baud_rate} baud")
+                
+                # Quick flush to clear any old data
+                self.serial.reset_input_buffer()
+                self.serial.reset_output_buffer()
+                return True
+            else:
+                raise Exception("Serial port failed to open")
 
         except Exception as e:
-            logger.error(f"Failed to connect: {e}")
+            logger.error(f"Failed to connect to {self.port}: {e}")
             self.is_connected = False
             return False
 
@@ -97,7 +105,7 @@ class SCPIHandler:
             # Even if there's an error, mark as disconnected
             self.is_connected = False 
             self.serial = None
-            raise
+            # Don't raise - allow graceful disconnect even with errors
 
     def send_custom_command(self, command):
         """Send a custom SCPI command"""
@@ -126,7 +134,10 @@ class SCPIHandler:
             
             # Read response if command ends with '?'
             if '?' in command:
+                # Quick response read with short timeout
+                self.serial.timeout = 0.2  # Very short timeout for fast response
                 response = self.serial.readline().decode().strip()
+                self.serial.timeout = 0.5  # Reset to default
                 return {
                     'success': True,
                     'command': command.strip(),

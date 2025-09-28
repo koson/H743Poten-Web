@@ -41,17 +41,17 @@ class CVParameters:
     def to_scpi_command(self) -> str:
         """Convert parameters to SCPI command for STM32
         
-        Format: POTEn:CV:Start:ALL <begin>,<upper>,<lower>,<rate>,<cycles>
-        Example: POTEn:CV:Start:ALL 0.0,1.0,-1.0,0.1,1
+        Format: POTEn:CV:Start:ALL <LowerVoltage>,<UpperVoltage>,<BeginVoltage>,<SweepRate>,<NumCycles>
+        Example: POTEn:CV:Start:ALL -1.0,1.0,-1.0,0.05,3
         
         Parameters:
-        - Begin: Starting potential (V)
-        - Upper: Upper potential limit (V) 
-        - Lower: Lower potential limit (V)
-        - Rate: Scan rate (V/s)
-        - Cycles: Number of cycles
+        - LowerVoltage: Lower potential limit (V)
+        - UpperVoltage: Upper potential limit (V) 
+        - BeginVoltage: Starting potential (V)
+        - SweepRate: Scan rate (V/s)
+        - NumCycles: Number of cycles
         """
-        return f"POTEn:CV:Start:ALL {self.begin},{self.upper},{self.lower},{self.rate},{self.cycles}"
+        return f"POTEn:CV:Start:ALL {self.lower},{self.upper},{self.begin},{self.rate},{self.cycles}"
 
 @dataclass
 class SWVParameters:
@@ -142,6 +142,7 @@ class CVMeasurementService:
         self.current_params: Optional[CVParameters] = None
         self.current_swv_params: Optional[SWVParameters] = None
         self.measurement_type: str = 'CV'  # 'CV' or 'SWV'
+        self.current_range: int = 1  # Current range setting (0-3)
         self.start_time = None
         self.current_cycle = 1
         self.scan_direction = 'forward'
@@ -188,14 +189,19 @@ class CVMeasurementService:
             print(f"🚨🚨🚨 CV SETUP CALLED WITH PARAMS: {params}")
             logger.info(f"�🚨🚨 CV SETUP - Received parameters from frontend: {params}")
             
-            # Extract values with explicit logging
-            begin_val = params.get('begin_voltage', params.get('begin', 0.0))
-            upper_val = params.get('upper_voltage', params.get('upper', 0.5))
-            lower_val = params.get('lower_voltage', params.get('lower', -0.5))
-            rate_val = params.get('scan_rate', params.get('rate', 0.05))
+            # Extract values with explicit logging - FIXED MAPPING
+            begin_val = params.get('begin_voltage', params.get('begin', params.get('initial', 0.0)))
+            upper_val = params.get('upper_voltage', params.get('upper', params.get('final', 0.5)))
+            lower_val = params.get('lower_voltage', params.get('lower', params.get('initial', -0.5)))
+            rate_val = params.get('scan_rate', params.get('rate', params.get('scanRate', 0.05)))
             cycles_val = params.get('cycles', 1)
+            current_range_val = params.get('currentRange', params.get('current_range', 'auto'))  # Support both formats
             
-            print(f"🚨 EXTRACTED VALUES: begin={begin_val}, upper={upper_val}, lower={lower_val}, rate={rate_val}, cycles={cycles_val}")
+            print(f"🚨 EXTRACTED VALUES: begin={begin_val}, upper={upper_val}, lower={lower_val}, rate={rate_val}, cycles={cycles_val}, currentRange={current_range_val}")
+            
+            # Store current range setting
+            self.current_range = current_range_val  # Keep as string to support 'auto'
+            logger.info(f"⚡ Current range set to: {self.current_range}")
             
             # Create CV parameters object with correct parameter name mapping
             cv_params = CVParameters(
@@ -473,6 +479,21 @@ class CVMeasurementService:
             self.completion_detected = False
             if hasattr(self, 'completion_wait_start'):
                 delattr(self, 'completion_wait_start')
+                
+            # 🎯 SEND CURRENT RANGE COMMAND (AFTER MEASUREMENT START) - ONLY IF NOT AUTO
+            if hasattr(self, 'current_range') and self.current_range is not None and self.current_range != 'auto':
+                try:
+                    range_command = f"POTEn:CURRent:RANGe {self.current_range}"
+                    logger.info(f"📡 Sending current range command: {range_command} (Manual mode)")
+                    response = self.stm32_handler.send_command(range_command, timeout=2)
+                    if response:
+                        logger.info(f"✅ Current range locked to {self.current_range}: {response.strip()}")
+                    else:
+                        logger.warning(f"⚠️ No response to current range command")
+                except Exception as e:
+                    logger.error(f"❌ Failed to send current range command: {e}")
+            elif hasattr(self, 'current_range') and self.current_range == 'auto':
+                logger.info(f"🤖 Using AUTO range mode - STM32 will handle range selection automatically")
                 
             # 🚨 ENHANCED START DEBUG
             logger.info(f"🚀🚀🚀 MEASUREMENT STARTED - Expecting {self.current_params.cycles if self.current_params else '?'} cycles 🚀🚀🚀")
@@ -906,8 +927,8 @@ class CVMeasurementService:
                     self.completion_wait_start = current_time
                     logger.info("🏁 Completion detected, waiting for final STM32 messages...")
                 
-                if (current_time - self.completion_wait_start) > 5.0:  # Wait 5 seconds after completion
-                    logger.info("✅ CV measurement completed successfully")
+                if (current_time - self.completion_wait_start) > 2.0:  # Wait only 2 seconds after completion
+                    logger.info("✅ CV measurement completed successfully - no need to wait for timeout!")
                     self.is_measuring = False
                     return False
                     
@@ -989,7 +1010,8 @@ class CVMeasurementService:
                 
                 # Check for measurement completion signals from STM32
                 if any(completion_keyword in line.upper() for completion_keyword in [
-                    'MEASUREMENT COMPLETE', 'CV COMPLETE', 'FINISHED', 'END', 'DONE', 'OK'
+                    'MEASUREMENT COMPLETE', 'CV COMPLETE', 'CV SCAN COMPLETE', 'CV OPERATION FINISHED', 
+                    'FINISHED', 'END', 'DONE', 'OK'
                 ]):
                     logger.info(f"🏁 STM32 signaled measurement completion: '{line}'")
                     self.is_measuring = False
@@ -1037,19 +1059,23 @@ class CVMeasurementService:
                     
                 # Handle completion messages from STM32 - All modes
                 completion_keywords = [
-                    "CV Operation Finished", "CV SCAN COMPLETE", "CV DONE",
+                    # CV completion messages (exact STM32 format)
+                    "CV SCAN COMPLETE", "CV Operation Finished", "CV DONE", "CV COMPLETED",
+                    "CV SCAN COMPLETED", "CV MEASUREMENT COMPLETE",
+                    # DPV completion messages
                     "DPV Operation Finished", "DPV SCAN COMPLETE", "DPV DONE", 
+                    # SWV completion messages
                     "SWV Operation Finished", "SWV SCAN COMPLETE", "SWV DONE",
+                    # CA completion messages
                     "CA Operation Finished", "CA MEASUREMENT COMPLETE", "CA DONE",
+                    # Generic completion messages
                     "MEASUREMENT COMPLETE", "SCAN COMPLETE", "Operation Finished",
-                    "CV SCAN COMPLETED", "SENDING COMPLETION MESSAGES",
-                    "END_CV_SCAN", "COMPLETION MESSAGES SENT"  # Final STM32 format
+                    "SENDING COMPLETION MESSAGES", "END_CV_SCAN", "COMPLETION MESSAGES SENT"
                 ]
                 if any(keyword in line.upper() for keyword in completion_keywords):
-                    logger.info(f"🏁🏁🏁 STM32 COMPLETION SIGNAL DETECTED: '{line.strip()}' 🏁🏁🏁")
-                    logger.info(f"📊 Measurement Status: Total points collected: {len(self.data_points)}")
-                    logger.info(f"📊 Current cycle: {self.current_cycle}/{self.current_params.cycles if self.current_params else '?'}")
-                    logger.info(f"📊 Is measuring: {self.is_measuring}")
+                    logger.info(f"🏁🏁🏁 CV SCAN COMPLETED! STM32 sent: '{line.strip()}' 🏁🏁🏁")
+                    logger.info(f"⚡ EARLY COMPLETION - No timeout needed! Finishing in 2 seconds...")
+                    logger.info(f"📊 Final Stats: {len(self.data_points)} points, {self.current_cycle}/{self.current_params.cycles if self.current_params else '?'} cycles")
                     self.completion_detected = True
                     continue
                 

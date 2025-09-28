@@ -48,7 +48,7 @@ def create_dev_app():
     app = create_app()
     
     # Use REAL SCPI handler (NOT mock)
-    app.scpi_handler = SCPIHandler()  # REAL STM32 CONNECTION
+    app.scpi_handler = SCPIHandler("/dev/ttyACM1", 115200)  # REAL STM32 CONNECTION
     
     # Initialize ALL measurement services
     app.measurement_service = MeasurementService(app.scpi_handler)  # Legacy/fallback
@@ -57,6 +57,10 @@ def create_dev_app():
     app.swv_service = SWVMeasurementService(app.scpi_handler)
     app.ca_service = CAMeasurementService(app.scpi_handler)
     app.data_service = DataService()
+    
+    # Enable auto-save for all measurement modes
+    app.config['auto_save_enabled'] = True
+    app.config['scpi_handler'] = app.scpi_handler
     
     return app
 
