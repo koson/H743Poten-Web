@@ -158,7 +158,7 @@ function updateMeasurementUI(measuring) {
 // Data handling
 function startDataPolling() {
     if (updateInterval) return;
-    updateInterval = setInterval(updateData, 100);  // Poll every 100ms
+    updateInterval = setInterval(updateData, 500);  // 🔧 FIXED: Reduce from 100ms to 500ms to prevent server overload
 }
 
 function stopDataPolling() {

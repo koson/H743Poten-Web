@@ -24,7 +24,7 @@ Path('logs').mkdir(exist_ok=True)
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('logs/h743poten_dev.log'),

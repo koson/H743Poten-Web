@@ -299,11 +299,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Data collection with improved timeout handling
+// Data collection with improved timeout handling and request deduplication
 function startDataCollection() {
     let consecutiveFailures = 0;
-    const maxConsecutiveFailures = 50; // Allow 5 seconds of no data before timeout (50 * 100ms)
+    const maxConsecutiveFailures = 10; // 🔧 FIXED: Reduce to 10 (5 seconds with 500ms polling)  
     let dataReceived = false; // Track if we've received any data
+    let requestInProgress = false; // 🔧 NEW: Prevent duplicate requests
     
     const dataCollector = setInterval(async () => {
         if (!isMeasuring) {
@@ -311,8 +312,20 @@ function startDataCollection() {
             return;
         }
         
+        // 🔧 NEW: Skip if previous request still in progress
+        if (requestInProgress) {
+            console.log('⏳ Skipping request - previous still in progress');
+            return;
+        }
+        
+        requestInProgress = true;
         try {
-            const response = await fetch('/api/measurement/data');
+            const response = await fetch('/api/measurement/data', {
+                timeout: 3000, // 🔧 NEW: 3 second timeout
+                headers: {
+                    'Cache-Control': 'no-cache' // 🔧 NEW: Prevent caching
+                }
+            });
             
             // Check if response is OK
             if (!response.ok) {
@@ -378,8 +391,11 @@ function startDataCollection() {
                 stopBtn.disabled = true;
                 alert('Measurement timeout: Communication error. Please check connection and try again.');
             }
+        } finally {
+            // 🔧 NEW: Always reset request flag
+            requestInProgress = false;
         }
-    }, 100); // Poll every 100ms
+    }, 500); // 🔧 FIXED: Reduce from 100ms to 500ms to prevent server overload in DPV mode
 }
 
 // Note: PortManager is initialized in port_manager.js

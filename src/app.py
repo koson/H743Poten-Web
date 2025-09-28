@@ -65,7 +65,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-def create_app():
+def create_app(scpi_handler=None):
     """Create and configure Flask application"""
     
     # Set up paths
@@ -105,7 +105,8 @@ def create_app():
     app.config['SECRET_KEY'] = 'h743poten-workflow-2025'  # For session management
     
     # Initialize services
-    scpi_handler = SCPIHandler()
+    if scpi_handler is None:
+        scpi_handler = SCPIHandler()
     measurement_service = MeasurementService(scpi_handler)
     data_service = DataService()
     cv_service = CVMeasurementService(scpi_handler)

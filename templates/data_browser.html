@@ -2,13 +2,91 @@
 
 {% block title %}Data Browser - H743Poten{% endblock %}
 
+{% block head %}
+<style>
+    /* Smooth transitions to reduce flicker */
+    .table, .table tbody, .table tbody tr, .table tbody td {
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .btn {
+        transition: all 0.15s ease-in-out;
+    }
+    
+    .session-row {
+        transition: background-color 0.2s ease-in-out;
+    }
+    
+    .session-row:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    
+    .session-details {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+    
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        transition: opacity 0.3s ease-in-out;
+    }
+    
+    #plot-loading {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+        transition: opacity 0.3s ease-in-out;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .plot-loading-spinner {
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .session-plot {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        transition: opacity 0.3s ease-in-out;
+    }
+    
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+    
+    /* Reduce loading spinner visibility for smoother experience */
+    .loading-overlay {
+        transition: opacity 0.2s ease-in-out;
+    }
+    
+    /* Smooth fade for content changes */
+    .fade-transition {
+        transition: opacity 0.15s ease-in-out;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid mt-3">
     <!-- Header -->
     <div class="row mb-3">
         <div class="col-12">
-            <h2><i class="fas fa-database me-2"></i>CV Measurement Data Browser</h2>
-            <p class="text-muted">Browse, view, and manage saved CV measurement data</p>
+            <h2><i class="fas fa-database me-2"></i>Measurement Data Browser</h2>
+            <p class="text-muted">Browse, view, and manage saved measurement data from all modes (CV, DPV, SWV, CA)</p>
         </div>
     </div>
 
@@ -27,10 +105,13 @@
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="auto-save-toggle">
                                     <label class="form-check-label" for="auto-save-toggle">
-                                        Enable automatic saving
+                                        Save when measurement completes
                                     </label>
                                 </div>
-                                <small class="text-muted">Automatically save measurements when completed</small>
+                                <small class="text-success">
+                                    <i class="fas fa-shield-alt me-1"></i>
+                                    Protects against data loss if you forget to save manually
+                                </small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -100,7 +181,7 @@
                     <div id="no-data-message" class="text-center py-4" style="display: none;">
                         <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
                         <h5>No Saved Measurements</h5>
-                        <p class="text-muted">Run some CV measurements to see them here</p>
+                        <p class="text-muted">Run some measurements to see them here</p>
                     </div>
 
                     <!-- Sessions table -->
@@ -145,13 +226,16 @@
                     <div class="col-md-8">
                         <div class="card">
                             <div class="card-header">
-                                <i class="fas fa-image me-2"></i>CV Plot
+                                <i class="fas fa-image me-2"></i>Measurement Plot
                             </div>
                             <div class="card-body text-center">
-                                <img id="session-plot-img" class="img-fluid" style="max-height: 500px;" alt="CV Plot">
+                                <img id="session-plot-img" class="img-fluid" style="max-height: 500px;" alt="Measurement Plot">
                                 <div id="plot-loading" class="py-4" style="display: none;">
-                                    <div class="spinner-border" role="status"></div>
-                                    <p class="mt-2">Loading plot...</p>
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="spinner-border plot-loading-spinner" role="status"></div>
+                                        <p class="mt-2 mb-0">Loading plot...</p>
+                                        <small class="text-muted">Please wait</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -168,6 +252,9 @@
                                     <dt class="col-sm-5">Session ID:</dt>
                                     <dd class="col-sm-7" id="detail-session-id">-</dd>
                                     
+                                    <dt class="col-sm-5">Measurement Mode:</dt>
+                                    <dd class="col-sm-7"><span id="detail-mode" class="badge bg-primary">-</span></dd>
+                                    
                                     <dt class="col-sm-5">Timestamp:</dt>
                                     <dd class="col-sm-7" id="detail-timestamp">-</dd>
                                     
@@ -179,10 +266,14 @@
                                     
                                     <dt class="col-sm-5">Current Range:</dt>
                                     <dd class="col-sm-7" id="detail-current-range">-</dd>
-                                    
-                                    <dt class="col-sm-5">Scan Rate:</dt>
-                                    <dd class="col-sm-7" id="detail-scan-rate">-</dd>
-                                    
+                                </dl>
+                                
+                                <!-- Dynamic Parameters Section -->
+                                <div id="detail-parameters">
+                                    <!-- Parameters will be populated dynamically based on measurement mode -->
+                                </div>
+                                
+                                <dl class="row">    
                                     <dt class="col-sm-5">Cycles:</dt>
                                     <dd class="col-sm-7" id="detail-cycles">-</dd>
                                 </dl>
@@ -252,5 +343,6 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/plot_loader.js') }}"></script>
 <script src="{{ url_for('static', filename='js/data_browser.js') }}"></script>
 {% endblock %}

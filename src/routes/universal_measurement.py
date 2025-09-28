@@ -222,6 +222,84 @@ def get_measurement_data(mode):
             'error': str(e)
         }), 500
 
+@universal_measurement.route('/api/measurement/status')
+def get_universal_measurement_status():
+    """Get status of any active measurement (universal endpoint)"""
+    try:
+        # Check all measurement modes for active measurements
+        modes = ['CV', 'DPV', 'SWV', 'CA']
+        
+        for mode in modes:
+            service = get_measurement_service(mode)
+            if service:
+                status = service.get_status()
+                
+                # If this service has an active measurement or data
+                if (status.get('active') or 
+                    status.get('is_measuring') or 
+                    (status.get('data_points_count', 0) > 0)):
+                    
+                    # Check for auto-save if measurement just completed
+                    if (not status.get('active', True) and 
+                        not status.get('is_measuring', True) and 
+                        status.get('data_points_count', 0) > 0):
+                        
+                        # Check if auto-save is enabled
+                        auto_save_enabled = current_app.config.get('auto_save_enabled', False)
+                        if auto_save_enabled:
+                            # Trigger auto-save
+                            try:
+                                from src.services.data_logging_service import DataLoggingService
+                                data_service = DataLoggingService()
+                                
+                                # Generate session ID with mode prefix
+                                from datetime import datetime
+                                session_id = f"{mode}_{datetime.now().isoformat().replace(':', '-').replace('.', '-')}"
+                                
+                                # Auto-save based on mode
+                                if mode == 'CV':
+                                    result = data_service.save_cv_measurement(
+                                        session_id=session_id,
+                                        measurement_data=status.get('measurement_data', []),
+                                        parameters=status.get('parameters', {}),
+                                        metadata={'auto_saved': True}
+                                    )
+                                    if result.get('success'):
+                                        logger.info(f"✅ Auto-saved {mode} measurement: {session_id}")
+                                        
+                            except Exception as auto_save_error:
+                                logger.error(f"Auto-save failed for {mode}: {auto_save_error}")
+                    
+                    return jsonify({
+                        'success': True,
+                        'active': status.get('active', False),
+                        'is_measuring': status.get('is_measuring', False),
+                        'mode': mode,
+                        'data_points_count': status.get('data_points_count', 0),
+                        'parameters': status.get('parameters', {}),
+                        'scan_rate': status.get('scan_rate'),
+                        'measurement_data': status.get('measurement_data', [])
+                    })
+        
+        # No active measurements found
+        return jsonify({
+            'success': True,
+            'active': False,
+            'is_measuring': False,
+            'mode': None,
+            'data_points_count': 0,
+            'parameters': {},
+            'scan_rate': None,
+            'measurement_data': []
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in get_universal_measurement_status: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @universal_measurement.route('/api/measurement/status/<mode>')
 def get_measurement_status(mode):
     """Get measurement status for specified mode"""
