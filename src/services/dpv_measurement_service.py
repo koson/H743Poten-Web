@@ -138,7 +138,22 @@ class DPVMeasurementService:
             self.current_params = params
             self.current_potential = params.initial_potential
             
-            # Send SCPI command to STM32
+            # 🎯 SEND CURRENT RANGE COMMAND FIRST (BEFORE MEASUREMENT START)
+            if hasattr(self, 'current_range') and self.current_range is not None and self.current_range != 'auto':
+                try:
+                    current_range_cmd = f"POTEn:CURRent:RANGe {self.current_range}"
+                    logger.info(f"📡 DPV Sending current range command FIRST: {current_range_cmd}")
+                    range_result = self.scpi_handler.send_custom_command(current_range_cmd)
+                    if range_result and range_result.get('success', False):
+                        logger.info(f"✅ DPV Current range set to {self.current_range}")
+                    else:
+                        logger.warning(f"⚠️ DPV No response to current range command")
+                except Exception as e:
+                    logger.error(f"❌ DPV Failed to send current range command: {e}")
+            elif hasattr(self, 'current_range') and self.current_range == 'auto':
+                logger.info(f"🤖 DPV Using AUTO range mode - STM32 will handle range selection automatically")
+            
+            # Send DPV SCPI command to STM32
             command = self.current_params.to_scpi_command()
             logger.info(f"🚨 DPV SCPI COMMAND: {command}")
             logger.info(f"🚨 DPV COMMAND LENGTH: {len(command)} chars")
@@ -173,23 +188,8 @@ class DPVMeasurementService:
             self.last_data_time = None
             self.pulse_number = 0
             
-            # DPV uses Start:ALL command (already sent in setup)
+            # DPV uses Start:ALL command (already sent in setup with current range)
             self.is_measuring = True
-            
-            # 🎯 SEND CURRENT RANGE COMMAND (AFTER MEASUREMENT START) - ONLY IF NOT AUTO
-            if hasattr(self, 'current_range') and self.current_range is not None and self.current_range != 'auto':
-                try:
-                    current_range_cmd = f"POTEn:CURRent:RANGe {self.current_range}"
-                    logger.info(f"📡 DPV Sending current range command: {current_range_cmd} (Manual mode)")
-                    range_result = self.scpi_handler.send_custom_command(current_range_cmd)
-                    if range_result and range_result.get('success', False):
-                        logger.info(f"✅ DPV Current range locked to {self.current_range}")
-                    else:
-                        logger.warning(f"⚠️ DPV No response to current range command")
-                except Exception as e:
-                    logger.error(f"❌ DPV Failed to send current range command: {e}")
-            elif hasattr(self, 'current_range') and self.current_range == 'auto':
-                logger.info(f"🤖 DPV Using AUTO range mode - STM32 will handle range selection automatically")
             
             logger.info(f"Started DPV measurement")
             
@@ -247,25 +247,88 @@ class DPVMeasurementService:
             
             # If no buffered data, try regular query
             command = "POTEn:DPV:DATA?"
+            logger.debug(f"🔍 DPV Sending data query: {command}")
             result = self.scpi_handler.send_custom_command(command)
+            logger.debug(f"🔍 DPV Data query result: success={result['success']}, response_len={len(result.get('response', ''))}")
 
             if not result['success']:
-                logger.debug(f"DPV data query failed: {result['error']}")
+                logger.warning(f"❌ DPV data query failed: {result['error']}")
                 return {'points': [], 'completed': False, 'status': 'collecting'}
+            
+            # Log raw response for debugging
+            if result.get('response'):
+                response_preview = result['response'][:200] + "..." if len(result['response']) > 200 else result['response']
+                logger.info(f"📄 DPV Raw response preview: {response_preview}")
+            else:
+                logger.warning(f"⚠️ DPV Empty response from STM32")
 
             # Parse the data response
             data = self._parse_measurement_data(result['response'])
+            logger.debug(f"📊 DPV Parsed data: {len(data.get('points', []))} points, completed={data.get('completed', False)}")
             
-            # Check if measurement is completed
-            if not data['points'] and self.is_measuring:
+            # 🚨 ALTERNATIVE DATA RETRIEVAL - Try multiple methods if no data
+            if not data.get('points') and self.is_measuring:
+                logger.info("🔄 DPV No data from standard query, trying alternative methods...")
+                
+                # Method 1: Try getting all available serial data
+                alternative_data = self.scpi_handler.get_all_available_data()
+                if alternative_data:
+                    logger.info(f"📡 DPV Alternative data found: {len(alternative_data)} chars")
+                    alt_parsed = self._parse_measurement_data(alternative_data)
+                    if alt_parsed.get('points'):
+                        logger.info(f"✅ DPV Alternative parsing successful: {len(alt_parsed['points'])} points")
+                        data = alt_parsed
+                
+                # Method 2: Try simple readline approach
+                if not data.get('points'):
+                    try:
+                        simple_data = self.scpi_handler.read_raw_data(timeout=1.0)
+                        if simple_data:
+                            logger.info(f"📡 DPV Simple read data: {len(simple_data)} chars")
+                            simple_parsed = self._parse_measurement_data(simple_data)
+                            if simple_parsed.get('points'):
+                                logger.info(f"✅ DPV Simple parsing successful: {len(simple_parsed['points'])} points")
+                                data = simple_parsed
+                    except Exception as e:
+                        logger.debug(f"Simple read failed: {e}")
+            
+            # 🏁 ENHANCED COMPLETION DETECTION for DPV
+            if self.is_measuring:
+                # Method 1: Check if data parsing found completion indicator
+                if data.get('completed', False):
+                    logger.info("🏁 DPV completed via data parsing")
+                    self.is_measuring = False
+                    return data
+                
+                # Method 2: Check STATUS command
                 status_command = "POTEn:DPV:STATUS?"
                 status_result = self.scpi_handler.send_custom_command(status_command)
-                if status_result['success'] and 'COMPLETE' in status_result['response'].upper():
-                    logger.info(f"DPV measurement completed")
-                    self.is_measuring = False
-                    completed_data = dict(data)
-                    completed_data['completed'] = True
-                    return completed_data
+                if status_result['success']:
+                    status_response = status_result['response'].upper()
+                    if 'COMPLETE' in status_response or 'FINISHED' in status_response or 'IDLE' in status_response:
+                        logger.info(f"🏁 DPV completed via status: {status_result['response']}")
+                        self.is_measuring = False
+                        completed_data = dict(data)
+                        completed_data['completed'] = True
+                        return completed_data
+                
+                # Method 3: Check if no new data for extended time (timeout detection)
+                current_time = time.time()
+                if hasattr(self, 'last_data_time') and self.last_data_time:
+                    time_since_last_data = current_time - self.last_data_time
+                    # If DPV parameters suggest completion time, use that for timeout
+                    if hasattr(self, 'current_params') and self.current_params:
+                        voltage_range = abs(self.current_params.final_potential - self.current_params.initial_potential)
+                        expected_points = int(voltage_range / self.current_params.pulse_increment) + 1
+                        expected_duration = expected_points * self.current_params.pulse_period
+                        timeout_threshold = max(expected_duration + 10, 30)  # At least 30s timeout
+                        
+                        if time_since_last_data > timeout_threshold:
+                            logger.info(f"🏁 DPV completed via timeout: {time_since_last_data:.1f}s > {timeout_threshold:.1f}s")
+                            self.is_measuring = False
+                            completed_data = dict(data)
+                            completed_data['completed'] = True
+                            return completed_data
             
             return data
 
@@ -280,22 +343,40 @@ class DPVMeasurementService:
         """
         try:
             if not response or not response.strip():
+                logger.debug("📄 DPV Empty or no response to parse")
                 return {'points': [], 'completed': False}
 
+            logger.debug(f"📄 DPV Parsing response: {len(response)} chars, {response.count(chr(10))} lines")
+            
             points = []
             lines = response.strip().split('\n')
             completed = False
             data_processed = False
+            line_count = 0
+            valid_dpv_lines = 0
             
             for line in lines:
+                line_count += 1
                 line = line.strip()
-                if not line or line.startswith('#'):
+                
+                if not line:
+                    continue
+                    
+                if line.startswith('#'):
+                    logger.debug(f"📝 DPV Comment line {line_count}: {line}")
                     continue
                 
-                # Check for completion indicators  
-                if 'Operation Finished' in line or 'COMPLETE' in line.upper() or 'END' in line.upper():
+                # 🏁 ENHANCED COMPLETION DETECTION - Check for various completion indicators
+                line_upper = line.upper()
+                completion_keywords = [
+                    'OPERATION FINISHED', 'COMPLETE', 'END', 'DONE', 'FINISHED',
+                    'DPV COMPLETE', 'DPV FINISHED', 'DPV END', 'DPV DONE',
+                    'MEASUREMENT COMPLETE', 'SCAN COMPLETE', 'SWEEP COMPLETE'
+                ]
+                
+                if any(keyword in line_upper for keyword in completion_keywords):
                     completed = True
-                    logger.info("🏁 DPV measurement completed")
+                    logger.info(f"🏁 DPV measurement completed - detected: {line.strip()}")
                     continue
                 
                 # Skip header line
@@ -305,11 +386,12 @@ class DPVMeasurementService:
                 
                 try:
                     parts = [part.strip() for part in line.split(',')]
-                    logger.debug(f"🔍 Parsing DPV data line: {parts}")
+                    logger.debug(f"🔍 Line {line_count}: {len(parts)} parts: {parts[:3]}...")
                     
                     # Real STM32 DPV format: "DPV, Point, Time, Potential, Current_i1, Current_i2, DPVCurrent"
                     # Example: DPV, 1, 0.000, -0.500, -6.737e-04, -6.708e-04, 2.903e-06
                     if len(parts) >= 7 and parts[0].strip().upper() == 'DPV':
+                        valid_dpv_lines += 1
                         point_num = int(parts[1].strip())            # Point number
                         time_s = float(parts[2].strip())             # Time in seconds
                         potential = float(parts[3].strip())          # Potential in V
@@ -320,7 +402,8 @@ class DPVMeasurementService:
                         # Convert current from A to µA for display
                         current_ua = dpv_current * 1e6
                         
-                        logger.debug(f"✅ STM32 DPV Point {point_num}: V={potential:.3f}V, I={current_ua:.2f}µA, Time={time_s:.1f}s")
+                        if valid_dpv_lines <= 3 or valid_dpv_lines % 10 == 0:  # Log first 3 and every 10th
+                            logger.info(f"✅ DPV Point {point_num}: V={potential:.3f}V, I={current_ua:.2f}µA, T={time_s:.1f}s")
                         
                         # Data validation and filtering
                         should_filter = False
@@ -362,16 +445,40 @@ class DPVMeasurementService:
                             self.last_validated_current = current_ua
                             self.last_data_time = time.time()
                             self.pulse_number = point_num
+                            
+                            # 🎯 CHECK IF WE'VE REACHED THE END POTENTIAL
+                            if hasattr(self, 'current_params') and self.current_params:
+                                # Check if we're close to final potential (within one increment)
+                                final_pot = self.current_params.final_potential
+                                increment = self.current_params.pulse_increment
+                                
+                                if abs(potential - final_pot) <= increment * 1.1:  # Allow 10% tolerance
+                                    logger.info(f"🏁 DPV approaching end potential: {potential:.3f}V ≈ {final_pot:.3f}V")
+                                    # Don't set completed here, let it finish naturally
                         
                         data_processed = True
                         
                     else:
-                        logger.warning(f"Invalid DPV data format: {line}")
+                        # Log various line types for debugging
+                        if line.upper().startswith('DPV') and len(parts) < 7:
+                            logger.warning(f"⚠️ DPV Incomplete DPV line: {line}")
+                        elif 'ERROR' in line.upper():
+                            logger.error(f"❌ DPV Error line: {line}")
+                        elif any(word in line.upper() for word in ['STATUS', 'READY', 'BUSY']):
+                            logger.info(f"📊 DPV Status line: {line}")
+                        else:
+                            logger.debug(f"❓ DPV Unknown line format: {line}")
                         continue
                         
                 except (ValueError, IndexError) as e:
                     logger.warning(f"Failed to parse DPV data line '{line}': {e}")
                     continue
+
+            # Summary logging
+            if valid_dpv_lines > 0:
+                logger.info(f"📊 DPV Parse summary: {valid_dpv_lines} valid points from {line_count} lines, completed={completed}")
+            elif line_count > 0:
+                logger.warning(f"⚠️ DPV Parse summary: No valid DPV points found in {line_count} lines")
 
             result = {
                 'points': points,
@@ -379,7 +486,9 @@ class DPVMeasurementService:
             }
                 
             if points:
-                logger.debug(f"Parsed {len(points)} DPV data points from STM32")
+                logger.info(f"✅ DPV Parsed {len(points)} data points from STM32")
+            elif line_count > 0:
+                logger.warning(f"⚠️ DPV No data processed from {line_count} lines")
             
             return result
 
@@ -388,13 +497,34 @@ class DPVMeasurementService:
             return {'points': [], 'completed': False, 'error': str(e)}
 
     def get_status(self) -> Dict:
-        """Get current DPV measurement status"""
+        """Get current DPV measurement status with completion estimation"""
         total_pulses = 0
+        progress_info = {}
+        
         if self.current_params:
             voltage_range = abs(self.current_params.final_potential - self.current_params.initial_potential)
             total_pulses = int(voltage_range / self.current_params.pulse_increment) + 1
+            expected_duration = total_pulses * self.current_params.pulse_period
             
-        return {
+            # Add progress information if measurement is active
+            if self.is_measuring and hasattr(self, 'start_time') and self.start_time:
+                elapsed_time = time.time() - self.start_time
+                progress_percent = min((self.pulse_number / total_pulses) * 100, 100) if total_pulses > 0 else 0
+                estimated_remaining = max(0, expected_duration - elapsed_time)
+                
+                progress_info = {
+                    'progress_percent': round(progress_percent, 1),
+                    'elapsed_time': round(elapsed_time, 1),
+                    'expected_duration': round(expected_duration, 1),
+                    'estimated_remaining': round(estimated_remaining, 1)
+                }
+                
+                # Check if we should be completed by now
+                if elapsed_time > expected_duration * 1.2:  # 20% overtime tolerance
+                    progress_info['overtime'] = True
+                    progress_info['overtime_seconds'] = round(elapsed_time - expected_duration, 1)
+            
+        status = {
             'mode': 'DPV',
             'is_measuring': self.is_measuring,
             'is_paused': self.is_paused,
@@ -411,6 +541,11 @@ class DPVMeasurementService:
                 'pulse_period': self.current_params.pulse_period if self.current_params else None,
             }
         }
+        
+        # Add progress info if available
+        status.update(progress_info)
+        
+        return status
 
     def export_data(self) -> Dict:
         """Export DPV measurement data"""

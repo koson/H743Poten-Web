@@ -374,8 +374,29 @@ def create_app(scpi_handler=None):
     def start_measurement():
         """Start measurement"""
         try:
-            success = app.config['measurement_service'].start_measurement()
-            return jsonify({'success': success})
+            # Get mode from request or use CV as default
+            data = request.get_json() if request.is_json else {}
+            mode = data.get('mode', 'CV').upper()
+            
+            # Get appropriate service based on mode
+            service = None
+            if mode == 'CV':
+                service = app.config.get('cv_service')
+            elif mode == 'DPV':
+                service = app.config.get('dpv_service')
+            elif mode == 'SWV':
+                service = app.config.get('swv_service')
+            elif mode == 'CA':
+                service = app.config.get('ca_service')
+            
+            if not service:
+                return jsonify({
+                    'success': False,
+                    'error': f'Service not available for mode: {mode}'
+                }), 503
+            
+            success = service.start_measurement()
+            return jsonify({'success': success, 'mode': mode})
         except Exception as e:
             logger.error(f"Failed to start measurement: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
@@ -404,24 +425,47 @@ def create_app(scpi_handler=None):
     def get_measurement_data(mode):
         """Get measurement data for specific mode (CV, DPV, SWV, CA)"""
         try:
-            # Get data from measurement service and update data service
-            measurement_data = app.config['measurement_service'].get_measurement_data()
-            app.config['data_service'].update_measurement_data(measurement_data)
+            mode = mode.upper()
+            logger.debug(f"🔍 Getting measurement data for mode: {mode}")
             
-            # Get current data
-            data = app.config['data_service'].get_current_data()
+            # Get appropriate service based on mode
+            service = None
+            if mode == 'CV':
+                service = app.config.get('cv_service')
+            elif mode == 'DPV':
+                service = app.config.get('dpv_service')
+            elif mode == 'SWV':
+                service = app.config.get('swv_service')
+            elif mode == 'CA':
+                service = app.config.get('ca_service')
+            else:
+                logger.error(f"❌ Unsupported measurement mode: {mode}")
+                return jsonify({
+                    'success': False,
+                    'error': f'Unsupported measurement mode: {mode}',
+                    'data': {'points': [], 'completed': False, 'mode': mode}
+                }), 400
+            
+            if not service:
+                logger.error(f"❌ No service available for mode: {mode}")
+                return jsonify({
+                    'success': False,
+                    'error': f'Service not available for mode: {mode}',
+                    'data': {'points': [], 'completed': False, 'mode': mode}
+                }), 503
+            
+            # Get measurement data directly from specific service
+            data = service.get_measurement_data()
+            logger.debug(f"📡 Got data for {mode}: {len(data.get('points', []))} points, completed: {data.get('completed', False)}")
             
             # Return data in format expected by frontend
             return jsonify({
                 'success': True,
-                'data': {
-                    'points': data.get('points', []),
-                    'completed': data.get('completed', False),
-                    'mode': mode
-                }
+                'mode': mode,
+                'data': data
             })
         except Exception as e:
-            logger.error(f"Failed to get measurement data for {mode}: {e}")
+            logger.error(f"❌ Failed to get measurement data for {mode}: {e}")
             return jsonify({
                 'success': False,
                 'error': str(e),

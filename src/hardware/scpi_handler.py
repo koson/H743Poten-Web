@@ -216,3 +216,52 @@ class SCPIHandler:
         except Exception as e:
             logger.error(f"Error checking data availability: {e}")
             return False
+    
+    def get_all_available_data(self):
+        """Get all available data from serial buffer (non-blocking)"""
+        try:
+            if not self.is_connected or not self.serial or not self.serial.is_open:
+                return None
+                
+            if self.serial.in_waiting > 0:
+                raw_data = self.serial.read_all()
+                if raw_data:
+                    data = raw_data.decode('utf-8', errors='ignore')
+                    logger.debug(f"📡 Read {len(raw_data)} bytes of available data")
+                    return data
+            return None
+            
+        except Exception as e:
+            logger.error(f"❌ Error reading all available data: {e}")
+            return None
+    
+    def read_raw_data(self, timeout=1.0):
+        """Read raw data with timeout"""
+        try:
+            if not self.is_connected or not self.serial or not self.serial.is_open:
+                return None
+                
+            original_timeout = self.serial.timeout
+            self.serial.timeout = timeout
+            
+            data = ""
+            start_time = time.time()
+            
+            while (time.time() - start_time) < timeout:
+                if self.serial.in_waiting > 0:
+                    chunk = self.serial.read(self.serial.in_waiting)
+                    if chunk:
+                        data += chunk.decode('utf-8', errors='ignore')
+                else:
+                    time.sleep(0.01)  # Small delay to prevent busy waiting
+                    
+            self.serial.timeout = original_timeout
+            
+            if data:
+                logger.debug(f"📡 Read {len(data)} chars via raw read")
+                return data
+            return None
+            
+        except Exception as e:
+            logger.error(f"❌ Error in raw data read: {e}")
+            return None
