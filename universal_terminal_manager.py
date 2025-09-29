@@ -58,37 +58,104 @@ class UniversalTerminalManager:
         
         if self.server_process.poll() is None:
             print("✅ Server เริ่มทำงานแล้ว!")
-            print("🌐 URL: http://127.0.0.1:8080")
-            if self.is_windows:
-                print("📋 ดู logs: dev logs หรือ type logs\\server_dev.log")
-                print("🛑 หยุด server: dev stop")
+            
+            # พยายามอ่าน port จาก log file
+            port = self._get_server_port()
+            if port:
+                print(f"🌐 URL: http://127.0.0.1:{port}")
             else:
-                print("📋 ดู logs: ./dev.sh logs หรือ tail -f logs/server_dev.log")
-                print("🛑 หยุด server: ./dev.sh stop")
+                print("🌐 URL: http://127.0.0.1:8080 (หรือ port อื่นตาม log)")
+                
+            if self.is_windows:
+                print("📋 ดู logs: python auto_dev.py logs")
+                print("🛑 หยุด server: python auto_dev.py stop")
+            else:
+                print("📋 ดู logs: python3 auto_dev.py logs")
+                print("🛑 หยุด server: python3 auto_dev.py stop")
             return True
         else:
             print("❌ Server ไม่สามารถเริ่มได้")
             return False
     
+    def _get_server_port(self):
+        """อ่าน port ที่ server ใช้จาก log file"""
+        try:
+            with open("logs/server_dev.log", "r", encoding="utf-8") as f:
+                content = f.read()
+                # หา pattern "Using port XXXX"
+                import re
+                match = re.search(r'Using port (\d+)', content)
+                if match:
+                    return match.group(1)
+        except:
+            pass
+        return None
+    
     def stop_dev_server(self):
         """หยุด development server"""
         print("🛑 Stopping development server...")
         
+        stopped = False
+        
         if self.is_windows:
-            # ใช้ taskkill บน Windows
+            # ใช้ taskkill บน Windows - หยุดเฉพาะ run_dev.py
             try:
-                subprocess.run(["taskkill", "/F", "/IM", "python.exe"], 
-                             capture_output=True, check=False)
-                print("✅ Server stopped!")
+                # หยุด process ที่รัน run_dev.py โดยเฉพาะ
+                result = subprocess.run([
+                    "wmic", "process", "where", 
+                    "commandline like '%run_dev.py%'", "delete"
+                ], capture_output=True, text=True, check=False)
+                
+                if result.returncode == 0:
+                    stopped = True
+                    print("✅ Server stopped (Windows)!")
+                else:
+                    # Fallback: หยุด python processes ทั้งหมดที่มี run_dev
+                    subprocess.run(["taskkill", "/F", "/FI", "IMAGENAME eq python.exe"], 
+                                 capture_output=True, check=False)
+                    stopped = True
+                    print("✅ Server stopped (Fallback)!")
+                    
             except Exception as e:
-                print(f"❌ Error stopping server: {e}")
+                print(f"❌ Error stopping server on Windows: {e}")
         else:
             # ใช้ pkill บน Linux/WSL
             try:
-                subprocess.run(["pkill", "-f", "run_dev.py"], check=False)
-                print("✅ Server stopped!")
+                # หยุด process run_dev.py โดยเฉพาะ
+                result = subprocess.run(["pkill", "-f", "run_dev.py"], 
+                                      capture_output=True, check=False)
+                
+                if result.returncode == 0 or result.returncode == 1:  # 1 = no process found
+                    stopped = True
+                    print("✅ Server stopped (Linux/WSL)!")
+                else:
+                    print(f"❌ pkill returned: {result.returncode}")
+                    
             except Exception as e:
-                print(f"❌ Error stopping server: {e}")
+                print(f"❌ Error stopping server on Linux: {e}")
+        
+        # ตรวจสอบว่า port หลัก (8080-8090) ว่างแล้วหรือไม่
+        if stopped:
+            time.sleep(2)  # รอให้ process หยุดจริง
+            self._check_port_status()
+    
+    def _check_port_status(self):
+        """ตรวจสอบสถานะของ ports"""
+        ports_to_check = [8080, 8081, 8082, 8083, 8084, 8085]
+        
+        for port in ports_to_check:
+            try:
+                import socket
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.settimeout(1)
+                    result = s.connect_ex(('127.0.0.1', port))
+                    if result == 0:
+                        print(f"⚠️  Port {port} ยังใช้งานอยู่")
+                        return False
+            except:
+                pass
+        
+        print("✅ ทุก ports ว่างแล้ว")
     
     def status(self):
         """ตรวจสอบสถานะ server"""

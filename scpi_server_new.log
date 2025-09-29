@@ -1,0 +1,20 @@
+2025-09-30 04:43:35,790 - INFO - ✅ Found STM32 at /dev/ttyACM2: MANUFACTURE,INSTR2013,0,01-02
+2025-09-30 04:43:35,791 - INFO - ✅ Database initialized successfully
+2025-09-30 04:43:35,792 - INFO - ✅ Export directories ready: exports
+2025-09-30 04:43:35,792 - INFO - ✅ Database and file exporter ready
+2025-09-30 04:43:35,792 - INFO - 🔌 Trying to connect to /dev/ttyACM2...
+2025-09-30 04:43:42,800 - INFO - 📋 Device response: MANUFACTURE,INSTR2013,0,01-02
+2025-09-30 04:43:42,800 - INFO - ✅ Connected to STM32 H743 on /dev/ttyACM2
+2025-09-30 04:43:42,807 - INFO - 🚀 Starting Queue-Based SCPI Server...
+2025-09-30 04:43:42,807 - INFO - 🚿💡 Shower Idea Implementation - No more blocking!
+2025-09-30 04:43:42,807 - INFO - 🧪 Testing Stream Manager...
+2025-09-30 04:43:42,808 - INFO - ✅ Stream Manager working: 1 points
+📁 Stream data directory: /tmp/h743_stream_j1lobatp
+🆕 Created stream session: TEST_0_1759182222
+ * Serving Flask app 'queue_scpi_server'
+ * Debug mode: off
+2025-09-30 04:43:42,828 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8094
+ * Running on http://192.168.9.76:8094
+2025-09-30 04:43:42,828 - INFO - [33mPress CTRL+C to quit[0m

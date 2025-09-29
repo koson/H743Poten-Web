@@ -23,6 +23,9 @@ try:
     from .services.measurement_service import MeasurementService
     from .services.data_service import DataService
     from .services.cv_measurement_service import CVMeasurementService
+    from .services.dpv_measurement_service import DPVMeasurementService
+    from .services.swv_measurement_service import SWVMeasurementService
+    from .services.ca_measurement_service import CAMeasurementService
     from .services.data_logging_service import DataLoggingService
     from .routes import ai_bp, port_bp
     from .routes.cv_routes import cv_bp
@@ -31,6 +34,10 @@ try:
     from .routes.preview_data import preview_bp
     from .routes.workflow_api import workflow_api_bp
     from .routes.peak_detection import peak_detection_bp
+    from .routes.peak_analysis import bp as peak_analysis_bp
+    from .routes.parameter_api import parameter_bp, parameter_api_bp
+    from .routes.calibration_api import calibration_api_bp
+    from .routes.production_calibration_api import calibration_bp as production_calibration_bp
 except ImportError:
     # Fall back to absolute imports (when run directly)
     from config.settings import Config
@@ -38,6 +45,9 @@ except ImportError:
     from services.measurement_service import MeasurementService
     from services.data_service import DataService
     from services.cv_measurement_service import CVMeasurementService
+    from services.dpv_measurement_service import DPVMeasurementService
+    from services.swv_measurement_service import SWVMeasurementService
+    from services.ca_measurement_service import CAMeasurementService
     from services.data_logging_service import DataLoggingService
     from routes import ai_bp, port_bp
     from routes.cv_routes import cv_bp
@@ -46,10 +56,16 @@ except ImportError:
     from routes.preview_data import preview_bp
     from routes.workflow_api import workflow_api_bp
     from routes.peak_detection import peak_detection_bp
+    from routes.peak_analysis import bp as peak_analysis_bp
+    from routes.parameter_api import parameter_bp, parameter_api_bp
+    from routes.calibration_api import calibration_api_bp
+    from routes.production_calibration_api import calibration_bp as production_calibration_bp
+    from routes.universal_measurement import universal_measurement
+    from routes.universal_measurement import universal_measurement
 
 logger = logging.getLogger(__name__)
 
-def create_app():
+def create_app(scpi_handler=None):
     """Create and configure Flask application"""
     
     # Set up paths
@@ -77,16 +93,26 @@ def create_app():
             os.makedirs(temp_dir)
         return send_from_directory(temp_dir, filename)
     
+    # Additional static folder for sample_data
+    @app.route('/sample_data/<path:filename>')
+    def serve_sample_file(filename):
+        sample_dir = os.path.join(project_root, 'sample_data')
+        return send_from_directory(sample_dir, filename)
+    
     # Configure file upload limits and security
     app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
     app.config['UPLOAD_EXTENSIONS'] = ['.csv', '.txt', '.xlsx', '.json']
     app.config['SECRET_KEY'] = 'h743poten-workflow-2025'  # For session management
     
     # Initialize services
-    scpi_handler = SCPIHandler()
+    if scpi_handler is None:
+        scpi_handler = SCPIHandler()
     measurement_service = MeasurementService(scpi_handler)
     data_service = DataService()
     cv_service = CVMeasurementService(scpi_handler)
+    dpv_service = DPVMeasurementService(scpi_handler)
+    swv_service = SWVMeasurementService(scpi_handler)
+    ca_service = CAMeasurementService(scpi_handler)
     
     # Initialize data logging service with correct path
     data_logs_path = project_root / "data_logs"
@@ -97,7 +123,20 @@ def create_app():
     app.config['measurement_service'] = measurement_service
     app.config['data_service'] = data_service
     app.config['cv_service'] = cv_service
+    app.config['dpv_service'] = dpv_service
+    app.config['swv_service'] = swv_service
+    app.config['ca_service'] = ca_service
     app.config['data_logging_service'] = data_logging_service
+    
+    # Also store services as app attributes for universal_measurement.py
+    app.cv_service = cv_service
+    app.dpv_service = dpv_service
+    app.swv_service = swv_service
+    app.ca_service = ca_service
+    app.scpi_handler = scpi_handler
+    app.measurement_service = measurement_service
+    app.data_service = data_service
+    app.data_logging_service = data_logging_service
     
     # Register blueprints
     app.register_blueprint(ai_bp)
@@ -107,7 +146,13 @@ def create_app():
     app.register_blueprint(workflow_bp)
     app.register_blueprint(preview_bp)
     app.register_blueprint(workflow_api_bp)
-    app.register_blueprint(peak_detection_bp, url_prefix='/api/peak-detection')
+    app.register_blueprint(peak_detection_bp)  # Remove url_prefix to use root URLs
+    app.register_blueprint(peak_analysis_bp, url_prefix='/peak_detection')
+    app.register_blueprint(parameter_bp)
+    app.register_blueprint(parameter_api_bp)
+    app.register_blueprint(calibration_api_bp)
+    app.register_blueprint(production_calibration_bp)  # Production cross-sample calibration
+    app.register_blueprint(universal_measurement)  # Universal measurement API for all modes
     
     # Error handlers
     @app.errorhandler(413)
@@ -138,6 +183,36 @@ def create_app():
             'error_code': 500
         }), 500
     
+
+    @app.route('/health')
+    def health_check():
+        """Health check endpoint for monitoring"""
+        try:
+            import sys
+            from datetime import datetime
+            serial_connected = app.config['scpi_handler'].is_connected if 'scpi_handler' in app.config else False
+            routes_count = len([rule for rule in app.url_map.iter_rules()])
+            return jsonify({
+                'status': 'healthy',
+                'timestamp': datetime.now().isoformat(),
+                'version': '1.0.0-rpi5',
+                'services': {
+                    'web': 'ok',
+                    'serial': 'connected' if serial_connected else 'disconnected',
+                    'routes': routes_count
+                },
+                'environment': {
+                    'platform': sys.platform,
+                    'python_version': sys.version.split()[0],
+                    'debug_mode': app.debug
+                }
+            }), 200
+        except Exception as e:
+            return jsonify({
+                'status': 'unhealthy',
+                'error': str(e),
+                'timestamp': datetime.now().isoformat()
+            }), 500
     @app.route('/debug')
     def debug():
         """Debug endpoint to check application state"""
@@ -156,23 +231,48 @@ def create_app():
     
     @app.route('/')
     def index():
-        """Main dashboard"""
-        return render_template('index.html')
+        """Main dashboard - redirect to all measurements"""
+        return render_template('all_measurements.html')
         
     @app.route('/measurements')
     def measurements():
         """Measurement interface"""
         return render_template('measurement.html')
     
+    @app.route('/all-measurements')
+    def all_measurements():
+        """Universal measurement interface for all modes"""
+        return render_template('all_measurements.html')
+    
     @app.route('/data-browser')
     def data_browser():
         """Data browser interface"""
         return render_template('data_browser.html')
         
-    @app.route('/peak-detection')
+    @app.route('/peak_detection')
     def peak_detection_view():
         """Peak detection visualization interface"""
         return render_template('peak_detection.html')
+    
+    @app.route('/calibration')
+    def calibration_view():
+        """Cross-instrument calibration interface"""
+        return render_template('calibration.html')
+    
+    @app.route('/settings')
+    def settings_view():
+        """Settings and feature management interface"""
+        return render_template('settings.html')
+
+    @app.route('/com-port-connector')
+    def com_port_connector():
+        """COM port connection interface"""
+        return render_template('com_port_connector.html')
+    
+    @app.route('/workflow')
+    def workflow_view():
+        """Analysis workflow interface"""
+        return render_template('workflow_visualization.html')
     
     @app.route('/favicon.ico')
     def favicon():
@@ -209,14 +309,32 @@ def create_app():
             port = data.get('port')
             baud_rate = data.get('baud_rate', 115200)  # Default to 115200 if not provided
             
+            logger.info(f"Connection attempt: port={port}, baud_rate={baud_rate}")
+            
             if not port:
+                logger.error("Connection failed: No port specified")
                 return jsonify({'success': False, 'error': 'Port is required'}), 400
 
             app.config['scpi_handler'].port = port
             app.config['scpi_handler'].baud_rate = baud_rate
             success = app.config['scpi_handler'].connect()
-            return jsonify({'success': success})
+            
+            if success:
+                logger.info(f"✅ Connection successful: {port} at {baud_rate} baud")
+                return jsonify({
+                    'success': True, 
+                    'message': f'Connected to {port} at {baud_rate} baud'
+                })
+            else:
+                error_msg = f"Failed to connect to {port} at {baud_rate} baud"
+                logger.error(f"❌ Connection failed: {error_msg}")
+                return jsonify({
+                    'success': False, 
+                    'error': error_msg
+                })
+            
         except Exception as e:
+            logger.error(f"Connection exception: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     @app.route('/api/connection/disconnect', methods=['POST'])
@@ -242,7 +360,8 @@ def create_app():
         try:
             data = request.get_json()
             mode = data.get('mode')
-            params = data.get('params', {})
+            # Support both 'params' and 'parameters' for compatibility
+            params = data.get('parameters', data.get('params', {}))
             
             success = app.config['measurement_service'].setup_measurement(mode, params)
             return jsonify({'success': success})
@@ -255,8 +374,29 @@ def create_app():
     def start_measurement():
         """Start measurement"""
         try:
-            success = app.config['measurement_service'].start_measurement()
-            return jsonify({'success': success})
+            # Get mode from request or use CV as default
+            data = request.get_json() if request.is_json else {}
+            mode = data.get('mode', 'CV').upper()
+            
+            # Get appropriate service based on mode
+            service = None
+            if mode == 'CV':
+                service = app.config.get('cv_service')
+            elif mode == 'DPV':
+                service = app.config.get('dpv_service')
+            elif mode == 'SWV':
+                service = app.config.get('swv_service')
+            elif mode == 'CA':
+                service = app.config.get('ca_service')
+            
+            if not service:
+                return jsonify({
+                    'success': False,
+                    'error': f'Service not available for mode: {mode}'
+                }), 503
+            
+            success = service.start_measurement()
+            return jsonify({'success': success, 'mode': mode})
         except Exception as e:
             logger.error(f"Failed to start measurement: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
@@ -280,6 +420,57 @@ def create_app():
         except Exception as e:
             logger.error(f"Failed to get measurement status: {e}")
             return jsonify({'error': str(e)}), 500
+    
+    @app.route('/api/measurement/data/<mode>')
+    def get_measurement_data(mode):
+        """Get measurement data for specific mode (CV, DPV, SWV, CA)"""
+        try:
+            mode = mode.upper()
+            logger.debug(f"🔍 Getting measurement data for mode: {mode}")
+            
+            # Get appropriate service based on mode
+            service = None
+            if mode == 'CV':
+                service = app.config.get('cv_service')
+            elif mode == 'DPV':
+                service = app.config.get('dpv_service')
+            elif mode == 'SWV':
+                service = app.config.get('swv_service')
+            elif mode == 'CA':
+                service = app.config.get('ca_service')
+            else:
+                logger.error(f"❌ Unsupported measurement mode: {mode}")
+                return jsonify({
+                    'success': False,
+                    'error': f'Unsupported measurement mode: {mode}',
+                    'data': {'points': [], 'completed': False, 'mode': mode}
+                }), 400
+            
+            if not service:
+                logger.error(f"❌ No service available for mode: {mode}")
+                return jsonify({
+                    'success': False,
+                    'error': f'Service not available for mode: {mode}',
+                    'data': {'points': [], 'completed': False, 'mode': mode}
+                }), 503
+            
+            # Get measurement data directly from specific service
+            data = service.get_measurement_data()
+            logger.debug(f"📡 Got data for {mode}: {len(data.get('points', []))} points, completed: {data.get('completed', False)}")
+            
+            # Return data in format expected by frontend
+            return jsonify({
+                'success': True,
+                'mode': mode,
+                'data': data
+            })
+        except Exception as e:
+            logger.error(f"❌ Failed to get measurement data for {mode}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'data': {'points': [], 'completed': False, 'mode': mode}
+            }), 500
     
     @app.route('/api/data/current')
     def get_current_data():
@@ -540,15 +731,151 @@ def create_app():
             logger.error(f"Failed to seek CSV emulation: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
+    # Settings API routes
+    @app.route('/api/settings/features')
+    def get_feature_settings():
+        """Get current feature settings"""
+        try:
+            # Get features from config or default settings
+            default_features = {
+                'measurements': {
+                    'enabled': True,
+                    'label': 'Measurements',
+                    'description': 'Basic electrochemical measurement functionality',
+                    'category': 'core'
+                },
+                'analysis_workflow': {
+                    'enabled': True,
+                    'label': 'Analysis Workflow',
+                    'description': 'Advanced data analysis and visualization tools',
+                    'category': 'analysis'
+                },
+                'ai_dashboard': {
+                    'enabled': False,
+                    'label': 'AI Dashboard',
+                    'description': 'Machine learning-powered analysis tools',
+                    'category': 'ai'
+                },
+                'calibration': {
+                    'enabled': True,
+                    'label': 'Calibration',
+                    'description': 'Cross-instrument calibration and validation',
+                    'category': 'calibration'
+                },
+                'peak_detection': {
+                    'enabled': True,
+                    'label': 'Peak Detection',
+                    'description': 'Automated peak detection and analysis',
+                    'category': 'analysis'
+                },
+                'data_logging': {
+                    'enabled': True,
+                    'label': 'Data Logging',
+                    'description': 'Automated data logging and storage',
+                    'category': 'core'
+                },
+                'csv_emulation': {
+                    'enabled': True,
+                    'label': 'CSV Emulation',
+                    'description': 'CSV data emulation for testing',
+                    'category': 'development'
+                },
+                'hardware_diagnostics': {
+                    'enabled': False,
+                    'label': 'Hardware Diagnostics',
+                    'description': 'Advanced hardware testing and diagnostics',
+                    'category': 'development'
+                }
+            }
+            
+            # Load from config file if it exists
+            config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'features.json')
+            if os.path.exists(config_path):
+                try:
+                    with open(config_path, 'r') as f:
+                        stored_features = json.load(f)
+                    # Merge with defaults (add new features, keep existing settings)
+                    for key, value in stored_features.items():
+                        if key in default_features:
+                            default_features[key]['enabled'] = value.get('enabled', default_features[key]['enabled'])
+                except Exception as e:
+                    logger.warning(f"Failed to load feature settings: {e}")
+            
+            return jsonify({
+                'success': True,
+                'features': default_features
+            })
+            
+        except Exception as e:
+            logger.error(f"Failed to get feature settings: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/settings/features', methods=['POST'])
+    def update_feature_settings():
+        """Update feature settings"""
+        try:
+            data = request.get_json()
+            features = data.get('features', {})
+            
+            # Ensure config directory exists
+            config_dir = os.path.join(os.path.dirname(__file__), '..', 'config')
+            os.makedirs(config_dir, exist_ok=True)
+            
+            # Save to config file
+            config_path = os.path.join(config_dir, 'features.json')
+            with open(config_path, 'w') as f:
+                json.dump(features, f, indent=2)
+            
+            logger.info(f"Updated feature settings: {features}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'Feature settings updated successfully'
+            })
+            
+        except Exception as e:
+            logger.error(f"Failed to update feature settings: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/settings/system')
+    def get_system_settings():
+        """Get system configuration"""
+        try:
+            return jsonify({
+                'success': True,
+                'system': {
+                    'version': '1.0.0-rpi5',
+                    'platform': 'Raspberry Pi 5',
+                    'python_version': sys.version,
+                    'flask_debug': app.debug,
+                    'upload_max_size': app.config.get('MAX_CONTENT_LENGTH', 0) // (1024 * 1024),  # MB
+                    'data_path': str(Path(__file__).parent.parent / 'data_logs'),
+                    'temp_path': str(Path(__file__).parent.parent / 'temp_data')
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"Failed to get system settings: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
     return app
 
 if __name__ == "__main__":
     """Allow direct execution of app.py for development"""
     
     # Configure logging
+    import os
+    log_dir = 'logs'
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('logs/h743poten_dev.log'),
+            logging.StreamHandler()
+        ]
     )
     
     logger = logging.getLogger(__name__)

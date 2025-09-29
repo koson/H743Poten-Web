@@ -1,0 +1,1146 @@
+Scikit-learn not available - ML features will be limited
+Scikit-learn not available - using fallback algorithms
+Running in fallback mode - limited ML capabilities
+Running in fallback mode - limited ML capabilities
+WARNING:routes.peak_detection:Enhanced Detector V4.0 not available: No module named 'enhanced_detector_v4'
+WARNING:routes.peak_detection:Enhanced Detector V4 Improved not available: No module named 'enhanced_detector_v4_improved'
+INFO:utils.cv_baseline_corrector:🎯 CV Baseline Corrector initialized
+INFO:utils.baseline_detector:🎯 Baseline Detector v2.1 Initialized for Web Application
+INFO:utils.baseline_detector:🤖 Auto-mode: ON
+INFO:routes.peak_detection:🎯 Enhanced Baseline Detector v2.1 initialized for web application
+INFO:routes.peak_detection:🔬 Voltage Window Baseline Detector v4 available as primary method
+/home/koson/H743Poten/H743Poten-Web/validation_data/cross_instrument_calibration.py:32: UserWarning: ML libraries not available - using simplified calibration
+  warnings.warn("ML libraries not available - using simplified calibration")
+INFO:src.services.parameter_logging:Database initialized successfully
+INFO:src.services.parameter_logging:Database initialized successfully
+INFO:src.services.parameter_logging:Database initialized successfully
+WARNING:src.services.production_calibration_service:Calibration file cross_sample_calibration_results.json not found, using defaults
+INFO:src.services.parameter_logging:Database initialized successfully
+WARNING:src.services.production_calibration_service:Calibration file cross_sample_calibration_results.json not found, using defaults
+INFO:src.services.parameter_logging:Database initialized successfully
+INFO:services.data_logging_service:Data logging directory initialized: /home/koson/H743Poten/H743Poten-Web/data_logs
+INFO:__main__:Starting H743Poten Web Interface
+INFO:__main__:Serial port: /dev/ttyACM1
+INFO:__main__:Baud rate: 115200
+INFO:__main__:Web server: http://localhost:8080
+✅ Using real scipy
+ * Serving Flask app 'app'
+ * Debug mode: off
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.9.76:8080
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:23:17] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:23:17] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:23:17] "[36mGET /static/js/connection_state.js?v=20250927-2 HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:23:17] "GET /api/connection/status HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:23:17] "GET /api/connection/status HTTP/1.1" 200 -
+INFO:routes.port_routes:Port list requested
+2025-09-30 00:23:17,886 - hardware.port_scanner - DEBUG - Starting port scan...
+DEBUG:hardware.port_scanner:Starting port scan...
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:23:17] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-09-30 00:23:17,900 - hardware.port_scanner - INFO - Found 33 ports in total
+INFO:hardware.port_scanner:Found 33 ports in total
+2025-09-30 00:23:17,900 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS31
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS31
+2025-09-30 00:23:17,900 - hardware.port_scanner - INFO - Found port: /dev/ttyS31 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS31 - n/a
+2025-09-30 00:23:17,900 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS31', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS31', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,900 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS30
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS30
+2025-09-30 00:23:17,900 - hardware.port_scanner - INFO - Found port: /dev/ttyS30 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS30 - n/a
+2025-09-30 00:23:17,900 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS30', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS30', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,900 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS29
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS29
+2025-09-30 00:23:17,900 - hardware.port_scanner - INFO - Found port: /dev/ttyS29 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS29 - n/a
+2025-09-30 00:23:17,900 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS29', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS29', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,900 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS28
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS28
+2025-09-30 00:23:17,900 - hardware.port_scanner - INFO - Found port: /dev/ttyS28 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS28 - n/a
+2025-09-30 00:23:17,900 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS28', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS28', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,900 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS27
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS27
+2025-09-30 00:23:17,900 - hardware.port_scanner - INFO - Found port: /dev/ttyS27 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS27 - n/a
+2025-09-30 00:23:17,900 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS27', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS27', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,900 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS26
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS26
+2025-09-30 00:23:17,900 - hardware.port_scanner - INFO - Found port: /dev/ttyS26 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS26 - n/a
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS26', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS26', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS25
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS25
+2025-09-30 00:23:17,901 - hardware.port_scanner - INFO - Found port: /dev/ttyS25 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS25 - n/a
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS25', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS25', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS24
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS24
+2025-09-30 00:23:17,901 - hardware.port_scanner - INFO - Found port: /dev/ttyS24 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS24 - n/a
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS24', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS24', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS23
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS23
+2025-09-30 00:23:17,901 - hardware.port_scanner - INFO - Found port: /dev/ttyS23 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS23 - n/a
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS23', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS23', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS22
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS22
+2025-09-30 00:23:17,901 - hardware.port_scanner - INFO - Found port: /dev/ttyS22 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS22 - n/a
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS22', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS22', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS21
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS21
+2025-09-30 00:23:17,901 - hardware.port_scanner - INFO - Found port: /dev/ttyS21 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS21 - n/a
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS21', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS21', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS20
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS20
+2025-09-30 00:23:17,901 - hardware.port_scanner - INFO - Found port: /dev/ttyS20 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS20 - n/a
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS20', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS20', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS19
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS19
+2025-09-30 00:23:17,901 - hardware.port_scanner - INFO - Found port: /dev/ttyS19 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS19 - n/a
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS19', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS19', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS18
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS18
+2025-09-30 00:23:17,901 - hardware.port_scanner - INFO - Found port: /dev/ttyS18 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS18 - n/a
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS18', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS18', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,901 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS17
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS17
+2025-09-30 00:23:17,902 - hardware.port_scanner - INFO - Found port: /dev/ttyS17 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS17 - n/a
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS17', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS17', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS16
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS16
+2025-09-30 00:23:17,902 - hardware.port_scanner - INFO - Found port: /dev/ttyS16 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS16 - n/a
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS16', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS16', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS15
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS15
+2025-09-30 00:23:17,902 - hardware.port_scanner - INFO - Found port: /dev/ttyS15 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS15 - n/a
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS15', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS15', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS14
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS14
+2025-09-30 00:23:17,902 - hardware.port_scanner - INFO - Found port: /dev/ttyS14 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS14 - n/a
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS14', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS14', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS13
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS13
+2025-09-30 00:23:17,902 - hardware.port_scanner - INFO - Found port: /dev/ttyS13 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS13 - n/a
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS13', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS13', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS12
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS12
+2025-09-30 00:23:17,902 - hardware.port_scanner - INFO - Found port: /dev/ttyS12 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS12 - n/a
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS12', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS12', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS11
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS11
+2025-09-30 00:23:17,902 - hardware.port_scanner - INFO - Found port: /dev/ttyS11 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS11 - n/a
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS11', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS11', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS10
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS10
+2025-09-30 00:23:17,902 - hardware.port_scanner - INFO - Found port: /dev/ttyS10 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS10 - n/a
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS10', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS10', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS9
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS9
+2025-09-30 00:23:17,902 - hardware.port_scanner - INFO - Found port: /dev/ttyS9 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS9 - n/a
+2025-09-30 00:23:17,902 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS9', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS9', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS8
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS8
+2025-09-30 00:23:17,903 - hardware.port_scanner - INFO - Found port: /dev/ttyS8 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS8 - n/a
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS8', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS8', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS7
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS7
+2025-09-30 00:23:17,903 - hardware.port_scanner - INFO - Found port: /dev/ttyS7 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS7 - n/a
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS7', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS7', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS6
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS6
+2025-09-30 00:23:17,903 - hardware.port_scanner - INFO - Found port: /dev/ttyS6 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS6 - n/a
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS6', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS6', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS5
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS5
+2025-09-30 00:23:17,903 - hardware.port_scanner - INFO - Found port: /dev/ttyS5 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS5 - n/a
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS5', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS5', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS4
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS4
+2025-09-30 00:23:17,903 - hardware.port_scanner - INFO - Found port: /dev/ttyS4 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS4 - n/a
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS4', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS4', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS3
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS3
+2025-09-30 00:23:17,903 - hardware.port_scanner - INFO - Found port: /dev/ttyS3 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS3 - n/a
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS3', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS3', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS2
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS2
+2025-09-30 00:23:17,903 - hardware.port_scanner - INFO - Found port: /dev/ttyS2 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS2 - n/a
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS2', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS2', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS1
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS1
+2025-09-30 00:23:17,903 - hardware.port_scanner - INFO - Found port: /dev/ttyS1 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS1 - n/a
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS1', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS1', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,903 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS0
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS0
+2025-09-30 00:23:17,903 - hardware.port_scanner - INFO - Found port: /dev/ttyS0 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS0 - n/a
+2025-09-30 00:23:17,904 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS0', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS0', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:23:17,904 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyACM1
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyACM1
+2025-09-30 00:23:17,904 - hardware.port_scanner - INFO - Found port: /dev/ttyACM1 - STM32 Virtual ComPort
+INFO:hardware.port_scanner:Found port: /dev/ttyACM1 - STM32 Virtual ComPort
+2025-09-30 00:23:17,904 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyACM1', 'description': 'STM32 Virtual ComPort', 'hwid': 'USB VID:PID=0483:5740 SER=326B396B3133 LOCATION=1-1:1.0', 'manufacturer': 'STMicroelectronics', 'vid': 1155, 'pid': 22336}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyACM1', 'description': 'STM32 Virtual ComPort', 'hwid': 'USB VID:PID=0483:5740 SER=326B396B3133 LOCATION=1-1:1.0', 'manufacturer': 'STMicroelectronics', 'vid': 1155, 'pid': 22336}
+2025-09-30 00:23:17,904 - hardware.port_scanner - DEBUG - Port scan complete. Found 33 available ports
+DEBUG:hardware.port_scanner:Port scan complete. Found 33 available ports
+2025-09-30 00:23:17,904 - hardware.port_scanner - INFO - Found potential STM32 device: /dev/ttyACM1
+INFO:hardware.port_scanner:Found potential STM32 device: /dev/ttyACM1
+INFO:routes.port_routes:Found 1 STM32 ports
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:23:17] "GET /api/ports HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:28] "GET /all-measurements?id=f117e62e-cfed-45ad-b9e2-f0082b12ad0e&vscodeBrowserReqId=1759166789041 HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:28] "[36mGET /static/js/connection_state.js?v=20250927-2 HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:28] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:28] "GET /api/connection/status HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:28] "GET /api/connection/status HTTP/1.1" 200 -
+INFO:routes.port_routes:Port list requested
+2025-09-30 00:26:28,577 - hardware.port_scanner - DEBUG - Starting port scan...
+DEBUG:hardware.port_scanner:Starting port scan...
+2025-09-30 00:26:28,588 - hardware.port_scanner - INFO - Found 33 ports in total
+INFO:hardware.port_scanner:Found 33 ports in total
+2025-09-30 00:26:28,588 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS31
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS31
+2025-09-30 00:26:28,588 - hardware.port_scanner - INFO - Found port: /dev/ttyS31 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS31 - n/a
+2025-09-30 00:26:28,588 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS31', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS31', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,588 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS30
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS30
+2025-09-30 00:26:28,588 - hardware.port_scanner - INFO - Found port: /dev/ttyS30 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS30 - n/a
+2025-09-30 00:26:28,588 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS30', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS30', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,588 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS29
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS29
+2025-09-30 00:26:28,588 - hardware.port_scanner - INFO - Found port: /dev/ttyS29 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS29 - n/a
+2025-09-30 00:26:28,588 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS29', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS29', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,588 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS28
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS28
+2025-09-30 00:26:28,588 - hardware.port_scanner - INFO - Found port: /dev/ttyS28 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS28 - n/a
+2025-09-30 00:26:28,588 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS28', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS28', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,588 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS27
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS27
+2025-09-30 00:26:28,588 - hardware.port_scanner - INFO - Found port: /dev/ttyS27 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS27 - n/a
+2025-09-30 00:26:28,588 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS27', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS27', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS26
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS26
+2025-09-30 00:26:28,589 - hardware.port_scanner - INFO - Found port: /dev/ttyS26 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS26 - n/a
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS26', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS26', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS25
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS25
+2025-09-30 00:26:28,589 - hardware.port_scanner - INFO - Found port: /dev/ttyS25 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS25 - n/a
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS25', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS25', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS24
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS24
+2025-09-30 00:26:28,589 - hardware.port_scanner - INFO - Found port: /dev/ttyS24 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS24 - n/a
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS24', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS24', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS23
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS23
+2025-09-30 00:26:28,589 - hardware.port_scanner - INFO - Found port: /dev/ttyS23 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS23 - n/a
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS23', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS23', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS22
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS22
+2025-09-30 00:26:28,589 - hardware.port_scanner - INFO - Found port: /dev/ttyS22 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS22 - n/a
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS22', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS22', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS21
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS21
+2025-09-30 00:26:28,589 - hardware.port_scanner - INFO - Found port: /dev/ttyS21 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS21 - n/a
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS21', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS21', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS20
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS20
+2025-09-30 00:26:28,589 - hardware.port_scanner - INFO - Found port: /dev/ttyS20 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS20 - n/a
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS20', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS20', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS19
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS19
+2025-09-30 00:26:28,589 - hardware.port_scanner - INFO - Found port: /dev/ttyS19 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS19 - n/a
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS19', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS19', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,589 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS18
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS18
+2025-09-30 00:26:28,589 - hardware.port_scanner - INFO - Found port: /dev/ttyS18 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS18 - n/a
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS18', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS18', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS17
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS17
+2025-09-30 00:26:28,590 - hardware.port_scanner - INFO - Found port: /dev/ttyS17 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS17 - n/a
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS17', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS17', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS16
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS16
+2025-09-30 00:26:28,590 - hardware.port_scanner - INFO - Found port: /dev/ttyS16 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS16 - n/a
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS16', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS16', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS15
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS15
+2025-09-30 00:26:28,590 - hardware.port_scanner - INFO - Found port: /dev/ttyS15 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS15 - n/a
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS15', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS15', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS14
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS14
+2025-09-30 00:26:28,590 - hardware.port_scanner - INFO - Found port: /dev/ttyS14 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS14 - n/a
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS14', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS14', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS13
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS13
+2025-09-30 00:26:28,590 - hardware.port_scanner - INFO - Found port: /dev/ttyS13 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS13 - n/a
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS13', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS13', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS12
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS12
+2025-09-30 00:26:28,590 - hardware.port_scanner - INFO - Found port: /dev/ttyS12 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS12 - n/a
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS12', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS12', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS11
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS11
+2025-09-30 00:26:28,590 - hardware.port_scanner - INFO - Found port: /dev/ttyS11 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS11 - n/a
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS11', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS11', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS10
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS10
+2025-09-30 00:26:28,590 - hardware.port_scanner - INFO - Found port: /dev/ttyS10 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS10 - n/a
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS10', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS10', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,590 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS9
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS9
+2025-09-30 00:26:28,590 - hardware.port_scanner - INFO - Found port: /dev/ttyS9 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS9 - n/a
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS9', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS9', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS8
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS8
+2025-09-30 00:26:28,591 - hardware.port_scanner - INFO - Found port: /dev/ttyS8 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS8 - n/a
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS8', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS8', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS7
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS7
+2025-09-30 00:26:28,591 - hardware.port_scanner - INFO - Found port: /dev/ttyS7 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS7 - n/a
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS7', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS7', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS6
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS6
+2025-09-30 00:26:28,591 - hardware.port_scanner - INFO - Found port: /dev/ttyS6 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS6 - n/a
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS6', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS6', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS5
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS5
+2025-09-30 00:26:28,591 - hardware.port_scanner - INFO - Found port: /dev/ttyS5 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS5 - n/a
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS5', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS5', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS4
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS4
+2025-09-30 00:26:28,591 - hardware.port_scanner - INFO - Found port: /dev/ttyS4 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS4 - n/a
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS4', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS4', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS3
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS3
+2025-09-30 00:26:28,591 - hardware.port_scanner - INFO - Found port: /dev/ttyS3 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS3 - n/a
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS3', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS3', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS2
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS2
+2025-09-30 00:26:28,591 - hardware.port_scanner - INFO - Found port: /dev/ttyS2 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS2 - n/a
+2025-09-30 00:26:28,591 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS2', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS2', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,592 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS1
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS1
+2025-09-30 00:26:28,592 - hardware.port_scanner - INFO - Found port: /dev/ttyS1 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS1 - n/a
+2025-09-30 00:26:28,592 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS1', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS1', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,592 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS0
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS0
+2025-09-30 00:26:28,592 - hardware.port_scanner - INFO - Found port: /dev/ttyS0 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS0 - n/a
+2025-09-30 00:26:28,592 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS0', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS0', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:28,592 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyACM1
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyACM1
+2025-09-30 00:26:28,592 - hardware.port_scanner - INFO - Found port: /dev/ttyACM1 - STM32 Virtual ComPort
+INFO:hardware.port_scanner:Found port: /dev/ttyACM1 - STM32 Virtual ComPort
+2025-09-30 00:26:28,592 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyACM1', 'description': 'STM32 Virtual ComPort', 'hwid': 'USB VID:PID=0483:5740 SER=326B396B3133 LOCATION=1-1:1.0', 'manufacturer': 'STMicroelectronics', 'vid': 1155, 'pid': 22336}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyACM1', 'description': 'STM32 Virtual ComPort', 'hwid': 'USB VID:PID=0483:5740 SER=326B396B3133 LOCATION=1-1:1.0', 'manufacturer': 'STMicroelectronics', 'vid': 1155, 'pid': 22336}
+2025-09-30 00:26:28,592 - hardware.port_scanner - DEBUG - Port scan complete. Found 33 available ports
+DEBUG:hardware.port_scanner:Port scan complete. Found 33 available ports
+2025-09-30 00:26:28,592 - hardware.port_scanner - INFO - Found potential STM32 device: /dev/ttyACM1
+INFO:hardware.port_scanner:Found potential STM32 device: /dev/ttyACM1
+INFO:routes.port_routes:Found 1 STM32 ports
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:28] "GET /api/ports HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:35] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:35] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:35] "[36mGET /static/js/connection_state.js?v=20250927-2 HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:35] "GET /api/connection/status HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:35] "GET /api/connection/status HTTP/1.1" 200 -
+INFO:routes.port_routes:Port list requested
+2025-09-30 00:26:35,720 - hardware.port_scanner - DEBUG - Starting port scan...
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:35] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+DEBUG:hardware.port_scanner:Starting port scan...
+2025-09-30 00:26:35,735 - hardware.port_scanner - INFO - Found 33 ports in total
+INFO:hardware.port_scanner:Found 33 ports in total
+2025-09-30 00:26:35,735 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS31
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS31
+2025-09-30 00:26:35,735 - hardware.port_scanner - INFO - Found port: /dev/ttyS31 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS31 - n/a
+2025-09-30 00:26:35,735 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS31', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS31', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,735 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS30
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS30
+2025-09-30 00:26:35,735 - hardware.port_scanner - INFO - Found port: /dev/ttyS30 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS30 - n/a
+2025-09-30 00:26:35,735 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS30', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS30', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,735 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS29
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS29
+2025-09-30 00:26:35,735 - hardware.port_scanner - INFO - Found port: /dev/ttyS29 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS29 - n/a
+2025-09-30 00:26:35,735 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS29', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS29', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,735 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS28
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS28
+2025-09-30 00:26:35,735 - hardware.port_scanner - INFO - Found port: /dev/ttyS28 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS28 - n/a
+2025-09-30 00:26:35,735 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS28', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS28', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,735 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS27
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS27
+2025-09-30 00:26:35,735 - hardware.port_scanner - INFO - Found port: /dev/ttyS27 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS27 - n/a
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS27', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS27', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS26
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS26
+2025-09-30 00:26:35,736 - hardware.port_scanner - INFO - Found port: /dev/ttyS26 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS26 - n/a
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS26', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS26', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS25
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS25
+2025-09-30 00:26:35,736 - hardware.port_scanner - INFO - Found port: /dev/ttyS25 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS25 - n/a
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS25', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS25', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS24
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS24
+2025-09-30 00:26:35,736 - hardware.port_scanner - INFO - Found port: /dev/ttyS24 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS24 - n/a
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS24', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS24', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS23
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS23
+2025-09-30 00:26:35,736 - hardware.port_scanner - INFO - Found port: /dev/ttyS23 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS23 - n/a
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS23', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS23', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS22
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS22
+2025-09-30 00:26:35,736 - hardware.port_scanner - INFO - Found port: /dev/ttyS22 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS22 - n/a
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS22', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS22', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS21
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS21
+2025-09-30 00:26:35,736 - hardware.port_scanner - INFO - Found port: /dev/ttyS21 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS21 - n/a
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS21', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS21', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS20
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS20
+2025-09-30 00:26:35,736 - hardware.port_scanner - INFO - Found port: /dev/ttyS20 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS20 - n/a
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS20', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS20', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS19
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS19
+2025-09-30 00:26:35,736 - hardware.port_scanner - INFO - Found port: /dev/ttyS19 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS19 - n/a
+2025-09-30 00:26:35,736 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS19', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS19', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS18
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS18
+2025-09-30 00:26:35,737 - hardware.port_scanner - INFO - Found port: /dev/ttyS18 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS18 - n/a
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS18', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS18', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS17
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS17
+2025-09-30 00:26:35,737 - hardware.port_scanner - INFO - Found port: /dev/ttyS17 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS17 - n/a
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS17', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS17', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS16
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS16
+2025-09-30 00:26:35,737 - hardware.port_scanner - INFO - Found port: /dev/ttyS16 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS16 - n/a
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS16', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS16', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS15
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS15
+2025-09-30 00:26:35,737 - hardware.port_scanner - INFO - Found port: /dev/ttyS15 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS15 - n/a
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS15', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS15', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS14
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS14
+2025-09-30 00:26:35,737 - hardware.port_scanner - INFO - Found port: /dev/ttyS14 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS14 - n/a
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS14', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS14', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS13
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS13
+2025-09-30 00:26:35,737 - hardware.port_scanner - INFO - Found port: /dev/ttyS13 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS13 - n/a
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS13', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS13', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS12
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS12
+2025-09-30 00:26:35,737 - hardware.port_scanner - INFO - Found port: /dev/ttyS12 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS12 - n/a
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS12', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS12', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS11
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS11
+2025-09-30 00:26:35,737 - hardware.port_scanner - INFO - Found port: /dev/ttyS11 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS11 - n/a
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS11', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS11', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS10
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS10
+2025-09-30 00:26:35,737 - hardware.port_scanner - INFO - Found port: /dev/ttyS10 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS10 - n/a
+2025-09-30 00:26:35,737 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS10', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS10', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS9
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS9
+2025-09-30 00:26:35,738 - hardware.port_scanner - INFO - Found port: /dev/ttyS9 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS9 - n/a
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS9', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS9', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS8
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS8
+2025-09-30 00:26:35,738 - hardware.port_scanner - INFO - Found port: /dev/ttyS8 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS8 - n/a
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS8', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS8', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS7
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS7
+2025-09-30 00:26:35,738 - hardware.port_scanner - INFO - Found port: /dev/ttyS7 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS7 - n/a
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS7', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS7', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS6
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS6
+2025-09-30 00:26:35,738 - hardware.port_scanner - INFO - Found port: /dev/ttyS6 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS6 - n/a
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS6', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS6', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS5
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS5
+2025-09-30 00:26:35,738 - hardware.port_scanner - INFO - Found port: /dev/ttyS5 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS5 - n/a
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS5', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS5', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS4
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS4
+2025-09-30 00:26:35,738 - hardware.port_scanner - INFO - Found port: /dev/ttyS4 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS4 - n/a
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS4', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS4', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS3
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS3
+2025-09-30 00:26:35,738 - hardware.port_scanner - INFO - Found port: /dev/ttyS3 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS3 - n/a
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS3', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS3', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS2
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS2
+2025-09-30 00:26:35,738 - hardware.port_scanner - INFO - Found port: /dev/ttyS2 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS2 - n/a
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS2', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS2', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS1
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS1
+2025-09-30 00:26:35,738 - hardware.port_scanner - INFO - Found port: /dev/ttyS1 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS1 - n/a
+2025-09-30 00:26:35,738 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS1', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS1', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,739 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS0
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS0
+2025-09-30 00:26:35,739 - hardware.port_scanner - INFO - Found port: /dev/ttyS0 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS0 - n/a
+2025-09-30 00:26:35,739 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS0', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS0', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:26:35,739 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyACM1
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyACM1
+2025-09-30 00:26:35,739 - hardware.port_scanner - INFO - Found port: /dev/ttyACM1 - STM32 Virtual ComPort
+INFO:hardware.port_scanner:Found port: /dev/ttyACM1 - STM32 Virtual ComPort
+2025-09-30 00:26:35,739 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyACM1', 'description': 'STM32 Virtual ComPort', 'hwid': 'USB VID:PID=0483:5740 SER=326B396B3133 LOCATION=1-1:1.0', 'manufacturer': 'STMicroelectronics', 'vid': 1155, 'pid': 22336}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyACM1', 'description': 'STM32 Virtual ComPort', 'hwid': 'USB VID:PID=0483:5740 SER=326B396B3133 LOCATION=1-1:1.0', 'manufacturer': 'STMicroelectronics', 'vid': 1155, 'pid': 22336}
+2025-09-30 00:26:35,739 - hardware.port_scanner - DEBUG - Port scan complete. Found 33 available ports
+DEBUG:hardware.port_scanner:Port scan complete. Found 33 available ports
+2025-09-30 00:26:35,739 - hardware.port_scanner - INFO - Found potential STM32 device: /dev/ttyACM1
+INFO:hardware.port_scanner:Found potential STM32 device: /dev/ttyACM1
+INFO:routes.port_routes:Found 1 STM32 ports
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:26:35] "GET /api/ports HTTP/1.1" 200 -
+2025-09-30 00:27:06,455 - hardware.port_scanner - ERROR - Failed to connect to dev/ttyACM1: [Errno 2] could not open port dev/ttyACM1: [Errno 2] No such file or directory: 'dev/ttyACM1'
+ERROR:hardware.port_scanner:Failed to connect to dev/ttyACM1: [Errno 2] could not open port dev/ttyACM1: [Errno 2] No such file or directory: 'dev/ttyACM1'
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:27:06] "GET /api/ports/test/dev/ttyACM1 HTTP/1.1" 200 -
+INFO:app:Connection attempt: port=/dev/ttyACM1, baud_rate=115200
+INFO:hardware.scpi_handler:Available ports: ['/dev/ttyS31', '/dev/ttyS30', '/dev/ttyS29', '/dev/ttyS28', '/dev/ttyS27', '/dev/ttyS26', '/dev/ttyS25', '/dev/ttyS24', '/dev/ttyS23', '/dev/ttyS22', '/dev/ttyS21', '/dev/ttyS20', '/dev/ttyS19', '/dev/ttyS18', '/dev/ttyS17', '/dev/ttyS16', '/dev/ttyS15', '/dev/ttyS14', '/dev/ttyS13', '/dev/ttyS12', '/dev/ttyS11', '/dev/ttyS10', '/dev/ttyS9', '/dev/ttyS8', '/dev/ttyS7', '/dev/ttyS6', '/dev/ttyS5', '/dev/ttyS4', '/dev/ttyS3', '/dev/ttyS2', '/dev/ttyS1', '/dev/ttyS0', '/dev/ttyACM1']
+INFO:hardware.scpi_handler:Trying to connect to: /dev/ttyACM1
+INFO:hardware.scpi_handler:🚀 Fast connect to /dev/ttyACM1...
+INFO:hardware.scpi_handler:Fast connected to /dev/ttyACM1 at 115200 baud
+INFO:app:✅ Connection successful: /dev/ttyACM1 at 115200 baud
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:27:07] "POST /api/connection/connect HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:27:28] "[33mGET /connection-status HTTP/1.1[0m" 404 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:27:28] "[33mPOST /connect HTTP/1.1[0m" 404 -
+INFO:hardware.scpi_handler:Disconnected from device
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:00] "POST /api/connection/disconnect HTTP/1.1" 200 -
+INFO:app:Connection attempt: port=/dev/ttyACM1, baud_rate=115200
+INFO:hardware.scpi_handler:Available ports: ['/dev/ttyS31', '/dev/ttyS30', '/dev/ttyS29', '/dev/ttyS28', '/dev/ttyS27', '/dev/ttyS26', '/dev/ttyS25', '/dev/ttyS24', '/dev/ttyS23', '/dev/ttyS22', '/dev/ttyS21', '/dev/ttyS20', '/dev/ttyS19', '/dev/ttyS18', '/dev/ttyS17', '/dev/ttyS16', '/dev/ttyS15', '/dev/ttyS14', '/dev/ttyS13', '/dev/ttyS12', '/dev/ttyS11', '/dev/ttyS10', '/dev/ttyS9', '/dev/ttyS8', '/dev/ttyS7', '/dev/ttyS6', '/dev/ttyS5', '/dev/ttyS4', '/dev/ttyS3', '/dev/ttyS2', '/dev/ttyS1', '/dev/ttyS0', '/dev/ttyACM1']
+INFO:hardware.scpi_handler:Trying to connect to: /dev/ttyACM1
+INFO:hardware.scpi_handler:🚀 Fast connect to /dev/ttyACM1...
+INFO:hardware.scpi_handler:Fast connected to /dev/ttyACM1 at 115200 baud
+INFO:app:✅ Connection successful: /dev/ttyACM1 at 115200 baud
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:01] "POST /api/connection/connect HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:06] "[33mGET /connection-status HTTP/1.1[0m" 404 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:06] "[33mPOST /connect HTTP/1.1[0m" 404 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:31] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:31] "[36mGET /static/js/connection_state.js?v=20250927-2 HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:31] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:31] "GET /api/connection/status HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:31] "GET /api/connection/status HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:31] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+INFO:routes.port_routes:Port list requested
+2025-09-30 00:28:31,703 - hardware.port_scanner - DEBUG - Starting port scan...
+DEBUG:hardware.port_scanner:Starting port scan...
+2025-09-30 00:28:31,716 - hardware.port_scanner - INFO - Found 33 ports in total
+INFO:hardware.port_scanner:Found 33 ports in total
+2025-09-30 00:28:31,716 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS31
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS31
+2025-09-30 00:28:31,716 - hardware.port_scanner - INFO - Found port: /dev/ttyS31 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS31 - n/a
+2025-09-30 00:28:31,716 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS31', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS31', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,716 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS30
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS30
+2025-09-30 00:28:31,716 - hardware.port_scanner - INFO - Found port: /dev/ttyS30 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS30 - n/a
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS30', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS30', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS29
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS29
+2025-09-30 00:28:31,717 - hardware.port_scanner - INFO - Found port: /dev/ttyS29 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS29 - n/a
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS29', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS29', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS28
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS28
+2025-09-30 00:28:31,717 - hardware.port_scanner - INFO - Found port: /dev/ttyS28 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS28 - n/a
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS28', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS28', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS27
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS27
+2025-09-30 00:28:31,717 - hardware.port_scanner - INFO - Found port: /dev/ttyS27 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS27 - n/a
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS27', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS27', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS26
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS26
+2025-09-30 00:28:31,717 - hardware.port_scanner - INFO - Found port: /dev/ttyS26 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS26 - n/a
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS26', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS26', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS25
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS25
+2025-09-30 00:28:31,717 - hardware.port_scanner - INFO - Found port: /dev/ttyS25 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS25 - n/a
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS25', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS25', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS24
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS24
+2025-09-30 00:28:31,717 - hardware.port_scanner - INFO - Found port: /dev/ttyS24 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS24 - n/a
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS24', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS24', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS23
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS23
+2025-09-30 00:28:31,717 - hardware.port_scanner - INFO - Found port: /dev/ttyS23 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS23 - n/a
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS23', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS23', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS22
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS22
+2025-09-30 00:28:31,717 - hardware.port_scanner - INFO - Found port: /dev/ttyS22 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS22 - n/a
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS22', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS22', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS21
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS21
+2025-09-30 00:28:31,717 - hardware.port_scanner - INFO - Found port: /dev/ttyS21 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS21 - n/a
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS21', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS21', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,717 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS20
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS20
+2025-09-30 00:28:31,718 - hardware.port_scanner - INFO - Found port: /dev/ttyS20 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS20 - n/a
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS20', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS20', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS19
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS19
+2025-09-30 00:28:31,718 - hardware.port_scanner - INFO - Found port: /dev/ttyS19 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS19 - n/a
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS19', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS19', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS18
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS18
+2025-09-30 00:28:31,718 - hardware.port_scanner - INFO - Found port: /dev/ttyS18 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS18 - n/a
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS18', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS18', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS17
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS17
+2025-09-30 00:28:31,718 - hardware.port_scanner - INFO - Found port: /dev/ttyS17 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS17 - n/a
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS17', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS17', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS16
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS16
+2025-09-30 00:28:31,718 - hardware.port_scanner - INFO - Found port: /dev/ttyS16 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS16 - n/a
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS16', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS16', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS15
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS15
+2025-09-30 00:28:31,718 - hardware.port_scanner - INFO - Found port: /dev/ttyS15 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS15 - n/a
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS15', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS15', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS14
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS14
+2025-09-30 00:28:31,718 - hardware.port_scanner - INFO - Found port: /dev/ttyS14 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS14 - n/a
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS14', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS14', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS13
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS13
+2025-09-30 00:28:31,718 - hardware.port_scanner - INFO - Found port: /dev/ttyS13 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS13 - n/a
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS13', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS13', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS12
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS12
+2025-09-30 00:28:31,718 - hardware.port_scanner - INFO - Found port: /dev/ttyS12 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS12 - n/a
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS12', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS12', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS11
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS11
+2025-09-30 00:28:31,718 - hardware.port_scanner - INFO - Found port: /dev/ttyS11 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS11 - n/a
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS11', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS11', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,718 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS10
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS10
+2025-09-30 00:28:31,718 - hardware.port_scanner - INFO - Found port: /dev/ttyS10 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS10 - n/a
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS10', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS10', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS9
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS9
+2025-09-30 00:28:31,719 - hardware.port_scanner - INFO - Found port: /dev/ttyS9 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS9 - n/a
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS9', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS9', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS8
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS8
+2025-09-30 00:28:31,719 - hardware.port_scanner - INFO - Found port: /dev/ttyS8 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS8 - n/a
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS8', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS8', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS7
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS7
+2025-09-30 00:28:31,719 - hardware.port_scanner - INFO - Found port: /dev/ttyS7 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS7 - n/a
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS7', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS7', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS6
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS6
+2025-09-30 00:28:31,719 - hardware.port_scanner - INFO - Found port: /dev/ttyS6 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS6 - n/a
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS6', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS6', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS5
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS5
+2025-09-30 00:28:31,719 - hardware.port_scanner - INFO - Found port: /dev/ttyS5 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS5 - n/a
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS5', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS5', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS4
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS4
+2025-09-30 00:28:31,719 - hardware.port_scanner - INFO - Found port: /dev/ttyS4 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS4 - n/a
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS4', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS4', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS3
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS3
+2025-09-30 00:28:31,719 - hardware.port_scanner - INFO - Found port: /dev/ttyS3 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS3 - n/a
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS3', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS3', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS2
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS2
+2025-09-30 00:28:31,719 - hardware.port_scanner - INFO - Found port: /dev/ttyS2 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS2 - n/a
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS2', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS2', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS1
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS1
+2025-09-30 00:28:31,719 - hardware.port_scanner - INFO - Found port: /dev/ttyS1 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS1 - n/a
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS1', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS1', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS0
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS0
+2025-09-30 00:28:31,719 - hardware.port_scanner - INFO - Found port: /dev/ttyS0 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS0 - n/a
+2025-09-30 00:28:31,719 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS0', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS0', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:28:31,720 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyACM1
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyACM1
+2025-09-30 00:28:31,720 - hardware.port_scanner - INFO - Found port: /dev/ttyACM1 - STM32 Virtual ComPort
+INFO:hardware.port_scanner:Found port: /dev/ttyACM1 - STM32 Virtual ComPort
+2025-09-30 00:28:31,720 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyACM1', 'description': 'STM32 Virtual ComPort', 'hwid': 'USB VID:PID=0483:5740 SER=326B396B3133 LOCATION=1-1:1.0', 'manufacturer': 'STMicroelectronics', 'vid': 1155, 'pid': 22336}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyACM1', 'description': 'STM32 Virtual ComPort', 'hwid': 'USB VID:PID=0483:5740 SER=326B396B3133 LOCATION=1-1:1.0', 'manufacturer': 'STMicroelectronics', 'vid': 1155, 'pid': 22336}
+2025-09-30 00:28:31,720 - hardware.port_scanner - DEBUG - Port scan complete. Found 33 available ports
+DEBUG:hardware.port_scanner:Port scan complete. Found 33 available ports
+2025-09-30 00:28:31,720 - hardware.port_scanner - INFO - Found potential STM32 device: /dev/ttyACM1
+INFO:hardware.port_scanner:Found potential STM32 device: /dev/ttyACM1
+INFO:routes.port_routes:Found 1 STM32 ports
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:31] "GET /api/ports HTTP/1.1" 200 -
+INFO:hardware.scpi_handler:Disconnected from device
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:36] "POST /api/connection/disconnect HTTP/1.1" 200 -
+2025-09-30 00:28:36,931 - hardware.port_scanner - ERROR - Failed to connect to dev/ttyACM1: [Errno 2] could not open port dev/ttyACM1: [Errno 2] No such file or directory: 'dev/ttyACM1'
+ERROR:hardware.port_scanner:Failed to connect to dev/ttyACM1: [Errno 2] could not open port dev/ttyACM1: [Errno 2] No such file or directory: 'dev/ttyACM1'
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:36] "GET /api/ports/test/dev/ttyACM1 HTTP/1.1" 200 -
+INFO:app:Connection attempt: port=/dev/ttyACM1, baud_rate=115200
+INFO:hardware.scpi_handler:Available ports: ['/dev/ttyS31', '/dev/ttyS30', '/dev/ttyS29', '/dev/ttyS28', '/dev/ttyS27', '/dev/ttyS26', '/dev/ttyS25', '/dev/ttyS24', '/dev/ttyS23', '/dev/ttyS22', '/dev/ttyS21', '/dev/ttyS20', '/dev/ttyS19', '/dev/ttyS18', '/dev/ttyS17', '/dev/ttyS16', '/dev/ttyS15', '/dev/ttyS14', '/dev/ttyS13', '/dev/ttyS12', '/dev/ttyS11', '/dev/ttyS10', '/dev/ttyS9', '/dev/ttyS8', '/dev/ttyS7', '/dev/ttyS6', '/dev/ttyS5', '/dev/ttyS4', '/dev/ttyS3', '/dev/ttyS2', '/dev/ttyS1', '/dev/ttyS0', '/dev/ttyACM1']
+INFO:hardware.scpi_handler:Trying to connect to: /dev/ttyACM1
+INFO:hardware.scpi_handler:🚀 Fast connect to /dev/ttyACM1...
+INFO:hardware.scpi_handler:Fast connected to /dev/ttyACM1 at 115200 baud
+INFO:app:✅ Connection successful: /dev/ttyACM1 at 115200 baud
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:37] "POST /api/connection/connect HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:48] "[33mGET /connection-status HTTP/1.1[0m" 404 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:28:48] "[33mPOST /connect HTTP/1.1[0m" 404 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:33:42] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:33:42] "[36mGET /static/js/port_manager.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:33:42] "[36mGET /static/js/connection_state.js?v=20250927-2 HTTP/1.1[0m" 304 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:33:42] "GET /api/connection/status HTTP/1.1" 200 -
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:33:42] "GET /api/connection/status HTTP/1.1" 200 -
+INFO:routes.port_routes:Port list requested
+2025-09-30 00:33:42,738 - hardware.port_scanner - DEBUG - Starting port scan...
+DEBUG:hardware.port_scanner:Starting port scan...
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:33:42] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
+2025-09-30 00:33:42,755 - hardware.port_scanner - INFO - Found 33 ports in total
+INFO:hardware.port_scanner:Found 33 ports in total
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS31
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS31
+2025-09-30 00:33:42,755 - hardware.port_scanner - INFO - Found port: /dev/ttyS31 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS31 - n/a
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS31', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS31', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS30
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS30
+2025-09-30 00:33:42,755 - hardware.port_scanner - INFO - Found port: /dev/ttyS30 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS30 - n/a
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS30', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS30', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS29
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS29
+2025-09-30 00:33:42,755 - hardware.port_scanner - INFO - Found port: /dev/ttyS29 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS29 - n/a
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS29', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS29', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS28
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS28
+2025-09-30 00:33:42,755 - hardware.port_scanner - INFO - Found port: /dev/ttyS28 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS28 - n/a
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS28', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS28', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS27
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS27
+2025-09-30 00:33:42,755 - hardware.port_scanner - INFO - Found port: /dev/ttyS27 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS27 - n/a
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS27', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS27', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS26
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS26
+2025-09-30 00:33:42,755 - hardware.port_scanner - INFO - Found port: /dev/ttyS26 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS26 - n/a
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS26', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS26', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,755 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS25
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS25
+2025-09-30 00:33:42,756 - hardware.port_scanner - INFO - Found port: /dev/ttyS25 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS25 - n/a
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS25', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS25', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS24
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS24
+2025-09-30 00:33:42,756 - hardware.port_scanner - INFO - Found port: /dev/ttyS24 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS24 - n/a
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS24', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS24', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS23
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS23
+2025-09-30 00:33:42,756 - hardware.port_scanner - INFO - Found port: /dev/ttyS23 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS23 - n/a
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS23', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS23', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS22
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS22
+2025-09-30 00:33:42,756 - hardware.port_scanner - INFO - Found port: /dev/ttyS22 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS22 - n/a
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS22', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS22', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS21
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS21
+2025-09-30 00:33:42,756 - hardware.port_scanner - INFO - Found port: /dev/ttyS21 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS21 - n/a
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS21', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS21', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS20
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS20
+2025-09-30 00:33:42,756 - hardware.port_scanner - INFO - Found port: /dev/ttyS20 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS20 - n/a
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS20', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS20', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS19
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS19
+2025-09-30 00:33:42,756 - hardware.port_scanner - INFO - Found port: /dev/ttyS19 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS19 - n/a
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS19', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS19', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS18
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS18
+2025-09-30 00:33:42,756 - hardware.port_scanner - INFO - Found port: /dev/ttyS18 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS18 - n/a
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS18', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS18', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS17
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS17
+2025-09-30 00:33:42,756 - hardware.port_scanner - INFO - Found port: /dev/ttyS17 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS17 - n/a
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS17', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS17', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,756 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS16
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS16
+2025-09-30 00:33:42,757 - hardware.port_scanner - INFO - Found port: /dev/ttyS16 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS16 - n/a
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS16', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS16', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS15
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS15
+2025-09-30 00:33:42,757 - hardware.port_scanner - INFO - Found port: /dev/ttyS15 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS15 - n/a
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS15', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS15', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS14
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS14
+2025-09-30 00:33:42,757 - hardware.port_scanner - INFO - Found port: /dev/ttyS14 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS14 - n/a
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS14', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS14', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS13
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS13
+2025-09-30 00:33:42,757 - hardware.port_scanner - INFO - Found port: /dev/ttyS13 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS13 - n/a
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS13', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS13', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS12
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS12
+2025-09-30 00:33:42,757 - hardware.port_scanner - INFO - Found port: /dev/ttyS12 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS12 - n/a
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS12', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS12', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS11
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS11
+2025-09-30 00:33:42,757 - hardware.port_scanner - INFO - Found port: /dev/ttyS11 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS11 - n/a
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS11', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS11', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS10
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS10
+2025-09-30 00:33:42,757 - hardware.port_scanner - INFO - Found port: /dev/ttyS10 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS10 - n/a
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS10', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS10', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS9
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS9
+2025-09-30 00:33:42,757 - hardware.port_scanner - INFO - Found port: /dev/ttyS9 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS9 - n/a
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS9', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS9', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS8
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS8
+2025-09-30 00:33:42,757 - hardware.port_scanner - INFO - Found port: /dev/ttyS8 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS8 - n/a
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS8', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS8', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,757 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS7
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS7
+2025-09-30 00:33:42,757 - hardware.port_scanner - INFO - Found port: /dev/ttyS7 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS7 - n/a
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS7', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS7', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS6
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS6
+2025-09-30 00:33:42,758 - hardware.port_scanner - INFO - Found port: /dev/ttyS6 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS6 - n/a
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS6', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS6', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS5
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS5
+2025-09-30 00:33:42,758 - hardware.port_scanner - INFO - Found port: /dev/ttyS5 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS5 - n/a
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS5', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS5', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS4
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS4
+2025-09-30 00:33:42,758 - hardware.port_scanner - INFO - Found port: /dev/ttyS4 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS4 - n/a
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS4', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS4', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS3
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS3
+2025-09-30 00:33:42,758 - hardware.port_scanner - INFO - Found port: /dev/ttyS3 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS3 - n/a
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS3', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS3', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS2
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS2
+2025-09-30 00:33:42,758 - hardware.port_scanner - INFO - Found port: /dev/ttyS2 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS2 - n/a
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS2', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS2', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS1
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS1
+2025-09-30 00:33:42,758 - hardware.port_scanner - INFO - Found port: /dev/ttyS1 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS1 - n/a
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS1', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS1', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyS0
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyS0
+2025-09-30 00:33:42,758 - hardware.port_scanner - INFO - Found port: /dev/ttyS0 - n/a
+INFO:hardware.port_scanner:Found port: /dev/ttyS0 - n/a
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyS0', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyS0', 'description': 'n/a', 'hwid': 'n/a', 'manufacturer': None, 'vid': None, 'pid': None}
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Processing port: /dev/ttyACM1
+DEBUG:hardware.port_scanner:Processing port: /dev/ttyACM1
+2025-09-30 00:33:42,758 - hardware.port_scanner - INFO - Found port: /dev/ttyACM1 - STM32 Virtual ComPort
+INFO:hardware.port_scanner:Found port: /dev/ttyACM1 - STM32 Virtual ComPort
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Port details: {'device': '/dev/ttyACM1', 'description': 'STM32 Virtual ComPort', 'hwid': 'USB VID:PID=0483:5740 SER=326B396B3133 LOCATION=1-1:1.0', 'manufacturer': 'STMicroelectronics', 'vid': 1155, 'pid': 22336}
+DEBUG:hardware.port_scanner:Port details: {'device': '/dev/ttyACM1', 'description': 'STM32 Virtual ComPort', 'hwid': 'USB VID:PID=0483:5740 SER=326B396B3133 LOCATION=1-1:1.0', 'manufacturer': 'STMicroelectronics', 'vid': 1155, 'pid': 22336}
+2025-09-30 00:33:42,758 - hardware.port_scanner - DEBUG - Port scan complete. Found 33 available ports
+DEBUG:hardware.port_scanner:Port scan complete. Found 33 available ports
+2025-09-30 00:33:42,758 - hardware.port_scanner - INFO - Found potential STM32 device: /dev/ttyACM1
+INFO:hardware.port_scanner:Found potential STM32 device: /dev/ttyACM1
+INFO:routes.port_routes:Found 1 STM32 ports
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 00:33:42] "GET /api/ports HTTP/1.1" 200 -
+INFO:hardware.scpi_handler:Disconnected from device
+INFO:werkzeug:192.168.9.83 - - [30/Sep/2025 01:13:09] "POST /api/connection/disconnect HTTP/1.1" 200 -

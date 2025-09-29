@@ -33,10 +33,10 @@ fi
 
 echo "✅ พบ Python $PYTHON_VERSION ที่ $PYTHON_CMD"
 
-# Virtual environment
-if [ ! -d "poten-env" ]; then
-    echo "📦 สร้าง virtual environment ด้วย Python $PYTHON_VERSION..."
-    $PYTHON_CMD -m venv poten-env
+# Virtual environment with system packages access
+if [ ! -d "poten-env-gui" ]; then
+    echo "📦 สร้าง GUI-compatible virtual environment ด้วย Python $PYTHON_VERSION..."
+    $PYTHON_CMD -m venv --system-site-packages poten-env-gui
     if [ $? -ne 0 ]; then
         echo "❌ ไม่สามารถสร้าง virtual environment ได้"
         echo "📦 ลองติดตั้ง: sudo apt-get install python3-venv"
@@ -45,8 +45,8 @@ if [ ! -d "poten-env" ]; then
 fi
 
 # Activate virtual environment
-echo "🔄 เปิดใช้ virtual environment..."
-source poten-env/bin/activate
+echo "🔄 เปิดใช้ GUI-compatible virtual environment..."
+source poten-env-gui/bin/activate
 
 # ตรวจสอบ Python ใน venv
 VENV_VERSION=$(python --version 2>&1 | grep -oE '[0-9]+\.[0-9]+')

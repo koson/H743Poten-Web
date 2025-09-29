@@ -35,19 +35,27 @@ def save_measurement():
             if not cv_service:
                 return jsonify({'success': False, 'error': 'CV service not available and no frontend data provided'}), 500
             
-            # Get current measurement data from service
-            data_points = cv_service.get_data_points()
-            status = cv_service.get_status()
-            
-            if not data_points:
-                return jsonify({'success': False, 'error': 'No measurement data to save'}), 400
-            
-            # Get parameters from status
-            parameters = status.get('parameters', {})
-            
-            # Add additional info
-            parameters['measurement_type'] = 'CV'
-            parameters['device_connected'] = status.get('device_connected', False)
+            try:
+                # Get current measurement data from service with error protection
+                data_points = cv_service.get_data_points()
+                status = cv_service.get_status()
+                
+                if not data_points:
+                    return jsonify({'success': False, 'error': 'No measurement data to save'}), 400
+                
+                # Get parameters from status
+                parameters = status.get('parameters', {})
+                
+                # Add additional info
+                parameters['measurement_type'] = 'CV'
+                parameters['device_connected'] = status.get('device_connected', False)
+                
+            except Exception as cv_error:
+                logger.error(f"Error accessing CV service data: {cv_error}")
+                return jsonify({
+                    'success': False, 
+                    'error': f'Failed to access measurement data: {str(cv_error)}. Please try saving with measurement data included in request.'
+                }), 500
         
         # Get data logging service
         data_logging_service = current_app.config.get('data_logging_service')

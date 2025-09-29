@@ -282,8 +282,8 @@ class MockSCPIHandler:
             # Generate data based on measurement mode
             if self._measurement_mode == 'CV':
                 # Cyclic Voltammetry simulation
-                voltage = self._simulation_params['signal_amplitude'] * math.sin(2 * math.pi * self._simulation_params['signal_frequency'] * t)
-                current = voltage * 0.001 + random.uniform(-self._simulation_params['noise_level'], self._simulation_params['noise_level'])
+                voltage = 10 
+                current = 20
             elif self._measurement_mode == 'DPV':
                 # Differential Pulse Voltammetry simulation
                 voltage = t * 0.1  # Linear ramp

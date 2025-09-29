@@ -24,7 +24,7 @@ Path('logs').mkdir(exist_ok=True)
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('logs/h743poten_dev.log'),
@@ -35,18 +35,32 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def create_dev_app():
-    """Create Flask app with mock SCPI handler"""
-    from hardware.mock_scpi_handler import MockSCPIHandler
+    """Create Flask app with REAL SCPI handler and ALL measurement modes"""
+    from hardware.scpi_handler import SCPIHandler  # REAL HARDWARE
     from services.measurement_service import MeasurementService
+    from services.cv_measurement_service import CVMeasurementService
+    from services.dpv_measurement_service import DPVMeasurementService
+    from services.swv_measurement_service import SWVMeasurementService
+    from services.ca_measurement_service import CAMeasurementService
     from services.data_service import DataService
     
-    # Import the create_app function and modify it for development
+    # Import the create_app function and modify it for production
     app = create_app()
     
-    # Replace the real SCPI handler with mock version
-    app.scpi_handler = MockSCPIHandler()
-    app.measurement_service = MeasurementService(app.scpi_handler)
+    # Use REAL SCPI handler (NOT mock)
+    app.scpi_handler = SCPIHandler("/dev/ttyACM1", 115200)  # REAL STM32 CONNECTION
+    
+    # Initialize ALL measurement services
+    app.measurement_service = MeasurementService(app.scpi_handler)  # Legacy/fallback
+    app.cv_service = CVMeasurementService(app.scpi_handler)
+    app.dpv_service = DPVMeasurementService(app.scpi_handler)
+    app.swv_service = SWVMeasurementService(app.scpi_handler)
+    app.ca_service = CAMeasurementService(app.scpi_handler)
     app.data_service = DataService()
+    
+    # Enable auto-save for all measurement modes
+    app.config['auto_save_enabled'] = True
+    app.config['scpi_handler'] = app.scpi_handler
     
     return app
 
@@ -56,9 +70,11 @@ def main():
         # Create and run Flask app with mock handler
         app = create_dev_app()
         
-        logger.info("Starting H743Poten Web Interface (Development Mode)")
-        logger.info("Using mock SCPI handler for testing")
-        logger.info(f"Web server: http://localhost:{Config.WEB_PORT}")
+        logger.info("🚀 Starting H743Poten Web Interface (FULL PRODUCTION MODE)")
+        logger.info("🔴 Using REAL SCPI handler - Will connect to STM32H743")
+        logger.info("📡 ALL MEASUREMENT MODES: CV ✅ DPV ✅ SWV ✅ CA ✅")
+        logger.info("📊 Full features: Real-time plotting, Data export, Hardware debugging")
+        logger.info(f"🌐 Web server: http://localhost:{Config.WEB_PORT}")
         
         app.run(
             host=Config.WEB_HOST,

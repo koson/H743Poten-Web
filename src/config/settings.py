@@ -14,7 +14,7 @@ class Config:
     if platform.system() == 'Windows':
         SERIAL_PORT = 'COM3'  # Default Windows port, adjust if needed
     else:
-        SERIAL_PORT = '/dev/ttyACM0'  # Default for Linux/RPi
+        SERIAL_PORT = '/dev/ttyACM1'  # Updated for current Pi setup
     BAUD_RATE = 115200
 
     # Default measurement parameters

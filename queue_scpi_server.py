@@ -73,9 +73,9 @@ class QueueBasedSCPIServer:
         """Auto-detect STM32 device port"""
         import glob
         
-        # Check common STM32 ports
+        # Check common STM32 ports (prioritize ACM1)
         possible_ports = [
-            '/dev/ttyACM0', '/dev/ttyACM1', '/dev/ttyACM2',
+            '/dev/ttyACM1', '/dev/ttyACM0', '/dev/ttyACM2',
             '/dev/ttyUSB0', '/dev/ttyUSB1', '/dev/ttyUSB2'
         ]
         
@@ -101,13 +101,13 @@ class QueueBasedSCPIServer:
                 except Exception as e:
                     continue
         
-        logger.warning("⚠️ STM32 not found, using default /dev/ttyACM0")
-        return '/dev/ttyACM0'
+        logger.warning("⚠️ STM32 not found, using default /dev/ttyACM1")
+        return '/dev/ttyACM1'
     
     def connect(self):
         """Connect to STM32 H743 using proven method"""
         try:
-            possible_ports = [self.port, '/dev/ttyACM0', '/dev/ttyACM1', '/dev/ttyUSB0']
+            possible_ports = [self.port, '/dev/ttyACM1', '/dev/ttyACM0', '/dev/ttyUSB0']
             
             for port in possible_ports:
                 if os.path.exists(port):
@@ -325,6 +325,77 @@ CORS(app)
 
 # Initialize SCPI server
 scpi_server = QueueBasedSCPIServer()
+
+@app.route('/', methods=['GET'])
+def index():
+    """Home page - H743 Potentiostat Desktop Interface"""
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>H743 Potentiostat Desktop</title>
+        <meta charset="utf-8">
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+            .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .header { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+            .status { padding: 15px; margin: 10px 0; border-radius: 5px; }
+            .status.connected { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+            .status.disconnected { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+            .nav { list-style: none; padding: 0; }
+            .nav li { margin: 10px 0; }
+            .nav a { display: block; padding: 10px 15px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+            .nav a:hover { background: #0056b3; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🧪 H743 Potentiostat Desktop</h1>
+                <p>High-Performance Electrochemical Analysis System</p>
+            </div>
+            
+            <div id="status" class="status">
+                📡 กำลังตรวจสอบสถานะ...
+            </div>
+            
+            <ul class="nav">
+                <li><a href="/status">📊 System Status</a></li>
+                <li><a href="http://localhost:5000" onclick="window.open('research_platform_v2.html', '_blank'); return false;">🔬 Research Platform</a></li>
+                <li><a href="/cv/stream/sessions">📈 CV Measurements</a></li>
+                <li><a href="/dpv/stream/sessions">⚡ DPV Measurements</a></li>
+            </ul>
+        </div>
+        
+        <script>
+            // Update status automatically
+            function updateStatus() {
+                fetch('/status')
+                    .then(response => response.json())
+                    .then(data => {
+                        const statusDiv = document.getElementById('status');
+                        if (data.device_connected) {
+                            statusDiv.className = 'status connected';
+                            statusDiv.innerHTML = `✅ เชื่อมต่อกับ STM32 H743 แล้ว (${data.port})<br>🚿 ${data.server}`;
+                        } else {
+                            statusDiv.className = 'status disconnected';
+                            statusDiv.innerHTML = `❌ ไม่พบอุปกรณ์ STM32 H743<br>🚿 ${data.server}`;
+                        }
+                    })
+                    .catch(err => {
+                        const statusDiv = document.getElementById('status');
+                        statusDiv.className = 'status disconnected';
+                        statusDiv.innerHTML = '❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้';
+                    });
+            }
+            
+            // Update status immediately and then every 5 seconds
+            updateStatus();
+            setInterval(updateStatus, 5000);
+        </script>
+    </body>
+    </html>
+    """
 
 @app.route('/status', methods=['GET'])
 def get_status():

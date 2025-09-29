@@ -60,7 +60,20 @@ def find_stm32_ports():
         for port in all_ports:
             # Check various indicators that this might be an STM32 device
             desc = port['description'].lower()
-            if any(x in desc for x in ['stm32', 'stlink', 'virtual com port']):
+            hwid = port.get('hwid', '').lower()
+            
+            # Check for known STM32 identifiers
+            is_stm32 = (
+                # Description-based detection
+                any(x in desc for x in ['stm32', 'stlink', 'virtual com port']) or
+                # Hardware ID-based detection for STM32
+                ('vid:pid=0483:5740' in hwid) or  # Common STM32 VID:PID
+                ('vid:pid=0483:374b' in hwid) or  # Another STM32 VID:PID
+                # USB Serial Device with STM32 VID
+                (port.get('vid') == 1155 and port.get('pid') == 22336)  # 0x0483:0x5740 in decimal
+            )
+            
+            if is_stm32:
                 stm32_ports.append(port)
                 logger.info(f"Found potential STM32 device: {port['device']}")
                 

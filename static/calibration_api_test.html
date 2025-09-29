@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Calibration API Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007acc;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #005a99;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-healthy { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .metric {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .metric h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        .metric .value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Production Calibration API Test Interface</h1>
+        <p>Test the real-time cross-instrument calibration API endpoints</p>
+        
+        <!-- Service Status -->
+        <div class="test-section">
+            <h2>📊 Service Status</h2>
+            <button onclick="getCalibrationInfo()">Get Calibration Info</button>
+            <button onclick="healthCheck()">Health Check</button>
+            <div id="status-result" class="result"></div>
+            
+            <div id="metrics-display" style="display: none;">
+                <div class="two-column">
+                    <div class="metric">
+                        <h3>Total Conditions</h3>
+                        <div class="value" id="total-conditions">-</div>
+                    </div>
+                    <div class="metric">
+                        <h3>Average Gain Factor</h3>
+                        <div class="value" id="avg-gain">-</div>
+                    </div>
+                    <div class="metric">
+                        <h3>Coefficient of Variation</h3>
+                        <div class="value" id="cv-percent">-</div>
+                    </div>
+                    <div class="metric">
+                        <h3>Average R²</h3>
+                        <div class="value" id="avg-r2">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Single Current Calibration -->
+        <div class="test-section">
+            <h2>⚡ Single Current Calibration</h2>
+            <div class="two-column">
+                <div>
+                    <div class="input-group">
+                        <label for="stm32-current">STM32 Current (A):</label>
+                        <input type="number" id="stm32-current" value="1e-4" step="any">
+                    </div>
+                    <div class="input-group">
+                        <label for="scan-rate">Scan Rate (mV/s):</label>
+                        <select id="scan-rate">
+                            <option value="">Default</option>
+                            <option value="20">20 mV/s</option>
+                            <option value="50">50 mV/s</option>
+                            <option value="100">100 mV/s</option>
+                            <option value="200">200 mV/s</option>
+                            <option value="400">400 mV/s</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="concentration">Concentration (mM):</label>
+                        <select id="concentration">
+                            <option value="">Default</option>
+                            <option value="5.0">5.0 mM</option>
+                        </select>
+                    </div>
+                    <button onclick="calibrateCurrent()">Calibrate Current</button>
+                </div>
+                <div id="current-result" class="result"></div>
+            </div>
+        </div>
+
+        <!-- CV Curve Calibration -->
+        <div class="test-section">
+            <h2>📈 CV Curve Calibration</h2>
+            <div class="two-column">
+                <div>
+                    <div class="input-group">
+                        <label for="cv-data">CV Data (JSON format: [[v1,i1], [v2,i2], ...]):</label>
+                        <textarea id="cv-data" rows="6">[[-0.5, -1e-4], [-0.25, -5e-5], [0.0, 0], [0.25, 5e-5], [0.5, 1e-4]]</textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="cv-scan-rate">Scan Rate (mV/s):</label>
+                        <select id="cv-scan-rate">
+                            <option value="">Default</option>
+                            <option value="20">20 mV/s</option>
+                            <option value="50">50 mV/s</option>
+                            <option value="100">100 mV/s</option>
+                            <option value="200">200 mV/s</option>
+                            <option value="400">400 mV/s</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="cv-concentration">Concentration (mM):</label>
+                        <select id="cv-concentration">
+                            <option value="">Default</option>
+                            <option value="5.0">5.0 mM</option>
+                        </select>
+                    </div>
+                    <button onclick="calibrateCVCurve()">Calibrate CV Curve</button>
+                </div>
+                <div id="cv-result" class="result"></div>
+            </div>
+        </div>
+
+        <!-- Measurement Calibration -->
+        <div class="test-section">
+            <h2>🔍 Measurement Calibration</h2>
+            <div class="two-column">
+                <div>
+                    <div class="input-group">
+                        <label for="measurement-id">Measurement ID:</label>
+                        <input type="number" id="measurement-id" value="67" min="1">
+                    </div>
+                    <button onclick="calibrateMeasurement()">Calibrate Measurement</button>
+                    <br><br>
+                    <div class="input-group">
+                        <label for="stm32-id">STM32 Measurement ID:</label>
+                        <input type="number" id="stm32-id" value="67" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="palmsens-id">PalmSens Measurement ID:</label>
+                        <input type="number" id="palmsens-id" value="77" min="1">
+                    </div>
+                    <button onclick="compareMeasurements()">Compare Measurements</button>
+                </div>
+                <div id="measurement-result" class="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8080/api/calibration';
+
+        function displayResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.className = `result ${isError ? 'error' : 'success'}`;
+        }
+
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                };
+                
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                const data = await response.json();
+                
+                return { data, isError: !response.ok };
+            } catch (error) {
+                return { data: { error: error.message }, isError: true };
+            }
+        }
+
+        async function getCalibrationInfo() {
+            const { data, isError } = await apiCall('/info');
+            displayResult('status-result', data, isError);
+            
+            if (!isError && data.success) {
+                // Update metrics display
+                const stats = data.statistics;
+                document.getElementById('total-conditions').textContent = stats.total_conditions;
+                document.getElementById('avg-gain').textContent = Math.round(stats.gain_factor_stats.mean).toLocaleString();
+                document.getElementById('cv-percent').textContent = stats.gain_factor_stats.cv_percent.toFixed(1) + '%';
+                document.getElementById('avg-r2').textContent = stats.r_squared_stats.mean.toFixed(3);
+                document.getElementById('metrics-display').style.display = 'block';
+            }
+        }
+
+        async function healthCheck() {
+            const { data, isError } = await apiCall('/health');
+            displayResult('status-result', data, isError);
+            
+            // Update status indicator if needed
+            const statusIndicator = document.querySelector('.status-indicator') || document.createElement('span');
+            statusIndicator.className = `status-indicator ${data.status === 'healthy' ? 'status-healthy' : 'status-error'}`;
+        }
+
+        async function calibrateCurrent() {
+            const current = parseFloat(document.getElementById('stm32-current').value);
+            const scanRate = document.getElementById('scan-rate').value;
+            const concentration = document.getElementById('concentration').value;
+            
+            const body = { stm32_current: current };
+            if (scanRate) body.scan_rate_mVs = parseFloat(scanRate);
+            if (concentration) body.concentration_mM = parseFloat(concentration);
+            
+            const { data, isError } = await apiCall('/current', 'POST', body);
+            displayResult('current-result', data, isError);
+        }
+
+        async function calibrateCVCurve() {
+            try {
+                const cvDataText = document.getElementById('cv-data').value;
+                const cvData = JSON.parse(cvDataText);
+                const scanRate = document.getElementById('cv-scan-rate').value;
+                const concentration = document.getElementById('cv-concentration').value;
+                
+                const body = { cv_data: cvData };
+                if (scanRate) body.scan_rate = parseFloat(scanRate);
+                if (concentration) body.concentration = parseFloat(concentration);
+                
+                const { data, isError } = await apiCall('/cv-curve', 'POST', body);
+                displayResult('cv-result', data, isError);
+            } catch (error) {
+                displayResult('cv-result', { error: 'Invalid JSON format in CV data' }, true);
+            }
+        }
+
+        async function calibrateMeasurement() {
+            const measurementId = document.getElementById('measurement-id').value;
+            const { data, isError } = await apiCall(`/measurement/${measurementId}`, 'POST');
+            displayResult('measurement-result', data, isError);
+        }
+
+        async function compareMeasurements() {
+            const stm32Id = document.getElementById('stm32-id').value;
+            const palmsensId = document.getElementById('palmsens-id').value;
+            const { data, isError } = await apiCall(`/compare/${stm32Id}/${palmsensId}`);
+            displayResult('measurement-result', data, isError);
+        }
+
+        // Initialize with calibration info
+        window.onload = function() {
+            getCalibrationInfo();
+        };
+    </script>
+</body>
+</html>

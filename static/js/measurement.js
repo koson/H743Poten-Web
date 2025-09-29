@@ -136,21 +136,35 @@ function getModeParameters() {
             params.amplitude = parseFloat(document.getElementById('dpv-amplitude').value);
             params.step = parseFloat(document.getElementById('dpv-step').value);
             params.pulseWidth = parseFloat(document.getElementById('dpv-pulse-width').value);
-            params.scanRate = parseFloat(document.getElementById('dpv-scan-rate').value);
+            params.pulsePeriod = parseFloat(document.getElementById('dpv-pulse-period').value);
             break;
             
         case 'SWV':
+            // Basic SWV parameters
             params.initial = parseFloat(document.getElementById('swv-initial').value);
             params.final = parseFloat(document.getElementById('swv-final').value);
             params.amplitude = parseFloat(document.getElementById('swv-amplitude').value);
             params.step = parseFloat(document.getElementById('swv-step').value);
             params.frequency = parseFloat(document.getElementById('swv-frequency').value);
+            
+            // Enhanced SWV parameters (for CV service compatibility)
+            params.begin = params.initial;  // Map initial -> begin
+            params.end = params.final;      // Map final -> end
+            params.step_potential = params.step;
+            
+            // Preconcentration parameters
+            params.preconc_enabled = document.getElementById('swv-preconc-enabled').checked;
+            params.preconc_potential = parseFloat(document.getElementById('swv-preconc-potential').value);
+            params.preconc_time = parseFloat(document.getElementById('swv-preconc-time').value);
+            params.equilibration_time = parseFloat(document.getElementById('swv-equilibration-time').value);
+            
+            console.log('🚨 SWV Frontend Params:', params);
             break;
             
         case 'CA':
             params.initial = parseFloat(document.getElementById('ca-initial').value);
             params.step = parseFloat(document.getElementById('ca-step').value);
-            params.time = parseFloat(document.getElementById('ca-time').value);
+            params.duration = parseFloat(document.getElementById('ca-duration').value);
             params.interval = parseFloat(document.getElementById('ca-interval').value);
             break;
     }
@@ -229,10 +243,25 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             const params = getModeParameters();
-            const response = await fetch('/api/measurement/start', {
+            const setupResponse = await fetch('/api/measurement/universal/setup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(params)
+                body: JSON.stringify({
+                    mode: currentMode,
+                    parameters: params
+                })
+            });
+            
+            if (!setupResponse.ok) {
+                throw new Error('Setup failed');
+            }
+            
+            const response = await fetch('/api/measurement/universal/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mode: currentMode
+                })
             });
             
             const data = await response.json();
@@ -254,7 +283,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isMeasuring) return;
         
         try {
-            const response = await fetch('/api/measurement/stop', { method: 'POST' });
+            const response = await fetch('/api/measurement/universal/stop', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mode: currentMode
+                })
+            });
             const data = await response.json();
             if (data.success) {
                 isMeasuring = false;
@@ -299,40 +334,221 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Data collection
+// Data collection with improved timeout handling and request deduplication
 function startDataCollection() {
+    let consecutiveFailures = 0;
+    const maxConsecutiveFailures = 10; // 🔧 FIXED: Reduce to 10 (5 seconds with 500ms polling)  
+    let dataReceived = false; // Track if we've received any data
+    let requestInProgress = false; // 🔧 NEW: Prevent duplicate requests
+    
     const dataCollector = setInterval(async () => {
         if (!isMeasuring) {
             clearInterval(dataCollector);
             return;
         }
         
+        // 🔧 NEW: Skip if previous request still in progress
+        if (requestInProgress) {
+            console.log('⏳ Skipping request - previous still in progress');
+            return;
+        }
+        
+        requestInProgress = true;
         try {
-            const response = await fetch('/api/measurement/data');
+            const response = await fetch('/api/measurement/universal/status', {
+                timeout: 3000, // 🔧 NEW: 3 second timeout
+                headers: {
+                    'Cache-Control': 'no-cache' // 🔧 NEW: Prevent caching
+                }
+            });
+            
+            // Check if response is OK
+            if (!response.ok) {
+                consecutiveFailures++;
+                console.warn(`Data fetch failed: ${response.status} ${response.statusText} (${consecutiveFailures}/${maxConsecutiveFailures})`);
+                
+                // Only timeout if we haven't received any data AND we've had many failures
+                if (!dataReceived && consecutiveFailures >= maxConsecutiveFailures) {
+                    console.error('Measurement timeout: No data received from STM32');
+                    clearInterval(dataCollector);
+                    isMeasuring = false;
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    alert('Measurement timeout: No data received from STM32. Please check connection and try again.');
+                }
+                return;
+            }
+            
             const data = await response.json();
             
-            if (data.completed) {
+            // Reset failure counter on successful response
+            consecutiveFailures = 0;
+            
+            // Check if measurement is completed
+            if (!data.active && !data.is_measuring && data.data_points_count > 0) {
+                console.log('📡 Measurement completed by device');
                 clearInterval(dataCollector);
                 isMeasuring = false;
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
+                return;
             }
             
-            if (data.points) {
-                // Append new data points
-                dataPoints.time.push(...data.points.time);
-                dataPoints.potential.push(...data.points.potential);
-                dataPoints.current.push(...data.points.current);
+            // Process SWV progress data first (if available)
+            if (data.swv_progress) {
+                updateSWVProgress(data.swv_progress);
+            }
+            
+            // Process measurement data from universal API
+            if (data.measurement_data && data.measurement_data.length > 0) {
+                dataReceived = true; // Mark that we've received data
+                
+                // Clear existing data and set new data from universal API
+                dataPoints.time = [];
+                dataPoints.potential = [];
+                dataPoints.current = [];
+                
+                // Universal API provides complete dataset
+                data.measurement_data.forEach(point => {
+                    if (point.time !== undefined) dataPoints.time.push(point.time);
+                    if (point.potential !== undefined) dataPoints.potential.push(point.potential);
+                    if (point.current !== undefined) dataPoints.current.push(point.current);
+                });
                 
                 // Update plot and table
                 updatePlot(dataPoints);
                 updateDataTable(dataPoints);
+                
+                console.log(`📡 Universal API: ${data.data_points_count} total points for ${data.mode} mode`);
+            } else {
+                // No data in this poll, but don't immediately fail
+                console.log('📡 No measurement data yet (waiting for device...)');
             }
+            
         } catch (error) {
-            console.error('Data collection error:', error);
-            clearInterval(dataCollector);
+            consecutiveFailures++;
+            console.error(`Data collection error (${consecutiveFailures}/${maxConsecutiveFailures}):`, error);
+            
+            // Only timeout after many consecutive failures AND no data received
+            if (!dataReceived && consecutiveFailures >= maxConsecutiveFailures) {
+                console.error('Measurement timeout: Network/communication error');
+                clearInterval(dataCollector);
+                isMeasuring = false;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                alert('Measurement timeout: Communication error. Please check connection and try again.');
+            }
+        } finally {
+            // 🔧 NEW: Always reset request flag
+            requestInProgress = false;
         }
-    }, 100); // Poll every 100ms
+    }, 500); // 🔧 FIXED: Reduce from 100ms to 500ms to prevent server overload in DPV mode
 }
+
+// SWV Progress tracking
+function updateSWVProgress(progressData) {
+    if (!progressData) return;
+    
+    const progressContainer = document.getElementById('swv-progress-container');
+    const progressBar = document.getElementById('swv-progress-bar');
+    const progressText = document.getElementById('swv-progress-text');
+    const progressDetail = document.getElementById('swv-progress-detail');
+    
+    if (!progressContainer) return;
+    
+    // Show progress container during SWV measurement
+    if (currentMode === 'SWV' && isMeasuring) {
+        progressContainer.style.display = 'block';
+    }
+    
+    console.log('🚨 SWV Progress Update:', progressData);
+    
+    if (progressData.phase === 'PRECONCENTRATION') {
+        const percent = Math.round((progressData.elapsed / progressData.total) * 100);
+        progressBar.style.width = `${percent}%`;
+        progressBar.className = 'progress-bar bg-warning'; // Orange for preconc
+        
+        progressText.textContent = `Preconcentration: ${percent}%`;
+        progressDetail.innerHTML = `
+            <small class="text-muted">
+                ⚡ Potential: ${progressData.potential}V | 
+                ⏱️ Time: ${progressData.elapsed}s / ${progressData.total}s
+            </small>
+        `;
+        
+    } else if (progressData.phase === 'EQUILIBRATION') {
+        const percent = Math.round((progressData.elapsed / progressData.total) * 100);
+        progressBar.style.width = `${percent}%`;
+        progressBar.className = 'progress-bar bg-info'; // Blue for equilibration
+        
+        progressText.textContent = `Equilibration: ${percent}%`;
+        progressDetail.innerHTML = `
+            <small class="text-muted">
+                ⚖️ Stabilizing at ${progressData.potential}V | 
+                ⏱️ Time: ${progressData.elapsed}s / ${progressData.total}s
+            </small>
+        `;
+        
+    } else if (progressData.phase === 'SCANNING') {
+        const percent = Math.round((progressData.current_point / progressData.total_points) * 100);
+        progressBar.style.width = `${percent}%`;
+        progressBar.className = 'progress-bar bg-success'; // Green for scanning
+        
+        progressText.textContent = `SWV Scanning: ${percent}%`;
+        progressDetail.innerHTML = `
+            <small class="text-muted">
+                📊 Point ${progressData.current_point} / ${progressData.total_points} | 
+                ⚡ Current: ${progressData.potential}V
+            </small>
+        `;
+        
+    } else if (progressData.phase === 'COMPLETE') {
+        progressBar.style.width = '100%';
+        progressBar.className = 'progress-bar bg-success';
+        progressText.textContent = 'SWV Complete! ✅';
+        progressDetail.innerHTML = '<small class="text-success">Measurement finished successfully</small>';
+        
+        // Hide progress after 3 seconds
+        setTimeout(() => {
+            if (progressContainer) {
+                progressContainer.style.display = 'none';
+            }
+        }, 3000);
+    }
+}
+
+// SWV Preconcentration settings toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const preoncEnabledCheckbox = document.getElementById('swv-preconc-enabled');
+    const preoncSettings = document.getElementById('swv-preconc-settings');
+    
+    if (preoncEnabledCheckbox && preoncSettings) {
+        function togglePreoncSettings() {
+            if (preoncEnabledCheckbox.checked) {
+                preoncSettings.classList.remove('disabled');
+                preoncSettings.style.opacity = '1';
+                
+                // Enable all input fields
+                const inputs = preoncSettings.querySelectorAll('input');
+                inputs.forEach(input => input.disabled = false);
+            } else {
+                preoncSettings.classList.add('disabled');
+                preoncSettings.style.opacity = '0.5';
+                
+                // Disable all input fields
+                const inputs = preoncSettings.querySelectorAll('input');
+                inputs.forEach(input => input.disabled = true);
+            }
+        }
+        
+        // Initial state
+        togglePreoncSettings();
+        
+        // Listen for changes
+        preoncEnabledCheckbox.addEventListener('change', togglePreoncSettings);
+        
+        console.log('🚨 SWV Preconcentration toggle initialized');
+    }
+});
 
 // Note: PortManager is initialized in port_manager.js
