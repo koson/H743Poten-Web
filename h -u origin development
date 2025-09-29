@@ -1,0 +1,23 @@
+  AI-Dashboard                        [m a4559ca [[34morigin/AI-Dashboard[m] style: Update AI Dashboard styles to match main theme with new color gradients
+  CV-Baseline-detect                  [m 869fd86 [[34morigin/CV-Baseline-detect[m] baseline  detection algo-0
+  Cross-Instrument-Calibration        [m c3a7971 [[34morigin/Cross-Instrument-Calibration[m] Fix: Complete loading spinner management for real data visualization - Fixed persistent loading spinners in residual analysis and error distribution plots - Replaced FontAwesome spinners with emoji indicators to avoid CSS animation persistence - Implemented aggressive DOM clearing and timeout mechanisms - Added real data integration with statistical analysis - Enhanced error handling with fallback success messages - Fixed element ID consistency and state management - Result: Validation system works seamlessly with quality scores 68.6-89.5/100
+  Measure-4-mode                      [m cabc8fe [[34morigin/Measure-4-mode[m] 🔧 Enhanced STM32 Communication Reliability & CV Measurement Validation
+  Measurement-Interface               [m 9a55705 [[34morigin/Measurement-Interface[m] feat: Enhance connection management with improved error handling, retries, and UI updates
+  Peak-Detection-Analysis-Minor-Change[m c950ca4 fix: Update workflow Step 3 to use v2.0.0 Peak Detection System
+  UI-Architecture-Refactor            [m 8fe6070 [[34morigin/UI-Architecture-Refactor[m] Add virtual ground calibration results for September 2025
+* [32mdevelopment                         [m 09e183c Add comprehensive DPV testing scripts for STM32 communication
+  feature/Baseline-detect-algo-1      [m a44ee20 [[34morigin/feature/Baseline-detect-algo-1[m] Add new measurement data files for CV experiments
+  feature/Baseline-detect-algo-2      [m d1045f2 [[34morigin/feature/Baseline-detect-algo-2[m: behind 5] Recover essential development files from archive
+  feature/cv-measurement              [m a0dd4d3 [[34morigin/feature/cv-measurement[m] Add .gitattributes file to manage line endings and binary files
+  feature/data-logging-system         [m 46b4b25 [[34morigin/feature/data-logging-system[m] Enhance measurement interface and CV measurement logic
+  feature/integrate-peak-detection    [m 9611810 [[34morigin/feature/integrate-peak-detection[m: ahead 2, behind 1] Add new CSV data files for various experiments
+  feature/ml-cv-analysis              [m c11e2c8 [[34morigin/feature/ml-cv-analysis[m] Add EIS feasibility analysis documentation for STM32H743 potentiostat
+  feature/peak-detection-analysis     [m e89fe99 [[34morigin/feature/peak-detection-analysis[m] feat: Complete peak detection UI with improved data visualization - Implement list-based peak information display - Add interactive peak selection - Improve UI/UX with clear data presentation - Optimize layout for scientific data readability
+  feature/peak-detection-framework    [m 8f4a89b [[34morigin/feature/peak-detection-framework[m] feat(workflow): complete real data visualization and export
+  fix/cv-plot-with-button             [m 1384a7d feat: Complete data logging system with PNG display
+  fix/improve-cv-plot                 [m 1384a7d feat: Complete data logging system with PNG display
+  lab-stable-v1.1.1                   [m 0b5fbd5 feat: Complete interactive peak analysis system with Chart.js
+  master                              [m c950ca4 [[34morigin/master[m] fix: Update workflow Step 3 to use v2.0.0 Peak Detection System
+  minor-change                        [m 1b360f9 [[34morigin/minor-change[m] feat: Update metadata format and parser implementation for enhanced data management
+  production-raspberry-pi             [m 0ffdf1e [[34morigin/production-raspberry-pi[m: behind 1] 	new file:   static/js/auth_manager.js
+  test/from-v1.0-complete             [m 70baccc [[34morigin/test/from-v1.0-complete[m: ahead 3] feat: Initialize Peak Detection Validation Framework
