@@ -85,3 +85,8 @@ data_logs/
 comprehensive_pls_results_*/
 *.log
 nohup.out
+
+# Deployment archives - prevent large files
+*.tar.gz
+# Specific large deployment files
+h743poten-deploy-*.tar.gz
