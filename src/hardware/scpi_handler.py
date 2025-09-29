@@ -135,8 +135,48 @@ class SCPIHandler:
             # Read response if command ends with '?'
             if '?' in command:
                 # Quick response read with short timeout
-                self.serial.timeout = 0.2  # Very short timeout for fast response
-                response = self.serial.readline().decode().strip()
+                self.serial.timeout = 0.5  # Longer timeout to collect more data
+                try:
+                    # Read multiple lines to capture debug messages and real response
+                    all_data = ""
+                    attempt_count = 0
+                    max_attempts = 10
+                    
+                    while attempt_count < max_attempts:
+                        try:
+                            response_bytes = self.serial.readline()
+                            if not response_bytes:
+                                break
+                                
+                            # Try UTF-8 first, fall back to latin-1 for raw bytes
+                            try:
+                                line = response_bytes.decode('utf-8').strip()
+                            except UnicodeDecodeError:
+                                line = response_bytes.decode('latin-1', errors='ignore').strip()
+                                
+                            if line:
+                                all_data += line + "\n"
+                                
+                            # Stop if we get a line that looks like a real SCPI response
+                            if self._is_real_scpi_response(line, command):
+                                logger.debug(f"Found real SCPI response: {line}")
+                                break
+                                
+                            attempt_count += 1
+                            
+                        except Exception:
+                            break
+                    
+                    # Filter out debug messages and extract real SCPI response
+                    response = self._filter_debug_messages(all_data, command)
+                    
+                    logger.debug(f"Raw data: {repr(all_data[:200])}")
+                    logger.debug(f"Filtered response: {repr(response)}")
+                    
+                except Exception as e:
+                    logger.error(f"Error reading response: {e}")
+                    response = ""
+                    
                 self.serial.timeout = 0.5  # Reset to default
                 return {
                     'success': True,
@@ -160,6 +200,109 @@ class SCPIHandler:
                 'response': None,
                 'error': str(e)
             }
+
+    def _is_real_scpi_response(self, line, command):
+        """Check if a line looks like a real SCPI response (not debug)"""
+        if not line:
+            return False
+            
+        # Debug message patterns to ignore
+        debug_patterns = [
+            "🔤 SCPI: Processing char",
+            "📥 CDC: Received",
+            "🔍 SCPI_Parse: Parsing",
+            "🚀 SCPI: CV Start command",
+            "⚙️ SCPI_CV_SetStatus:",
+            "🏁 CV: Measurement completed",
+            "📊 SCPI: CV data query",
+            "Debug:",
+            "DEBUG:",
+            "SCPI: Processing char",  # In case emoji doesn't decode properly
+            "CDC: Received",         # In case emoji doesn't decode properly
+            "SCPI_Parse: Parsing",   # In case emoji doesn't decode properly
+        ]
+        
+        # If line contains debug patterns, it's not a real response
+        for pattern in debug_patterns:
+            if pattern in line:
+                return False
+        
+        # Command-specific response patterns
+        if "*IDN?" in command.upper():
+            # IDN should return manufacturer,model,serial,version format
+            if "," in line and not line.startswith("🔤"):
+                return True
+        elif "STATUS?" in command.upper():
+            # Status should return IDLE, MEASURING, or COMPLETE
+            if line.upper() in ["IDLE", "MEASURING", "COMPLETE"]:
+                return True
+        elif "DATA?" in command.upper():
+            # Data should return CSV format or empty
+            if line.startswith("voltage,current") or "," in line or line == "":
+                return True
+        
+        # If it's not obviously debug and has some content, probably real
+        return len(line) > 0 and not line.startswith("🔤") and not line.startswith("📥")
+    
+    def _filter_debug_messages(self, raw_data, command):
+        """Filter out debug messages and extract real SCPI response"""
+        if not raw_data:
+            return ""
+        
+        lines = raw_data.split('\n')
+        
+        # Debug message patterns to filter out
+        debug_patterns = [
+            "🔤 SCPI: Processing char",
+            "📥 CDC: Received",
+            "🔍 SCPI_Parse: Parsing", 
+            "🚀 SCPI: CV Start command",
+            "⚙️ SCPI_CV_SetStatus:",
+            "🏁 CV: Measurement completed",
+            "📊 SCPI: CV data query",
+            "Debug:",
+            "DEBUG:",
+            "SCPI: Processing char",  # In case emoji doesn't decode properly
+            "CDC: Received",         # In case emoji doesn't decode properly
+            "SCPI_Parse: Parsing",   # In case emoji doesn't decode properly
+        ]
+        
+        real_responses = []
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Skip debug messages
+            is_debug = False
+            for pattern in debug_patterns:
+                if pattern in line:
+                    is_debug = True
+                    break
+                    
+            if not is_debug:
+                real_responses.append(line)
+        
+        # Join real responses
+        result = '\n'.join(real_responses).strip()
+        
+        # Handle specific command types
+        if "*IDN?" in command.upper():
+            # Return first line that looks like IDN response
+            for line in real_responses:
+                if "," in line:  # IDN format usually has commas
+                    return line
+        elif "STATUS?" in command.upper():
+            # Return first line that looks like status
+            for line in real_responses:
+                if line.upper() in ["IDLE", "MEASURING", "COMPLETE"]:
+                    return line
+        elif "DATA?" in command.upper():
+            # Return all data lines
+            return result
+            
+        return result
 
     def query(self, command):
         """Send a query command and return the response"""

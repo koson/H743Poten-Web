@@ -713,11 +713,22 @@ class CVMeasurementService:
             return result
 
     def get_measurement_data(self) -> Dict:
-        """Get current measurement data for API"""
+        """Get current measurement data for API using new SCPI commands"""
         
         #  DEBUG: Log SCPI handler type to identify mock vs real hardware
         handler_type = type(self.scpi_handler).__name__
         print(f"🔍 CV Service using: {handler_type}")
+        
+        # Try to get fresh data from STM32 using new SCPI commands
+        # Only poll if we're actively measuring or haven't polled recently
+        current_time = time.time()
+        if not hasattr(self, '_last_poll_time'):
+            self._last_poll_time = 0
+            
+        # Poll every 1 second for real-time updates (avoid rate limiting)
+        if (current_time - self._last_poll_time) >= 1.0:
+            self._poll_stm32_data()
+            self._last_poll_time = current_time
         
         # Use get_data_points() which includes virtual ground correction
         data_points = self.get_data_points()  # This method applies virtual ground correction
@@ -733,6 +744,9 @@ class CVMeasurementService:
             print(f"🔍 First 5 points: {data_points[:5]}")
             print(f"🔍 Last 5 points: {data_points[-5:]}")
         
+        # Calculate progress indicator for user feedback
+        progress_info = self._calculate_progress()
+        
         # Return data structure that frontend expects
         return {
                 'points': data_points,
@@ -741,9 +755,191 @@ class CVMeasurementService:
                     'is_measuring': self.is_measuring,
                     'data_points_count': len(data_points),
                     'current_cycle': self.current_cycle,
-                    'scan_direction': self.scan_direction
+                    'scan_direction': self.scan_direction,
+                    'progress': progress_info
                 }
             }
+    
+    def _calculate_progress(self) -> Dict:
+        """Calculate measurement progress for user feedback"""
+        if not self.is_measuring and not self.start_time:
+            return {'phase': 'ready', 'percentage': 0, 'message': 'Ready to start'}
+        
+        if not self.start_time:
+            return {'phase': 'starting', 'percentage': 5, 'message': 'Initializing measurement...'}
+            
+        elapsed = time.time() - self.start_time
+        
+        if self.is_measuring:
+            # Estimate progress based on time elapsed
+            if self.current_params:
+                # Rough estimation: CV scan time depends on voltage range and scan rate
+                voltage_range = abs(self.current_params.upper - self.current_params.lower) * 2  # forward + reverse
+                estimated_time = (voltage_range / self.current_params.rate) * self.current_params.cycles
+                
+                percentage = min(90, (elapsed / estimated_time) * 100)  # Cap at 90% until complete
+                
+                if len(self.data_points) > 0:
+                    return {
+                        'phase': 'measuring',
+                        'percentage': percentage,
+                        'message': f'Scanning... {len(self.data_points)} points collected',
+                        'elapsed_time': elapsed,
+                        'estimated_total': estimated_time
+                    }
+                else:
+                    return {
+                        'phase': 'waiting_data',
+                        'percentage': 10,
+                        'message': 'Waiting for data from STM32...',
+                        'elapsed_time': elapsed
+                    }
+            else:
+                return {
+                    'phase': 'measuring',
+                    'percentage': 50,
+                    'message': f'Measuring... ({elapsed:.1f}s elapsed)',
+                    'elapsed_time': elapsed
+                }
+        else:
+            # Measurement completed
+            return {
+                'phase': 'completed',
+                'percentage': 100,
+                'message': f'Completed - {len(self.data_points)} points collected',
+                'elapsed_time': elapsed
+            }
+    
+    def _poll_stm32_data(self) -> None:
+        """Poll STM32 for status and data using new SCPI commands with enhanced retry"""
+        if not self.scpi_handler or not self.scpi_handler.is_connected:
+            return
+            
+        try:
+            # Check measurement status first
+            if self.measurement_type == 'CV':
+                status_command = "POTEn:CV:STATUS?"
+                data_command = "POTEn:CV:DATA?"
+            elif self.measurement_type == 'SWV':  # For SWV compatibility
+                status_command = "POTEn:SWV:STATUS?"
+                data_command = "POTEn:SWV:DATA?"
+            else:
+                return
+                
+            # Get status with retry
+            status_response = ""
+            for attempt in range(2):  # Try twice
+                status_result = self.scpi_handler.send_custom_command(status_command)
+                if status_result.get('success', False):
+                    status_response = status_result.get('response', '').strip()
+                    logger.debug(f"🔍 CV Status (attempt {attempt+1}): {status_response}")
+                    break
+                time.sleep(0.1)  # Brief delay between attempts
+                
+            # Update measurement state based on status
+            if status_response == "MEASURING":
+                self.is_measuring = True
+                logger.debug("📊 STM32 is actively measuring")
+            elif status_response == "COMPLETE":
+                self.is_measuring = False
+                logger.info("🏁 STM32 measurement completed")
+            elif status_response == "IDLE":
+                if self.is_measuring:
+                    logger.info("🏁 STM32 returned to IDLE - measurement completed")
+                    self.is_measuring = False
+                else:
+                    logger.debug("⏸️ STM32 is IDLE")
+                    
+            # Always try to get data (even if IDLE, there might be accumulated data)
+            data_result = self.scpi_handler.send_custom_command(data_command)
+            if data_result.get('success', False):
+                data_response = data_result.get('response', '').strip()
+                if data_response and data_response != "":
+                    logger.info(f"📊 CV Data received: {len(data_response)} chars, {data_response.count(chr(10))} lines")
+                    self._parse_cv_data_response(data_response)
+                    
+                    # For debugging: show sample of what we got
+                    lines = data_response.split('\n')
+                    data_lines = [line for line in lines if line.strip() and not line.startswith('voltage,current')]
+                    if data_lines:
+                        logger.info(f"📊 Data sample: First={data_lines[0]}, Last={data_lines[-1] if len(data_lines) > 1 else 'N/A'}")
+                        
+                    # CRITICAL: Check if we're getting the same 5 points repeatedly
+                    if len(data_lines) <= 5 and len(self.data_points) <= 5:
+                        logger.warning("⚠️ WARNING: Only 5 data points detected - STM32 may not be performing full CV scan")
+                        logger.warning("⚠️ This suggests firmware CV implementation issue, not web interface problem")
+                else:
+                    logger.debug("📊 No new data available")
+            else:
+                logger.debug(f"❌ Data query failed: {data_result.get('error', 'Unknown error')}")
+                    
+        except Exception as e:
+            logger.error(f"❌ Error polling STM32 data: {e}")
+    
+    def _parse_cv_data_response(self, data_response: str) -> None:
+        """Parse CSV data response from STM32 with enhanced duplicate detection"""
+        try:
+            lines = data_response.strip().split('\n')
+            new_points_added = 0
+            
+            for line in lines:
+                line = line.strip()
+                if not line or line.startswith('voltage,current'):  # Skip header
+                    continue
+                    
+                # Parse CSV format: voltage,current
+                parts = line.split(',')
+                if len(parts) >= 2:
+                    try:
+                        voltage = float(parts[0])
+                        current = float(parts[1])
+                        
+                        # Convert to microamps for consistency  
+                        current_ua = current * 1e6
+                        
+                        # Enhanced duplicate detection - check if this point already exists
+                        is_duplicate = False
+                        if self.data_points:
+                            # Check last few points to avoid duplicates
+                            for existing_point in self.data_points[-5:]:  # Check last 5 points
+                                if (abs(existing_point.potential - voltage) < 1e-6 and 
+                                    abs(existing_point.current - current_ua) < 1e-3):
+                                    is_duplicate = True
+                                    break
+                        
+                        if not is_duplicate:
+                            # Determine scan direction based on voltage trend
+                            if len(self.data_points) >= 2:
+                                last_v = self.data_points[-1].potential
+                                prev_v = self.data_points[-2].potential
+                                if voltage > last_v and last_v >= prev_v:
+                                    self.scan_direction = 'forward'
+                                elif voltage < last_v and last_v <= prev_v:
+                                    self.scan_direction = 'reverse'
+                        
+                            # Create data point
+                            data_point = CVDataPoint(
+                                timestamp=time.time(),
+                                potential=voltage,
+                                current=current_ua,
+                                cycle=self.current_cycle,
+                                direction=self.scan_direction
+                            )
+                            
+                            self.data_points.append(data_point)
+                            self.last_data_time = time.time()
+                            new_points_added += 1
+                            
+                    except (ValueError, IndexError) as e:
+                        logger.debug(f"Could not parse data line: {line} - {e}")
+            
+            if new_points_added > 0:
+                logger.info(f"📊 Added {new_points_added} new CV data points (total: {len(self.data_points)})")
+            else:
+                logger.debug("📊 No new data points added (duplicates filtered)")
+                        
+        except Exception as e:
+            logger.error(f"❌ Error parsing CV data response: {e}")
     
     def _estimate_measurement_time(self) -> int:
         """Estimate measurement duration based on parameters"""

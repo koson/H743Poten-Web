@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H743 Potentiostat Research Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tool-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tool-card.active {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+        }
+        
+        .card-header {
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+        }
+        
+        .cv-card .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .swv-card .card-header { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .dpv-card .card-header { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .system-card .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .status-connected { background-color: var(--success-color); }
+        .status-disconnected { background-color: var(--danger-color); }
+        .status-measuring { background-color: var(--warning-color); animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+            display: inline-block;
+            margin: 10px;
+        }
+        
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring circle {
+            fill: transparent;
+            stroke: #e6e6e6;
+            stroke-width: 4;
+        }
+        
+        .progress-ring .progress {
+            stroke: var(--primary-color);
+            stroke-dasharray: 0 100;
+            transition: stroke-dasharray 0.3s;
+        }
+        
+        .measurement-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn-measurement {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cv { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-swv { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .btn-dpv { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        
+        .data-display {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .system-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .offline-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--warning-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            z-index: 1000;
+        }
+        
+        .export-panel {
+            background: #e8f5e8;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .file-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .console-log {
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            height: 200px;
+            overflow-y: scroll;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-badge" id="connection-status">
+        <i class="fas fa-wifi"></i> <span id="connection-text">Checking...</span>
+    </div>
+
+    <div class="main-container">
+        <div class="text-center mb-4">
+            <h1 class="display-4 mb-2">
+                <i class="fas fa-flask"></i> H743 Potentiostat
+            </h1>
+            <p class="lead">Professional Electrochemical Research Platform</p>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Research Mode:</strong> All data is stored locally. Export files when measurement complete.
+            </div>
+        </div>
+
+        <!-- Tools Grid -->
+        <div class="row">
+            <!-- CV Tool -->
+            <div class="col-lg-6 col-md-6">
+                <div class="tool-card cv-card" id="cv-tool">
+                    <div class="card-header">
+                        <i class="fas fa-wave-square"></i> Cyclic Voltammetry (CV)
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Status:</h6>
+                            <div>
+                                <span id="cv-status-indicator" class="status-indicator status-disconnected"></span>
+                                <span id="cv-status-text">Ready</span>
+                            </div>
+                            
+                            <h6 class="mt-3">Progress:</h6>
+                            <div class="progress-ring">
+                                <svg width="60" height="60">
+                                    <circle cx="30" cy="30" r="26" stroke="#e6e6e6" stroke-width="4" fill="none"/>
+                                    <circle cx="30" cy="30" r="26" stroke="#667eea" stroke-width="4" fill="none" 
+                                            class="progress" id="cv-progress-circle"/>
+                                </svg>
+                            </div>
+                            <span id="cv-progress-text">0%</span>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Parameters:</h6>
+                            <div class="mb-2">
+                                <small>Start Voltage:</small>
+                                <input type="number" class="form-control form-control-sm" id="cv-start" value="-0.5" step="0.1">
+                            </div>
+                            <div class="mb-2">
+                                <small>End Voltage:</small>
+                                <input type="number" class="form-control form-control-sm" id="cv-end" value="0.5" step="0.1">
+                            </div>
+                            <div class="mb-2">
+                                <small>Scan Rate (V/s):</small>
+                                <input type="number" class="form-control form-control-sm" id="cv-rate" value="0.05" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="measurement-controls">
+                        <button class="btn btn-success btn-measurement btn-cv" onclick="startCV()">
+                            <i class="fas fa-play"></i> Start CV
+                        </button>
+                        <button class="btn btn-danger btn-measurement" onclick="stopCV()">
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                    </div>
+                    
+                    <div class="data-display">
+                        <strong>Data Points:</strong> <span id="cv-data-count">0</span> |
+                        <strong>Duration:</strong> <span id="cv-duration">0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SWV Tool -->
+            <div class="col-lg-6 col-md-6">
+                <div class="tool-card swv-card" id="swv-tool">
+                    <div class="card-header">
+                        <i class="fas fa-chart-line"></i> Square Wave Voltammetry (SWV)
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Status:</h6>
+                            <div>
+                                <span id="swv-status-indicator" class="status-indicator status-disconnected"></span>
+                                <span id="swv-status-text">Ready</span>
+                            </div>
+                            
+                            <h6 class="mt-3">Progress:</h6>
+                            <div class="progress-ring">
+                                <svg width="60" height="60">
+                                    <circle cx="30" cy="30" r="26" stroke="#e6e6e6" stroke-width="4" fill="none"/>
+                                    <circle cx="30" cy="30" r="26" stroke="#11998e" stroke-width="4" fill="none" 
+                                            class="progress" id="swv-progress-circle"/>
+                                </svg>
+                            </div>
+                            <span id="swv-progress-text">0%</span>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Parameters:</h6>
+                            <div class="mb-2">
+                                <small>Start Voltage:</small>
+                                <input type="number" class="form-control form-control-sm" id="swv-start" value="-0.5" step="0.1">
+                            </div>
+                            <div class="mb-2">
+                                <small>End Voltage:</small>
+                                <input type="number" class="form-control form-control-sm" id="swv-end" value="0.5" step="0.1">
+                            </div>
+                            <div class="mb-2">
+                                <small>Frequency (Hz):</small>
+                                <input type="number" class="form-control form-control-sm" id="swv-freq" value="50" step="10">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="measurement-controls">
+                        <button class="btn btn-success btn-measurement btn-swv" onclick="startSWV()">
+                            <i class="fas fa-play"></i> Start SWV
+                        </button>
+                        <button class="btn btn-danger btn-measurement" onclick="stopSWV()">
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                    </div>
+                    
+                    <div class="data-display">
+                        <strong>Data Points:</strong> <span id="swv-data-count">0</span> |
+                        <strong>Duration:</strong> <span id="swv-duration">0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DPV Tool -->
+            <div class="col-lg-6 col-md-6">
+                <div class="tool-card dpv-card" id="dpv-tool">
+                    <div class="card-header">
+                        <i class="fas fa-signal"></i> Differential Pulse Voltammetry (DPV)
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Status:</h6>
+                            <div>
+                                <span id="dpv-status-indicator" class="status-indicator status-disconnected"></span>
+                                <span id="dpv-status-text">Ready</span>
+                            </div>
+                            
+                            <h6 class="mt-3">Progress:</h6>
+                            <div class="progress-ring">
+                                <svg width="60" height="60">
+                                    <circle cx="30" cy="30" r="26" stroke="#e6e6e6" stroke-width="4" fill="none"/>
+                                    <circle cx="30" cy="30" r="26" stroke="#fa709a" stroke-width="4" fill="none" 
+                                            class="progress" id="dpv-progress-circle"/>
+                                </svg>
+                            </div>
+                            <span id="dpv-progress-text">0%</span>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Parameters:</h6>
+                            <div class="mb-2">
+                                <small>Start Voltage:</small>
+                                <input type="number" class="form-control form-control-sm" id="dpv-start" value="-0.5" step="0.1">
+                            </div>
+                            <div class="mb-2">
+                                <small>End Voltage:</small>
+                                <input type="number" class="form-control form-control-sm" id="dpv-end" value="0.5" step="0.1">
+                            </div>
+                            <div class="mb-2">
+                                <small>Pulse Height (mV):</small>
+                                <input type="number" class="form-control form-control-sm" id="dpv-pulse" value="50" step="10">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="measurement-controls">
+                        <button class="btn btn-success btn-measurement btn-dpv" onclick="startDPV()">
+                            <i class="fas fa-play"></i> Start DPV
+                        </button>
+                        <button class="btn btn-danger btn-measurement" onclick="stopDPV()">
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                    </div>
+                    
+                    <div class="data-display">
+                        <strong>Data Points:</strong> <span id="dpv-data-count">0</span> |
+                        <strong>Duration:</strong> <span id="dpv-duration">0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System & Export Tool -->
+            <div class="col-lg-6 col-md-6">
+                <div class="tool-card system-card" id="system-tool">
+                    <div class="card-header">
+                        <i class="fas fa-cogs"></i> System & Data Export
+                    </div>
+                    
+                    <div class="system-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="total-measurements">0</div>
+                            <small>Measurements</small>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="total-data-points">0</div>
+                            <small>Data Points</small>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="total-files">0</div>
+                            <small>Export Files</small>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="stm32-status">
+                                <i class="fas fa-circle" id="stm32-icon"></i>
+                            </div>
+                            <small>STM32 Status</small>
+                        </div>
+                    </div>
+                    
+                    <div class="export-panel">
+                        <h6><i class="fas fa-download"></i> Data Export</h6>
+                        <p class="mb-3">Export measurement data for analysis</p>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" onclick="exportCurrentMeasurement()">
+                                <i class="fas fa-file-export"></i> Export Current Measurement
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="showFileManager()">
+                                <i class="fas fa-folder-open"></i> File Manager
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="openFileBrowser()">
+                                <i class="fas fa-external-link-alt"></i> Web File Browser
+                            </button>
+                        </div>
+                        
+                        <div class="file-list" id="recent-files">
+                            <small class="text-muted">Recent exported files will appear here...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Display -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h5><i class="fas fa-chart-area"></i> Real-time Measurement Display</h5>
+                    <canvas id="measurementChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Console Log -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h6><i class="fas fa-terminal"></i> System Console</h6>
+                <div class="console-log" id="console-log"></div>
+                <button class="btn btn-secondary btn-sm mt-2" onclick="clearConsole()">
+                    <i class="fas fa-broom"></i> Clear Console
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const SCPI_SERVER_URL = 'http://192.168.9.76:8081';
+        
+        // Global variables
+        let measurementChart = null;
+        let statusPolling = null;
+        let dataPolling = null;
+        let currentMeasurementId = null;
+        let isOffline = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 H743 Potentiostat Research Platform Started');
+            initChart();
+            checkConnection();
+            startStatusPolling();
+        });
+
+        // Chart initialization
+        function initChart() {
+            const ctx = document.getElementById('measurementChart').getContext('2d');
+            measurementChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'CV',
+                            data: [],
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            hidden: false
+                        },
+                        {
+                            label: 'SWV',
+                            data: [],
+                            borderColor: '#11998e',
+                            backgroundColor: 'rgba(17, 153, 142, 0.1)',
+                            hidden: true
+                        },
+                        {
+                            label: 'DPV',
+                            data: [],
+                            borderColor: '#fa709a',
+                            backgroundColor: 'rgba(250, 112, 154, 0.1)',
+                            hidden: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: { display: true, text: 'Potential (V)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Current (A)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: true },
+                        title: { 
+                            display: true, 
+                            text: 'Electrochemical Measurements'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Connection management
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${SCPI_SERVER_URL}/system/status`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    isOffline = false;
+                    updateConnectionStatus('online', 'Connected');
+                    updateSystemStatus(data.status);
+                } else {
+                    throw new Error('Server not responding');
+                }
+            } catch (error) {
+                isOffline = true;
+                updateConnectionStatus('offline', 'Offline Mode');
+                log('⚠️ Running in offline mode', 'warning');
+            }
+        }
+
+        function updateConnectionStatus(status, text) {
+            const badge = document.getElementById('connection-status');
+            const textElement = document.getElementById('connection-text');
+            
+            if (status === 'online') {
+                badge.className = 'offline-badge bg-success';
+                badge.innerHTML = '<i class="fas fa-wifi"></i> ' + text;
+            } else {
+                badge.className = 'offline-badge bg-warning';
+                badge.innerHTML = '<i class="fas fa-wifi-slash"></i> ' + text;
+            }
+        }
+
+        function updateSystemStatus(status) {
+            // Update STM32 status
+            const stm32Icon = document.getElementById('stm32-icon');
+            if (status.scpi_server.device_connected) {
+                stm32Icon.className = 'fas fa-circle text-success';
+            } else {
+                stm32Icon.className = 'fas fa-circle text-danger';
+            }
+
+            // Update statistics
+            if (status.database && status.database.stats) {
+                const stats = status.database.stats;
+                document.getElementById('total-measurements').textContent = 
+                    Object.values(stats.measurements_by_type || {}).reduce((a, b) => a + b, 0);
+                document.getElementById('total-data-points').textContent = stats.total_data_points || 0;
+                document.getElementById('total-files').textContent = stats.total_exported_files || 0;
+            }
+        }
+
+        // Measurement functions
+        async function startCV() {
+            if (isOffline) {
+                log('❌ CV measurement requires connection to SCPI server', 'error');
+                return;
+            }
+
+            const parameters = {
+                start_voltage: parseFloat(document.getElementById('cv-start').value),
+                end_voltage: parseFloat(document.getElementById('cv-end').value),
+                scan_rate: parseFloat(document.getElementById('cv-rate').value),
+                step_size: 0.01
+            };
+
+            try {
+                log('🚀 Starting CV measurement...');
+                const response = await fetch(`${SCPI_SERVER_URL}/cv/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ parameters, notes: 'CV measurement from web interface' })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentMeasurementId = data.measurement_id;
+                    updateMeasurementStatus('cv', 'measuring', 'CV measurement started');
+                    startDataPolling('cv');
+                    log(`✅ CV measurement started (ID: ${currentMeasurementId})`, 'success');
+                } else {
+                    log(`❌ CV start failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ CV start error: ${error.message}`, 'error');
+            }
+        }
+
+        async function stopCV() {
+            try {
+                log('⏹️ Stopping CV measurement...');
+                const response = await fetch(`${SCPI_SERVER_URL}/cv/stop`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateMeasurementStatus('cv', 'stopped', 'CV measurement stopped');
+                    stopDataPolling();
+                    log('✅ CV measurement stopped', 'success');
+                    
+                    // Auto-export if we have a measurement ID
+                    if (currentMeasurementId) {
+                        setTimeout(() => exportCurrentMeasurement(), 1000);
+                    }
+                } else {
+                    log(`❌ CV stop failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ CV stop error: ${error.message}`, 'error');
+            }
+        }
+
+        function startSWV() {
+            log('🔄 SWV measurement - Coming soon with STM32 streaming support', 'info');
+        }
+
+        function startDPV() {
+            log('🔄 DPV measurement - Coming soon with STM32 streaming support', 'info');
+        }
+
+        function stopSWV() {
+            updateMeasurementStatus('swv', 'stopped', 'SWV measurement stopped');
+        }
+
+        function stopDPV() {
+            updateMeasurementStatus('dpv', 'stopped', 'DPV measurement stopped');
+        }
+
+        // Data polling
+        function startDataPolling(measurementType) {
+            if (dataPolling) clearInterval(dataPolling);
+            
+            dataPolling = setInterval(async () => {
+                try {
+                    const response = await fetch(`${SCPI_SERVER_URL}/cv/data`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.data) {
+                        updateChart(measurementType, data.data);
+                        updateDataCount(measurementType, data.count);
+                    }
+                } catch (error) {
+                    log(`Data polling error: ${error.message}`, 'error');
+                }
+            }, 1500);
+        }
+
+        function stopDataPolling() {
+            if (dataPolling) {
+                clearInterval(dataPolling);
+                dataPolling = null;
+            }
+        }
+
+        // UI Updates
+        function updateMeasurementStatus(type, status, message) {
+            const indicator = document.getElementById(`${type}-status-indicator`);
+            const text = document.getElementById(`${type}-status-text`);
+            
+            indicator.className = `status-indicator status-${status}`;
+            text.textContent = message;
+            
+            // Activate card
+            const cards = document.querySelectorAll('.tool-card');
+            cards.forEach(card => card.classList.remove('active'));
+            
+            if (status === 'measuring') {
+                document.getElementById(`${type}-tool`).classList.add('active');
+            }
+        }
+
+        function updateChart(type, data) {
+            if (!measurementChart || !data.length) return;
+            
+            const datasetIndex = type === 'cv' ? 0 : type === 'swv' ? 1 : 2;
+            measurementChart.data.datasets[datasetIndex].data = data.map(point => ({
+                x: point.voltage,
+                y: point.current
+            }));
+            
+            // Show only active dataset
+            measurementChart.data.datasets.forEach((dataset, i) => {
+                dataset.hidden = i !== datasetIndex;
+            });
+            
+            measurementChart.update();
+        }
+
+        function updateDataCount(type, count) {
+            document.getElementById(`${type}-data-count`).textContent = count;
+        }
+
+        // Export functions
+        async function exportCurrentMeasurement() {
+            if (!currentMeasurementId) {
+                log('❌ No current measurement to export', 'error');
+                return;
+            }
+
+            try {
+                log(`📁 Exporting measurement ${currentMeasurementId}...`);
+                const response = await fetch(`${SCPI_SERVER_URL}/measurements/export/${currentMeasurementId}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    log(`✅ Exported ${data.files.length} files: ${data.files.map(f => f.filename).join(', ')}`, 'success');
+                    updateRecentFiles(data.files);
+                } else {
+                    log(`❌ Export failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Export error: ${error.message}`, 'error');
+            }
+        }
+
+        function showFileManager() {
+            log('📁 Opening file manager...', 'info');
+            // This would open a local file browser or show download links
+            alert('File Manager: Check the exported files in the system file browser.\nTypical location: /home/koson/H743Poten/H743Poten-Web/exports/');
+        }
+
+        function openFileBrowser() {
+            if (isOffline) {
+                log('❌ Web file browser requires internet connection', 'error');
+                return;
+            }
+            
+            window.open(`${SCPI_SERVER_URL}/files/list`, '_blank');
+        }
+
+        function updateRecentFiles(files) {
+            const container = document.getElementById('recent-files');
+            container.innerHTML = '';
+            
+            files.forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                item.innerHTML = `
+                    <div>
+                        <i class="fas fa-file-${file.type === 'csv' ? 'csv' : file.type === 'png' ? 'image' : 'code'}"></i>
+                        <strong>${file.filename}</strong>
+                    </div>
+                    <small class="text-muted">${file.type.toUpperCase()}</small>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Status polling
+        function startStatusPolling() {
+            if (statusPolling) clearInterval(statusPolling);
+            
+            statusPolling = setInterval(() => {
+                checkConnection();
+            }, 5000);
+        }
+
+        // Console functions
+        function log(message, type = 'info') {
+            const console = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            console.innerHTML += `[${timestamp}] ${prefix} ${message}\n`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console-log').innerHTML = '';
+        }
+
+        // Cleanup
+        window.addEventListener('beforeunload', function() {
+            if (statusPolling) clearInterval(statusPolling);
+            if (dataPolling) clearInterval(dataPolling);
+        });
+    </script>
+</body>
+</html>

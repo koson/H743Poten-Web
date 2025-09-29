@@ -4,11 +4,8 @@
 		{
 			"label": "H743Poten: Start Development Server",
 			"type": "shell",
-			"command": "bash",
-			"args": ["-c", "source poten-env/bin/activate && python auto_dev.py start"],
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
+			"command": "ssh",
+			"args": ["koson@192.168.9.76", "cd /home/koson/H743Poten/H743Poten-Web && source poten-env/bin/activate && python auto_dev.py start"],
 			"group": "build",
 			"presentation": { 
 				"echo": true, 
@@ -21,11 +18,8 @@
 		{
 			"label": "H743Poten: Stop Development Server",
 			"type": "shell",
-			"command": "bash",
-			"args": ["-c", "source poten-env/bin/activate && python auto_dev.py stop"],
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
+			"command": "ssh",
+			"args": ["koson@192.168.9.76", "cd /home/koson/H743Poten/H743Poten-Web && source poten-env/bin/activate && python auto_dev.py stop"],
 			"group": "build",
 			"presentation": { 
 				"echo": true, 
@@ -38,11 +32,8 @@
 		{
 			"label": "H743Poten: Server Status",
 			"type": "shell",
-			"command": "bash",
-			"args": ["-c", "source poten-env/bin/activate && python auto_dev.py status"],
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
+			"command": "ssh",
+			"args": ["koson@192.168.9.76", "cd /home/koson/H743Poten/H743Poten-Web && source poten-env/bin/activate && python auto_dev.py status"],
 			"group": "test",
 			"presentation": { 
 				"echo": true, 
@@ -55,11 +46,8 @@
 		{
 			"label": "H743Poten: Show Logs",
 			"type": "shell",
-			"command": "bash",
-			"args": ["-c", "source poten-env/bin/activate && python auto_dev.py logs"],
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
+			"command": "ssh",
+			"args": ["koson@192.168.9.76", "cd /home/koson/H743Poten/H743Poten-Web && source poten-env/bin/activate && python auto_dev.py logs"],
 			"group": "test",
 			"presentation": { 
 				"echo": true, 
@@ -89,11 +77,8 @@
 		{
 			"label": "H743Poten: Start Flask App (Development)",
 			"type": "shell",
-			"command": "bash",
-			"args": ["-c", "source poten-env/bin/activate && python main_dev.py"],
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
+			"command": "ssh",
+			"args": ["koson@192.168.9.76", "cd /home/koson/H743Poten/H743Poten-Web && source poten-env/bin/activate && python main_dev.py"],
 			"group": "build",
 			"presentation": { 
 				"echo": true, 
@@ -157,11 +142,22 @@
 		{
 			"label": "H743Poten: Check Hardware",
 			"type": "shell",
-			"command": "bash",
-			"args": ["-c", "ls -la /dev/ttyUSB* /dev/ttyACM* 2>/dev/null || echo 'No USB devices found'; whoami; groups"],
-			"options": {
-				"cwd": "${workspaceFolder}"
+			"command": "ssh",
+			"args": ["koson@192.168.9.76", "\"ls -la /dev/ttyUSB* /dev/ttyACM* 2>/dev/null || echo 'No USB devices found'; whoami; groups\""],
+			"group": "test",
+			"presentation": { 
+				"echo": true, 
+				"reveal": "always", 
+				"focus": false, 
+				"panel": "shared" 
 			},
+			"problemMatcher": []
+		},
+		{
+			"label": "H743Poten: Test SCPI Commands",
+			"type": "shell",
+			"command": "ssh",
+			"args": ["koson@192.168.9.76", "cd /home/koson/H743Poten/H743Poten-Web && python3 test_enhanced_debug.py"],
 			"group": "test",
 			"presentation": { 
 				"echo": true, 

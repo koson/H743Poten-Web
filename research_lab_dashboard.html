@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌅 Morning Research Lab - Multi-Device Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .device-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .device-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }
+
+        .status-connected { border-left: 5px solid var(--success-color); }
+        .status-busy { border-left: 5px solid var(--warning-color); }
+        .status-error { border-left: 5px solid var(--danger-color); }
+        .status-offline { border-left: 5px solid #95a5a6; }
+
+        .queue-item {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            padding: 1rem;
+            border-left: 4px solid #3498db;
+            transition: all 0.3s ease;
+        }
+
+        .queue-item:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateX(5px);
+        }
+
+        .priority-high { border-left-color: var(--danger-color) !important; }
+        .priority-normal { border-left-color: var(--accent-color) !important; }
+        .priority-low { border-left-color: #95a5a6 !important; }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .add-command-form {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .device-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-connected-badge { background: #d4edda; color: #155724; }
+        .status-busy-badge { background: #fff3cd; color: #856404; }
+        .status-error-badge { background: #f8d7da; color: #721c24; }
+        .status-offline-badge { background: #e2e3e5; color: #495057; }
+
+        .queue-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 1rem;
+        }
+
+        .queue-stat {
+            text-align: center;
+        }
+
+        .queue-stat h4 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .queue-stat small {
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .command-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 15px;
+        }
+
+        .research-vision {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0">
+                        <i class="fas fa-flask text-primary"></i>
+                        Morning Research Lab
+                        <small class="text-muted">Multi-Device Management System</small>
+                    </h1>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <div id="system-status" class="me-3">
+                            <span class="device-status status-connected-badge">
+                                <i class="fas fa-wifi"></i> System Online
+                            </span>
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="refreshAll()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Research Vision -->
+        <div class="research-vision">
+            <h4><i class="fas fa-lightbulb text-warning"></i> 🌅 Morning Research Lab Vision</h4>
+            <p class="mb-0">
+                <strong>Setup in the morning:</strong> Researchers prepare samples and queue all measurements for the day.
+                <strong>Autonomous execution:</strong> Multiple STM32 devices (up to 10+) execute commands automatically.
+                <strong>Full control:</strong> Monitor progress, modify priorities, cancel commands as needed.
+            </p>
+        </div>
+
+        <!-- System Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="total-devices" class="text-primary">0</h3>
+                    <small>Connected Devices</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="queued-commands" class="text-info">0</h3>
+                    <small>Queued Commands</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="running-commands" class="text-warning">0</h3>
+                    <small>Running Commands</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="completed-commands" class="text-success">0</h3>
+                    <small>Completed Today</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Device Management -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-microchip"></i> Connected STM32 Devices</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="devices-container">
+                            <!-- Device cards will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-list"></i> Command Queue</h5>
+                        <div>
+                            <span class="badge bg-info" id="queue-length">0 commands</span>
+                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="clearCompletedCommands()">
+                                <i class="fas fa-trash"></i> Clear Completed
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        <div id="queue-container">
+                            <!-- Queue items will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Command Form -->
+            <div class="col-lg-4">
+                <div class="add-command-form">
+                    <h5><i class="fas fa-plus-circle"></i> Add New Command</h5>
+                    <form id="add-command-form">
+                        <div class="mb-3">
+                            <label class="form-label">Researcher ID</label>
+                            <input type="text" class="form-control" id="researcher-id" placeholder="Dr.Smith" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Command Type</label>
+                            <select class="form-select" id="command-type" required>
+                                <option value="">Select technique...</option>
+                                <option value="CV">Cyclic Voltammetry (CV)</option>
+                                <option value="DPV">Differential Pulse Voltammetry (DPV)</option>
+                                <option value="SWV">Square Wave Voltammetry (SWV)</option>
+                                <option value="CA">Chronoamperometry (CA)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Device</label>
+                            <select class="form-select" id="device-select">
+                                <option value="">Auto-assign</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Priority</label>
+                            <select class="form-select" id="priority">
+                                <option value="NORMAL">Normal</option>
+                                <option value="HIGH">High</option>
+                                <option value="LOW">Low</option>
+                                <option value="URGENT">Urgent</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Sample ID</label>
+                            <input type="text" class="form-control" id="sample-id" placeholder="SAMPLE_001">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" rows="2" placeholder="Additional notes..."></textarea>
+                        </div>
+
+                        <!-- CV Parameters -->
+                        <div id="cv-parameters" class="parameter-group" style="display: none;">
+                            <h6>CV Parameters</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label">Start V</label>
+                                    <input type="number" class="form-control" id="cv-start-voltage" value="-1.0" step="0.1">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">End V</label>
+                                    <input type="number" class="form-control" id="cv-end-voltage" value="1.0" step="0.1">
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <label class="form-label">Scan Rate</label>
+                                    <input type="number" class="form-control" id="cv-scan-rate" value="0.05" step="0.01">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Cycles</label>
+                                    <input type="number" class="form-control" id="cv-cycles" value="1" min="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DPV Parameters -->
+                        <div id="dpv-parameters" class="parameter-group" style="display: none;">
+                            <h6>DPV Parameters</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label">Start V</label>
+                                    <input type="number" class="form-control" id="dpv-start-voltage" value="-0.5" step="0.1">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">End V</label>
+                                    <input type="number" class="form-control" id="dpv-end-voltage" value="0.5" step="0.1">
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <label class="form-label">Step V</label>
+                                    <input type="number" class="form-control" id="dpv-step-voltage" value="0.004" step="0.001">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Pulse Amp</label>
+                                    <input type="number" class="form-control" id="dpv-pulse-amplitude" value="0.05" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <i class="fas fa-plus"></i> Add to Queue
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Queue Statistics -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6><i class="fas fa-chart-bar"></i> Today's Statistics</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="queue-stats">
+                            <div class="queue-stat">
+                                <h4 id="success-rate" class="text-success">0%</h4>
+                                <small>Success Rate</small>
+                            </div>
+                            <div class="queue-stat">
+                                <h4 id="avg-time" class="text-info">0m</h4>
+                                <small>Avg Time</small>
+                            </div>
+                        </div>
+                        <div class="progress mt-3">
+                            <div id="progress-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">Daily progress</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = 'http://192.168.9.76:8095';
+        let systemData = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshAll();
+            setInterval(refreshAll, 5000); // Auto-refresh every 5 seconds
+            
+            // Setup form handlers
+            setupFormHandlers();
+        });
+
+        function setupFormHandlers() {
+            // Command type change handler
+            document.getElementById('command-type').addEventListener('change', function() {
+                showParameterForm(this.value);
+            });
+
+            // Add command form submission
+            document.getElementById('add-command-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addCommand();
+            });
+        }
+
+        function showParameterForm(commandType) {
+            // Hide all parameter forms
+            document.querySelectorAll('.parameter-group').forEach(form => {
+                form.style.display = 'none';
+            });
+
+            // Show relevant parameter form
+            if (commandType) {
+                const formId = commandType.toLowerCase() + '-parameters';
+                const formElement = document.getElementById(formId);
+                if (formElement) {
+                    formElement.style.display = 'block';
+                }
+            }
+        }
+
+        async function refreshAll() {
+            try {
+                const response = await fetch(`${API_BASE}/system/status`);
+                const data = await response.json();
+                systemData = data;
+                
+                updateSystemStats(data);
+                updateDevices(data.devices);
+                updateQueue(data.queue_status);
+                updateDeviceSelect(data.devices);
+                
+            } catch (error) {
+                console.error('Failed to refresh data:', error);
+                document.getElementById('system-status').innerHTML = 
+                    '<span class="device-status status-error-badge"><i class="fas fa-exclamation-triangle"></i> Connection Error</span>';
+            }
+        }
+
+        function updateSystemStats(data) {
+            document.getElementById('total-devices').textContent = data.system_info.total_devices;
+            document.getElementById('queued-commands').textContent = data.queue_status.queue_summary.total_queued;
+            document.getElementById('running-commands').textContent = data.queue_status.queue_summary.total_running;
+            document.getElementById('completed-commands').textContent = data.queue_status.queue_summary.total_completed;
+            
+            // Update success rate
+            const stats = data.queue_status.statistics;
+            document.getElementById('success-rate').textContent = Math.round(stats.success_rate) + '%';
+            
+            // Update progress bar
+            const totalCommands = stats.total_queued || 1;
+            const completedCommands = stats.total_completed;
+            const progressPercent = (completedCommands / totalCommands) * 100;
+            document.getElementById('progress-bar').style.width = progressPercent + '%';
+        }
+
+        function updateDevices(devices) {
+            const container = document.getElementById('devices-container');
+            
+            if (Object.keys(devices).length === 0) {
+                container.innerHTML = '<div class="text-center text-muted"><i class="fas fa-search"></i> No devices found. Connect STM32 devices via USB.</div>';
+                return;
+            }
+
+            container.innerHTML = Object.entries(devices).map(([deviceId, device]) => {
+                const statusClass = `status-${device.status}`;
+                const statusBadgeClass = `status-${device.status}-badge`;
+                const queueInfo = device.queue_info || {};
+                
+                return `
+                    <div class="device-card ${statusClass}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="card-title">
+                                        <i class="fas fa-microchip"></i> ${deviceId}
+                                        <span class="device-status ${statusBadgeClass}">${device.status}</span>
+                                    </h6>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            Port: ${device.port} | 
+                                            Serial: ${device.serial_number} |
+                                            Queue: ${queueInfo.queue_size || 0}
+                                        </small>
+                                    </p>
+                                    ${queueInfo.current_command ? 
+                                        `<div class="badge bg-warning">Running: ${queueInfo.current_command}</div>` : 
+                                        '<div class="badge bg-success">Available</div>'
+                                    }
+                                </div>
+                                <div class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-info" onclick="viewDeviceDetails('${deviceId}')">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                        <button class="btn btn-outline-primary" onclick="testDevice('${deviceId}')">
+                                            <i class="fas fa-vial"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    Capabilities: ${(device.queue_info?.capabilities || []).join(', ')}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateQueue(queueStatus) {
+            const container = document.getElementById('queue-container');
+            const queuedCommands = queueStatus.queued_commands || [];
+            const runningCommands = queueStatus.running_commands || [];
+            
+            document.getElementById('queue-length').textContent = `${queuedCommands.length + runningCommands.length} commands`;
+
+            if (queuedCommands.length === 0 && runningCommands.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-inbox"></i>
+                        <p class="mt-2">No commands in queue. Add commands to start automated execution.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Show running commands first
+            let html = '';
+            
+            if (runningCommands.length > 0) {
+                html += '<h6 class="text-warning"><i class="fas fa-play"></i> Running Commands</h6>';
+                runningCommands.forEach(cmd => {
+                    const elapsedTime = Math.round(cmd.elapsed_time || 0);
+                    html += `
+                        <div class="queue-item border-warning">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${cmd.command_type}</strong> - ${cmd.researcher_id}
+                                    <br><small class="text-muted">Device: ${cmd.device_id} | Running for ${elapsedTime}s</small>
+                                </div>
+                                <div class="command-actions">
+                                    <button class="btn btn-outline-info btn-sm" onclick="viewCommandDetails('${cmd.command_id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="cancelCommand('${cmd.command_id}')">
+                                        <i class="fas fa-stop"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (queuedCommands.length > 0) {
+                html += '<h6 class="text-info mt-3"><i class="fas fa-clock"></i> Queued Commands</h6>';
+                queuedCommands.forEach((cmd, index) => {
+                    const priorityClass = `priority-${cmd.priority.toLowerCase()}`;
+                    html += `
+                        <div class="queue-item ${priorityClass}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${cmd.command_type}</strong> - ${cmd.researcher_id}
+                                    <span class="badge bg-secondary ms-2">${cmd.priority}</span>
+                                    <br><small class="text-muted">
+                                        Device: ${cmd.device_id} | 
+                                        Sample: ${cmd.sample_info?.sample_id || 'N/A'} |
+                                        Est: ${cmd.estimated_duration ? Math.round(cmd.estimated_duration/60) + 'm' : 'N/A'}
+                                    </small>
+                                    ${cmd.notes ? `<br><small class="text-info">${cmd.notes}</small>` : ''}
+                                </div>
+                                <div class="command-actions">
+                                    <span class="badge bg-light text-dark me-2">#${index + 1}</span>
+                                    <button class="btn btn-outline-info btn-sm" onclick="viewCommandDetails('${cmd.command_id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" onclick="editCommand('${cmd.command_id}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="cancelCommand('${cmd.command_id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            container.innerHTML = html;
+        }
+
+        function updateDeviceSelect(devices) {
+            const select = document.getElementById('device-select');
+            const currentValue = select.value;
+            
+            // Clear existing options except "Auto-assign"
+            select.innerHTML = '<option value="">Auto-assign</option>';
+            
+            // Add device options
+            Object.entries(devices).forEach(([deviceId, device]) => {
+                if (device.status === 'connected') {
+                    const option = document.createElement('option');
+                    option.value = deviceId;
+                    option.textContent = `${deviceId} (${device.port})`;
+                    select.appendChild(option);
+                }
+            });
+            
+            // Restore selection if still valid
+            if (currentValue) {
+                select.value = currentValue;
+            }
+        }
+
+        async function addCommand() {
+            try {
+                const commandType = document.getElementById('command-type').value;
+                const parameters = getParametersForCommandType(commandType);
+                
+                const commandData = {
+                    command_type: commandType,
+                    parameters: parameters,
+                    researcher_id: document.getElementById('researcher-id').value,
+                    sample_info: {
+                        sample_id: document.getElementById('sample-id').value || 'N/A'
+                    },
+                    device_id: document.getElementById('device-select').value || null,
+                    priority: document.getElementById('priority').value,
+                    notes: document.getElementById('notes').value,
+                    estimated_duration: estimateCommandDuration(commandType, parameters)
+                };
+
+                const response = await fetch(`${API_BASE}/queue/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(commandData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Command added to queue successfully!');
+                    document.getElementById('add-command-form').reset();
+                    showParameterForm(''); // Hide parameter forms
+                    refreshAll();
+                } else {
+                    alert('❌ Failed to add command: ' + result.error);
+                }
+
+            } catch (error) {
+                console.error('Failed to add command:', error);
+                alert('❌ Failed to add command: ' + error.message);
+            }
+        }
+
+        function getParametersForCommandType(commandType) {
+            switch (commandType) {
+                case 'CV':
+                    return {
+                        start_voltage: parseFloat(document.getElementById('cv-start-voltage').value),
+                        end_voltage: parseFloat(document.getElementById('cv-end-voltage').value),
+                        begin_voltage: 0.0,
+                        scan_rate: parseFloat(document.getElementById('cv-scan-rate').value),
+                        cycles: parseInt(document.getElementById('cv-cycles').value)
+                    };
+                case 'DPV':
+                    return {
+                        start_voltage: parseFloat(document.getElementById('dpv-start-voltage').value),
+                        end_voltage: parseFloat(document.getElementById('dpv-end-voltage').value),
+                        step_voltage: parseFloat(document.getElementById('dpv-step-voltage').value),
+                        pulse_amplitude: parseFloat(document.getElementById('dpv-pulse-amplitude').value),
+                        pulse_width: 0.05,
+                        sampling_width: 0.017,
+                        pulse_period: 0.2
+                    };
+                default:
+                    return {};
+            }
+        }
+
+        function estimateCommandDuration(commandType, parameters) {
+            // Simple estimation based on command type and parameters
+            switch (commandType) {
+                case 'CV':
+                    const voltageRange = Math.abs(parameters.end_voltage - parameters.start_voltage) * 2; // Forward + reverse
+                    const duration = (voltageRange / parameters.scan_rate) * parameters.cycles;
+                    return Math.max(duration, 60); // Minimum 1 minute
+                case 'DPV':
+                    const steps = Math.abs(parameters.end_voltage - parameters.start_voltage) / parameters.step_voltage;
+                    return Math.max(steps * 0.2, 120); // Minimum 2 minutes
+                default:
+                    return 300; // Default 5 minutes
+            }
+        }
+
+        async function cancelCommand(commandId) {
+            if (!confirm('Are you sure you want to cancel this command?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/queue/command/${commandId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Command cancelled successfully!');
+                    refreshAll();
+                } else {
+                    alert('❌ Failed to cancel command: ' + result.error);
+                }
+
+            } catch (error) {
+                console.error('Failed to cancel command:', error);
+                alert('❌ Failed to cancel command: ' + error.message);
+            }
+        }
+
+        function viewCommandDetails(commandId) {
+            // TODO: Implement command details modal
+            alert('Command details for: ' + commandId);
+        }
+
+        function editCommand(commandId) {
+            // TODO: Implement command editing
+            alert('Edit command: ' + commandId);
+        }
+
+        function viewDeviceDetails(deviceId) {
+            // TODO: Implement device details modal
+            const device = systemData.devices[deviceId];
+            alert(`Device: ${deviceId}\nPort: ${device.port}\nStatus: ${device.status}\nSerial: ${device.serial_number}`);
+        }
+
+        function testDevice(deviceId) {
+            // TODO: Implement device testing
+            alert('Test device: ' + deviceId);
+        }
+
+        function clearCompletedCommands() {
+            if (confirm('Clear all completed commands from the display?')) {
+                alert('Feature not implemented yet');
+            }
+        }
+    </script>
+</body>
+</html>

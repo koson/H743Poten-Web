@@ -1,0 +1,439 @@
+// Step 1: Basic connection test
+console.log("🔍 Step 1: Testing Basic Connection");
+
+async function testConnection() {
+    try {
+        // Test 1: API availability
+        const response = await fetch('/api/connection/status');
+        const data = await response.json();
+        console.log("✅ API Response:", data);
+        
+        // Test 2: SCPI communication
+        const scpiTest = await fetch('/api/uart/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command: '*IDN?' })
+        });
+        const scpiResult = await scpiTest.json();
+        console.log("✅ SCPI Test:", scpiResult);
+        
+        if (scpiResult.response) {
+            console.log("🎉 Step 1 PASSED - Connection OK");
+            return true;
+        } else {
+            console.log("❌ Step 1 FAILED - SCPI not responding");
+            return false;
+        }
+    } catch (error) {
+        console.log("❌ Step 1 FAILED - Connection error:", error);
+        return false;
+    }
+}
+
+testConnection();
+
+--------------------------------------------------------------------------------------
+// Step 2: CV Status and Command Test
+console.log("🔍 Step 2: Testing CV Commands");
+
+async function testCVCommands() {
+    try {
+        console.log("Testing CV-specific SCPI commands...");
+        
+        // Test 2.1: Initial CV Status
+        console.log("📊 2.1: Checking initial CV status...");
+        const statusResponse = await fetch('/api/uart/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command: 'POTEn:CV:STATUS?' })
+        });
+        const statusResult = await statusResponse.json();
+        console.log("   Initial Status:", statusResult.response || statusResult.error);
+        
+        // Wait a bit to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Test 2.2: Initial CV Data (should be empty)
+        console.log("📊 2.2: Checking initial CV data...");
+        const dataResponse = await fetch('/api/uart/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command: 'POTEn:CV:DATA?' })
+        });
+        const dataResult = await dataResponse.json();
+        console.log("   Initial Data Length:", dataResult.response?.length || 0, "chars");
+        console.log("   Initial Data Preview:", dataResult.response?.substring(0, 100) || "No data");
+        
+        // Wait again
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Test 2.3: Test CV start command format (without actually starting)
+        console.log("📊 2.3: Testing CV command format...");
+        const testCommand = "POTEn:CV:Start:ALL -0.5,0.5,-0.5,0.1,1";
+        console.log("   Command to test:", testCommand);
+        
+        // Check expected vs actual
+        if (statusResult.response?.trim() === "IDLE") {
+            console.log("✅ Step 2.1 PASSED - Status shows IDLE");
+        } else {
+            console.log("⚠️  Step 2.1 WARNING - Status not IDLE:", statusResult.response);
+        }
+        
+        if (dataResult.response === "" || dataResult.response?.length === 0) {
+            console.log("✅ Step 2.2 PASSED - No initial data (as expected)");
+        } else {
+            console.log("⚠️  Step 2.2 WARNING - Initial data present:", dataResult.response?.length, "chars");
+        }
+        
+        console.log("🎉 Step 2 PASSED - CV Commands are responsive");
+        console.log("📋 Ready for Step 3: Parameter Setup");
+        return true;
+        
+    } catch (error) {
+        console.log("❌ Step 2 FAILED - CV Commands error:", error);
+        return false;
+    }
+}
+
+testCVCommands();
+
+--------------------------------------------------------------------------------------
+// Step 3: Clear previous measurement and start fresh
+console.log("🔍 Step 3: Clearing Previous Data");
+
+async function clearAndStartFresh() {
+    try {
+        console.log("🧹 3.1: Clearing previous measurement data...");
+        
+        // Try to clear/reset STM32 state
+        const clearCommands = [
+            "POTEn:CV:ABORt",  // Abort any running measurement
+            "SYSTem:CLEar",    // Clear system state (if supported)
+            "*RST"             // Reset device (if supported)
+        ];
+        
+        for (const cmd of clearCommands) {
+            try {
+                console.log(`   Trying: ${cmd}`);
+                const response = await fetch('/api/uart/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: cmd })
+                });
+                const result = await response.json();
+                console.log(`   Response: ${result.response || result.error}`);
+                
+                // Wait between commands
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            } catch (e) {
+                console.log(`   ${cmd} failed:`, e.message);
+            }
+        }
+        
+        // Wait a bit for STM32 to process
+        console.log("⏳ Waiting 3 seconds for STM32 to reset...");
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        // Check status after clearing
+        console.log("📊 3.2: Checking status after clear...");
+        const statusResponse = await fetch('/api/uart/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command: 'POTEn:CV:STATUS?' })
+        });
+        const statusResult = await statusResponse.json();
+        console.log("   Status after clear:", statusResult.response);
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Check data after clearing
+        console.log("📊 3.3: Checking data after clear...");
+        const dataResponse = await fetch('/api/uart/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command: 'POTEn:CV:DATA?' })
+        });
+        const dataResult = await dataResponse.json();
+        console.log("   Data after clear:", dataResult.response?.length || 0, "chars");
+        console.log("   Data content:", dataResult.response || "No data");
+        
+        // Analysis
+        if (statusResult.response?.trim() === "IDLE") {
+            console.log("✅ Step 3 PASSED - STM32 cleared and ready");
+            console.log("📋 Ready for Step 4: Fresh CV Start");
+            return true;
+        } else {
+            console.log("⚠️  Step 3 PARTIAL - Status still:", statusResult.response);
+            console.log("💡 Will proceed anyway - STM32 might auto-reset on new command");
+            console.log("📋 Ready for Step 4: Fresh CV Start");
+            return true;
+        }
+        
+    } catch (error) {
+        console.log("❌ Step 3 FAILED - Clear error:", error);
+        return false;
+    }
+}
+
+clearAndStartFresh();
+
+--------------------------------------------------------------------------------------
+
+// Step 4: Start Fresh CV Measurement
+console.log("🔍 Step 4: Fresh CV Start");
+
+async function startFreshCV() {
+    try {
+        console.log("🚀 4.1: Starting fresh CV measurement...");
+        
+        // Use different parameters to ensure fresh start
+        const cvCommand = "POTEn:CV:Start:ALL -0.3,0.3,-0.3,0.1,1";
+        console.log(`   Command: ${cvCommand}`);
+        console.log("   Parameters: -0.3V to +0.3V, start at -0.3V, 0.1V/s, 1 cycle");
+        
+        const startResponse = await fetch('/api/uart/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command: cvCommand })
+        });
+        const startResult = await startResponse.json();
+        console.log("   Start Response:", startResult.response || startResult.error);
+        
+        if (!startResult.response || !startResult.response.includes("OK")) {
+            console.log("❌ Step 4.1 FAILED - STM32 did not start CV");
+            return false;
+        }
+        
+        console.log("✅ Step 4.1 PASSED - CV started successfully");
+        
+        // Wait for STM32 to begin measurement
+        console.log("⏳ 4.2: Waiting 2 seconds for measurement to begin...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Check status during measurement
+        console.log("📊 4.3: Checking status during measurement...");
+        const statusResponse = await fetch('/api/uart/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command: 'POTEn:CV:STATUS?' })
+        });
+        const statusResult = await statusResponse.json();
+        console.log("   Status during measurement:", statusResult.response);
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Check early data
+        console.log("📊 4.4: Checking early data...");
+        const dataResponse = await fetch('/api/uart/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command: 'POTEn:CV:DATA?' })
+        });
+        const dataResult = await dataResponse.json();
+        const dataLength = dataResult.response?.length || 0;
+        console.log("   Early data length:", dataLength, "chars");
+        
+        if (dataLength > 50) {  // Substantial data
+            const lines = dataResult.response.split('\n').filter(line => line.trim());
+            console.log("   Data lines:", lines.length);
+            console.log("   First line:", lines[0] || "No lines");
+            console.log("   Second line:", lines[1] || "No second line");
+            console.log("   Last line:", lines[lines.length - 1] || "No last line");
+        } else {
+            console.log("   Data preview:", dataResult.response || "No data");
+        }
+        
+        // Analysis
+        if (statusResult.response?.includes("MEASURING")) {
+            console.log("🎉 Step 4 EXCELLENT - STM32 is actively measuring!");
+            console.log("📋 Ready for Step 5: Real-time Monitoring");
+            return "MEASURING";
+        } else if (statusResult.response?.includes("COMPLETE")) {
+            console.log("⚡ Step 4 FAST - Measurement completed quickly");
+            if (dataLength > 100) {
+                console.log("✅ And we have substantial data!");
+                console.log("📋 Ready for Step 6: Data Analysis");
+                return "COMPLETE_WITH_DATA";
+            } else {
+                console.log("⚠️  But data is still limited");
+                console.log("📋 This confirms the 5-point issue");
+                return "COMPLETE_LIMITED";
+            }
+        } else {
+            console.log("❓ Step 4 UNCLEAR - Unexpected status:", statusResult.response);
+            console.log("📋 Will proceed to monitoring anyway");
+            return "UNCLEAR";
+        }
+        
+    } catch (error) {
+        console.log("❌ Step 4 FAILED - Start error:", error);
+        return false;
+    }
+}
+
+startFreshCV();
+
+--------------------------------------------------------------------------------------
+
+// Step 5: Investigate Debug Message Issue
+console.log("🔍 Step 5: Debug Message Investigation");
+
+async function investigateDebugIssue() {
+    try {
+        console.log("🔬 5.1: Analyzing the debug message problem...");
+        console.log("📋 Observation: STM32 is returning debug messages instead of SCPI responses");
+        console.log("📋 This suggests firmware has debug output enabled on SCPI channel");
+        
+        // Try multiple commands to see pattern
+        const testCommands = ["*IDN?", "POTEn:CV:STATUS?", "POTEn:CV:DATA?"];
+        
+        for (let i = 0; i < testCommands.length; i++) {
+            const cmd = testCommands[i];
+            console.log(`🧪 5.${i+2}: Testing "${cmd}"...`);
+            
+            try {
+                const response = await fetch('/api/uart/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: cmd })
+                });
+                const result = await response.json();
+                const data = result.response || result.error || "";
+                
+                console.log(`   Response length: ${data.length} chars`);
+                console.log(`   Raw response: "${data}"`);
+                
+                // Analyze response type
+                if (data.includes("CDC:") || data.includes("Received") || data.includes("bytes:")) {
+                    console.log("   ❌ DEBUG MESSAGE detected");
+                } else if (data.length > 0 && !data.includes("CDC:")) {
+                    console.log("   ✅ CLEAN SCPI response");
+                } else {
+                    console.log("   ❓ EMPTY response");
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+            } catch (e) {
+                console.log(`   Error: ${e.message}`);
+            }
+        }
+        
+        console.log("\n🎯 DIAGNOSIS:");
+        console.log("The STM32 firmware has debug output enabled that interferes with SCPI communication.");
+        console.log("This explains why web interface gets mixed debug + SCPI data.");
+        
+        console.log("\n💡 SOLUTIONS:");
+        console.log("1. FIRMWARE: Disable debug output on SCPI channel");
+        console.log("2. FIRMWARE: Separate debug channel from SCPI channel"); 
+        console.log("3. SOFTWARE: Filter debug messages in web interface");
+        
+        console.log("\n📋 Let's try SOFTWARE solution first - filtering debug messages");
+        console.log("📋 Ready for Step 6: Debug Filtering Test");
+        
+        return true;
+        
+    } catch (error) {
+        console.log("❌ Step 5 FAILED - Investigation error:", error);
+        return false;
+    }
+}
+
+investigateDebugIssue();
+
+--------------------------------------------------------------------------------------
+
+// Step 6: Test Fixed SCPI Handler (Debug Message Filtering)
+console.log("🔍 Step 6: Testing Fixed SCPI Handler");
+
+async function testFixedHandler() {
+    try {
+        console.log("🔧 6.1: Testing debug message filtering...");
+        
+        // Test the same commands that returned debug messages before
+        const testCommands = [
+            "*IDN?",
+            "POTEn:CV:STATUS?", 
+            "POTEn:CV:DATA?"
+        ];
+        
+        for (let i = 0; i < testCommands.length; i++) {
+            const cmd = testCommands[i];
+            console.log(`🧪 6.${i+2}: Testing "${cmd}" with filtering...`);
+            
+            try {
+                const response = await fetch('/api/uart/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: cmd })
+                });
+                const result = await response.json();
+                const data = result.response || result.error || "";
+                
+                console.log(`   Response: "${data}"`);
+                console.log(`   Length: ${data.length} chars`);
+                
+                // Check if we got clean response
+                if (data.includes("🔤") || data.includes("CDC:") || data.includes("Processing char")) {
+                    console.log("   ❌ STILL HAS DEBUG MESSAGES");
+                } else if (data.length > 0) {
+                    console.log("   ✅ CLEAN RESPONSE - Debug filtering working!");
+                } else {
+                    console.log("   ❓ EMPTY RESPONSE");
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+            } catch (e) {
+                console.log(`   Error: ${e.message}`);
+            }
+        }
+        
+        console.log("\n📊 6.5: Testing fresh CV start with filtered handler...");
+        const cvCommand = "POTEn:CV:Start:ALL -0.3,0.3,-0.3,0.1,1";
+        console.log(`   Command: ${cvCommand}`);
+        
+        const startResponse = await fetch('/api/uart/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command: cvCommand })
+        });
+        const startResult = await startResponse.json();
+        console.log(`   Start Response: "${startResult.response}"`);
+        
+        if (startResult.response === "OK") {
+            console.log("   ✅ CV START CLEAN");
+            
+            // Wait and check status
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            const statusResponse = await fetch('/api/uart/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: 'POTEn:CV:STATUS?' })
+            });
+            const statusResult = await statusResponse.json();
+            console.log(`   Status After Start: "${statusResult.response}"`);
+            
+            if (statusResult.response && !statusResult.response.includes("🔤")) {
+                console.log("🎉 Step 6 SUCCESS - Debug filtering is working!");
+                console.log("📋 Ready for Step 7: Real CV Measurement Test");
+                return true;
+            }
+        }
+        
+        console.log("❌ Step 6 PARTIAL - Some issues remain");
+        return false;
+        
+    } catch (error) {
+        console.log("❌ Step 6 FAILED - Test error:", error);
+        return false;
+    }
+}
+
+testFixedHandler();
+
+--------------------------------------------------------------------------------------
+
+
+

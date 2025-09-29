@@ -9,10 +9,16 @@ import logging
 import pandas as pd
 
 # Configure matplotlib to use Agg backend (non-interactive)
-import matplotlib
-matplotlib.use('Agg')  # Set backend before importing pyplot
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+try:
+    import matplotlib
+    matplotlib.use('Agg')  # Set backend before importing pyplot
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+    MATPLOTLIB_AVAILABLE = True
+except ImportError:
+    # Mock matplotlib if not available (Raspberry Pi compatibility)
+    MATPLOTLIB_AVAILABLE = False
+    print("⚠️ Matplotlib not available - charts will be disabled")
 
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
@@ -163,6 +169,10 @@ class DataLoggingService:
     
     def _save_png_plot(self, df: pd.DataFrame, png_path: Path, parameters: Dict, session_id: str) -> bool:
         """Generate and save CV plot as PNG"""
+        if not MATPLOTLIB_AVAILABLE:
+            print("⚠️ Skipping PNG plot generation - matplotlib not available")
+            return False
+            
         try:
             # Create matplotlib figure
             plt.style.use('default')

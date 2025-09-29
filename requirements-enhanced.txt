@@ -1,0 +1,32 @@
+# H743 Potentiostat Research Platform Requirements
+# Core web framework
+flask>=2.3.0
+flask-cors>=6.0.0
+Werkzeug>=2.0.0
+Jinja2>=3.0.0
+
+# Serial communication
+pyserial>=3.5
+
+# Database
+sqlite3  # Built-in with Python
+
+# Data visualization and export
+matplotlib>=3.7.0
+numpy>=1.24.0
+pandas>=1.5.0
+
+# Development and testing
+requests>=2.28.0
+
+# Development utilities
+python-dotenv>=1.0.0
+
+# Optional: Enhanced plotting
+seaborn>=0.12.0
+
+# Optional: Data analysis
+pandas>=2.0.0
+
+# Optional: Image processing
+pillow>=10.0.0
