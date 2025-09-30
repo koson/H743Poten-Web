@@ -277,7 +277,7 @@ class ElectrochemicalApp:
         ttk.Entry(grid, textvariable=self.swv_sw_amp, width=10).grid(row=1, column=3, padx=5)
         
         ttk.Label(grid, text="SW Frequency (Hz):").grid(row=2, column=0, sticky="w", padx=5, pady=2)
-        self.swv_frequency = tk.StringVar(value="5")
+        self.swv_frequency = tk.StringVar(value="50")
         ttk.Entry(grid, textvariable=self.swv_frequency, width=10).grid(row=2, column=1, padx=5)
         
         # Current range
@@ -313,7 +313,7 @@ class ElectrochemicalApp:
         
         # Row 2: Times and Presets
         ttk.Label(precon_grid, text="Time(s):").grid(row=1, column=0, sticky="w", padx=2)
-        self.swv_precon_time = tk.StringVar(value="60")
+        self.swv_precon_time = tk.StringVar(value="10")
         self.precon_time_entry = ttk.Entry(precon_grid, textvariable=self.swv_precon_time, width=8, state="disabled")
         self.precon_time_entry.grid(row=1, column=1, padx=2)
         self.swv_precon_time.trace('w', self.update_precon_warning)
@@ -625,15 +625,15 @@ class ElectrochemicalApp:
                         'SWV_START_V': str(params.get('start_voltage', -0.5)),
                         'SWV_END_V': str(params.get('end_voltage', 0.5)),
                         'SWV_STEP_V': str(params.get('step_voltage', 0.005)),
-                        'SWV_AMPLITUDE': str(params.get('sw_amplitude', 0.05)),
-                        'SWV_FREQUENCY': str(params.get('sw_frequency', 5)),
-                        'SWV_ENABLE_PRECON': str(params.get('enable_precon', 0)),
+                        'SWV_AMP': str(params.get('sw_amplitude', 0.025)),
+                        'SWV_FREQ': str(params.get('sw_frequency', 50)),
+                        'SWV_ENABLE_PRECON': str(params.get('enable_precon', 1)),
                         'SWV_PRECON_POT1': str(params.get('precon_pot1', -1.9)),
                         'SWV_PRECON_POT2': str(params.get('precon_pot2', -0.5)),
-                        'SWV_PRECON_TIME': str(params.get('precon_time', 60)),
+                        'SWV_PRECON_TIME': str(params.get('precon_time', 10)),
                         'SWV_EQUIL_TIME': str(params.get('equil_time', 10))
                     }
-                    cmd = [sys.executable, "test_swv_simple.py"]
+                    cmd = [sys.executable, "test_swv_plot.py"]
                 else:
                     raise ValueError(f"Unknown method: {self.current_method}")
                 

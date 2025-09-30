@@ -38,8 +38,8 @@ def get_swv_parameters_from_env():
         'enable_precon': int(os.environ.get('SWV_ENABLE_PRECON', 1)),
         'precon_pot1': float(os.environ.get('SWV_PRECON_POT1', -1.9)),
         'precon_pot2': float(os.environ.get('SWV_PRECON_POT2', -0.5)),
-        'precon_time': int(os.environ.get('SWV_PRECON_TIME', 10)),
-        'equil_time': int(os.environ.get('SWV_EQUIL_TIME', 10))
+        'precon_time': int(float(os.environ.get('SWV_PRECON_TIME', 10))),
+        'equil_time': int(float(os.environ.get('SWV_EQUIL_TIME', 10)))
     }
     return params
 
@@ -66,6 +66,7 @@ class SWVPlotter:
         self.times = []
         self.forward_currents = []
         self.reverse_currents = []
+        self.step_numbers = []  # Add step numbers for x-axis
         
         # Initialize plot lines
         self.line1, = self.ax1.plot([], [], 'r-', linewidth=2, label='SWV Net Current')
@@ -80,8 +81,18 @@ class SWVPlotter:
     def update_plot(self):
         """Update the plot with new data"""
         if len(self.potentials) > 0:
-            # Update SWV net current plot
-            self.line1.set_data(self.potentials, self.net_currents)
+            # Sort data by potential for proper plotting
+            if len(self.potentials) > 1:
+                # Create pairs and sort by potential
+                data_pairs = list(zip(self.potentials, self.net_currents))
+                data_pairs.sort(key=lambda x: x[0])  # Sort by potential
+                sorted_potentials, sorted_currents = zip(*data_pairs)
+                
+                # Update SWV net current plot with sorted data
+                self.line1.set_data(sorted_potentials, sorted_currents)
+            else:
+                self.line1.set_data(self.potentials, self.net_currents)
+            
             self.ax1.relim()
             self.ax1.autoscale_view()
             
@@ -190,6 +201,7 @@ def run_swv_measurement():
                                     plotter.times.append(time_val)
                                     plotter.forward_currents.append(forward_current)
                                     plotter.reverse_currents.append(reverse_current)
+                                    plotter.step_numbers.append(point_num)  # Add step number
                                     
                                     data_count += 1
                                     
