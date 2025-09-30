@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=H743 Potentiostat
+Comment=Complete Electrochemical Methods Application (CV, DPV, SWV)
+Exec=/home/koson/H743Poten-Desktop/launch_h743_app.sh
+Icon=/home/koson/H743Poten-Desktop/app_icon.png
+Path=/home/koson/H743Poten-Desktop
+Terminal=true
+StartupNotify=true
+Categories=Science;Education;Chemistry;
+Keywords=potentiostat;electrochemistry;CV;DPV;SWV;H743;STM32;

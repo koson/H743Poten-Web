@@ -81,17 +81,8 @@ class SWVPlotter:
     def update_plot(self):
         """Update the plot with new data"""
         if len(self.potentials) > 0:
-            # Sort data by potential for proper plotting
-            if len(self.potentials) > 1:
-                # Create pairs and sort by potential
-                data_pairs = list(zip(self.potentials, self.net_currents))
-                data_pairs.sort(key=lambda x: x[0])  # Sort by potential
-                sorted_potentials, sorted_currents = zip(*data_pairs)
-                
-                # Update SWV net current plot with sorted data
-                self.line1.set_data(sorted_potentials, sorted_currents)
-            else:
-                self.line1.set_data(self.potentials, self.net_currents)
+            # Use data in the order received (no sorting) to show true measurement sequence
+            self.line1.set_data(self.potentials, self.net_currents)
             
             self.ax1.relim()
             self.ax1.autoscale_view()
