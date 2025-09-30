@@ -322,14 +322,14 @@ class CVPlotter:
     def add_data_point(self, voltage, current, timestamp):
         """เพิ่มจุดข้อมูลใหม่ พร้อมการกรองข้อมูลที่ผิดปกติ"""
         with self.data_lock:
-            # การกรองข้อมูลเพิ่มเติม
+            # การกรองข้อมูลเพิ่มเติม - ใช้ range ที่กว้างขึ้นสำหรับ CV
             if self.voltage_range:
-                # ตรวจสอบว่า voltage อยู่ในช่วงที่กำหนดหรือไม่ (เผื่อ 20%)
-                lower_limit = self.voltage_range[0] - 0.2
-                upper_limit = self.voltage_range[1] + 0.2
+                # เผื่อ margin 0.5V สำหรับ CV เพราะอาจมี overshoot ตอนเริ่มต้น
+                lower_limit = self.voltage_range[0] - 0.5
+                upper_limit = self.voltage_range[1] + 0.5
                 
                 if voltage < lower_limit or voltage > upper_limit:
-                    print(f"  --> Filtering out-of-range voltage: {voltage:.3f}V (range: {self.voltage_range[0]:.2f} to {self.voltage_range[1]:.2f}V)")
+                    print(f"  --> Filtering severely out-of-range voltage: {voltage:.3f}V (expected: {self.voltage_range[0]:.2f} to {self.voltage_range[1]:.2f}V)")
                     return
             
             # ถ้าเป็นข้อมูลจุดแรกๆ ให้เช็คการกระโดดของ voltage ที่ผิดปกติ
@@ -552,10 +552,15 @@ def get_cv_parameters_from_env():
         # Convert scan rate from mV/s to V/s
         scan_rate_v_s = scan_rate_mv_s / 1000.0
         
+        # Fix CV parameters mapping for correct voltage sweep
+        # For CV: start_v -> end_v, so upper = max(start_v, end_v), lower = min(start_v, end_v)
+        upper_v = max(start_v, end_v)
+        lower_v = min(start_v, end_v)
+        
         return {
-            'begin': end_v,      # Begin potential (V) 
-            'upper': start_v,    # Upper potential (V)
-            'lower': end_v,      # Lower potential (V)
+            'begin': start_v,    # Begin potential (V) - where to start
+            'upper': upper_v,    # Upper potential (V) - maximum voltage
+            'lower': lower_v,    # Lower potential (V) - minimum voltage  
             'rate': scan_rate_v_s,  # Scan rate in V/s
             'cycles': cycles,    # Number of cycles
             'step_size_mv': step_size,
