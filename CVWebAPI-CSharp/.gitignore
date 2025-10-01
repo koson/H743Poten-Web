@@ -1,0 +1,25 @@
+# .NET Build artifacts
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# Logs
+*.log
+nohup.out
+
+# Backups
+*.tar.gz
+*.backup
+
+# IDE
+.vs/
+.vscode/
+*.suo
+*.user
+*.sln.docstates
+
+# OS
+.DS_Store
+Thumbs.db
