@@ -71,6 +71,7 @@ public class STM32CVDataStreamer : IDisposable
     public bool IsConnected => _isConnected;
     public int DataPointCount => _allData.Count;
     public STM32CVScanConfig CurrentConfig => _config;
+    public string PortName => _portName;
 
     public STM32CVDataStreamer(string portName = "/dev/ttyACM0")
     {
@@ -376,6 +377,105 @@ public class STM32CVDataStreamer : IDisposable
         _allData.Clear();
         while (_dataBuffer.TryDequeue(out _)) { }
         Console.WriteLine("🧹 Data cleared");
+    }
+
+    /// <summary>
+    /// Change the serial port dynamically
+    /// </summary>
+    public void ChangePort(string newPort)
+    {
+        Console.WriteLine($"🔄 Changing port from {_portName} to {newPort}");
+        
+        // Stop current operations
+        if (_isRunning)
+        {
+            StopScan();
+        }
+        
+        // Disconnect from current port
+        Disconnect();
+        
+        // Update port name
+        _portName = newPort;
+        
+        // Try to connect to new port
+        try
+        {
+            Connect();
+            Console.WriteLine($"✅ Successfully connected to {newPort}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Failed to connect to {newPort}: {ex.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Get available serial ports for STM32 connection
+    /// </summary>
+    public static string[] GetAvailablePorts()
+    {
+        var ports = new List<string>();
+        
+        // Check for Linux/Pi USB serial devices
+        if (Directory.Exists("/dev"))
+        {
+            var usbPorts = Directory.GetFiles("/dev", "ttyACM*")
+                .Concat(Directory.GetFiles("/dev", "ttyUSB*"))
+                .Where(File.Exists)
+                .OrderBy(p => p)
+                .ToArray();
+            ports.AddRange(usbPorts);
+        }
+        
+        // Add Windows COM ports if on Windows
+        try
+        {
+            var comPorts = SerialPort.GetPortNames();
+            ports.AddRange(comPorts);
+        }
+        catch { }
+        
+        return ports.ToArray();
+    }
+    
+    /// <summary>
+    /// Auto-detect STM32 port by testing available ports
+    /// </summary>
+    public static string AutoDetectSTM32Port()
+    {
+        var availablePorts = GetAvailablePorts();
+        
+        foreach (var port in availablePorts)
+        {
+            try
+            {
+                Console.WriteLine($"🔍 Testing port: {port}");
+                using var testPort = new SerialPort(port, 115200);
+                testPort.Open();
+                testPort.Write("POTEn:ID?\n");
+                Thread.Sleep(100);
+                
+                if (testPort.BytesToRead > 0)
+                {
+                    var response = testPort.ReadExisting();
+                    if (response.Contains("H743") || response.Contains("POTEN"))
+                    {
+                        Console.WriteLine($"✅ Found STM32 at: {port}");
+                        return port;
+                    }
+                }
+                testPort.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Port {port} failed: {ex.Message}");
+            }
+        }
+        
+        // Fallback to first available port
+        return availablePorts.FirstOrDefault() ?? "/dev/ttyACM0";
     }
 
     public void Dispose()

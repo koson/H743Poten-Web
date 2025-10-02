@@ -22,8 +22,13 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
 
-// Add STM32CVDataStreamer as singleton service
-builder.Services.AddSingleton<STM32CVDataStreamer>();
+// Add STM32CVDataStreamer as singleton service  
+builder.Services.AddSingleton<STM32CVDataStreamer>(provider =>
+{
+    var autoDetectedPort = STM32CVDataStreamer.AutoDetectSTM32Port();
+    Console.WriteLine($"🔍 Auto-detected STM32 port: {autoDetectedPort}");
+    return new STM32CVDataStreamer(autoDetectedPort);
+});
 
 var app = builder.Build();
 
@@ -45,9 +50,46 @@ app.MapGet("/api/stm32/status", async (STM32CVDataStreamer streamer) =>
     await Task.CompletedTask; // Fix warning
     return new { 
         isConnected = streamer.IsConnected,
-        port = "/dev/ttyACM0",
+        port = streamer.PortName,
         timestamp = DateTime.UtcNow 
     };
+});
+
+// Get available ports
+app.MapGet("/api/stm32/ports", () => 
+{
+    var ports = STM32CVDataStreamer.GetAvailablePorts();
+    return new { 
+        availablePorts = ports,
+        timestamp = DateTime.UtcNow 
+    };
+});
+
+// Change port
+app.MapPost("/api/stm32/change-port", async (STM32CVDataStreamer streamer, JsonElement request) => 
+{
+    try
+    {
+        var newPort = request.GetProperty("port").GetString();
+        if (string.IsNullOrEmpty(newPort))
+            return Results.BadRequest("Port name is required");
+            
+        streamer.ChangePort(newPort);
+        return Results.Ok(new { 
+            success = true,
+            port = newPort,
+            isConnected = streamer.IsConnected,
+            timestamp = DateTime.UtcNow 
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { 
+            success = false, 
+            error = ex.Message,
+            timestamp = DateTime.UtcNow 
+        });
+    }
 });
 
 app.MapPost("/api/stm32/connect", async (STM32CVDataStreamer streamer) => 
