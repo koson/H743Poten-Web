@@ -90,3 +90,4 @@ nohup.out
 *.tar.gz
 # Specific large deployment files
 h743poten-deploy-*.tar.gz
+obj/

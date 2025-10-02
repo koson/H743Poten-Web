@@ -63,15 +63,26 @@ app.MapPost("/api/stm32/disconnect", (STM32CVDataStreamer streamer) =>
 });
 
 // CV Scan endpoints  
-app.MapPost("/api/cv/start", async (STM32CVScanConfig config, STM32CVDataStreamer streamer) =>
+app.MapPost("/api/cv/start", async (STM32CVDataStreamer streamer) =>
 {
+    // Use default config if none provided
+    var config = new STM32CVScanConfig 
+    {
+        startVoltage = -1.0,
+        endVoltage = 1.0,
+        scanRate = 100.0,
+        stepSize = 0.01,
+        cycles = 1,
+        useRealDMM = true
+    };
+    
     if (!streamer.IsConnected)
     {
         return Results.BadRequest(new { error = "STM32 not connected" });
     }
     
     var success = await streamer.StartScanAsync(config);
-    return success ? Results.Ok(new { message = "CV scan started" }) : Results.BadRequest(new { error = "Failed to start scan" });
+    return success ? Results.Ok(new { success = true, message = "CV scan started" }) : Results.BadRequest(new { error = "Failed to start scan" });
 });
 
 app.MapGet("/api/cv/data", (STM32CVDataStreamer streamer) =>
@@ -89,7 +100,16 @@ app.MapGet("/api/cv/all-data", (STM32CVDataStreamer streamer) =>
 app.MapPost("/api/cv/stop", (STM32CVDataStreamer streamer) =>
 {
     streamer.StopScan();
-    return new { message = "CV scan stopped", isRunning = streamer.IsRunning };
+    return new { success = true, message = "CV scan stopped", isRunning = streamer.IsRunning };
+});
+
+app.MapPost("/api/cv/clear", (STM32CVDataStreamer streamer) =>
+{
+    streamer.StopScan(); // Stop first
+    // Clear data if method exists
+    var data = streamer.GetAllData();
+    data.Clear(); // Clear the data collection
+    return new { success = true, message = "CV data cleared" };
 });
 
 app.MapGet("/api/cv/status", (STM32CVDataStreamer streamer) =>
@@ -113,8 +133,8 @@ app.MapGet("/api/system/metrics", () =>
         var memInfo = System.IO.File.ReadAllText("/proc/meminfo");
         var uptimeInfo = System.IO.File.ReadAllText("/proc/uptime");
         
-        // Parse memory info
-        var memLines = memInfo.Split('\n');
+        // Parse memory info more carefully
+        var memLines = memInfo.Split('\n', StringSplitOptions.RemoveEmptyEntries);
         var memTotalLine = memLines.FirstOrDefault(l => l.StartsWith("MemTotal:"));
         var memAvailableLine = memLines.FirstOrDefault(l => l.StartsWith("MemAvailable:"));
         
@@ -123,20 +143,28 @@ app.MapGet("/api/system/metrics", () =>
             throw new Exception("Cannot parse memory info");
         }
         
-        var memTotal = long.Parse(memTotalLine.Split()[1]) * 1024;
-        var memAvailable = long.Parse(memAvailableLine.Split()[1]) * 1024;
+        // Parse numbers more carefully
+        var memTotalParts = memTotalLine.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        var memAvailableParts = memAvailableLine.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        
+        var memTotal = long.Parse(memTotalParts[1]) * 1024; // Convert KB to bytes
+        var memAvailable = long.Parse(memAvailableParts[1]) * 1024;
         var memUsed = memTotal - memAvailable;
         var memPercent = (double)memUsed / memTotal * 100;
         
-        // Parse uptime
-        var uptime = double.Parse(uptimeInfo.Split()[0]);
+        // Parse uptime more carefully
+        var uptimeParts = uptimeInfo.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        var uptime = double.Parse(uptimeParts[0]);
         
         // Get temperature (if available)
         var temp = 45.0; // Default
         try 
         {
-            var tempStr = System.IO.File.ReadAllText("/sys/class/thermal/thermal_zone0/temp");
-            temp = double.Parse(tempStr) / 1000.0;
+            var tempStr = System.IO.File.ReadAllText("/sys/class/thermal/thermal_zone0/temp").Trim();
+            if (!string.IsNullOrEmpty(tempStr))
+            {
+                temp = double.Parse(tempStr) / 1000.0;
+            }
         }
         catch { /* Use default */ }
         
@@ -231,12 +259,12 @@ app.MapGet("/api/system/metrics", () =>
     }
 });
 
-// Default route
-app.MapGet("/", () => "STM32 CV Web API is running! Visit /swagger for API documentation.");
+// Default route - redirect to index.html
+app.MapGet("/", () => Results.Redirect("/index.html"));
 
 // Start server
 var port = args.Length > 0 && int.TryParse(args[0], out var p) ? p : 5000;
-Console.WriteLine($"�� STM32 CV Web API starting on http://0.0.0.0:{port}");
+Console.WriteLine($"🚀 STM32 CV Web API starting on http://0.0.0.0:{port}");
 Console.WriteLine($"📊 CV functionality with STM32 hardware");
 Console.WriteLine($"🔗 API docs available at http://localhost:{port}");
 

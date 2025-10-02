@@ -15,8 +15,13 @@ import os
 import sys
 
 # เพิ่มไลบรารีที่จำเป็น
-import tkinter as tk
-from tkinter import ttk, messagebox
+try:
+    import tkinter as tk
+    from tkinter import ttk, messagebox
+    HAS_TKINTER = True
+except ImportError:
+    HAS_TKINTER = False
+    print("Warning: tkinter not available. Using command-line interface instead.")
 
 # เพิ่ม data management system
 from file_utils import ensure_directory_exists, get_data_root_folder
@@ -77,15 +82,15 @@ def debug_auto_range(voltage, current_ua, tia_gain_index, dac1_counts=None):
         rgain = tia_gains[tia_gain_index]
         range_str = current_ranges[tia_gain_index]
         
-        #debug_msg = f"AUTO-RANGE DEBUG: V={voltage:.4f}, Range={tia_gain_index}, RGain={rgain:.0f}, I={current_ua:.2f} µA"
+        debug_msg = f"AUTO-RANGE DEBUG: V={voltage:.4f}, Range={tia_gain_index}, RGain={rgain:.0f}, I={current_ua:.2f} µA"
         if dac1_counts is not None:
-            debug_msg += f", DAC1={dac1_counts}"
-        debug_msg += f" ({range_str})"
+            debug_msg = debug_msg + f", DAC1={dac1_counts}"
+        debug_msg = debug_msg + f" ({range_str})"
         
         print(debug_msg)
         return debug_msg
     else:
-        #print(f"AUTO-RANGE DEBUG: V={voltage:.4f}, Range={tia_gain_index} (UNKNOWN), I={current_ua:.2f} µA")
+        print(f"AUTO-RANGE DEBUG: V={voltage:.4f}, Range={tia_gain_index} (UNKNOWN), I={current_ua:.2f} µA")
         return None
 
 # แสดงข้อมูลโฟลเดอร์ที่จะใช้เก็บข้อมูล
@@ -494,7 +499,7 @@ def test_cv_scan():
     ser = None
     try:
         # เชื่อมต่อ STM32
-        ser = serial.Serial('COM11', 115200, timeout=2)
+        ser = serial.Serial('COM10', 115200, timeout=2)
         time.sleep(1)
         
         print('=== CV (Cyclic Voltammetry) Test with Real-time Plotting ===')
@@ -1299,6 +1304,9 @@ def extract_cv_data_from_csv(csv_file):
 # เพิ่มฟังก์ชันสำหรับ dialog เลือก scan rate และจำนวนรอบ
 def show_scan_rate_selection_dialog():
     """แสดง dialog เลือก scan rate และจำนวนรอบสแกน"""
+    if not HAS_TKINTER:
+        return show_scan_rate_selection_cli()
+        
     # สร้างฟังก์ชันสำหรับตรวจสอบความถูกต้องของจำนวนรอบ
     def validate_cycles(value):
         if value == "":
@@ -1402,6 +1410,55 @@ def show_scan_rate_selection_dialog():
     
     # ส่งคืนผลลัพธ์
     return result[0]
+
+def show_scan_rate_selection_cli():
+    """Command-line interface สำหรับเลือก scan rate และจำนวนรอบ"""
+    print("\n=== CV Scan Rate Selection (CLI Mode) ===")
+    print("Available scan rates: 10, 20, 50, 100, 200, 400 mV/s")
+    print("Example input: '100:3,200:2' (100mV/s with 3 cycles, 200mV/s with 2 cycles)")
+    print("Or just press Enter for default: 100mV/s with 3 cycles")
+    
+    try:
+        user_input = input("Enter scan rates and cycles (rate:cycles,rate:cycles...): ").strip()
+        
+        if not user_input:
+            # ค่าเริ่มต้น
+            return [(100, 3)]
+        
+        selected_configs = []
+        for part in user_input.split(','):
+            if ':' in part:
+                rate_str, cycles_str = part.split(':')
+                rate = int(rate_str.strip())
+                cycles = int(cycles_str.strip())
+                
+                # ตรวจสอบความถูกต้อง
+                if rate in [10, 20, 50, 100, 200, 400] and 1 <= cycles <= 10:
+                    selected_configs.append((rate, cycles))
+                else:
+                    print(f"Warning: Invalid rate/cycles {rate}:{cycles}, skipping...")
+            else:
+                # ถ้าไม่มี : ให้ใช้ 3 cycles เป็นค่าเริ่มต้น
+                rate = int(part.strip())
+                if rate in [10, 20, 50, 100, 200, 400]:
+                    selected_configs.append((rate, 3))
+                else:
+                    print(f"Warning: Invalid rate {rate}, skipping...")
+        
+        if not selected_configs:
+            print("No valid configurations. Using default: 100mV/s with 3 cycles")
+            return [(100, 3)]
+        
+        print(f"Selected configurations: {selected_configs}")
+        confirm = input("Proceed with these settings? (y/n): ").strip().lower()
+        if confirm in ['y', 'yes']:
+            return selected_configs
+        else:
+            return []
+            
+    except (ValueError, KeyboardInterrupt):
+        print("Invalid input or cancelled. Using default: 100mV/s with 3 cycles")
+        return [(100, 3)]
 
 # เพิ่มฟังก์ชันทดสอบ CV แบบ multi scan rate
 def test_cv_multi_scan_rate():

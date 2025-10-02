@@ -1,17 +1,24 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using System.Text.Json;
 using PureDotNetScpiServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
         policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
     });
+});
+
+// Configure JSON serialization
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.SerializerOptions.WriteIndented = true;
 });
 
 // Register STM32 CV Data Streamer as singleton
@@ -61,11 +68,42 @@ builder.Services.AddSingleton<STM32CVDataStreamer>(sp =>
 
 var app = builder.Build();
 
+// Configure middleware
 app.UseCors();
-app.UseStaticFiles();
 
-app.MapGet("/", () => Results.Redirect("/index.html"));
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
 
+// Serve static files (for web interface)
+app.UseFileServer();
+
+// Default route
+app.MapGet("/", () => Results.Text(@"
+🔬 STM32 CV Web API Server
+
+Available endpoints:
+  GET  /api/cv/status     - Get CV scan status
+  POST /api/cv/start      - Start CV scan  
+  POST /api/cv/stop       - Stop CV scan
+  GET  /api/cv/data       - Get new data points
+  GET  /api/cv/data/all   - Get all data points
+  POST /api/cv/clear      - Clear all data
+  GET  /api/stm32/status  - Get STM32 connection status
+
+Example CV start request:
+{
+  ""beginVoltage"": -1.0,
+  ""upperVoltage"": 1.0,
+  ""lowerVoltage"": -1.0,
+  ""scanRate"": 0.05,
+  ""cycles"": 3,
+  ""enableAutoRangeDebug"": true
+}
+", "text/plain"));
+
+// CV API endpoints
 app.MapGet("/api/cv/status", (STM32CVDataStreamer streamer) =>
 {
     return Results.Json(new
@@ -159,7 +197,7 @@ app.MapGet("/health", () => Results.Json(new {
 // Start server
 var port = args.Length > 0 && int.TryParse(args[0], out var p) ? p : 5000;
 Console.WriteLine($"🚀 STM32 CV Web API starting on http://0.0.0.0:{port}");
-Console.WriteLine($"📊 CV functionality with STM32 hardware");
+Console.WriteLine($"📊 CV functionality ported from Python test_cv_final.py");
 Console.WriteLine($"🔗 API docs available at http://localhost:{port}");
 
 app.Run($"http://0.0.0.0:{port}");
