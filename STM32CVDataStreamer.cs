@@ -41,7 +41,7 @@ public class STM32CVScanConfig
 /// </summary>
 public class STM32CVDataStreamer : IDisposable
 {
-    private readonly string _portName;
+    private string _portName;
     private SerialPort? _serialPort;
     private readonly ConcurrentQueue<STM32CVDataPoint> _dataBuffer = new();
     private readonly List<STM32CVDataPoint> _allData = new();
@@ -76,6 +76,54 @@ public class STM32CVDataStreamer : IDisposable
     public STM32CVDataStreamer(string portName = "/dev/ttyACM0")
     {
         _portName = portName;
+    }
+
+    /// <summary>
+    /// Connect to STM32 device (synchronous)
+    /// </summary>
+    public void Connect()
+    {
+        try
+        {
+            _serialPort?.Close();
+            _serialPort?.Dispose();
+            
+            _serialPort = new SerialPort(_portName, 115200, Parity.None, 8, StopBits.One)
+            {
+                ReadTimeout = 5000,
+                WriteTimeout = 5000,
+                NewLine = "\n"
+            };
+
+            _serialPort.Open();
+            _isConnected = true;
+            Console.WriteLine($"✅ Connected to STM32 via {_portName}");
+        }
+        catch (Exception ex)
+        {
+            _isConnected = false;
+            Console.WriteLine($"❌ Failed to connect to {_portName}: {ex.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Disconnect from STM32 device
+    /// </summary>
+    public void Disconnect()
+    {
+        try
+        {
+            _isConnected = false;
+            _serialPort?.Close();
+            _serialPort?.Dispose();
+            _serialPort = null;
+            Console.WriteLine($"🔌 Disconnected from {_portName}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"⚠️ Error during disconnect: {ex.Message}");
+        }
     }
 
     /// <summary>

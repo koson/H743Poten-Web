@@ -5,7 +5,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+try 
+{
+    builder.Services.AddSwaggerGen();
+}
+catch 
+{
+    Console.WriteLine("⚠️ Swagger not available, continuing without it");
+}
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -35,8 +42,15 @@ var app = builder.Build();
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    try 
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+    catch 
+    {
+        Console.WriteLine("⚠️ Swagger UI not available");
+    }
 }
 
 app.UseCors();
