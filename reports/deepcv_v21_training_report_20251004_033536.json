@@ -1,0 +1,36 @@
+{
+  "model_info": {
+    "version": "2.1",
+    "type": "Human-AI Collaborative",
+    "algorithm": "Random Forest + Gradient Boosting"
+  },
+  "training_data": {
+    "total_samples": 7,
+    "train_samples": 5,
+    "test_samples": 2,
+    "feature_count": 15,
+    "valid_peak_ratio": 1.0
+  },
+  "performance": {
+    "test_accuracy": 1.0,
+    "training_date": "2025-10-04T03:35:36.011288"
+  },
+  "features": [
+    "voltage",
+    "current",
+    "magnitude",
+    "voltage_sq",
+    "current_sq",
+    "v_i_interaction",
+    "is_oxidation",
+    "is_reduction",
+    "concentration",
+    "log_concentration",
+    "current_density",
+    "v5_confidence",
+    "high_confidence",
+    "voltage_decay",
+    "current_saturation"
+  ],
+  "training_sessions": 1
+}

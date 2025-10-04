@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Research/dotnet-python-web/CVPeakValidation.Api/wwwroot/index.html",
+      "PackagePath": "staticwebassets/index.html"
+    },
+    {
+      "Id": "/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Research/dotnet-python-web/CVPeakValidation.Api/wwwroot/test.html",
+      "PackagePath": "staticwebassets/test.html"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.CVPeakValidation.Api.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.CVPeakValidation.Api.props",
+      "PackagePath": "build\\CVPeakValidation.Api.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.CVPeakValidation.Api.props",
+      "PackagePath": "buildMultiTargeting\\CVPeakValidation.Api.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.CVPeakValidation.Api.props",
+      "PackagePath": "buildTransitive\\CVPeakValidation.Api.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

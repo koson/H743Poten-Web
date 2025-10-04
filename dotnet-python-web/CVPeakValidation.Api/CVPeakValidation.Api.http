@@ -1,0 +1,98 @@
+### CV Peak Validation API Test File
+@CVPeakValidation.Api_HostAddress = http://localhost:5017
+
+### 1. Health Check - Root endpoint
+GET {{CVPeakValidation.Api_HostAddress}}/
+Accept: application/json
+
+### 2. System Health Check
+GET {{CVPeakValidation.Api_HostAddress}}/api/health
+Accept: application/json
+
+### 3. Python Service Health Check
+GET {{CVPeakValidation.Api_HostAddress}}/api/health/python-service
+Accept: application/json
+
+### 4. Swagger Documentation
+GET {{CVPeakValidation.Api_HostAddress}}/swagger/index.html
+Accept: text/html
+
+### 5. Upload CV File (multipart/form-data)
+POST {{CVPeakValidation.Api_HostAddress}}/api/cvanalysis/upload
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="test_cv_data.csv"
+Content-Type: text/csv
+
+Voltage,Current
+-1.0,0.001
+-0.8,0.002
+-0.6,0.003
+-0.4,0.005
+-0.2,0.008
+0.0,0.012
+0.2,0.015
+0.4,0.020
+0.6,0.018
+0.8,0.010
+1.0,0.005
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="compoundName"
+
+Test Compound
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="electrolyte"
+
+KCl
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="scanRate"
+
+0.1
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### 6. Analyze CV File (replace fileId with actual ID from upload response)
+POST {{CVPeakValidation.Api_HostAddress}}/api/cvanalysis/analyze/1
+Content-Type: application/json
+
+{
+  "height": 0.02,
+  "distance": 10.0,
+  "prominence": 0.01,
+  "width": 5.0,
+  "windowSize": 10,
+  "detectionMethod": "enhanced_v6"
+}
+
+### 7. Create Validation Session
+POST {{CVPeakValidation.Api_HostAddress}}/api/cvanalysis/sessions
+Content-Type: application/json
+
+{
+  "fileId": 1,
+  "sessionName": "Test Session",
+  "validatorName": "Test User"
+}
+
+### 8. Validate Peaks
+POST {{CVPeakValidation.Api_HostAddress}}/api/cvanalysis/validate
+Content-Type: application/json
+
+{
+  "sessionId": 1,
+  "peakValidations": [
+    {
+      "peakId": 1,
+      "status": "Accepted",
+      "comments": "Good peak",
+      "correctedPeakType": "oxidation",
+      "validationConfidence": 0.95
+    }
+  ]
+}
+
+### 9. Export Training Data
+GET {{CVPeakValidation.Api_HostAddress}}/api/cvanalysis/export-training-data
+Accept: application/json
+
+###

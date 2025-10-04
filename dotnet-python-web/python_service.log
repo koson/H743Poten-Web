@@ -1,0 +1,598 @@
+nohup: ignoring input
+🐍 Starting Python CV Analysis Service
+📊 Compatible with .NET CVPeakValidation.Api
+🚀 Access at: http://localhost:5003
+🔗 Also available at: http://127.0.0.1:5003
+ * Serving Flask app 'python_cv_service'
+ * Debug mode: on
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5003
+ * Running on http://172.21.55.201:5003
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:36] "GET /health HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:55] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:56] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.0011, -0.0011, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, -0.2112, ...
+INFO:__main__:Analyzing CV data: 219 points
+INFO:__main__:Voltage scan range: -0.390V to 0.697V (total: 1.087V)
+INFO:__main__:Peak detection zone: -0.290V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.290-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:57] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:57] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:58] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:58] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:58] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:58] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:58] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:59] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:59] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:59] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:34:59] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.0011, -0.0011, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, -0.2112, ...
+INFO:__main__:Analyzing CV data: 219 points
+INFO:__main__:Voltage scan range: -0.390V to 0.697V (total: 1.087V)
+INFO:__main__:Peak detection zone: -0.290V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.290-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:35:00] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:35:00] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:35:01] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:35:01] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:35:02] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:35:02] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-1.2483, -0.0011, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, -0.2112, ...
+INFO:__main__:Analyzing CV data: 219 points
+INFO:__main__:Voltage scan range: -1.248V to 0.697V (total: 1.945V)
+INFO:__main__:Peak detection zone: -1.148V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-1.148-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:42] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:43] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:44] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:44] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:44] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:45] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:45] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:45] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:46] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.0011, -0.0011, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, -0.2112, ...
+INFO:__main__:Analyzing CV data: 219 points
+INFO:__main__:Voltage scan range: -0.390V to 0.697V (total: 1.087V)
+INFO:__main__:Peak detection zone: -0.290V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.290-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:46] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:46] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:46] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:46] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:46] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:47] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.3805, -0.3903, -0.4006, -0.3903, -0.3805, -0.3708, -0.3604, -0.3507, -0.3409, -0.3306, -0.3208, -0.3105, -0.3007, -0.291, -0.2806, -0.2709, -0.2606, -0.2508, -0.2411, -0.2307, -0.221, ...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.401V to 0.697V (total: 1.097V)
+INFO:__main__:Peak detection zone: -0.301V to 0.597V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 0
+INFO:__main__:  Raw reduction peaks found: 0
+INFO:__main__:  Filtered peaks (ferrocyanide range): 0
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.301-0.597V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 0 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:47] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.40001, -0.390003, -0.379995, -0.369987, -0.359979, -0.349972, -0.339964, -0.329956, -0.319948, -0.30994, -0.299933, -0.289925, -0.279917, -0.269909, -0.259902, -0.249894, -0.239886, -0...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.400V to 0.701V (total: 1.101V)
+INFO:__main__:Peak detection zone: -0.300V to 0.601V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 1
+INFO:__main__:  Raw reduction peaks found: 1
+INFO:__main__:  Filtered peaks (ferrocyanide range): 2
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.300-0.601V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 2 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:43:58] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.40001, -0.390003, -0.379995, -0.369987, -0.359979, -0.349972, -0.339964, -0.329956, -0.319948, -0.30994, -0.299933, -0.289925, -0.279917, -0.269909, -0.259902, -0.249894, -0.239886, -0...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.400V to 0.701V (total: 1.101V)
+INFO:__main__:Peak detection zone: -0.300V to 0.601V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 1
+INFO:__main__:  Raw reduction peaks found: 1
+INFO:__main__:  Filtered peaks (ferrocyanide range): 2
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.300-0.601V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 2 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:44:00] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.40001, -0.390003, -0.379995, -0.369987, -0.359979, -0.349972, -0.339964, -0.329956, -0.319948, -0.30994, -0.299933, -0.289925, -0.279917, -0.269909, -0.259902, -0.249894, -0.239886, -0...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.400V to 0.701V (total: 1.101V)
+INFO:__main__:Peak detection zone: -0.300V to 0.601V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 1
+INFO:__main__:  Raw reduction peaks found: 1
+INFO:__main__:  Filtered peaks (ferrocyanide range): 2
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.300-0.601V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 2 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:44:01] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.40001, -0.390003, -0.379995, -0.369987, -0.359979, -0.349972, -0.339964, -0.329956, -0.319948, -0.30994, -0.299933, -0.289925, -0.279917, -0.269909, -0.259902, -0.249894, -0.239886, -0...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.400V to 0.701V (total: 1.101V)
+INFO:__main__:Peak detection zone: -0.300V to 0.601V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 1
+INFO:__main__:  Raw reduction peaks found: 1
+INFO:__main__:  Filtered peaks (ferrocyanide range): 2
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.300-0.601V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 2 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:44:02] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.40001, -0.390003, -0.379995, -0.369987, -0.359979, -0.349972, -0.339964, -0.329956, -0.319948, -0.30994, -0.299933, -0.289925, -0.279917, -0.269909, -0.259902, -0.249894, -0.239886, -0...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.400V to 0.701V (total: 1.101V)
+INFO:__main__:Peak detection zone: -0.300V to 0.601V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 1
+INFO:__main__:  Raw reduction peaks found: 1
+INFO:__main__:  Filtered peaks (ferrocyanide range): 2
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.300-0.601V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 2 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:44:03] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.40001, -0.390003, -0.379995, -0.369987, -0.359979, -0.349972, -0.339964, -0.329956, -0.319948, -0.30994, -0.299933, -0.289925, -0.279917, -0.269909, -0.259902, -0.249894, -0.239886, -0...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.400V to 0.701V (total: 1.101V)
+INFO:__main__:Peak detection zone: -0.300V to 0.601V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 1
+INFO:__main__:  Raw reduction peaks found: 1
+INFO:__main__:  Filtered peaks (ferrocyanide range): 2
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.300-0.601V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 2 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:44:03] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.40001, -0.390003, -0.379995, -0.369987, -0.359979, -0.349972, -0.339964, -0.329956, -0.319948, -0.30994, -0.299933, -0.289925, -0.279917, -0.269909, -0.259902, -0.249894, -0.239886, -0...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.400V to 0.701V (total: 1.101V)
+INFO:__main__:Peak detection zone: -0.300V to 0.601V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 1
+INFO:__main__:  Raw reduction peaks found: 1
+INFO:__main__:  Filtered peaks (ferrocyanide range): 2
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.300-0.601V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 2 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:44:03] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.40001, -0.390003, -0.379995, -0.369987, -0.359979, -0.349972, -0.339964, -0.329956, -0.319948, -0.30994, -0.299933, -0.289925, -0.279917, -0.269909, -0.259902, -0.249894, -0.239886, -0...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.400V to 0.701V (total: 1.101V)
+INFO:__main__:Peak detection zone: -0.300V to 0.601V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 1
+INFO:__main__:  Raw reduction peaks found: 1
+INFO:__main__:  Filtered peaks (ferrocyanide range): 2
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.300-0.601V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 2 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:44:04] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.40001, -0.390003, -0.379995, -0.369987, -0.359979, -0.349972, -0.339964, -0.329956, -0.319948, -0.30994, -0.299933, -0.289925, -0.279917, -0.269909, -0.259902, -0.249894, -0.239886, -0...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.400V to 0.701V (total: 1.101V)
+INFO:__main__:Peak detection zone: -0.300V to 0.601V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 1
+INFO:__main__:  Raw reduction peaks found: 1
+INFO:__main__:  Filtered peaks (ferrocyanide range): 2
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.300-0.601V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 2 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:44:12] "POST /api/analyze HTTP/1.1" 200 -
+INFO:__main__:Received data keys: ['voltage', 'current', 'method', 'parameters']
+INFO:__main__:Data content preview: {'voltage': [-0.40001, -0.390003, -0.379995, -0.369987, -0.359979, -0.349972, -0.339964, -0.329956, -0.319948, -0.30994, -0.299933, -0.289925, -0.279917, -0.269909, -0.259902, -0.249894, -0.239886, -0...
+INFO:__main__:Analyzing CV data: 220 points
+INFO:__main__:Voltage scan range: -0.400V to 0.701V (total: 1.101V)
+INFO:__main__:Peak detection zone: -0.300V to 0.601V (margin: 0.100V)
+INFO:__main__:Peak detection summary:
+INFO:__main__:  Raw oxidation peaks found: 1
+INFO:__main__:  Raw reduction peaks found: 1
+INFO:__main__:  Filtered peaks (ferrocyanide range): 2
+INFO:__main__:  Detection parameters: height=0.1, distance=10, prominence=0.05
+INFO:__main__:  Flexible filtering: Peak zone=[-0.300-0.601V], Edge margin=0.100V
+INFO:__main__:Analysis complete: 2 peaks detected
+INFO:werkzeug:127.0.0.1 - - [05/Oct/2025 03:44:28] "POST /api/analyze HTTP/1.1" 200 -

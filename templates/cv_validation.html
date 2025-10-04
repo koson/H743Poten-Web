@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Peak Validation Interface</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        .control-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .analysis-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .info-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .peak-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .peak-item {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .peak-item:hover {
+            background-color: #f8f9fa;
+            border-color: #007bff;
+        }
+        
+        .peak-item.selected {
+            background-color: #e7f3ff;
+            border-color: #007bff;
+        }
+        
+        .peak-item.validated {
+            background-color: #d1edcc;
+            border-color: #28a745;
+        }
+        
+        .peak-item.rejected {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .peak-type-oxidation {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .peak-type-reduction {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .btn-group-custom {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .status-badge {
+            font-size: 0.75em;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        .cv-plot-container {
+            width: 100%;
+            height: 500px;
+            position: relative;
+        }
+        
+        .cv-plot-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .file-selector {
+            margin-bottom: 15px;
+        }
+        
+        .parameter-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .summary-card {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .summary-card .value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .summary-card .label {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-4">
+                    <i class="fas fa-chart-line text-primary"></i>
+                    Peak Analysis: DeepCV
+                </h1>
+                <p class="lead text-muted">Interactive CV Peak Validation for Deep Learning Training</p>
+            </div>
+        </div>
+        
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="fileSelect" class="form-label"><strong>Select File:</strong></label>
+                    <div class="input-group">
+                        <select id="fileSelect" class="form-select">
+                            <option value="">Loading files...</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" type="button" id="browseBtn">
+                            <i class="fas fa-folder-open"></i> Browse
+                        </button>
+                    </div>
+                    <input type="file" id="fileInput" accept=".csv" style="display: none;">
+                </div>
+                <div class="col-md-8">
+                    <div class="parameter-controls">
+                        <div>
+                            <label for="thresholdInput" class="form-label">r² threshold:</label>
+                            <input type="number" id="thresholdInput" class="form-control" value="0.85" step="0.01" min="0" max="1">
+                        </div>
+                        <div>
+                            <label for="slopeInput" class="form-label">Max |slope|:</label>
+                            <input type="number" id="slopeInput" class="form-control" value="10" step="1" min="1">
+                        </div>
+                        <div>
+                            <label for="windowInput" class="form-label">Window size:</label>
+                            <input type="number" id="windowInput" class="form-control" value="9" step="1" min="3">
+                        </div>
+                        <div class="d-flex align-items-end">
+                            <button id="recalculateBtn" class="btn btn-primary">
+                                <i class="fas fa-sync-alt"></i> Recalculate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analysis Container -->
+        <div class="analysis-container">
+            <!-- Chart Container -->
+            <div class="chart-container">
+                <div id="loadingSpinner" class="loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Analyzing CV data...</p>
+                </div>
+                
+                <div id="chartContent" style="display: none;">
+                    <div class="cv-plot-container">
+                        <img id="cvPlot" src="" alt="CV Plot">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Info Panel -->
+            <div class="info-panel">
+                <!-- Summary Stats -->
+                <div class="summary-stats">
+                    <div class="summary-card">
+                        <div class="value" id="methodValue">DeepCV</div>
+                        <div class="label">Method</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="value" id="peaksDetectedValue">-</div>
+                        <div class="label">Peaks Detected</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="value" id="peakHeightsValue">-</div>
+                        <div class="label">Peak Heights</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="value" id="dataPointsValue">-</div>
+                        <div class="label">Data Points</div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col">
+                        <span class="badge bg-success">Available</span>
+                        <strong>Baseline Status</strong>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col">
+                        <span class="badge bg-primary">Complete</span>
+                        <strong>Analysis</strong>
+                    </div>
+                </div>
+                
+                <!-- Peak Information -->
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>Peak Information</h5>
+                        <span class="badge bg-success">Active Method</span>
+                    </div>
+                    
+                    <div id="peakList" class="peak-list">
+                        <!-- Peaks will be populated here -->
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button id="validateSelectedBtn" class="btn btn-success">
+                            <i class="fas fa-check"></i> Validate Selected
+                        </button>
+                        <button id="rejectSelectedBtn" class="btn btn-danger">
+                            <i class="fas fa-times"></i> Reject Selected
+                        </button>
+                        <button id="selectAllBtn" class="btn btn-outline-primary">
+                            <i class="fas fa-check-double"></i> Select All
+                        </button>
+                        <button id="clearSelectionBtn" class="btn btn-outline-secondary">
+                            <i class="fas fa-eraser"></i> Clear Selection
+                        </button>
+                        <button id="exportPeakDataBtn" class="btn btn-info">
+                            <i class="fas fa-download"></i> Export Peak Data
+                        </button>
+                        <button id="exportBaselineBtn" class="btn btn-outline-info">
+                            <i class="fas fa-download"></i> Export Baseline
+                        </button>
+                        <button id="recalculateBaselineBtn" class="btn btn-outline-warning">
+                            <i class="fas fa-calculator"></i> Recalculate Baseline
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toastMessage" class="toast" role="alert">
+            <div class="toast-header">
+                <strong class="me-auto">CV Peak Validation</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                <!-- Message will be inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        class CVPeakValidator {
+            constructor() {
+                this.selectedPeaks = new Set();
+                this.currentData = null;
+                this.currentSession = null;
+                this.peakValidations = {};
+                
+                this.initializeElements();
+                this.loadAvailableFiles();
+                this.setupEventListeners();
+            }
+            
+            initializeElements() {
+                this.fileSelect = document.getElementById('fileSelect');
+                this.recalculateBtn = document.getElementById('recalculateBtn');
+                this.cvPlot = document.getElementById('cvPlot');
+                this.peakList = document.getElementById('peakList');
+                this.loadingSpinner = document.getElementById('loadingSpinner');
+                this.chartContent = document.getElementById('chartContent');
+                
+                // File input elements
+                this.browseBtn = document.getElementById('browseBtn');
+                this.fileInput = document.getElementById('fileInput');
+                
+                // Action buttons
+                this.validateSelectedBtn = document.getElementById('validateSelectedBtn');
+                this.rejectSelectedBtn = document.getElementById('rejectSelectedBtn');
+                this.selectAllBtn = document.getElementById('selectAllBtn');
+                this.clearSelectionBtn = document.getElementById('clearSelectionBtn');
+                this.exportPeakDataBtn = document.getElementById('exportPeakDataBtn');
+            }
+            
+            setupEventListeners() {
+                this.fileSelect.addEventListener('change', () => this.analyzeSelectedFile());
+                this.recalculateBtn.addEventListener('change', () => this.analyzeSelectedFile());
+                
+                // Browse button functionality
+                this.browseBtn.addEventListener('click', () => {
+                    this.fileInput.click();
+                });
+                
+                this.fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
+                
+                // Plot image error handling
+                this.cvPlot.addEventListener('load', () => {
+                    console.log('Plot image loaded successfully');
+                });
+                
+                this.cvPlot.addEventListener('error', () => {
+                    console.error('Failed to load plot image');
+                    this.showToast('Failed to load plot image', 'danger');
+                });
+                
+                this.validateSelectedBtn.addEventListener('click', () => this.validateSelected());
+                this.rejectSelectedBtn.addEventListener('click', () => this.rejectSelected());
+                this.selectAllBtn.addEventListener('click', () => this.selectAll());
+                this.clearSelectionBtn.addEventListener('click', () => this.clearSelection());
+                this.exportPeakDataBtn.addEventListener('click', () => this.exportPeakData());
+            }
+            
+            async loadAvailableFiles() {
+                try {
+                    const response = await fetch('/api/files');
+                    const data = await response.json();
+                    
+                    this.fileSelect.innerHTML = '<option value="">Select a CV file...</option>';
+                    
+                    data.files.forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file.full_path;
+                        option.textContent = `${file.filename} (${file.metadata.compound} ${file.metadata.concentration}mM)`;
+                        this.fileSelect.appendChild(option);
+                    });
+                    
+                } catch (error) {
+                    console.error('Error loading files:', error);
+                    this.showToast('Error loading files', 'danger');
+                }
+            }
+            
+            async analyzeSelectedFile() {
+                const filePath = this.fileSelect.value;
+                if (!filePath) return;
+                
+                this.showLoading();
+                
+                try {
+                    const response = await fetch('/api/analyze', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            file_path: filePath,
+                            threshold: parseFloat(document.getElementById('thresholdInput').value),
+                            max_slope: parseFloat(document.getElementById('slopeInput').value),
+                            window_size: parseInt(document.getElementById('windowInput').value)
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        this.currentData = data;
+                        this.currentSession = data.session_id;
+                        this.updateDisplay(data);
+                        this.showToast('Analysis completed successfully', 'success');
+                    } else {
+                        throw new Error(data.error || 'Analysis failed');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error analyzing file:', error);
+                    this.showToast('Error analyzing file: ' + error.message, 'danger');
+                } finally {
+                    this.hideLoading();
+                }
+            }
+            
+            updateDisplay(data) {
+                // Update plot
+                if (data.plot_url) {
+                    this.cvPlot.src = data.plot_url;
+                    this.cvPlot.style.display = 'block';
+                    console.log('Plot URL set successfully');
+                } else {
+                    console.error('No plot URL received');
+                    this.showToast('No plot data received', 'warning');
+                }
+                
+                // Update summary stats
+                document.getElementById('peaksDetectedValue').textContent = data.peaks.length;
+                document.getElementById('peakHeightsValue').textContent = `${data.peaks.length}/${data.peaks.length}`;
+                document.getElementById('dataPointsValue').textContent = data.cv_data.data_points;
+                
+                // Update peak list
+                this.updatePeakList(data.peaks);
+                
+                // Reset selections
+                this.selectedPeaks.clear();
+                this.peakValidations = {};
+            }
+            
+            updatePeakList(peaks) {
+                this.peakList.innerHTML = '';
+                
+                peaks.forEach(peak => {
+                    const peakItem = document.createElement('div');
+                    peakItem.className = 'peak-item';
+                    peakItem.dataset.peakId = peak.id;
+                    
+                    const typeClass = `peak-type-${peak.type}`;
+                    const confidencePercent = Math.round(peak.confidence * 100);
+                    
+                    peakItem.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Peak ${peak.id}</strong>
+                                <span class="badge bg-secondary ms-2">${peak.method}</span>
+                            </div>
+                            <div>
+                                <span class="status-badge bg-light text-dark">Pending</span>
+                            </div>
+                        </div>
+                        <div class="mt-1">
+                            <small>
+                                <strong>Type:</strong> <span class="${typeClass}">${peak.type.toUpperCase()}</span><br>
+                                <strong>Position:</strong> ${peak.voltage?.toFixed(3)}V, ${peak.current?.toFixed(2)}µA<br>
+                                <strong>Confidence:</strong> ${confidencePercent}% | <strong>SNR:</strong> ${peak.snr?.toFixed(2)}
+                            </small>
+                        </div>
+                    `;
+                    
+                    peakItem.addEventListener('click', () => this.togglePeakSelection(peak.id));
+                    this.peakList.appendChild(peakItem);
+                });
+            }
+            
+            togglePeakSelection(peakId) {
+                const peakItem = this.peakList.querySelector(`[data-peak-id="${peakId}"]`);
+                
+                if (this.selectedPeaks.has(peakId)) {
+                    this.selectedPeaks.delete(peakId);
+                    peakItem.classList.remove('selected');
+                } else {
+                    this.selectedPeaks.add(peakId);
+                    peakItem.classList.add('selected');
+                }
+                
+                this.updateActionButtons();
+            }
+            
+            selectAll() {
+                this.selectedPeaks.clear();
+                this.peakList.querySelectorAll('.peak-item').forEach(item => {
+                    const peakId = parseInt(item.dataset.peakId);
+                    this.selectedPeaks.add(peakId);
+                    item.classList.add('selected');
+                });
+                this.updateActionButtons();
+            }
+            
+            clearSelection() {
+                this.selectedPeaks.clear();
+                this.peakList.querySelectorAll('.peak-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                this.updateActionButtons();
+            }
+            
+            validateSelected() {
+                this.selectedPeaks.forEach(peakId => {
+                    this.peakValidations[peakId] = {
+                        peak_id: peakId,
+                        is_valid: true,
+                        reasoning: 'Web UI validation'
+                    };
+                    
+                    const peakItem = this.peakList.querySelector(`[data-peak-id="${peakId}"]`);
+                    peakItem.classList.remove('selected', 'rejected');
+                    peakItem.classList.add('validated');
+                    peakItem.querySelector('.status-badge').textContent = 'Valid';
+                    peakItem.querySelector('.status-badge').className = 'status-badge bg-success text-white';
+                });
+                
+                this.selectedPeaks.clear();
+                this.updateActionButtons();
+                this.showToast(`Validated ${Object.keys(this.peakValidations).filter(k => this.peakValidations[k].is_valid).length} peaks`, 'success');
+            }
+            
+            rejectSelected() {
+                this.selectedPeaks.forEach(peakId => {
+                    this.peakValidations[peakId] = {
+                        peak_id: peakId,
+                        is_valid: false,
+                        reasoning: 'Web UI rejection'
+                    };
+                    
+                    const peakItem = this.peakList.querySelector(`[data-peak-id="${peakId}"]`);
+                    peakItem.classList.remove('selected', 'validated');
+                    peakItem.classList.add('rejected');
+                    peakItem.querySelector('.status-badge').textContent = 'Rejected';
+                    peakItem.querySelector('.status-badge').className = 'status-badge bg-danger text-white';
+                });
+                
+                this.selectedPeaks.clear();
+                this.updateActionButtons();
+                this.showToast(`Rejected ${Object.keys(this.peakValidations).filter(k => !this.peakValidations[k].is_valid).length} peaks`, 'warning');
+            }
+            
+            async handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                this.showLoading();
+                
+                try {
+                    const response = await fetch('/api/upload_csv', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Update the file select dropdown with the uploaded file
+                        const option = document.createElement('option');
+                        option.value = data.filename;
+                        option.textContent = data.filename;
+                        option.selected = true;
+                        this.fileSelect.appendChild(option);
+                        
+                        // Analyze the uploaded file
+                        await this.analyzeSelectedFile();
+                        this.showToast('File uploaded successfully!', 'success');
+                    } else {
+                        this.showToast(data.error || 'Failed to upload file', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    this.showToast('Failed to upload file', 'danger');
+                } finally {
+                    this.hideLoading();
+                    // Clear the file input
+                    this.fileInput.value = '';
+                }
+            }
+            
+            async exportPeakData() {
+                if (!this.currentSession || Object.keys(this.peakValidations).length === 0) {
+                    this.showToast('No validated peaks to export', 'warning');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/validate_peaks', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            session_id: this.currentSession,
+                            peak_validations: Object.values(this.peakValidations)
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        this.showToast(`Exported ${data.validated_count} validated peaks for training`, 'success');
+                        
+                        // Export training data
+                        this.exportTrainingData();
+                    } else {
+                        throw new Error(data.error || 'Export failed');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error exporting peaks:', error);
+                    this.showToast('Error exporting peaks: ' + error.message, 'danger');
+                }
+            }
+            
+            async exportTrainingData() {
+                try {
+                    const response = await fetch('/api/export_data');
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        // Download the training data
+                        const blob = new Blob([JSON.stringify(data.data, null, 2)], {
+                            type: 'application/json'
+                        });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = data.filename;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        
+                        this.showToast('Training data downloaded successfully', 'info');
+                    }
+                } catch (error) {
+                    console.error('Error exporting training data:', error);
+                }
+            }
+            
+            updateActionButtons() {
+                const hasSelection = this.selectedPeaks.size > 0;
+                this.validateSelectedBtn.disabled = !hasSelection;
+                this.rejectSelectedBtn.disabled = !hasSelection;
+            }
+            
+            showLoading() {
+                this.loadingSpinner.style.display = 'block';
+                this.chartContent.style.display = 'none';
+            }
+            
+            hideLoading() {
+                this.loadingSpinner.style.display = 'none';
+                this.chartContent.style.display = 'block';
+            }
+            
+            showToast(message, type = 'info') {
+                const toast = document.getElementById('toastMessage');
+                const toastBody = toast.querySelector('.toast-body');
+                
+                toastBody.textContent = message;
+                
+                // Update toast style based on type
+                const toastHeader = toast.querySelector('.toast-header');
+                toastHeader.className = `toast-header bg-${type} text-white`;
+                
+                // Show toast
+                const bsToast = new bootstrap.Toast(toast);
+                bsToast.show();
+            }
+        }
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new CVPeakValidator();
+        });
+    </script>
+</body>
+</html>

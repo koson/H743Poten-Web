@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Peak Validation</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: auto 1fr;
+            grid-gap: 15px;
+            flex: 1;
+            min-height: 0;
+        }
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+        .center-panel {
+            grid-column: 2;
+            grid-row: 1 / 3;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin: 0 0 15px 0;
+            font-size: 1.5em;
+        }
+        .section {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .section h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+            color: #495057;
+        }
+        .compact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .compact-form label {
+            font-size: 0.9em;
+            margin-bottom: 3px;
+        }
+        .compact-form input, .compact-form select {
+            padding: 6px;
+            font-size: 0.9em;
+        }
+        .upload-section {
+            border: 2px dashed #ccc;
+            padding: 15px;
+            text-align: center;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .upload-section.dragover {
+            border-color: #007bff;
+            background-color: #f0f8ff;
+        }
+        input[type="file"] {
+            margin: 10px;
+            padding: 10px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .file-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .analysis-results {
+            margin-top: 20px;
+        }
+        .peak {
+            background-color: #fff3cd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+        }
+        .plot-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .plot-container img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #007bff;
+            transition: width 0.3s ease;
+        }
+        .health-status {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .health-item {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .health-ok {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .health-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .health-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        .badge-success {
+            background-color: #28a745;
+        }
+        .badge-primary {
+            background-color: #007bff;
+        }
+        .badge-secondary {
+            background-color: #6c757d;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .plot-container {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .plot-area {
+            flex: 1;
+            min-height: 400px;
+        }
+        .peaks-table-container {
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+        .peaks-table {
+            font-size: 0.85em;
+            margin: 0;
+        }
+        .peaks-table th, .peaks-table td {
+            padding: 4px 6px;
+        }
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 250px 1fr 250px;
+            }
+        }
+        .table-responsive {
+            margin-top: 15px;
+        }
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-muted {
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 CV Peak Validation System</h1>
+        
+        <!-- Health Status -->
+        <div class="health-status" style="margin-bottom: 10px;">
+            <div class="health-item" id="apiHealth" style="display: inline-block; margin-right: 20px;">
+                <strong>API:</strong> <span id="apiStatus">Checking...</span>
+            </div>
+            <div class="health-item" id="pythonHealth" style="display: inline-block;">
+                <strong>Python:</strong> <span id="pythonStatus">Checking...</span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Folder Selection -->
+                <div class="section">
+                    <h3>📂 Select Folder</h3>
+                    <div class="compact-form">
+                        <button onclick="selectFolder()" class="btn btn-primary" style="width: 100%; margin-bottom: 8px;">
+                            📂 Choose CV Data Folder
+                        </button>
+                        <div id="folderPath" style="font-size: 0.8em; color: #666; margin-bottom: 8px; display: none;"></div>
+
+                    </div>
+                </div>
+
+                <!-- File Selection -->
+                <div class="section" id="fileSelectionSection" style="display: none;">
+                    <h3>📁 Select CV File</h3>
+                    <div class="compact-form">
+                        <label>Available Files:</label>
+                        <select id="fileSelector" onchange="selectAndAnalyzeFile()" style="width: 100%; padding: 8px;">
+                            <option value="">Select a file...</option>
+                        </select>
+                        <div id="autoAnalyzeStatus" style="margin-top: 8px; font-size: 0.85em; color: #666; display: none;">
+                            🔄 Auto-analyzing...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Information -->
+                <div class="section" id="fileInfoSection" style="display: none;">
+                    <h3>📊 File Information</h3>
+                    <div id="fileInfo"></div>
+                </div>
+
+                <!-- Analysis Parameters -->
+                <div class="section">
+                    <h3>⚙️ Parameters</h3>
+                    <div class="compact-form">
+                        <label>Height: <input type="number" id="heightParam" value="0.1" step="0.01" onchange="autoReanalyze()" /></label>
+                        <label>Distance: <input type="number" id="distanceParam" value="10" step="1" onchange="autoReanalyze()" /></label>
+                        <label>Prominence: <input type="number" id="prominenceParam" value="0.05" step="0.01" onchange="autoReanalyze()" /></label>
+                    </div>
+                </div>
+
+                <!-- Save Actions -->
+            </div>
+
+            <!-- Center Panel - Plot -->
+            <div class="center-panel">
+                <div id="analysisResults" style="display: none; height: 100%; flex-direction: column;">
+                    <div id="peakCount" class="alert alert-info" style="margin-bottom: 10px; padding: 8px;"></div>
+                    <div class="plot-container">
+                        <div id="plotContainer" class="plot-area">
+                            <div id="cvPlot" style="width: 100%; height: 100%; border: 1px solid #ddd; border-radius: 5px;"></div>
+                            <div id="interactivePlot" style="width: 100%; height: 100%; border: 1px solid #ddd; border-radius: 5px; display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <div class="section" id="peaksListSection" style="display: none;">
+                    <h3>📋 Detected Peaks</h3>
+                    <div class="peaks-table-container">
+                        <table id="peaksTable" class="peaks-table table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Type</th>
+                                    <th>V</th>
+                                    <th>I(µA)</th>
+                                    <th>Conf</th>
+                                </tr>
+                            </thead>
+                            <tbody id="peaksTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                <div class="section" id="saveActionsSection" style="display: none;">
+
+                    <h3>💾 Save Results</h3>
+                    <div class="compact-form">
+                        <button onclick="saveValidatedPeaks()" class="btn btn-success" style="width: 100%; margin-bottom: 8px;">
+                            💾 Save to Database
+                        </button>
+                        <div id="saveStatus" style="font-size: 0.75em; color: #666; margin-bottom: 8px; text-align: center; display: none;">
+                            📝 You have unsaved changes
+                        </div>
+                        <button onclick="exportPeakData()" class="btn btn-primary" style="width: 100%;">
+                            📊 Export Data
+                        </button>
+                    </div>
+                </div>
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress" id="progressContainer" style="display: none;">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="statusMessages"></div>
+    </div>
+
+    <script>
+        let currentFileId = null;
+        const API_BASE = 'http://localhost:5017/api';
+        const CV_API_BASE = 'http://localhost:5017/api/CVAnalysis';
+        const PYTHON_BASE = 'http://localhost:5003/api';
+
+        // Check system health on startup
+        window.onload = function() {
+            checkHealth();
+        };
+
+        async function checkHealth() {
+            try {
+                // Check API health with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                
+                const apiResponse = await fetch(`${API_BASE}/health`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                if (apiResponse.ok) {
+                    const apiData = await apiResponse.json();
+                    const overallHealth = apiData.isHealthy ? 'OK' : 'Partial';
+                    document.getElementById('apiStatus').textContent = overallHealth;
+                    document.getElementById('apiHealth').className = apiData.isHealthy ? 'health-item health-ok' : 'health-item health-warning';
+                } else {
+                    throw new Error(`HTTP ${apiResponse.status}`);
+                }
+            } catch (error) {
+                console.warn('Health check failed:', error.message);
+                document.getElementById('apiStatus').textContent = 'Checking...';
+                document.getElementById('apiHealth').className = 'health-item health-warning';
+                
+                // Retry after 2 seconds
+                setTimeout(() => checkHealth(), 2000);
+            }
+
+            try {
+                // Check Python service health via main health endpoint
+                const healthResponse = await fetch(`${API_BASE}/health`);
+                const healthData = await healthResponse.json();
+                const pythonServiceStatus = healthData.services?.['python-cv-service'];
+                document.getElementById('pythonStatus').textContent = pythonServiceStatus?.message || 'OK';
+                document.getElementById('pythonHealth').className = pythonServiceStatus?.isHealthy ? 'health-item health-ok' : 'health-item health-error';
+            } catch (error) {
+                document.getElementById('pythonStatus').textContent = 'Error';
+                document.getElementById('pythonHealth').className = 'health-item health-error';
+            }
+        }
+
+        function setupDragAndDrop() {
+            const uploadArea = document.getElementById('uploadArea');
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('fileInput').files = files;
+                    uploadFile();
+                }
+            });
+        }
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showStatus('Please select a file', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            showProgress(0);
+            showStatus('Uploading file...', 'info');
+
+            try {
+                const response = await fetch(`${CV_API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                showProgress(100);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    currentFileId = result.id;
+                    showStatus(`File uploaded successfully! ID: ${result.id}`, 'success');
+                    displayFileInfo(result);
+                    showAnalysisControls();
+                } else {
+                    const error = await response.json();
+                    showStatus(`Upload failed: ${error.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Upload error: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        async function analyzeFile() {
+            if (!currentFileId) {
+                showStatus('No file uploaded', 'error');
+                return;
+            }
+
+            const parameters = {
+                height: parseFloat(document.getElementById('heightParam').value),
+                distance: parseInt(document.getElementById('distanceParam').value),
+                prominence: parseFloat(document.getElementById('prominenceParam').value)
+            };
+
+            showStatus('Analyzing peaks...', 'info');
+
+            try {
+                const response = await fetch(`${CV_API_BASE}/analyze/${currentFileId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(parameters)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showStatus(`Analysis complete! Found ${result.peaks?.length || 0} peaks`, 'success');
+                    displayAnalysisResults(result);
+                } else {
+                    const error = await response.json();
+                    showStatus(`Analysis failed: ${error.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Analysis error: ${error.message}`, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            
+            const container = document.getElementById('statusMessages');
+            container.appendChild(statusDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (statusDiv.parentNode) {
+                    statusDiv.parentNode.removeChild(statusDiv);
+                }
+            }, 5000);
+        }
+
+        function showProgress(percent) {
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('progressBar').style.width = percent + '%';
+        }
+
+        function hideProgress() {
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+
+        function displayFileInfo(fileInfo) {
+            const html = `
+                <div style="font-size: 0.9em;">
+                    <div><strong>Name:</strong> ${fileInfo.fileName}</div>
+                    <div><strong>Size:</strong> ${(fileInfo.fileSize / 1024).toFixed(1)} KB</div>
+                    <div><strong>Points:</strong> ${fileInfo.dataPoints}</div>
+                    <div><strong>Rate:</strong> ${fileInfo.scanRate} V/s</div>
+                </div>
+            `;
+            document.getElementById('fileInfo').innerHTML = html;
+            document.getElementById('fileInfoSection').style.display = 'block';
+        }
+
+        function showAnalysisControls() {
+            document.getElementById('analysisControlsSection').style.display = 'block';
+        }
+
+        let selectedFolderPath = null;
+        let currentFileName = null; // Track current file name for uploads analysis
+        let directoryFiles = new Map(); // Store files from directory selection
+        let handleFiles = new Map(); // Store file handles from File System Access API
+        let currentFolderHandle = null; // Store current folder handle
+
+        async function loadFilesFromFolder(directoryHandle) {
+            try {
+                showBriefMessage('📂 Loading files from selected folder...', 'info');
+                
+                const files = [];
+                handleFiles.clear(); // Clear previous file handles
+                
+                // Iterate through all files in the directory
+                for await (const [name, handle] of directoryHandle.entries()) {
+                    if (handle.kind === 'file') {
+                        // Filter for CSV files (common CV data format)
+                        if (name.toLowerCase().endsWith('.csv') || 
+                            name.toLowerCase().endsWith('.txt') ||
+                            name.toLowerCase().endsWith('.dat')) {
+                            
+                            files.push({
+                                name: name,
+                                handle: handle
+                            });
+                            
+                            // Store file handle for later use
+                            handleFiles.set(name, handle);
+                        }
+                    }
+                }
+                
+                if (files.length === 0) {
+                    showBriefMessage('📁 No CV files found in selected folder. Looking for .csv, .txt, or .dat files.', 'warning');
+                    return;
+                }
+                
+                showBriefMessage(`📁 Found ${files.length} CV files in folder`, 'success');
+                
+                // Populate file selector
+                populateFileSelector(files);
+                document.getElementById('fileSelectionSection').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading files from folder:', error);
+                showBriefMessage('❌ Error loading files from folder', 'error');
+            }
+        }
+
+        async function selectFolder() {
+            try {
+                // Check if File System Access API is supported
+                if ('showDirectoryPicker' in window) {
+                    showBriefMessage('📂 Please select a folder containing CV files...', 'info');
+                    
+                    // Request folder access
+                    const directoryHandle = await window.showDirectoryPicker({
+                        mode: 'read'
+                    });
+                    
+                    // Store the directory handle
+                    currentFolderHandle = directoryHandle;
+                    
+                    // Display selected folder path
+                    document.getElementById('folderPath').textContent = `Selected: ${directoryHandle.name}`;
+                    document.getElementById('folderPath').style.display = 'block';
+                    
+                    selectedFolderPath = directoryHandle.name;
+                    
+                    // Load files from selected folder
+                    await loadFilesFromFolder(directoryHandle);
+                    
+                } else {
+                    // Fallback to uploads folder for browsers that don't support File System Access API
+                    showBriefMessage('📂 File System Access not supported in this browser. Please use Chrome/Edge and ensure files are uploaded to server first.', 'warning');
+                    await browseUploadsFolder();
+                }
+                
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    showBriefMessage('📂 Folder selection cancelled', 'info');
+                } else {
+                    console.error('Folder selection failed:', error);
+                    showBriefMessage('📂 Folder selection failed - using uploads folder', 'warning');
+                    await browseUploadsFolder();
+                }
+            }
+        }
+
+        async function browseUploadsFolder() {
+            try {
+                showBriefMessage('📂 Loading files from database...', 'info');
+                
+                // Use the correct case-sensitive endpoint
+                const response = await fetch(`${CV_API_BASE}/cv-files`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load files: ${response.status}`);
+                }
+                
+                const files = await response.json();
+                
+                if (files.length === 0) {
+                    showBriefMessage('📁 No CV files found. Please upload files first.', 'info');
+                    return;
+                }
+                
+                selectedFolderPath = 'database';
+                document.getElementById('folderPath').textContent = `Available files: ${files.length} previously uploaded files`;
+                document.getElementById('folderPath').style.display = 'block';
+                
+                // Convert to format expected by populateFileSelector
+                const fileList = files.map(f => ({
+                    id: f.id,
+                    fileName: f.fileName
+                }));
+                
+                populateFileSelector(fileList);
+                document.getElementById('fileSelectionSection').style.display = 'block';
+                
+                showBriefMessage(`✅ Found ${files.length} previously uploaded CV files!`, 'success');
+                
+            } catch (error) {
+                console.error('Failed to browse files:', error);
+                showBriefMessage(`❌ Failed to load files: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadFilesFromFolder(dirHandle) {
+            try {
+                const files = [];
+                handleFiles.clear(); // Clear previous handles
+                
+                for await (const entry of dirHandle.values()) {
+                    if (entry.kind === 'file' && (entry.name.endsWith('.csv') || entry.name.endsWith('.txt'))) {
+                        files.push(entry);
+                        handleFiles.set(entry.name, entry); // Store the handle
+                    }
+                }
+                
+                if (files.length === 0) {
+                    showBriefMessage('No CV files found in selected folder', 'info');
+                    return;
+                }
+                
+                // Process files and populate dropdown
+                populateFileSelector(files.map(f => ({ name: f.name, handle: f })));
+                document.getElementById('fileSelectionSection').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Failed to load files from folder:', error);
+                showBriefMessage('❌ Failed to load files from folder', 'error');
+            }
+        }
+
+        async function processSelectedFiles(files) {
+            try {
+                // Filter CV files (csv, txt)
+                const cvFiles = files.filter(file => 
+                    file.name.toLowerCase().endsWith('.csv') || 
+                    file.name.toLowerCase().endsWith('.txt')
+                );
+
+                if (cvFiles.length === 0) {
+                    showBriefMessage('No CV files found in selected folder', 'info');
+                    return;
+                }
+
+                // Upload files to server and populate dropdown
+                const uploadedFiles = [];
+                showBriefMessage(`📤 Uploading ${cvFiles.length} CV files...`, 'info');
+
+                for (const file of cvFiles) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        
+                        const response = await fetch(`${CV_API_BASE}/upload`, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            uploadedFiles.push({ id: result.id, fileName: result.fileName });
+                        }
+                    } catch (error) {
+                        console.error(`Failed to upload ${file.name}:`, error);
+                    }
+                }
+
+                if (uploadedFiles.length > 0) {
+                    populateFileSelector(uploadedFiles);
+                    document.getElementById('fileSelectionSection').style.display = 'block';
+                    showBriefMessage(`✅ Uploaded ${uploadedFiles.length} files successfully!`, 'success');
+                } else {
+                    showBriefMessage('❌ Failed to upload any files', 'error');
+                }
+
+            } catch (error) {
+                console.error('Failed to process selected files:', error);
+                showBriefMessage('❌ Failed to process files', 'error');
+            }
+        }
+
+        function populateFileSelector(files) {
+            const selector = document.getElementById('fileSelector');
+            selector.innerHTML = '<option value="">Select a CV file...</option>';
+            
+            files.forEach(file => {
+                const option = document.createElement('option');
+                
+                if (file.id) {
+                    // Files from database (already uploaded)
+                    option.value = file.id;
+                    option.textContent = file.fileName;
+                    option.dataset.type = 'uploaded';
+                } else if (file.isFromUploads) {
+                    // Files from uploads folder
+                    option.value = file.fileName;
+                    option.textContent = file.fileName;
+                    option.dataset.type = 'uploads';
+                    option.dataset.filePath = file.filePath;
+                } else if (file.handle) {
+                    // Files from File System Access API
+                    option.value = file.name;
+                    option.textContent = file.name;
+                    option.dataset.type = 'handle';
+                    // Store the file handle for later use
+                    handleFiles.set(file.name, file.handle);
+                } else {
+                    // Files from webkitdirectory
+                    option.value = file.name || file.fileName;
+                    option.textContent = file.name || file.fileName;
+                    option.dataset.type = 'directory';
+                }
+                
+                selector.appendChild(option);
+            });
+        }
+
+        async function selectAndAnalyzeFile() {
+            const selector = document.getElementById('fileSelector');
+            const selectedValue = selector.value;
+            if (!selectedValue) return;
+            
+            // Show auto-analyze status
+            document.getElementById('autoAnalyzeStatus').style.display = 'block';
+            document.getElementById('autoAnalyzeStatus').innerHTML = '🔄 Auto-analyzing...';
+            
+            try {
+                const selectedOption = selector.options[selector.selectedIndex];
+                const fileType = selectedOption.dataset.type;
+                
+                if (fileType === 'uploaded') {
+                    // This is an uploaded file with database ID
+                    const fileId = selectedValue;
+                    
+
+                    
+                    // Get file info  
+                    const fileResponse = await fetch(`${CV_API_BASE}/cv-files/${fileId}`);
+                    const fileInfo = await fileResponse.json();
+                    displayFileInfo(fileInfo);
+                    
+                    // Auto-analyze with current parameters
+                    currentFileId = fileId;
+                    currentFileName = null;
+                    await performAnalysis();
+                    
+                } else if (fileType === 'uploads') {
+                    // This is a file from uploads folder
+                    const fileName = selectedValue;
+                    
+                    // Display file info
+                    displayFileInfo({
+                        fileName: fileName,
+                        fileSize: 'Unknown',
+                        uploadedAt: new Date().toISOString()
+                    });
+                    
+                    // Analyze directly from uploads folder
+                    currentFileId = null; // No database ID
+                    currentFileName = fileName;
+                    await performUploadsAnalysis(fileName);
+                    
+                } else if (fileType === 'directory') {
+                    // Files from webkitdirectory - upload and analyze
+                    const fileName = selectedValue;
+                    document.getElementById('autoAnalyzeStatus').innerHTML = '� Uploading and analyzing file...';
+                    
+                    await uploadAndAnalyzeDirectoryFile(fileName);
+                    
+                } else if (fileType === 'handle') {
+                    // Files from File System Access API - upload and analyze
+                    const fileName = selectedValue;
+                    document.getElementById('autoAnalyzeStatus').innerHTML = '📤 Processing file from folder...';
+                    
+                    await uploadAndAnalyzeHandleFile(fileName);
+                    
+                } else {
+                    // Unknown file type
+                    document.getElementById('autoAnalyzeStatus').innerHTML = '❌ Unsupported file type';
+                    showBriefMessage('❌ Unsupported file selection method', 'error');
+                    return;
+                }
+                
+                // Auto-show interactive plot for all successful analyses
+                setTimeout(() => {
+                    if (window.currentResults) {
+                        showInteractivePlot();
+                        document.getElementById('saveActionsSection').style.display = 'block';
+                    }
+                }, 500);
+                
+                document.getElementById('autoAnalyzeStatus').innerHTML = '✅ Ready for validation';
+                
+            } catch (error) {
+                console.error('Auto-analysis failed:', error);
+                document.getElementById('autoAnalyzeStatus').innerHTML = '❌ Analysis failed';
+                showBriefMessage('❌ Analysis failed: ' + error.message, 'error');
+            }
+        }
+
+        async function autoReanalyze() {
+            if (!currentFileId && !currentFileName) return;
+            
+            document.getElementById('autoAnalyzeStatus').style.display = 'block';
+            document.getElementById('autoAnalyzeStatus').innerHTML = '🔄 Re-analyzing...';
+            
+            try {
+                if (currentFileId) {
+                    await performAnalysis();
+                } else if (currentFileName) {
+                    await performUploadsAnalysis(currentFileName);
+                }
+                
+                if (window.currentResults) {
+                    showInteractivePlot();
+                }
+                document.getElementById('autoAnalyzeStatus').innerHTML = '✅ Updated';
+            } catch (error) {
+                console.error('Re-analysis failed:', error);
+                document.getElementById('autoAnalyzeStatus').innerHTML = '❌ Update failed';
+            }
+        }
+
+        async function uploadAndAnalyzeDirectoryFile(fileName) {
+            try {
+                const file = directoryFiles.get(fileName);
+                if (!file) {
+                    throw new Error('File not found in directory selection');
+                }
+
+                // Upload the file
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                showBriefMessage('📤 Uploading file from folder...', 'info');
+                const uploadResponse = await fetch(`${CV_API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error(`Upload failed: ${uploadResponse.status}`);
+                }
+
+                const uploadResult = await uploadResponse.json();
+                
+                // Display file info
+                displayFileInfo(uploadResult);
+                
+                // Set as current file and analyze
+                currentFileId = uploadResult.id;
+                currentFileName = null;
+                
+                showBriefMessage('🔍 Analyzing uploaded file...', 'info');
+                await performAnalysis();
+                
+            } catch (error) {
+                console.error('Directory file upload and analysis failed:', error);
+                showBriefMessage('❌ Failed to process file from folder: ' + error.message, 'error');
+                throw error;
+            }
+        }
+
+        async function uploadAndAnalyzeHandleFile(fileName) {
+            try {
+                const fileHandle = handleFiles.get(fileName);
+                if (!fileHandle) {
+                    throw new Error('File handle not found');
+                }
+
+                // Get the file from the handle
+                const file = await fileHandle.getFile();
+                
+                // Upload the file
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                showBriefMessage('📤 Uploading file from folder...', 'info');
+                const uploadResponse = await fetch(`${CV_API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error(`Upload failed: ${uploadResponse.status}`);
+                }
+
+                const uploadResult = await uploadResponse.json();
+                
+                // Display file info
+                displayFileInfo(uploadResult);
+                
+                // Set as current file and analyze
+                currentFileId = uploadResult.id;
+                currentFileName = null;
+                
+                showBriefMessage('🔍 Analyzing uploaded file...', 'info');
+                await performAnalysis();
+                
+            } catch (error) {
+                console.error('Handle file upload and analysis failed:', error);
+                showBriefMessage('❌ Failed to process file from folder: ' + error.message, 'error');
+                throw error;
+            }
+        }
+
+        async function performAnalysis() {
+            const parameters = {
+                height: parseFloat(document.getElementById('heightParam').value) || 0.1,
+                distance: parseFloat(document.getElementById('distanceParam').value) || 10,
+                prominence: parseFloat(document.getElementById('prominenceParam').value) || 0.05,
+                width: 5.0,
+                windowSize: 10,
+                detectionMethod: 'enhanced_v6'
+            };
+
+            try {
+                const response = await fetch(`${CV_API_BASE}/analyze/${currentFileId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(parameters)
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const results = await response.json();
+                displayAnalysisResults(results);
+            } catch (error) {
+                console.error('Analysis failed:', error);
+                throw error;
+            }
+        }
+
+        async function performUploadsAnalysis(fileName) {
+            const parameters = {
+                height: parseFloat(document.getElementById('heightParam').value) || 0.1,
+                distance: parseFloat(document.getElementById('distanceParam').value) || 10,
+                prominence: parseFloat(document.getElementById('prominenceParam').value) || 0.05,
+                width: 5.0,
+                windowSize: 10,
+                detectionMethod: 'enhanced_v6'
+            };
+
+            try {
+                const response = await fetch(`${CV_API_BASE}/analyze-uploads/${encodeURIComponent(fileName)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(parameters)
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const results = await response.json();
+                displayAnalysisResults(results);
+            } catch (error) {
+                console.error('Uploads analysis failed:', error);
+                throw error;
+            }
+        }
+
+        function displayAnalysisResults(results) {
+            console.log('Analysis results:', results);
+            
+            // Update peak count
+            const peakCount = results.peaks?.length || 0;
+            document.getElementById('peakCount').innerHTML = `
+                <strong>Auto-Analysis Complete!</strong> Found ${peakCount} peaks using ${results.parameters?.detectionMethod || 'enhanced detection'}.
+            `;
+            
+            // Store results globally for interactive plot
+            window.currentResults = results;
+            
+            // Reset states for new analysis
+            hasUnsavedChanges = true; // New analysis = unsaved changes
+            isSaving = false; // Reset saving flag
+            updateSaveButtonState();
+            
+            // Display original plot if available (fallback)
+            if (results.plotUrl || results.plotData) {
+                const plotImg = document.getElementById('cvPlot');
+                plotImg.src = results.plotUrl || results.plotData;
+                plotImg.style.display = 'block';
+                plotImg.onerror = function() {
+                    console.error('Failed to load plot image');
+                    plotImg.style.display = 'none';
+                };
+            }
+            
+            // Display peaks table
+            const tableBody = document.getElementById('peaksTableBody');
+            tableBody.innerHTML = '';
+            
+            if (results.peaks && results.peaks.length > 0) {
+                results.peaks.forEach((peak, index) => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td><span class="badge ${peak.peakType === 'oxidation' ? 'badge-success' : 'badge-primary'}">${peak.peakType}</span></td>
+                        <td>${peak.voltage ? peak.voltage.toFixed(4) : 'N/A'}</td>
+                        <td>${peak.current ? (peak.current * 1000000).toFixed(2) : 'N/A'}</td>
+                        <td>${peak.height ? peak.height.toFixed(3) : 'N/A'}</td>
+                        <td>${peak.width ? peak.width.toFixed(2) : 'N/A'}</td>
+                        <td>${peak.confidence ? (peak.confidence * 100).toFixed(1) + '%' : 'N/A'}</td>
+                    `;
+                });
+            } else {
+                const row = tableBody.insertRow();
+                row.innerHTML = '<td colspan="7" class="text-center text-muted">No peaks detected</td>';
+            }
+            
+            // Show results section
+            document.getElementById('analysisResults').style.display = 'flex';
+            document.getElementById('peaksListSection').style.display = 'block';
+        }
+
+        function showInteractivePlot() {
+            if (!window.currentResults) return;
+            
+            const results = window.currentResults;
+            
+            // Hide original plot and show interactive plot
+            document.getElementById('cvPlot').style.display = 'none';
+            document.getElementById('interactivePlot').style.display = 'block';
+            
+            // Create CV data trace
+            const cvTrace = {
+                x: results.cvData.voltage,
+                y: results.cvData.current.map(c => c * 1000000), // Convert to µA
+                type: 'scatter',
+                mode: 'lines',
+                name: 'CV Data',
+                line: { color: '#1f77b4', width: 2 }
+            };
+            
+            // Create accepted peaks trace with better identification
+            const acceptedPeaks = results.peaks.filter(p => p.validationStatus !== 'Rejected');
+            const acceptedTrace = {
+                x: acceptedPeaks.map(p => p.voltage),
+                y: acceptedPeaks.map(p => p.current * 1000000),
+                type: 'scatter',
+                mode: 'markers',
+                name: 'Accepted Peaks',
+                marker: { 
+                    color: acceptedPeaks.map(p => p.peakType === 'oxidation' ? '#ff4444' : '#44aa44'),
+                    size: 15,
+                    symbol: acceptedPeaks.map(p => p.peakType === 'oxidation' ? 'circle' : 'triangle-up'),
+                    line: { width: 2, color: '#333' }
+                },
+                text: acceptedPeaks.map((p, originalIndex) => {
+                    // Find original index in full results array
+                    const fullIndex = results.peaks.findIndex(peak => 
+                        Math.abs(peak.voltage - p.voltage) < 0.001 && 
+                        Math.abs(peak.current - p.current) < 0.000001
+                    );
+                    return `Peak ${fullIndex + 1}: ${p.peakType}<br>V: ${p.voltage.toFixed(4)}<br>I: ${(p.current * 1000000).toFixed(2)} µA<br>Click to reject`;
+                }),
+                hovertemplate: '%{text}<extra></extra>'
+            };
+            
+            // Create rejected peaks trace with better identification
+            const rejectedPeaks = results.peaks.filter(p => p.validationStatus === 'Rejected');
+            const rejectedTrace = {
+                x: rejectedPeaks.map(p => p.voltage),
+                y: rejectedPeaks.map(p => p.current * 1000000),
+                type: 'scatter',
+                mode: 'markers',
+                name: 'Rejected Peaks',
+                marker: { 
+                    color: '#cc0000',
+                    size: 12,
+                    symbol: 'x',
+                    line: { width: 3 }
+                },
+                text: rejectedPeaks.map((p) => {
+                    // Find original index in full results array
+                    const fullIndex = results.peaks.findIndex(peak => 
+                        Math.abs(peak.voltage - p.voltage) < 0.001 && 
+                        Math.abs(peak.current - p.current) < 0.000001
+                    );
+                    return `Peak ${fullIndex + 1}: ${p.peakType} (REJECTED)<br>V: ${p.voltage.toFixed(4)}<br>I: ${(p.current * 1000000).toFixed(2)} µA<br>Click to accept`;
+                }),
+                hovertemplate: '%{text}<extra></extra>'
+            };
+            
+            const data = [cvTrace, acceptedTrace];
+            if (rejectedPeaks.length > 0) {
+                data.push(rejectedTrace);
+            }
+            
+            const layout = {
+                title: 'Interactive CV Peak Validation',
+                xaxis: { title: 'Voltage (V)' },
+                yaxis: { title: 'Current (µA)' },
+                hovermode: 'closest',
+                showlegend: true,
+                legend: { x: 0, y: 1 }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToAdd: ['select2d', 'lasso2d']
+            };
+            
+            Plotly.newPlot('interactivePlot', data, layout, config);
+            
+            // Add click event for peak selection with improved accuracy
+            document.getElementById('interactivePlot').on('plotly_click', function(data) {
+                const point = data.points[0];
+                
+                // Only handle clicks on peak traces (not CV data)
+                if (point.curveNumber === 1 || point.curveNumber === 2) { // Accepted or Rejected peaks
+                    const clickedVoltage = point.x;
+                    const clickedCurrent = point.y;
+                    
+                    // Find the exact peak by matching voltage and current
+                    let exactPeakIndex = -1;
+                    for (let i = 0; i < results.peaks.length; i++) {
+                        const peak = results.peaks[i];
+                        const peakCurrent = peak.current * 1000000; // Convert to µA
+                        
+                        // Use tolerance for matching (due to floating point precision)
+                        if (Math.abs(peak.voltage - clickedVoltage) < 0.001 && 
+                            Math.abs(peakCurrent - clickedCurrent) < 0.1) {
+                            exactPeakIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    if (exactPeakIndex >= 0) {
+                        const peak = results.peaks[exactPeakIndex];
+                        togglePeakStatus(peak, exactPeakIndex);
+                    }
+                }
+            });
+        }
+        
+        function togglePeakStatus(peak, index) {
+            // Toggle peak status directly without confirmation dialog
+            const newStatus = peak.validationStatus === 'Rejected' ? 'Accepted' : 'Rejected';
+            updatePeakStatus(peak.id, newStatus, index);
+            
+            // Show brief feedback message
+            showBriefMessage(`Peak ${index + 1} ${newStatus.toLowerCase()}!`);
+        }
+        
+        function showBriefMessage(message) {
+            // Create or update brief message display
+            let messageDiv = document.getElementById('peakMessage');
+            if (!messageDiv) {
+                messageDiv = document.createElement('div');
+                messageDiv.id = 'peakMessage';
+                messageDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #28a745;
+                    color: white;
+                    padding: 10px 15px;
+                    border-radius: 5px;
+                    z-index: 1000;
+                    font-weight: bold;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                    transition: all 0.3s ease;
+                `;
+                document.body.appendChild(messageDiv);
+            }
+            
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.opacity = '1';
+            
+            // Auto hide after 2 seconds
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.style.display = 'none';
+                    }
+                }, 300);
+            }, 2000);
+        }
+        
+        function updatePeakStatus(peakId, newStatus, index) {
+            // Update local data
+            window.currentResults.peaks[index].validationStatus = newStatus;
+            
+            // Mark as changed for database update
+            markAsChanged();
+            
+            // Update table
+            updatePeaksTable();
+            
+            // Refresh interactive plot
+            showInteractivePlot();
+            
+            // TODO: Send update to server
+            // savePeakValidation(peakId, newStatus);
+        }
+        
+        function updatePeaksTable() {
+            const results = window.currentResults;
+            const tableBody = document.getElementById('peaksTableBody');
+            tableBody.innerHTML = '';
+            
+            if (results.peaks && results.peaks.length > 0) {
+                results.peaks.forEach((peak, index) => {
+                    const row = tableBody.insertRow();
+                    const statusClass = peak.validationStatus === 'Rejected' ? 'text-muted' : '';
+                    const statusBadge = peak.validationStatus === 'Rejected' ? 
+                        '<span class="badge badge-secondary">X</span>' : 
+                        `<span class="badge ${peak.peakType === 'oxidation' ? 'badge-success' : 'badge-primary'}">${peak.peakType === 'oxidation' ? 'Ox' : 'Red'}</span>`;
+                    
+                    row.className = statusClass;
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${statusBadge}</td>
+                        <td>${peak.voltage ? peak.voltage.toFixed(3) : 'N/A'}</td>
+                        <td>${peak.current ? (peak.current * 1000000).toFixed(1) : 'N/A'}</td>
+                        <td>${peak.confidence ? (peak.confidence * 100).toFixed(0) + '%' : 'N/A'}</td>
+                    `;
+                });
+            } else {
+                const row = tableBody.insertRow();
+                row.innerHTML = '<td colspan="5" class="text-center text-muted">No peaks detected</td>';
+            }
+        }
+
+        let isSaving = false; // Prevent double-saving
+        let hasUnsavedChanges = false; // Track if there are unsaved changes
+        
+        async function saveValidatedPeaks() {
+            if (!window.currentResults) {
+                showBriefMessage('No analysis results to save', 'error');
+                return;
+            }
+
+            if (isSaving) {
+                showBriefMessage('⏳ Already saving, please wait...', 'info');
+                return;
+            }
+
+            try {
+                isSaving = true;
+                showBriefMessage('💾 Saving validation results...', 'info');
+                // Prepare validation data with correct C# property names and enum values
+                const validationData = {
+                    SessionId: window.currentResults.sessionId,
+                    PeakValidations: window.currentResults.peaks.map((peak, index) => ({
+                        PeakId: peak.id,
+                        Status: peak.validationStatus === 'Rejected' ? 2 : 1, // 1=Accepted, 2=Rejected
+                        Comments: '',
+                        CorrectedPeakType: peak.peakType,
+                        ValidationConfidence: 1.0
+                    }))
+                };
+
+                const response = await fetch(`${CV_API_BASE}/validate-peaks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(validationData)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server error response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                const result = await response.json();
+                showBriefMessage('✅ Validation results saved successfully!', 'success');
+                
+                // Mark as saved and update button state
+                hasUnsavedChanges = false;
+                updateSaveButtonState();
+                
+            } catch (error) {
+                console.error('Save failed:', error);
+                // Log detailed error for debugging
+                console.error('Full error details:', error);
+                showBriefMessage('❌ Failed to save validation results. Check console for details.', 'error');
+            } finally {
+                isSaving = false; // Reset the flag
+            }
+        }
+
+        function updateSaveButtonState() {
+            const saveButton = document.querySelector('button[onclick="saveValidatedPeaks()"]');
+            const saveStatus = document.getElementById('saveStatus');
+            if (!saveButton) return;
+            
+            if (hasUnsavedChanges) {
+                saveButton.textContent = '💾 Save Changes to Database';
+                saveButton.style.backgroundColor = '#ffc107'; // Yellow for unsaved changes
+                saveButton.disabled = false;
+                if (saveStatus) {
+                    saveStatus.style.display = 'block';
+                    saveStatus.textContent = '📝 You have unsaved changes';
+                    saveStatus.style.color = '#856404';
+                }
+            } else {
+                saveButton.textContent = '✅ Saved to Database';
+                saveButton.style.backgroundColor = '#28a745'; // Green for saved
+                saveButton.disabled = false; // Keep enabled for future changes
+                if (saveStatus) {
+                    saveStatus.style.display = 'block';
+                    saveStatus.textContent = '✅ All changes saved';
+                    saveStatus.style.color = '#155724';
+                }
+            }
+        }
+
+        function markAsChanged() {
+            if (!hasUnsavedChanges) {
+                hasUnsavedChanges = true;
+                updateSaveButtonState();
+                showBriefMessage('📝 Peak validation changed. Click "Save Changes" to update database.', 'info');
+            }
+        }
+
+        async function exportPeakData() {
+            if (!window.currentResults) {
+                showBriefMessage('No data to export', 'error');
+                return;
+            }
+
+            try {
+                // Create CSV content
+                const headers = ['Peak#', 'Type', 'Voltage(V)', 'Current(µA)', 'Height', 'Width', 'Confidence', 'Status'];
+                const csvContent = [
+                    headers.join(','),
+                    ...window.currentResults.peaks.map((peak, index) => [
+                        index + 1,
+                        peak.peakType,
+                        peak.voltage?.toFixed(4) || 'N/A',
+                        peak.current ? (peak.current * 1000000).toFixed(2) : 'N/A',
+                        peak.height?.toFixed(3) || 'N/A',
+                        peak.width?.toFixed(2) || 'N/A',
+                        peak.confidence ? (peak.confidence * 100).toFixed(1) + '%' : 'N/A',
+                        peak.validationStatus || 'Accepted'
+                    ].join(','))
+                ].join('\n');
+
+                // Download CSV
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `peaks_${window.currentResults.fileName}_${new Date().toISOString().slice(0,10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                showBriefMessage('📊 Peak data exported successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Export failed:', error);
+                showBriefMessage('❌ Failed to export data', 'error');
+            }
+        }
+
+        function showBriefMessage(message, type = 'success') {
+            let messageDiv = document.getElementById('peakMessage');
+            if (!messageDiv) {
+                messageDiv = document.createElement('div');
+                messageDiv.id = 'peakMessage';
+                messageDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 12px 16px;
+                    border-radius: 6px;
+                    z-index: 1000;
+                    font-weight: bold;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    transition: all 0.3s ease;
+                    max-width: 300px;
+                `;
+                document.body.appendChild(messageDiv);
+            }
+            
+            // Set color based on type
+            const colors = {
+                success: { bg: '#28a745', color: 'white' },
+                error: { bg: '#dc3545', color: 'white' },
+                info: { bg: '#17a2b8', color: 'white' }
+            };
+            
+            const color = colors[type] || colors.success;
+            messageDiv.style.backgroundColor = color.bg;
+            messageDiv.style.color = color.color;
+            
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.opacity = '1';
+            
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.style.display = 'none';
+                    }
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

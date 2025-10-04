@@ -1,0 +1,58 @@
+{
+  "Version": 1,
+  "Hash": "l7ScVE+FnpGFdl5cb62FYO5ZFkqpjoZn9tvhanVghHg=",
+  "Source": "CVPeakValidation.Api",
+  "BasePath": "_content/CVPeakValidation.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "CVPeakValidation.Api/wwwroot",
+      "Source": "CVPeakValidation.Api",
+      "ContentRoot": "/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Research/dotnet-python-web/CVPeakValidation.Api/wwwroot/",
+      "BasePath": "_content/CVPeakValidation.Api",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Research/dotnet-python-web/CVPeakValidation.Api/wwwroot/index.html",
+      "SourceId": "CVPeakValidation.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Research/dotnet-python-web/CVPeakValidation.Api/wwwroot/",
+      "BasePath": "_content/CVPeakValidation.Api",
+      "RelativePath": "index.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/index.html"
+    },
+    {
+      "Identity": "/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Research/dotnet-python-web/CVPeakValidation.Api/wwwroot/test.html",
+      "SourceId": "CVPeakValidation.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "/mnt/d/GitHubRepos/__Potentiostat/poten-2025/H743Poten/H743Poten-Research/dotnet-python-web/CVPeakValidation.Api/wwwroot/",
+      "BasePath": "_content/CVPeakValidation.Api",
+      "RelativePath": "test.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/test.html"
+    }
+  ]
+}

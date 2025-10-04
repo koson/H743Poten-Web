@@ -1,0 +1,51 @@
+{
+  "workflow_summary": {
+    "timestamp": "2025-10-04T03:25:25.739933",
+    "version": "V6-V7 Improved",
+    "samples_processed": 3
+  },
+  "validation_statistics": {
+    "total_peaks_detected": 5,
+    "total_peaks_validated": 5,
+    "total_theoretical_peaks": 5,
+    "validation_accuracy": 1.0,
+    "false_positive_reduction": 0.0
+  },
+  "training_results": {},
+  "sample_results": [
+    {
+      "session_id": "13e0ef78",
+      "filename": "temp_data/Ferrocyanide_0.5mM_Improved.csv",
+      "compound": "Ferrocyanide_0.5mM_Improved",
+      "detected_peaks": 2,
+      "validated_peaks": 2,
+      "theoretical_peaks": 2,
+      "accuracy": 1.0
+    },
+    {
+      "session_id": "99a81ab3",
+      "filename": "temp_data/Dopamine_1.0mM_Improved.csv",
+      "compound": "Dopamine_1.0mM_Improved",
+      "detected_peaks": 1,
+      "validated_peaks": 1,
+      "theoretical_peaks": 1,
+      "accuracy": 1.0
+    },
+    {
+      "session_id": "360f4b09",
+      "filename": "temp_data/AscorbicAcid_2.0mM_Improved.csv",
+      "compound": "AscorbicAcid_2.0mM_Improved",
+      "detected_peaks": 2,
+      "validated_peaks": 2,
+      "theoretical_peaks": 2,
+      "accuracy": 1.0
+    }
+  ],
+  "key_improvements": [
+    "Enhanced peak detection algorithm with adaptive thresholding",
+    "SQLite database for persistent validation storage",
+    "Batch validation UI for efficient expert review",
+    "AI training directly from validated human data",
+    "Complete workflow integration with reporting"
+  ]
+}
